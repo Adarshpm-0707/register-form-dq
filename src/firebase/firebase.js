@@ -1,0 +1,27 @@
+// ─────────────────────────────────────────────────────
+//  firebase/firebase.js
+//  Firebase v9 modular SDK initialisation
+//  ⚠️  Replace the firebaseConfig values below with your
+//     own project credentials from the Firebase Console.
+// ─────────────────────────────────────────────────────
+
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+
+// TODO: Replace with your Firebase project config
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID",
+};
+
+// Initialise Firebase app
+const app = initializeApp(firebaseConfig);
+
+// Initialise and export Firestore database
+export const db = getFirestore(app);
+
+export default app;
