@@ -4,7 +4,7 @@
 // ─────────────────────────────────────────────────────
 
 import React, { Suspense, useEffect, useRef } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF, useAnimations, OrbitControls, Float, ContactShadows, Environment } from "@react-three/drei";
 import * as THREE from "three";
 
