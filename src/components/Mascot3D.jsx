@@ -14,9 +14,8 @@ const MODEL_URL = "https://raw.githubusercontent.com/mrdoob/three.js/master/exam
 // CameraController - Handles true 3D responsiveness
 // ──────────────────────────────────────────────────────────
 function CameraController() {
-  const { viewport } = useThree();
-
   useFrame((state) => {
+
     const viewportWidth = state.viewport.width;
     
     // Narrow screens (mobile)
