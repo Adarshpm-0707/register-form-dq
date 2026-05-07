@@ -7,7 +7,7 @@ import BottomSF from "./BottomSF";
 // Premium SVG Icons
 const Icons = {
   Star: ({ className }) => (
-    <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" fill="currentColor"/>
     </svg>
   ),
@@ -17,17 +17,6 @@ const Icons = {
       <line x1="16" y1="2" x2="16" y2="6"></line>
       <line x1="8" y1="2" x2="8" y2="6"></line>
       <line x1="3" y1="10" x2="21" y2="10"></line>
-    </svg>
-  ),
-  Ticket: () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
-      <path d="M13 5v2" /><path d="M13 17v2" /><path d="M13 11v2" />
-    </svg>
-  ),
-  Location: () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" />
     </svg>
   ),
   Clock: () => (
@@ -71,14 +60,14 @@ const CountdownTimer = ({ targetDate }) => {
   ];
 
   return (
-    <div className="grid grid-cols-4 gap-2 md:gap-3 w-full mb-3 md:mb-4">
+    <div className="grid grid-cols-4 gap-3 md:gap-4 w-full">
       {units.map((unit, i) => (
-        <div key={i} className="flex flex-col items-center justify-center p-2 md:p-3.5 rounded-xl md:rounded-2xl bg-[#ff3b3b]/5 border border-[#ff3b3b]/20 backdrop-blur-3xl relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-[#ff3b3b] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-          <span className="text-lg md:text-2xl font-black text-[#ff3b3b] tabular-nums tracking-tighter">
+        <div key={i} className="flex flex-col items-center justify-center p-3 md:p-6 rounded-xl md:rounded-[32px] bg-[#ff3b3b]/5 border border-[#ff3b3b]/20 backdrop-blur-3xl relative overflow-hidden group shadow-xl">
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-[#ff3b3b] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+          <span className="text-xl md:text-3xl font-black text-[#ff3b3b] tabular-nums tracking-tighter leading-none mb-1 md:mb-2">
             {String(unit.value).padStart(2, '0')}
           </span>
-          <span className="text-[7px] md:text-[9px] font-black text-[#ff3b3b]/60 uppercase tracking-widest mt-0.5">
+          <span className="text-[8px] md:text-[10px] font-black text-[#ff3b3b]/60 uppercase tracking-[0.2em]">
             {unit.label}
           </span>
         </div>
@@ -95,84 +84,92 @@ export default function Home() {
       
       <div className="absolute inset-0 bg-[linear-gradient(rgba(198,255,52,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(198,255,52,0.03)_1px,transparent_1px)] bg-[size:100px_100px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_80%)] pointer-events-none -z-10" />
 
-      {/* Hero Section - Optimized Sizing for Laptop */}
-      <main className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center pt-24 md:pt-28 pb-32">
+      {/* Hero Content Wrapper */}
+      <main className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12 pt-24 md:pt-32 pb-48">
         
-        {/* Left Column: Typography */}
-        <motion.div 
-          initial={{ opacity: 0, x: -50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="flex flex-col items-center lg:items-start"
-        >
-          <h1 className="text-4xl sm:text-6xl md:text-[4.5rem] lg:text-[5.5rem] font-black leading-[1] tracking-tighter mb-6 md:mb-8 uppercase text-center lg:text-left">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-[#c6ff34] to-white/60 relative inline-block">
-              THE FUTURE 
-            </span> 
-            <br />
-            <span className="text-white">IS AI</span>
-          </h1>
+        {/* Top Section: Title (Left) and Description (Right) for Laptop */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center mb-12 md:mb-16">
+          
+          {/* Title Section */}
+          <motion.div 
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="flex flex-col items-center lg:items-start"
+          >
+            <h1 className="text-4xl sm:text-6xl md:text-[6rem] lg:text-[7rem] xl:text-[8rem] font-black leading-[0.9] tracking-tighter uppercase text-center lg:text-left">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-[#c6ff34] to-white/60 relative inline-block">
+                THE FUTURE 
+              </span> 
+              <br />
+              <span className="text-white">IS AI</span>
+            </h1>
+          </motion.div>
 
-          {/* Bottom Statement / AI Diploma Info */}
-          <div className="relative group max-w-lg mb-6 md:mb-8">
+          {/* Description Section */}
+          <motion.div 
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            className="relative group max-w-lg mx-auto lg:mx-0"
+          >
              <div className="absolute -inset-1 bg-gradient-to-r from-[#c6ff34]/20 to-transparent rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
-             <div className="relative p-4 md:p-5 rounded-2xl bg-white/[0.02] border-l-4 border-[#c6ff34] backdrop-blur-3xl shadow-[0_0_30px_rgba(198,255,52,0.05)]">
-                <p className="text-white font-black text-base md:text-lg tracking-tight leading-snug mb-2 md:mb-3 uppercase">
+             <div className="relative p-5 md:p-8 rounded-[28px] md:rounded-[40px] bg-white/[0.02] border-l-4 border-[#c6ff34] backdrop-blur-3xl shadow-2xl">
+                <p className="text-white font-black text-lg md:text-2xl tracking-tight leading-snug mb-3 md:mb-4 uppercase">
                    No background in tech? <span className="text-[#c6ff34]">No problem.</span>
                 </p>
-                <p className="text-slate-400 text-xs md:text-sm leading-relaxed font-medium">
+                <p className="text-slate-400 text-xs md:text-lg leading-relaxed font-medium">
                    The <span className="text-white font-bold">AI/ML diploma by Deepstaq</span> is built for fresher students and beginners in AI. 
                    Learn by doing, graduate with a project portfolio.
                 </p>
              </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
 
-
-        {/* Right Column: Timer & Ticket Visuals */}
+        {/* Bottom Section: Timer and Info Cards */}
         <motion.div 
-          initial={{ opacity: 0, scale: 0.9, x: 50 }}
-          whileInView={{ opacity: 1, scale: 1, x: 0 }}
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="flex flex-col items-center lg:items-end justify-center relative w-full"
+          transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+          className="flex flex-col items-center w-full"
         >
           {/* HUD Header */}
-          <div className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[450px] mb-2 md:mb-3 flex items-center justify-between px-2">
-             <div className="flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-[#c6ff34] animate-pulse" />
-                <span className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-[#c6ff34]">Live_Countdown</span>
+          <div className="w-full max-w-[500px] mb-4 md:mb-6 flex items-center justify-between px-4">
+             <div className="flex items-center gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#ff3b3b] animate-pulse" />
+                <span className="text-[9px] md:text-xs font-black uppercase tracking-[0.4em] text-[#ff3b3b]">Live_Countdown</span>
              </div>
           </div>
 
-          {/* Countdown Timer Component */}
-          <div className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[450px]">
+          {/* Countdown Timer */}
+          <div className="w-full max-w-4xl mb-8 md:mb-12">
             <CountdownTimer targetDate="May 20, 2026 09:00:00" />
           </div>
 
-          {/* Date and Time Info Row */}
-          <div className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[450px] mb-5 md:mb-6 flex flex-col md:flex-row gap-2 md:gap-3">
-             <div className="flex-1 p-2 md:p-4 rounded-xl md:rounded-2xl bg-white/[0.02] border border-white/10 backdrop-blur-3xl flex items-center gap-2 md:gap-3 group">
-                <div className="w-7 h-7 md:w-9 md:h-9 rounded-lg bg-[#c6ff34]/10 flex items-center justify-center text-[#c6ff34] group-hover:scale-110 transition-transform">
-                   <Icons.Calendar />
+          {/* Info Cards Row */}
+          <div className="w-full max-w-4xl flex flex-col md:flex-row gap-4 md:gap-6">
+             <div className="flex-1 p-5 md:p-8 rounded-2xl md:rounded-[32px] bg-white/[0.02] border border-white/10 backdrop-blur-3xl flex items-center justify-center gap-4 md:gap-8 group shadow-xl">
+                <div className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-[24px] bg-[#c6ff34]/10 flex items-center justify-center text-[#c6ff34] group-hover:scale-110 transition-transform">
+                   <Icons.Calendar className="w-6 h-6 md:w-8 md:h-8" />
                 </div>
                 <div>
-                   <p className="text-[9px] md:text-xs font-black text-white uppercase tracking-wider">May 20th</p>
-                   <p className="text-[7px] md:text-[9px] text-[#c6ff34]/60 font-bold tracking-[0.1em] uppercase">EVENT_DATE</p>
+                   <p className="text-base md:text-3xl font-black text-white uppercase tracking-wider">May 20th</p>
+                   <p className="text-[8px] md:text-[10px] text-[#c6ff34]/60 font-bold tracking-[0.2em] uppercase mt-1">EVENT_DATE</p>
                 </div>
              </div>
-             <div className="flex-1 p-2 md:p-4 rounded-xl md:rounded-2xl bg-white/[0.02] border border-white/10 backdrop-blur-3xl flex items-center gap-2 md:gap-3 group">
-                <div className="w-7 h-7 md:w-9 md:h-9 rounded-lg bg-[#c6ff34]/10 flex items-center justify-center text-[#c6ff34] group-hover:scale-110 transition-transform">
-                   <Icons.Clock />
+             <div className="flex-1 p-5 md:p-8 rounded-2xl md:rounded-[32px] bg-white/[0.02] border border-white/10 backdrop-blur-3xl flex items-center justify-center gap-4 md:gap-8 group shadow-xl">
+                <div className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-[24px] bg-[#c6ff34]/10 flex items-center justify-center text-[#c6ff34] group-hover:scale-110 transition-transform">
+                   <Icons.Clock className="w-6 h-6 md:w-8 md:h-8" />
                 </div>
                 <div>
-                   <p className="text-[9px] md:text-xs font-black text-white uppercase tracking-wider">09:00 AM</p>
-                   <p className="text-[7px] md:text-[9px] text-[#c6ff34]/60 font-bold tracking-[0.1em] uppercase">LAUNCH_TIME</p>
+                   <p className="text-base md:text-3xl font-black text-white uppercase tracking-wider">09:00 AM</p>
+                   <p className="text-[8px] md:text-[10px] text-[#c6ff34]/60 font-bold tracking-[0.2em] uppercase mt-1">LAUNCH_TIME</p>
                 </div>
              </div>
           </div>
-
         </motion.div>
       </main>
 

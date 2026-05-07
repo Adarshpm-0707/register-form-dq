@@ -1,51 +1,85 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
-const features = [
-  {
-    title: "AI WORKSHOP",
-    detail: "MAY 20, 2026",
-    icon: "⚡"
-  },
-  {
-    title: "MASTER CLASS",
-    detail: "ADVANCED SYNC",
-    icon: "🧠"
-  }
-];
+const Countdown = ({ targetDate }) => {
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0 });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const distance = new Date(targetDate).getTime() - new Date().getTime();
+      if (distance < 0) {
+        clearInterval(timer);
+        return;
+      }
+      setTimeLeft({
+        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  return (
+    <div className="flex items-center gap-2 tabular-nums">
+      <span className="text-[#c6ff34] font-black text-[10px] md:text-lg">{timeLeft.days}D</span>
+      <span className="text-white/20">/</span>
+      <span className="text-[#c6ff34] font-black text-[10px] md:text-lg">{timeLeft.hours}H</span>
+      <span className="text-white/20">/</span>
+      <span className="text-[#c6ff34] font-black text-[10px] md:text-lg">{timeLeft.minutes}M</span>
+    </div>
+  );
+};
 
 function BottomSF() {
   return (
     <motion.div 
-      initial={{ y: 100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ delay: 1, duration: 0.8 }}
-      className="fixed bottom-0 left-0 w-full z-40 px-3 pb-3 md:px-8 md:pb-6 pointer-events-none"
+      initial={{ y: 100 }}
+      animate={{ y: 0 }}
+      className="fixed bottom-0 left-0 w-full z-50 bg-[#050521]/80 backdrop-blur-2xl border-t border-white/10"
     >
-      <div className="max-w-3xl mx-auto flex flex-row justify-center items-center gap-2 md:gap-4 pointer-events-auto overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory">
-        {features.map((feature, index) => (
-          <motion.div
-            key={index}
-            whileHover={{ y: -5, scale: 1.01 }}
-            className="flex-shrink-0 snap-center min-w-[130px] md:flex-1 max-w-[280px] p-2 md:p-3 rounded-xl md:rounded-[24px] bg-white/[0.02] border border-white/10 backdrop-blur-3xl hover:border-[#c6ff34]/50 transition-all flex items-center gap-2 md:gap-4 cursor-pointer group shadow-xl relative overflow-hidden"
-          >
-            {/* Subtle brand glow on hover */}
-            <div className="absolute inset-0 bg-[#c6ff34]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-            
-            <div className="w-8 h-8 md:w-11 md:h-11 rounded-lg md:rounded-xl bg-[#c6ff34]/10 flex items-center justify-center text-sm md:text-xl group-hover:bg-[#c6ff34] group-hover:text-[#050521] transition-all duration-500 shadow-md">
-               {feature.icon}
+      <div className="flex h-20 md:h-32 w-full">
+        
+        {/* Left Section: Event */}
+        <div className="flex-1 border-r border-white/10 px-4 md:px-12 flex items-center justify-between group cursor-pointer hover:bg-white/[0.02] transition-colors">
+          <div className="flex items-center gap-4 md:gap-8">
+            <div className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-[#c6ff34]/10 flex items-center justify-center text-xl md:text-3xl text-[#c6ff34]">
+              ⚡
             </div>
-            
-            <div className="flex flex-col relative z-10">
-               <span className="text-[8px] md:text-[11px] font-black text-white uppercase tracking-tighter leading-none mb-0.5 group-hover:text-[#c6ff34] transition-colors">
-                  {feature.title}
-               </span>
-               <span className="text-[6px] md:text-[8px] text-[#c6ff34]/40 font-bold uppercase tracking-[0.1em] leading-none">
-                  {feature.detail}
-               </span>
+            <div className="flex flex-col">
+              <span className="text-[10px] md:text-xl font-black text-white uppercase tracking-tighter leading-none mb-1">
+                AI WORKSHOP
+              </span>
+              <span className="text-[7px] md:text-xs text-[#c6ff34]/60 font-bold uppercase tracking-widest">
+                MAY 20, 2026
+              </span>
             </div>
-          </motion.div>
-        ))}
+          </div>
+          <div className="hidden sm:block">
+            <Countdown targetDate="May 20, 2026 09:00:00" />
+          </div>
+        </div>
+
+        {/* Right Section: Master Class */}
+        <div className="flex-1 px-4 md:px-12 flex items-center justify-between group cursor-pointer hover:bg-white/[0.02] transition-colors">
+          <div className="flex items-center gap-4 md:gap-8">
+            <div className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-[#c6ff34]/10 flex items-center justify-center text-xl md:text-3xl text-[#c6ff34]">
+              🧠
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] md:text-xl font-black text-white uppercase tracking-tighter leading-none mb-1">
+                MASTER CLASS
+              </span>
+              <span className="text-[7px] md:text-xs text-[#c6ff34]/60 font-bold uppercase tracking-widest">
+                ADVANCED SYNC
+              </span>
+            </div>
+          </div>
+          <div className="hidden sm:block">
+            <Countdown targetDate="May 20, 2026 09:00:00" />
+          </div>
+        </div>
+
       </div>
     </motion.div>
   );
