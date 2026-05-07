@@ -1,13 +1,24 @@
-// ─────────────────────────────────────────────────────
-//  App.jsx  —  Root application component
-// ─────────────────────────────────────────────────────
-
 import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
+import Register from "./pages/Register";
+import EventForm from "./pages/EventForm";
+import MasterForm from "./pages/MasterForm";
 import "./styles/global.css";
 
 function App() {
-  return <Home />;
+  return (
+    <Router>
+      <div className="relative">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/event-form" element={<EventForm />} />
+          <Route path="/master-form" element={<MasterForm />} />
+        </Routes>
+      </div>
+    </Router>
+  );
 }
 
 export default App;
