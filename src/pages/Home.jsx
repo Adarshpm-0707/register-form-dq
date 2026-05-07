@@ -73,12 +73,12 @@ const CountdownTimer = ({ targetDate }) => {
   return (
     <div className="grid grid-cols-4 gap-2 md:gap-3 w-full mb-3 md:mb-4">
       {units.map((unit, i) => (
-        <div key={i} className="flex flex-col items-center justify-center p-2 md:p-3.5 rounded-xl md:rounded-2xl bg-[#c6ff34]/5 border border-[#c6ff34]/20 backdrop-blur-3xl relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-[#c6ff34] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-          <span className="text-lg md:text-2xl font-black text-white tabular-nums tracking-tighter">
+        <div key={i} className="flex flex-col items-center justify-center p-2 md:p-3.5 rounded-xl md:rounded-2xl bg-[#ff3b3b]/5 border border-[#ff3b3b]/20 backdrop-blur-3xl relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-[#ff3b3b] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+          <span className="text-lg md:text-2xl font-black text-[#ff3b3b] tabular-nums tracking-tighter">
             {String(unit.value).padStart(2, '0')}
           </span>
-          <span className="text-[7px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mt-0.5">
+          <span className="text-[7px] md:text-[9px] font-black text-[#ff3b3b]/60 uppercase tracking-widest mt-0.5">
             {unit.label}
           </span>
         </div>

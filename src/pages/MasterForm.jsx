@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -14,12 +14,24 @@ const Icons = {
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="20 6 9 17 4 12"/>
     </svg>
+  ),
+  Clock: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+    </svg>
   )
 };
 
 export default function MasterForm() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [studentCount] = useState(42); // Mocked: First 50 students logic
+  const targetDate = new Date("May 20, 2026 09:00:00").getTime();
+  
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0, hours: 0, minutes: 0, seconds: 0
+  });
+
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -30,6 +42,35 @@ export default function MasterForm() {
     currentYear: "",
     completionYear: ""
   });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      if (distance < 0) {
+        clearInterval(timer);
+        return;
+      }
+
+      setTimeLeft({
+        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((distance % (1000 * 60)) / 1000)
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  const getPriceDetails = () => {
+    const now = new Date().getTime();
+    if (now > targetDate) return { price: "249 RS", status: "EVENT LIVE RATE" };
+    if (studentCount < 50) return { price: "FREE", status: "EARLY BIRD (FIRST 50)" };
+    return { price: "49 RS", status: "SPECIAL PRE-EVENT RATE" };
+  };
+
+  const { price, status } = getPriceDetails();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -52,13 +93,32 @@ export default function MasterForm() {
 
       <main className="relative z-10 w-full max-w-2xl mx-auto px-4 sm:px-6 pt-24 md:pt-32 pb-24">
         
-        <button 
-          onClick={() => navigate("/register")}
-          className="flex items-center gap-2 text-white/40 hover:text-[#c6ff34] transition-colors mb-6 md:mb-8 group uppercase text-[9px] md:text-[10px] font-black tracking-widest"
-        >
-          <Icons.ArrowLeft /> Back to Selection
-        </button>
+        {/* Top Header Row */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+          <button 
+            onClick={() => navigate("/register")}
+            className="flex items-center gap-2 text-white/40 hover:text-[#c6ff34] transition-colors group uppercase text-[9px] md:text-[10px] font-black tracking-widest"
+          >
+            <Icons.ArrowLeft /> Back to Selection
+          </button>
 
+          {/* Pricing HUD */}
+          <div className="flex items-center gap-4 bg-white/[0.03] border border-white/10 px-4 py-2 rounded-full backdrop-blur-xl">
+             <div className="flex flex-col">
+                <span className="text-[7px] text-[#ff3b3b] font-black uppercase tracking-widest leading-none mb-1">{status}</span>
+                <span className="text-[#c6ff34] font-black text-xs md:text-sm leading-none">{price}</span>
+             </div>
+             <div className="w-[1px] h-6 bg-white/10" />
+             <div className="flex items-center gap-2">
+                <Icons.Clock className="text-[#ff3b3b]" />
+                <span className="text-[10px] md:text-xs font-black tabular-nums text-[#ff3b3b]">
+                  {timeLeft.days}D:{timeLeft.hours}H:{timeLeft.minutes}M
+                </span>
+             </div>
+          </div>
+        </div>
+
+        {/* Progress Header */}
         <div className="mb-8 md:mb-12">
            <div className="flex items-end justify-between mb-3 md:mb-4">
               <h1 className="text-2xl sm:text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none">
