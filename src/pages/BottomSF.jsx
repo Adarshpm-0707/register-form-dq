@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const Countdown = ({ targetDate }) => {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0 });
@@ -41,7 +42,10 @@ function BottomSF() {
       <div className="flex h-20 md:h-32 w-full">
         
         {/* Left Section: Event */}
-        <div className="flex-1 border-r border-white/10 px-4 md:px-12 flex items-center justify-between group cursor-pointer hover:bg-white/[0.02] transition-colors">
+        <Link 
+          to="/register"
+          className="flex-1 border-r border-white/10 px-4 md:px-12 flex items-center justify-between group cursor-pointer hover:bg-white/[0.02] transition-colors"
+        >
           <div className="flex items-center gap-4 md:gap-8">
             <div className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-[#c6ff34]/10 flex items-center justify-center text-xl md:text-3xl text-[#c6ff34]">
               ⚡
@@ -58,10 +62,13 @@ function BottomSF() {
           <div className="hidden sm:block">
             <Countdown targetDate="May 20, 2026 09:00:00" />
           </div>
-        </div>
+        </Link>
 
         {/* Right Section: Master Class */}
-        <div className="flex-1 px-4 md:px-12 flex items-center justify-between group cursor-pointer hover:bg-white/[0.02] transition-colors">
+        <Link 
+          to="/register"
+          className="flex-1 px-4 md:px-12 flex items-center justify-between group cursor-pointer hover:bg-white/[0.02] transition-colors"
+        >
           <div className="flex items-center gap-4 md:gap-8">
             <div className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-[#c6ff34]/10 flex items-center justify-center text-xl md:text-3xl text-[#c6ff34]">
               🧠
@@ -71,14 +78,14 @@ function BottomSF() {
                 MASTER CLASS
               </span>
               <span className="text-[7px] md:text-xs text-[#c6ff34]/60 font-bold uppercase tracking-widest">
-                ADVANCED SYNC
+                MAY 25, 2026
               </span>
             </div>
           </div>
           <div className="hidden sm:block">
-            <Countdown targetDate="May 20, 2026 09:00:00" />
+            <Countdown targetDate="May 25, 2026 09:00:00" />
           </div>
-        </div>
+        </Link>
 
       </div>
     </motion.div>

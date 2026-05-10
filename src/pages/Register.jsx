@@ -79,30 +79,30 @@ function Register() {
             </div>
           </motion.div>
 
-          {/* Card 2: Master Class */}
+          {/* Card 2: Master Class (LOCKED) */}
           <motion.div 
-            whileHover={{ y: -8, scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => navigate("/master-form")}
-            className="cursor-pointer group relative p-6 sm:p-8 md:p-10 rounded-[30px] md:rounded-[40px] border bg-white/[0.02] border-white/10 hover:border-[#c6ff34] transition-all duration-500 text-left overflow-hidden"
+            className="relative p-6 sm:p-8 md:p-10 rounded-[30px] md:rounded-[40px] border bg-white/[0.01] border-white/5 opacity-50 grayscale transition-all duration-500 text-left overflow-hidden cursor-not-allowed"
           >
-            {/* Subtle Gradient Glow */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#c6ff34]/5 blur-[60px] rounded-full group-hover:bg-[#c6ff34]/10 transition-colors" />
-            
-            <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center mb-6 md:mb-8 bg-white/5 text-white group-hover:bg-[#c6ff34] group-hover:text-[#050521] transition-all duration-500 shadow-xl relative z-10">
+            <div className="absolute inset-0 bg-[#050521]/60 backdrop-blur-[2px] z-20 flex items-center justify-center">
+               <div className="bg-[#ff3b3b]/10 border border-[#ff3b3b]/30 px-6 py-2 rounded-full text-[#ffff] font-black text-[10px] md:text-xs uppercase tracking-[0.3em] shadow-2xl">
+                 Locked
+               </div>
+            </div>
+
+            <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center mb-6 md:mb-8 bg-white/5 text-white/20 transition-all duration-500 relative z-10">
               <Icons.MasterClass />
             </div>
             
-            <h3 className="text-xl sm:text-2xl md:text-4xl font-black uppercase mb-3 md:mb-4 tracking-tight group-hover:text-[#c6ff34] transition-colors relative z-10">
+            <h3 className="text-xl sm:text-2xl md:text-4xl font-black uppercase mb-3 md:mb-4 tracking-tight text-white/40 transition-colors relative z-10">
               Master Class
             </h3>
             
-            <p className="text-slate-400 text-xs sm:text-sm md:text-lg leading-relaxed mb-6 md:mb-8 font-medium relative z-10">
+            <p className="text-white/20 text-xs sm:text-sm md:text-lg leading-relaxed mb-6 md:mb-8 font-medium relative z-10">
               Deep-dive into advanced AI/ML architectures. Built for those ready to architect the future of tech.
             </p>
             
-            <div className="flex items-center gap-3 text-[12px] md:text-sm font-black uppercase tracking-[0.1em] text-[#c6ff34] relative z-10">
-              <span className="line-through opacity-40">249 RS</span> OFF TO 49 RS <Icons.ArrowRight />
+            <div className="flex items-center gap-3 text-[12px] md:text-sm font-black uppercase tracking-[0.1em] text-white/10 relative z-10">
+               Slots Finalized <Icons.ArrowRight />
             </div>
           </motion.div>
         </div>
