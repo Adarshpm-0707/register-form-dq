@@ -5,17 +5,23 @@ const crypto = require('crypto');
 require('dotenv').config();
 
 const app = express();
+app.use(cors()); // Simplified CORS for local dev
 app.use(express.json());
-app.use(cors({
-  origin: '*', // Allow all origins for testing
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type']
-}));
+
+// Health check route to verify server is up
+app.get('/', (req, res) => {
+  res.send('Razorpay Backend is active');
+});
 
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
+  key_id: process.env.RAZORPAY_KEY_ID || 'MISSING_KEY',
+  key_secret: process.env.RAZORPAY_KEY_SECRET || 'MISSING_SECRET',
 });
+
+// Validate keys on startup
+if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+  console.warn('⚠️ WARNING: Razorpay API keys are missing in .env file!');
+}
 
 // Create Order Endpoint
 app.post('/api/create-order', async (req, res) => {
@@ -70,7 +76,15 @@ app.post('/api/verify-payment', (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Razorpay Backend running on port ${PORT}`);
+const PORT = 8888; 
+
+app.listen(PORT, '0.0.0.0', (err) => {
+  if (err) {
+    console.error('❌ Failed to start server:', err);
+  } else {
+    console.log('--------------------------------------------------');
+    console.log(`🚀 RAZORPAY SERVER IS ACTIVE`);
+    console.log(`📡 URL: http://127.0.0.1:${PORT}`);
+    console.log('--------------------------------------------------');
+  }
 });

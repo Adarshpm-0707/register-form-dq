@@ -43,7 +43,7 @@ function BottomSF() {
         
         {/* Left Section: Event */}
         <Link 
-          to="/register"
+          to="/event-form"
           className="flex-1 border-r border-white/10 px-4 md:px-12 flex items-center justify-between group cursor-pointer hover:bg-white/[0.02] transition-colors"
         >
           <div className="flex items-center gap-4 md:gap-8">
@@ -66,7 +66,7 @@ function BottomSF() {
 
         {/* Right Section: Master Class */}
         <Link 
-          to="/register"
+          to="/master-form"
           className="flex-1 px-4 md:px-12 flex items-center justify-between group cursor-pointer hover:bg-white/[0.02] transition-colors"
         >
           <div className="flex items-center gap-4 md:gap-8">

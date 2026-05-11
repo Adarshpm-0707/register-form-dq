@@ -1,5 +1,5 @@
 import { db } from "../firebase/firebase";
-import { collection, addDoc, serverTimestamp, getDocs } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
 
 /**
  * Saves event registration data to Firestore
@@ -112,6 +112,90 @@ export const getAptitudeLeads = async () => {
     return data.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
   } catch (error) {
     console.error("Error fetching aptitude leads:", error);
+    throw error;
+  }
+};
+/**
+ * Marks attendance for a student using their paymentId
+ */
+export const markAttendance = async (paymentId) => {
+  try {
+    const q = query(collection(db, "master_registrations"), where("paymentId", "==", paymentId));
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      throw new Error("Student not found or invalid QR code.");
+    }
+
+    const studentDoc = querySnapshot.docs[0];
+    const studentRef = doc(db, "master_registrations", studentDoc.id);
+
+    await updateDoc(studentRef, {
+      attended: true,
+      attendedAt: serverTimestamp(),
+    });
+
+    return { success: true, studentName: studentDoc.data().name };
+  } catch (error) {
+    console.error("Error marking attendance:", error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches only those who have attended Master Class
+ */
+export const getAttendanceList = async () => {
+  try {
+    const q = query(collection(db, "master_registrations"), where("attended", "==", true));
+    const querySnapshot = await getDocs(q);
+    const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return data.sort((a, b) => (b.attendedAt?.seconds || 0) - (a.attendedAt?.seconds || 0));
+  } catch (error) {
+    console.error("Error fetching attendance list:", error);
+    throw error;
+  }
+};
+
+/**
+ * Marks attendance for a student in the WORKSHOP
+ */
+export const markEventAttendance = async (regId) => {
+  try {
+    const q = query(collection(db, "event_registrations"), where("registrationId", "==", regId));
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      throw new Error("Workshop student not found or invalid QR.");
+    }
+
+    const studentDoc = querySnapshot.docs[0];
+    const studentRef = doc(db, "event_registrations", studentDoc.id);
+
+    await updateDoc(studentRef, {
+      attended: true,
+      attendedAt: serverTimestamp(),
+      attendanceStatus: "Checked-In"
+    });
+
+    return { success: true, studentName: studentDoc.data().fullName };
+  } catch (error) {
+    console.error("Error marking event attendance:", error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches workshop attendance list
+ */
+export const getEventAttendanceList = async () => {
+  try {
+    const q = query(collection(db, "event_registrations"), where("attended", "==", true));
+    const querySnapshot = await getDocs(q);
+    const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return data.sort((a, b) => (b.attendedAt?.seconds || 0) - (a.attendedAt?.seconds || 0));
+  } catch (error) {
+    console.error("Error fetching event attendance list:", error);
     throw error;
   }
 };

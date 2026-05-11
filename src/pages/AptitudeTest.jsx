@@ -42,6 +42,7 @@ export default function AptitudeTest() {
     try {
       const response = await saveAptitudeLead(formData);
       if (response.success) {
+        localStorage.setItem("aptitude_lead_id", response.id);
         navigate("/assessment", { state: { leadId: response.id, userData: formData } });
       }
     } catch (error) {
@@ -87,11 +88,11 @@ export default function AptitudeTest() {
             <div className="grid grid-cols-3 gap-2 mb-8 border-y border-white/5 py-6">
                <div className="text-center">
                   <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Time</p>
-                  <p className="text-base font-black text-white">35M</p>
+                  <p className="text-base font-black text-white">15M</p>
                </div>
                <div className="text-center border-x border-white/5 px-1">
                   <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Items</p>
-                  <p className="text-base font-black text-white">30</p>
+                  <p className="text-base font-black text-white">15</p>
                </div>
                <div className="text-center">
                   <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Pass</p>
@@ -137,7 +138,20 @@ export default function AptitudeTest() {
                   </div>
                   <div className="space-y-1 text-left">
                     <label className="text-[8px] font-black uppercase tracking-widest text-[#c6ff34] ml-4">Uplink_Phone</label>
-                    <input required type="tel" placeholder="+91 00000 00000" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    <input 
+                      required 
+                      type="tel" 
+                      placeholder="10-digit mobile number" 
+                      value={formData.phone} 
+                      pattern="[0-9]{10}"
+                      title="Phone number must be exactly 10 digits"
+                      maxLength={10}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "" || /^\d*$/.test(val)) {
+                          if (val.length <= 10) setFormData({...formData, phone: val});
+                        }
+                      }}
                       className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-3 md:py-4 text-base text-white font-bold focus:outline-none focus:border-[#c6ff34] transition-all"
                     />
                   </div>
