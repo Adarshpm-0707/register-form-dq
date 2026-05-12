@@ -282,13 +282,19 @@ export default function AdminDashboard() {
                                            <p className="text-xs md:text-sm font-black uppercase text-white truncate">{item.department || item.course}</p>
                                         </div>
                                         <div>
-                                           <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">{activeTab === 'masters' ? 'Year of Comp.' : 'Passing Year'}</p>
-                                           <p className="text-xs md:text-sm font-black text-white">{item.passingYear || item.yearOfCompletion}</p>
+                                           <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">{activeTab === 'masters' ? 'Year of Study' : 'Passing Year'}</p>
+                                           <p className="text-xs md:text-sm font-black text-white">{item.year || item.passingYear}</p>
                                         </div>
-                                        <div>
-                                           <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Date</p>
-                                           <p className="text-xs md:text-sm font-black text-white truncate">
-                                             {new Date((item.timestamp?.seconds || item.createdAt?.seconds) * 1000).toLocaleDateString()}
+                                        {activeTab === 'masters' && (
+                                           <div>
+                                              <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Completion</p>
+                                              <p className="text-xs md:text-sm font-black text-white">{item.yearOfCompletion}</p>
+                                           </div>
+                                        )}
+                                        <div className="col-span-1">
+                                           <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Joint_At</p>
+                                           <p className="text-[10px] md:text-xs font-black text-white truncate">
+                                             {new Date((item.timestamp?.seconds || item.createdAt?.seconds) * 1000).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                                            </p>
                                         </div>
                                      </>
@@ -296,12 +302,40 @@ export default function AdminDashboard() {
                                </div>
 
                                <div className="lg:w-1/3 flex flex-col justify-center space-y-3 border-t lg:border-t-0 pt-8 lg:pt-0">
-                                  <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 group-hover:border-[#c6ff34]/20 transition-all">
-                                     <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Context</p>
-                                     <p className="text-[10px] md:text-xs font-bold leading-relaxed line-clamp-2 text-white/60 italic">
-                                       {activeTab === 'aptitude' ? (item.completedAt ? "Sync finalized." : "Awaiting sync...") : (item.interest || item.address || "Generic Entry")}
-                                     </p>
-                                  </div>
+                                   <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 group-hover:border-[#c6ff34]/20 transition-all space-y-3">
+                                      {activeTab === 'aptitude' ? (
+                                        <>
+                                          <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Status_Report</p>
+                                          <p className="text-[10px] md:text-xs font-bold leading-relaxed text-white/60 italic">
+                                            {item.completedAt ? "Sync finalized. Assessment complete." : "Awaiting sync. Test in progress or abandoned."}
+                                          </p>
+                                        </>
+                                      ) : activeTab === 'masters' ? (
+                                        <>
+                                          <div>
+                                            <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Postal_Address</p>
+                                            <p className="text-[10px] md:text-xs font-bold leading-relaxed text-white/60">{item.address || "No address provided"}</p>
+                                          </div>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                              <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Heard_From</p>
+                                              <p className="text-[10px] md:text-xs font-bold text-white/60">{item.referral || "N/A"}</p>
+                                            </div>
+                                            <div>
+                                              <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">AI_Aware</p>
+                                              <p className="text-[10px] md:text-xs font-bold text-white/60 capitalize">{item.heardOfAI || "N/A"}</p>
+                                            </div>
+                                          </div>
+                                          <div>
+                                            <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Expectations</p>
+                                            <p className="text-[10px] md:text-xs font-bold leading-relaxed text-white/60 line-clamp-2">{item.expectations || "No message provided"}</p>
+                                          </div>
+                                        </>
+                                      )}
+                                   </div>
                                </div>
                             </div>
                          </motion.div>

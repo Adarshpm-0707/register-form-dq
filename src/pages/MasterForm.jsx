@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Background3D from "../components/Background3D";
-import { saveMasterRegistration, getMasterRegistrations } from "../services/dbService";
+import { saveMasterRegistration, getMasterRegistrations, checkMasterRegistrationExists } from "../services/dbService";
 
 const Icons = {
   ArrowLeft: () => (
@@ -115,10 +115,6 @@ export default function MasterForm() {
       if (value.length > 10) return;
     }
     
-    if (name === "year" || name === "yearOfCompletion") {
-      if (value !== "" && !/^\d*$/.test(value)) return;
-      if (value.length > 4) return;
-    }
 
     setFormData({ ...formData, [name]: value });
   };
@@ -149,6 +145,13 @@ export default function MasterForm() {
     setLoading(true);
 
     try {
+      const exists = await checkMasterRegistrationExists(formData.phone);
+      if (exists) {
+        alert("This mobile number is already registered for the Master Class.");
+        setLoading(false);
+        return;
+      }
+
       // 1. FINAL CHECK: Get latest count & date to be 100% fair
       const registrations = await getMasterRegistrations();
       const latestCount = registrations.length;
@@ -271,8 +274,10 @@ export default function MasterForm() {
                  </div>
                  <div className="w-[1px] h-6 md:h-8 bg-white/10" />
                  <div className="flex flex-col">
-                    <span className="text-[7px] md:text-[9px] text-[#c6ff34] font-black uppercase tracking-widest leading-none mb-1">SLOTS</span>
-                    <span className="text-[#c6ff34] font-black text-xs md:text-xl leading-none uppercase">{registrationCount}/50 FREE</span>
+                    <span className="text-[7px] md:text-[9px] text-[#c6ff34] font-black uppercase tracking-widest leading-none mb-1">BALANCE</span>
+                    <span className="text-[#c6ff34] font-black text-xs md:text-xl leading-none uppercase">
+                      {Math.max(0, 50 - registrationCount)} FREE
+                    </span>
                  </div>
                  <div className="w-[1px] h-6 md:h-8 bg-white/10" />
                  <div className="flex items-center gap-2 md:gap-3">
@@ -472,21 +477,20 @@ export default function MasterForm() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10">
                         <div className="space-y-1.5 md:space-y-4">
-                          <label className="text-[9px] md:text-xs font-black uppercase tracking-[0.2em] text-white/40 ml-2 md:ml-4">Current Year</label>
+                          <label className="text-[9px] md:text-xs font-black uppercase tracking-[0.2em] text-white/40 ml-2 md:ml-4">Year of Study</label>
                           <input 
                             type="text" name="year" value={formData.year} onChange={handleChange}
-                            pattern="[0-9]{4}" title="Year must be exactly 4 digits" maxLength={4}
+                           
                             className="w-full bg-white/[0.03] border border-white/10 rounded-xl md:rounded-[24px] px-5 py-3.5 md:px-8 md:py-6 focus:border-[#c6ff34] focus:outline-none transition-all placeholder:text-white/10 font-bold text-sm md:text-2xl"
-                            placeholder="e.g. 2024" required
+                            placeholder="" required
                           />
                         </div>
                         <div className="space-y-1.5 md:space-y-4">
                           <label className="text-[9px] md:text-xs font-black uppercase tracking-[0.2em] text-white/40 ml-2 md:ml-4">Year of Completion</label>
                           <input 
                             type="text" name="yearOfCompletion" value={formData.yearOfCompletion} onChange={handleChange}
-                            pattern="[0-9]{4}" title="Year must be exactly 4 digits" maxLength={4}
                             className="w-full bg-white/[0.03] border border-white/10 rounded-xl md:rounded-[24px] px-5 py-3.5 md:px-8 md:py-6 focus:border-[#c6ff34] focus:outline-none transition-all placeholder:text-white/10 font-bold text-sm md:text-2xl"
-                            placeholder="e.g. 2026" required
+                            placeholder="" required
                           />
                         </div>
                       </div>

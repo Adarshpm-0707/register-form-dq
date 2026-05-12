@@ -2,6 +2,28 @@ import { db } from "../firebase/firebase";
 import { collection, addDoc, serverTimestamp, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
 
 /**
+ * Normalizes phone numbers to last 10 digits for consistent comparison
+ */
+const normalizePhone = (phone) => {
+  if (!phone) return "";
+  return phone.toString().replace(/\D/g, "").slice(-10);
+};
+
+/**
+ * Checks if a mobile number is already registered for the event
+ */
+export const checkEventRegistrationExists = async (phone) => {
+  try {
+    const normalizedPhone = normalizePhone(phone);
+    const querySnapshot = await getDocs(collection(db, "event_registrations"));
+    return querySnapshot.docs.some(doc => normalizePhone(doc.data().phone) === normalizedPhone);
+  } catch (error) {
+    console.error("Error checking event registration:", error);
+    return false;
+  }
+};
+
+/**
  * Saves event registration data to Firestore
  */
 export const saveEventRegistration = async (formData) => {
@@ -15,6 +37,20 @@ export const saveEventRegistration = async (formData) => {
   } catch (error) {
     console.error("Error saving event registration:", error);
     throw error;
+  }
+};
+
+/**
+ * Checks if a mobile number is already registered for the master class
+ */
+export const checkMasterRegistrationExists = async (phone) => {
+  try {
+    const normalizedPhone = normalizePhone(phone);
+    const querySnapshot = await getDocs(collection(db, "master_registrations"));
+    return querySnapshot.docs.some(doc => normalizePhone(doc.data().phone) === normalizedPhone);
+  } catch (error) {
+    console.error("Error checking master registration:", error);
+    return false;
   }
 };
 
@@ -42,8 +78,17 @@ export const getEventRegistrations = async () => {
   try {
     const querySnapshot = await getDocs(collection(db, "event_registrations"));
     const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    // Sort manually in JS to avoid Firestore's "missing field" exclusion
-    return data.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+    // Sort by timestamp descending (latest first)
+    const sorted = data.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+    
+    // Filter unique by normalized phone number
+    const seen = new Set();
+    return sorted.filter(item => {
+      const normalized = normalizePhone(item.phone);
+      if (!normalized || seen.has(normalized)) return false;
+      seen.add(normalized);
+      return true;
+    });
   } catch (error) {
     console.error("Error fetching event registrations:", error);
     throw error;
@@ -57,8 +102,17 @@ export const getMasterRegistrations = async () => {
   try {
     const querySnapshot = await getDocs(collection(db, "master_registrations"));
     const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    // Sort manually in JS
-    return data.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+    // Sort by timestamp descending
+    const sorted = data.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+    
+    // Filter unique by normalized phone
+    const seen = new Set();
+    return sorted.filter(item => {
+      const normalized = normalizePhone(item.phone);
+      if (!normalized || seen.has(normalized)) return false;
+      seen.add(normalized);
+      return true;
+    });
   } catch (error) {
     console.error("Error fetching master registrations:", error);
     throw error;
@@ -109,7 +163,16 @@ export const getAptitudeLeads = async () => {
     const querySnapshot = await getDocs(collection(db, "aptitude_test_leads"));
     const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     // Sort by createdAt descending
-    return data.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    const sorted = data.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    
+    // Filter unique by normalized phone
+    const seen = new Set();
+    return sorted.filter(item => {
+      const normalized = normalizePhone(item.phone);
+      if (!normalized || seen.has(normalized)) return false;
+      seen.add(normalized);
+      return true;
+    });
   } catch (error) {
     console.error("Error fetching aptitude leads:", error);
     throw error;
@@ -150,7 +213,16 @@ export const getAttendanceList = async () => {
     const q = query(collection(db, "master_registrations"), where("attended", "==", true));
     const querySnapshot = await getDocs(q);
     const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return data.sort((a, b) => (b.attendedAt?.seconds || 0) - (a.attendedAt?.seconds || 0));
+    const sorted = data.sort((a, b) => (b.attendedAt?.seconds || 0) - (a.attendedAt?.seconds || 0));
+    
+    // Filter unique by normalized phone
+    const seen = new Set();
+    return sorted.filter(item => {
+      const normalized = normalizePhone(item.phone);
+      if (!normalized || seen.has(normalized)) return false;
+      seen.add(normalized);
+      return true;
+    });
   } catch (error) {
     console.error("Error fetching attendance list:", error);
     throw error;
@@ -193,7 +265,16 @@ export const getEventAttendanceList = async () => {
     const q = query(collection(db, "event_registrations"), where("attended", "==", true));
     const querySnapshot = await getDocs(q);
     const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return data.sort((a, b) => (b.attendedAt?.seconds || 0) - (a.attendedAt?.seconds || 0));
+    const sorted = data.sort((a, b) => (b.attendedAt?.seconds || 0) - (a.attendedAt?.seconds || 0));
+    
+    // Filter unique by normalized phone
+    const seen = new Set();
+    return sorted.filter(item => {
+      const normalized = normalizePhone(item.phone);
+      if (!normalized || seen.has(normalized)) return false;
+      seen.add(normalized);
+      return true;
+    });
   } catch (error) {
     console.error("Error fetching event attendance list:", error);
     throw error;

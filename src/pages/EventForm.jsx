@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Background3D from "../components/Background3D";
-import { saveEventRegistration } from "../services/dbService";
+import { saveEventRegistration, checkEventRegistrationExists } from "../services/dbService";
 
 const Icons = {
   ArrowLeft: () => (
@@ -84,6 +84,12 @@ export default function EventForm() {
     e.preventDefault();
     setLoading(true);
     try {
+      const exists = await checkEventRegistrationExists(formData.phone);
+      if (exists) {
+        alert("This mobile number is already registered for this event.");
+        setLoading(false);
+        return;
+      }
       const regId = "WORKSHOP_" + Math.random().toString(36).substring(7).toUpperCase();
       await saveEventRegistration({
         ...formData,
