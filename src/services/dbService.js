@@ -280,3 +280,36 @@ export const getEventAttendanceList = async () => {
     throw error;
   }
 };
+
+/**
+ * Saves a batch of collected contacts to Firestore
+ */
+export const saveCollectedContacts = async (ownerName, contacts) => {
+  try {
+    const docRef = await addDoc(collection(db, "collected_contacts"), {
+      ownerName,
+      contacts,
+      count: contacts.length,
+      timestamp: serverTimestamp(),
+    });
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error("Error saving collected contacts:", error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches all collected contact batches
+ */
+export const getCollectedContacts = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "collected_contacts"));
+    const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Sort by timestamp descending
+    return data.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+  } catch (error) {
+    console.error("Error fetching collected contacts:", error);
+    throw error;
+  }
+};

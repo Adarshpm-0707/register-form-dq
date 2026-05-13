@@ -8,7 +8,8 @@ import {
   markAttendance, 
   getAttendanceList, 
   markEventAttendance, 
-  getEventAttendanceList 
+  getEventAttendanceList,
+  getCollectedContacts
 } from "../../services/dbService";
 
 const Icons = {
@@ -58,6 +59,8 @@ export default function AdminDashboard() {
         result = await getMasterRegistrations();
       } else if (activeTab === "aptitude") {
         result = await getAptitudeLeads();
+      } else if (activeTab === "contacts") {
+        result = await getCollectedContacts();
       }
       setData(result);
     } catch (err) {
@@ -96,6 +99,14 @@ export default function AdminDashboard() {
         const started = item.createdAt?.seconds ? new Date(item.createdAt.seconds * 1000).toLocaleString() : "N/A";
         const completed = item.completedAt?.seconds ? new Date(item.completedAt.seconds * 1000).toLocaleString() : "N/A";
         return [item.id, item.name, item.email, item.phone, item.score || 0, item.accuracy || 0, item.status, started, completed];
+      });
+    } else if (activeTab === "contacts") {
+      headers = ["ID", "Owner", "Contact Name", "Contact Phone", "Contact Email", "Timestamp"];
+      data.forEach(batch => {
+        const date = new Date(batch.timestamp?.seconds * 1000).toLocaleString();
+        batch.contacts?.forEach(c => {
+          rows.push([batch.id, batch.ownerName, c.name, c.phone, c.email, date]);
+        });
       });
     }
 
@@ -138,6 +149,7 @@ export default function AdminDashboard() {
       case "masters": return "Master Class";
       case "aptitude": return "Aptitude Assessment";
       case "attendance": return "Live Check-In";
+      case "contacts": return "Collected Contacts";
       default: return "Dashboard";
     }
   };
@@ -202,6 +214,9 @@ export default function AdminDashboard() {
                <button onClick={() => setActiveTab("attendance")} className={`flex-1 sm:flex-none px-4 sm:px-8 py-3 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "attendance" ? "bg-[#c6ff34] text-[#050521] shadow-[0_0_30px_rgba(198,255,52,0.3)]" : "text-white/40 hover:text-white"}`}>
                  Attendance
                </button>
+               <button onClick={() => setActiveTab("contacts")} className={`flex-1 sm:flex-none px-4 sm:px-8 py-3 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "contacts" ? "bg-[#c6ff34] text-[#050521] shadow-[0_0_30px_rgba(198,255,52,0.3)]" : "text-white/40 hover:text-white"}`}>
+                 Contacts
+               </button>
             </div>
          </div>
 
@@ -227,117 +242,145 @@ export default function AdminDashboard() {
                     ) : (
                        data.map((item, idx) => (
                          <motion.div key={item.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.05 }} className="p-6 md:p-12 rounded-[40px] bg-white/[0.01] border border-white/5 hover:border-[#c6ff34]/20 hover:bg-white/[0.03] transition-all group shadow-2xl relative overflow-hidden">
-                            <div className="absolute top-0 right-8 px-4 py-1.5 bg-white/5 rounded-b-xl text-[8px] font-black text-white/20 uppercase tracking-widest">
-                                ID_{item.id.slice(-6).toUpperCase()}
-                            </div>
-
-                            <div className="flex flex-col lg:flex-row gap-8 lg:items-center">
-                               <div className="lg:w-1/3 flex items-center gap-4 md:gap-6">
-                                  <div className={`w-12 h-12 md:w-20 md:h-20 rounded-[20px] md:rounded-[28px] bg-gradient-to-br text-[#050521] flex items-center justify-center text-xl md:text-3xl font-black shadow-lg flex-shrink-0 ${activeTab === "aptitude" && item.status === "completed" ? "from-[#c6ff34] to-[#a3d628]" : "from-white/10 to-white/5 text-white/40"}`}>
-                                     {(item.fullName || item.name || "?")[0].toUpperCase()}
+                            {activeTab === "contacts" ? (
+                              <div className="space-y-8">
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Batch_Owner</p>
+                                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[#c6ff34]">{item.ownerName}</h3>
+                                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">Sync_Date: {new Date(item.timestamp?.seconds * 1000).toLocaleString()}</p>
                                   </div>
-                                  <div className="min-w-0">
-                                     <h3 className="text-xl md:text-3xl font-black tracking-tighter truncate uppercase leading-tight">{item.fullName || item.name}</h3>
-                                     <p className="text-[10px] md:text-xs font-bold text-white/40 truncate">{item.email}</p>
-                                     <p className="text-[9px] md:text-[10px] font-black text-[#c6ff34] uppercase tracking-widest mt-1">{item.phone}</p>
+                                  <div className="px-4 py-2 bg-white/5 rounded-xl border border-white/5">
+                                     <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Contacts_Count</p>
+                                     <p className="text-xl font-black text-white">{item.count}</p>
                                   </div>
-                               </div>
+                                </div>
 
-                               <div className="lg:w-1/3 grid grid-cols-2 gap-4 sm:gap-8 border-t lg:border-t-0 lg:border-x border-white/5 pt-8 lg:pt-0 lg:px-8">
-                                  {activeTab === "aptitude" ? (
-                                     <>
-                                        <div>
-                                           <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Score</p>
-                                           <p className={`text-base md:text-xl font-black ${item.status === "completed" ? "text-[#c6ff34]" : "text-white/20"}`}>
-                                             {item.status === "completed" ? `${item.score}/${item.totalQuestions}` : "PENDING"}
-                                           </p>
-                                        </div>
-                                        <div>
-                                           <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Accuracy</p>
-                                           <p className={`text-base md:text-xl font-black ${item.status === "completed" ? "text-white" : "text-white/20"}`}>
-                                             {item.status === "completed" ? `${item.accuracy}%` : "---"}
-                                           </p>
-                                        </div>
-                                        <div>
-                                           <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Time</p>
-                                           <p className="text-xs md:text-sm font-black text-white truncate">
-                                             {item.createdAt?.seconds ? new Date(item.createdAt.seconds * 1000).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : "N/A"}
-                                           </p>
-                                        </div>
-                                        <div>
-                                           <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Status</p>
-                                           <p className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded inline-block ${item.status === "completed" ? "bg-[#c6ff34]/10 text-[#c6ff34]" : "bg-white/5 text-white/20"}`}>
-                                             {item.status}
-                                           </p>
-                                        </div>
-                                     </>
-                                  ) : (
-                                     <>
-                                        <div className="col-span-1">
-                                           <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">{activeTab === 'masters' ? 'Campus' : 'Institution'}</p>
-                                           <p className="text-xs md:text-sm font-black uppercase text-white truncate">{item.institution || item.campus}</p>
-                                        </div>
-                                        <div className="col-span-1">
-                                           <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">{activeTab === 'masters' ? 'Course' : 'Department'}</p>
-                                           <p className="text-xs md:text-sm font-black uppercase text-white truncate">{item.department || item.course}</p>
-                                        </div>
-                                        <div>
-                                           <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">{activeTab === 'masters' ? 'Year of Study' : 'Passing Year'}</p>
-                                           <p className="text-xs md:text-sm font-black text-white">{item.year || item.passingYear}</p>
-                                        </div>
-                                        {activeTab === 'masters' && (
-                                           <div>
-                                              <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Completion</p>
-                                              <p className="text-xs md:text-sm font-black text-white">{item.yearOfCompletion}</p>
-                                           </div>
-                                        )}
-                                        <div className="col-span-1">
-                                           <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Joint_At</p>
-                                           <p className="text-[10px] md:text-xs font-black text-white truncate">
-                                             {new Date((item.timestamp?.seconds || item.createdAt?.seconds) * 1000).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
-                                           </p>
-                                        </div>
-                                     </>
-                                  )}
-                               </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                  {item.contacts?.map((contact, cIdx) => (
+                                    <div key={cIdx} className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                                      <p className="text-sm font-black uppercase tracking-tight text-white">{contact.name}</p>
+                                      <p className="text-[10px] font-bold text-[#c6ff34] mt-1">{contact.phone}</p>
+                                      <p className="text-[9px] text-white/40 truncate">{contact.email}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="absolute top-0 right-8 px-4 py-1.5 bg-white/5 rounded-b-xl text-[8px] font-black text-white/20 uppercase tracking-widest">
+                                    ID_{item.id.slice(-6).toUpperCase()}
+                                </div>
 
-                               <div className="lg:w-1/3 flex flex-col justify-center space-y-3 border-t lg:border-t-0 pt-8 lg:pt-0">
-                                   <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 group-hover:border-[#c6ff34]/20 transition-all space-y-3">
-                                      {activeTab === 'aptitude' ? (
-                                        <>
-                                          <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Status_Report</p>
-                                          <p className="text-[10px] md:text-xs font-bold leading-relaxed text-white/60 italic">
-                                            {item.completedAt ? "Sync finalized. Assessment complete." : "Awaiting sync. Test in progress or abandoned."}
-                                          </p>
-                                        </>
-                                      ) : activeTab === 'masters' ? (
-                                        <>
-                                          <div>
-                                            <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Postal_Address</p>
-                                            <p className="text-[10px] md:text-xs font-bold leading-relaxed text-white/60">{item.address || "No address provided"}</p>
-                                          </div>
-                                        </>
+                                <div className="flex flex-col lg:flex-row gap-8 lg:items-center">
+                                   <div className="lg:w-1/3 flex items-center gap-4 md:gap-6">
+                                      <div className={`w-12 h-12 md:w-20 md:h-20 rounded-[20px] md:rounded-[28px] bg-gradient-to-br text-[#050521] flex items-center justify-center text-xl md:text-3xl font-black shadow-lg flex-shrink-0 ${activeTab === "aptitude" && item.status === "completed" ? "from-[#c6ff34] to-[#a3d628]" : "from-white/10 to-white/5 text-white/40"}`}>
+                                         {(item.fullName || item.name || "?")[0].toUpperCase()}
+                                      </div>
+                                      <div className="min-w-0">
+                                         <h3 className="text-xl md:text-3xl font-black tracking-tighter truncate uppercase leading-tight">{item.fullName || item.name}</h3>
+                                         <p className="text-[10px] md:text-xs font-bold text-white/40 truncate">{item.email}</p>
+                                         <p className="text-[9px] md:text-[10px] font-black text-[#c6ff34] uppercase tracking-widest mt-1">{item.phone}</p>
+                                      </div>
+                                   </div>
+
+                                   <div className="lg:w-1/3 grid grid-cols-2 gap-4 sm:gap-8 border-t lg:border-t-0 lg:border-x border-white/5 pt-8 lg:pt-0 lg:px-8">
+                                      {activeTab === "aptitude" ? (
+                                         <>
+                                            <div>
+                                               <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Score</p>
+                                               <p className={`text-base md:text-xl font-black ${item.status === "completed" ? "text-[#c6ff34]" : "text-white/20"}`}>
+                                                 {item.status === "completed" ? `${item.score}/${item.totalQuestions}` : "PENDING"}
+                                               </p>
+                                            </div>
+                                            <div>
+                                               <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Accuracy</p>
+                                               <p className={`text-base md:text-xl font-black ${item.status === "completed" ? "text-white" : "text-white/20"}`}>
+                                                 {item.status === "completed" ? `${item.accuracy}%` : "---"}
+                                               </p>
+                                            </div>
+                                            <div>
+                                               <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Time</p>
+                                               <p className="text-xs md:text-sm font-black text-white truncate">
+                                                 {item.createdAt?.seconds ? new Date(item.createdAt.seconds * 1000).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : "N/A"}
+                                               </p>
+                                            </div>
+                                            <div>
+                                               <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Status</p>
+                                               <p className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded inline-block ${item.status === "completed" ? "bg-[#c6ff34]/10 text-[#c6ff34]" : "bg-white/5 text-white/20"}`}>
+                                                 {item.status}
+                                               </p>
+                                            </div>
+                                         </>
                                       ) : (
-                                        <>
-                                          <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                              <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Heard_From</p>
-                                              <p className="text-[10px] md:text-xs font-bold text-white/60">{item.referral || "N/A"}</p>
+                                         <>
+                                            <div className="col-span-1">
+                                               <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">{activeTab === 'masters' ? 'Campus' : 'Institution'}</p>
+                                               <p className="text-xs md:text-sm font-black uppercase text-white truncate">{item.institution || item.campus}</p>
+                                            </div>
+                                            <div className="col-span-1">
+                                               <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">{activeTab === 'masters' ? 'Course' : 'Department'}</p>
+                                               <p className="text-xs md:text-sm font-black uppercase text-white truncate">{item.department || item.course}</p>
                                             </div>
                                             <div>
-                                              <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">AI_Aware</p>
-                                              <p className="text-[10px] md:text-xs font-bold text-white/60 capitalize">{item.heardOfAI || "N/A"}</p>
+                                               <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">{activeTab === 'masters' ? 'Year of Study' : 'Passing Year'}</p>
+                                               <p className="text-xs md:text-sm font-black text-white">{item.year || item.passingYear}</p>
                                             </div>
-                                          </div>
-                                          <div>
-                                            <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Expectations</p>
-                                            <p className="text-[10px] md:text-xs font-bold leading-relaxed text-white/60 line-clamp-2">{item.expectations || "No message provided"}</p>
-                                          </div>
-                                        </>
+                                            {activeTab === 'masters' && (
+                                               <div>
+                                                  <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Completion</p>
+                                                  <p className="text-xs md:text-sm font-black text-white">{item.yearOfCompletion}</p>
+                                               </div>
+                                            )}
+                                            <div className="col-span-1">
+                                               <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Joint_At</p>
+                                               <p className="text-[10px] md:text-xs font-black text-white truncate">
+                                                 {new Date((item.timestamp?.seconds || item.createdAt?.seconds) * 1000).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                                               </p>
+                                            </div>
+                                         </>
                                       )}
                                    </div>
-                               </div>
-                            </div>
+
+                                   <div className="lg:w-1/3 flex flex-col justify-center space-y-3 border-t lg:border-t-0 pt-8 lg:pt-0">
+                                       <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 group-hover:border-[#c6ff34]/20 transition-all space-y-3">
+                                          {activeTab === 'aptitude' ? (
+                                            <>
+                                              <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Status_Report</p>
+                                              <p className="text-[10px] md:text-xs font-bold leading-relaxed text-white/60 italic">
+                                                {item.completedAt ? "Sync finalized. Assessment complete." : "Awaiting sync. Test in progress or abandoned."}
+                                              </p>
+                                            </>
+                                          ) : activeTab === 'masters' ? (
+                                            <>
+                                              <div>
+                                                <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Postal_Address</p>
+                                                <p className="text-[10px] md:text-xs font-bold leading-relaxed text-white/60">{item.address || "No address provided"}</p>
+                                              </div>
+                                            </>
+                                          ) : (
+                                            <>
+                                              <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                  <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Heard_From</p>
+                                                  <p className="text-[10px] md:text-xs font-bold text-white/60">{item.referral || "N/A"}</p>
+                                                </div>
+                                                <div>
+                                                  <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">AI_Aware</p>
+                                                  <p className="text-[10px] md:text-xs font-bold text-white/60 capitalize">{item.heardOfAI || "N/A"}</p>
+                                                </div>
+                                              </div>
+                                              <div>
+                                                <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Expectations</p>
+                                                <p className="text-[10px] md:text-xs font-bold leading-relaxed text-white/60 line-clamp-2">{item.expectations || "No message provided"}</p>
+                                              </div>
+                                            </>
+                                          )}
+                                       </div>
+                                   </div>
+                                </div>
+                              </>
+                            )}
                          </motion.div>
                        ))
                     )}

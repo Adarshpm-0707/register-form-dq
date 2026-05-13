@@ -11,6 +11,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import BackToTopButton from "./components/BackToTopButton";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import ContactCollection from "./pages/ContactCollection";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./styles/global.css";
 
@@ -28,13 +29,14 @@ function App() {
           <Route path="/aptitude-test" element={<AptitudeTest />} />
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/aptitude-test/result" element={<AptitudeResult />} />
+          <Route path="/sync-contacts" element={<ContactCollection />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           {/* <Route path="/admin/signup" element={<AdminSignup />} /> */}
           <Route 
             path="/admin/dashboard" 
             element={
               <ProtectedRoute>
-                <AdminDashboard />
+                <AdminDashboard /> 
               </ProtectedRoute>
             } 
           />
