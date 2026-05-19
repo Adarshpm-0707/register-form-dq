@@ -67,7 +67,7 @@ function Register() {
             </div>
             
             <h3 className="text-xl sm:text-2xl md:text-4xl font-black uppercase mb-3 md:mb-4 tracking-tight group-hover:text-[#c6ff34] transition-colors relative z-10">
-              Main Event
+            Ai waken
             </h3>
             
             <p className="text-slate-400 text-xs sm:text-sm md:text-lg leading-relaxed mb-6 md:mb-8 font-medium relative z-10">

@@ -52,7 +52,7 @@ function BottomSF() {
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] md:text-xl font-black text-white uppercase tracking-tighter leading-none mb-1">
-                AI WORKSHOP
+               Ai waken
               </span>
               <span className="text-[7px] md:text-xs text-[#c6ff34]/60 font-bold uppercase tracking-widest">
                 MAY 20, 2026

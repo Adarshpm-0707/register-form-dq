@@ -21,6 +21,24 @@ service cloud.firestore {
       allow read: if true;    // Needed for progress and results
     }
 
+    // Security for Collected Contacts
+    match /collected_contacts/{document} {
+      allow write: if true;   // Anyone can sync contacts
+      allow read: if true;    // Admin dashboard needs to show them
+    }
+
+    // Security for Uploaded Contact Files
+    match /uploaded_contact_files/{document} {
+      allow write: if true;   
+      allow read: if true;    
+    }
+
+    // Security for Slot Registrations
+    match /slot_registrations/{document} {
+      allow write: if true;   
+      allow read: if true;    
+    }
+
     // Lock everything else by default
     match /{document=**} {
       allow read, write: if false;

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Background3D from "../components/Background3D";
-import { saveEventRegistration, checkEventRegistrationExists } from "../services/dbService";
+import { saveEventRegistration, checkEventRegistrationExists, updateCourseInterest } from "../services/dbService";
 
 const Icons = {
   ArrowLeft: () => (
@@ -36,6 +36,8 @@ export default function EventForm() {
     referral: "",
     expectations: ""
   });
+  const [docId, setDocId] = useState(null);
+  const [enrollInterested, setEnrollInterested] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -91,12 +93,14 @@ export default function EventForm() {
         return;
       }
       const regId = "WORKSHOP_" + Math.random().toString(36).substring(7).toUpperCase();
-      await saveEventRegistration({
+      const res = await saveEventRegistration({
         ...formData,
         registrationId: regId,
         attendanceStatus: "Pending",
+        enrolledInAICourse: "No", // Initial state
         timestamp: new Date()
       });
+      setDocId(res.id);
       setRegistrationId(regId);
       setSuccess(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -175,6 +179,50 @@ export default function EventForm() {
                       ID: {registrationId}
                     </div>
                  </div>
+
+                 {/* AI/ML Course Enrollment Section */}
+                 <motion.div 
+                   initial={{ opacity: 0, y: 20 }}
+                   animate={{ opacity: 1, y: 0 }}
+                   transition={{ delay: 0.5 }}
+                   className="max-w-md mx-auto p-6 md:p-8 rounded-[32px] bg-[#c6ff34]/5 border border-[#c6ff34]/20 backdrop-blur-xl relative overflow-hidden group"
+                 >
+                    <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+                        <path d="M12 6v6l4 2"/>
+                      </svg>
+                    </div>
+                    
+                    <div className="flex items-center gap-4 text-left relative z-10">
+                      <div className="flex-1">
+                        <h4 className="text-[#c6ff34] font-black text-[10px] md:text-xs uppercase tracking-[0.2em] mb-1">Exclusive Offer</h4>
+                        <p className="text-white text-sm md:text-lg font-bold leading-tight">
+                          Would you like to enroll in our 6-month AI/ML course?
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          className="sr-only peer"
+                          checked={enrollInterested}
+                          onChange={async (e) => {
+                            const val = e.target.checked;
+                            setEnrollInterested(val);
+                            if (docId) {
+                              try {
+                                await updateCourseInterest("event_registrations", docId, val);
+                              } catch (err) {
+                                console.error("Update failed:", err);
+                              }
+                            }
+                          }}
+                        />
+                        <div className="w-14 h-7 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-6 after:transition-all peer-checked:bg-[#c6ff34]"></div>
+                      </label>
+                    </div>
+                 </motion.div>
+
 
                  <div className="max-w-md mx-auto space-y-4">
                     <motion.a 

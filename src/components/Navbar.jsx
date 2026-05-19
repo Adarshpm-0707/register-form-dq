@@ -21,7 +21,8 @@ function Navbar() {
 
   const navLinks = [
     { name: "HOME", path: "/" },
-    { name: "APTITUDE TEST", path: "/aptitude-test" }
+    { name: "APTITUDE TEST", path: "/aptitude-test" },
+    { name: "SLOT", path: "/slot" }
   ];
 
   return (

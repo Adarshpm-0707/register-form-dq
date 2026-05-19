@@ -1,5 +1,6 @@
-import { db } from "../firebase/firebase";
+import { db, storage } from "../firebase/firebase";
 import { collection, addDoc, serverTimestamp, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 /**
  * Normalizes phone numbers to last 10 digits for consistent comparison
@@ -115,6 +116,47 @@ export const getMasterRegistrations = async () => {
     });
   } catch (error) {
     console.error("Error fetching master registrations:", error);
+    throw error;
+  }
+};
+
+/**
+ * Saves slot registration data to Firestore
+ */
+export const saveSlotRegistration = async (formData) => {
+  try {
+    const docRef = await addDoc(collection(db, "slot_registrations"), {
+      ...formData,
+      type: "SLOT",
+      timestamp: serverTimestamp(),
+    });
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error("Error saving slot registration:", error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches all slot registrations
+ */
+export const getSlotRegistrations = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "slot_registrations"));
+    const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Sort by timestamp descending
+    const sorted = data.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+    
+    // Filter unique by normalized phone
+    const seen = new Set();
+    return sorted.filter(item => {
+      const normalized = normalizePhone(item.phone);
+      if (!normalized || seen.has(normalized)) return false;
+      seen.add(normalized);
+      return true;
+    });
+  } catch (error) {
+    console.error("Error fetching slot registrations:", error);
     throw error;
   }
 };
@@ -310,6 +352,77 @@ export const getCollectedContacts = async () => {
     return data.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
   } catch (error) {
     console.error("Error fetching collected contacts:", error);
+    throw error;
+  }
+};
+/**
+ * Updates the AI/ML course enrollment interest for any registration
+ */
+export const updateCourseInterest = async (collectionName, docId, interested) => {
+  try {
+    const docRef = doc(db, collectionName, docId);
+    await updateDoc(docRef, {
+      enrolledInAICourse: interested ? "Yes" : "No",
+      enrollmentTimestamp: serverTimestamp()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating course interest:", error);
+    throw error;
+  }
+};
+/**
+ * Updates the confirmation status for a registration
+ */
+export const updateConfirmationStatus = async (collectionName, docId, status) => {
+  try {
+    const docRef = doc(db, collectionName, docId);
+    await updateDoc(docRef, {
+      confirmationStatus: status,
+      confirmationUpdatedAt: serverTimestamp()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating confirmation status:", error);
+    throw error;
+  }
+};
+
+/**
+ * Saves an uploaded contact file to Storage and metadata to Firestore
+ */
+export const saveUploadedContactFile = async (ownerName, category, file) => {
+  try {
+    const fileRef = ref(storage, `contact_files/${Date.now()}_${file.name}`);
+    const snapshot = await uploadBytes(fileRef, file);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+
+    const docRef = await addDoc(collection(db, "uploaded_contact_files"), {
+      ownerName,
+      category,
+      fileName: file.name,
+      fileURL: downloadURL,
+      timestamp: serverTimestamp(),
+    });
+
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error("Error saving uploaded contact file:", error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches all uploaded contact file metadata
+ */
+export const getUploadedContactFiles = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "uploaded_contact_files"));
+    const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Sort by timestamp descending
+    return data.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+  } catch (error) {
+    console.error("Error fetching uploaded contact files:", error);
     throw error;
   }
 };

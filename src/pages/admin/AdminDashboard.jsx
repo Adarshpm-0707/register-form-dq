@@ -9,13 +9,34 @@ import {
   getAttendanceList, 
   markEventAttendance, 
   getEventAttendanceList,
-  getCollectedContacts
+  getCollectedContacts,
+  getUploadedContactFiles,
+  updateConfirmationStatus,
+  getSlotRegistrations,
+  saveSlotRegistration
 } from "../../services/dbService";
+
+const loadRazorpay = () => {
+  return new Promise((resolve) => {
+    if (window.Razorpay) return resolve(true);
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.id = "razorpay-sdk";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
 
 const Icons = {
   Refresh: ({ className }) => (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/>
+    </svg>
+  ),
+  Check: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
     </svg>
   ),
   Download: ({ className }) => (
@@ -37,6 +58,16 @@ const Icons = {
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/>
     </svg>
+  ),
+  File: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/>
+    </svg>
+  ),
+  ExternalLink: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+    </svg>
   )
 };
 
@@ -46,6 +77,59 @@ export default function AdminDashboard() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [syncError, setSyncError] = useState(null);
+
+  const [isAddSlotOpen, setIsAddSlotOpen] = useState(false);
+  const [addingSlot, setAddingSlot] = useState(false);
+  const [addSlotData, setAddSlotData] = useState({ fullName: "", phone: "", address: "", parentsName: "" });
+  const [paymentMethod, setPaymentMethod] = useState("Cash");
+
+  const handleAddSlotSubmit = async (e) => {
+    e.preventDefault();
+    setAddingSlot(true);
+    try {
+      if (paymentMethod === "Cash") {
+        await saveSlotRegistration({ ...addSlotData, paymentMode: "Cash_On_Hand", status: "Paid" });
+        setIsAddSlotOpen(false);
+        setAddSlotData({ fullName: "", phone: "", address: "", parentsName: "" });
+        fetchData();
+      } else {
+        const isLoaded = await loadRazorpay();
+        if (!isLoaded) throw new Error("Razorpay SDK failed to load.");
+        const options = {
+          key: "rzp_live_SnxCrKgLPqpHnz",
+          amount: 3000 * 100,
+          currency: "INR",
+          name: "DEEPSTAQ",
+          description: "Slot Booking",
+          handler: async (response) => {
+            try {
+              await saveSlotRegistration({
+                ...addSlotData,
+                paymentId: response.razorpay_payment_id,
+                paymentMode: "Online_Payment",
+                status: "Paid"
+              });
+              setIsAddSlotOpen(false);
+              setAddSlotData({ fullName: "", phone: "", address: "", parentsName: "" });
+              fetchData();
+            } catch (err) {
+              console.error("Firestore Error:", err);
+              alert("Payment successful but failed to save data.");
+            }
+          },
+          prefill: { name: addSlotData.fullName, contact: addSlotData.phone },
+          theme: { color: "#c6ff34" },
+        };
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error adding slot: " + err.message);
+    } finally {
+      setAddingSlot(false);
+    }
+  };
 
   const fetchData = useCallback(async () => {
     if (activeTab === "attendance") return;
@@ -61,6 +145,10 @@ export default function AdminDashboard() {
         result = await getAptitudeLeads();
       } else if (activeTab === "contacts") {
         result = await getCollectedContacts();
+      } else if (activeTab === "files") {
+        result = await getUploadedContactFiles();
+      } else if (activeTab === "slots") {
+        result = await getSlotRegistrations();
       }
       setData(result);
     } catch (err) {
@@ -70,6 +158,20 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   }, [activeTab]);
+  
+  const handleStatusChange = async (id, status) => {
+    try {
+      const collectionName = activeTab === "events" ? "event_registrations" : "master_registrations";
+      await updateConfirmationStatus(collectionName, id, status);
+      
+      // Update local state to reflect change immediately
+      setData(prevData => prevData.map(item => 
+        item.id === id ? { ...item, confirmationStatus: status } : item
+      ));
+    } catch (err) {
+      alert("Failed to update status: " + err.message);
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -81,37 +183,75 @@ export default function AdminDashboard() {
     let headers = [];
     let rows = [];
 
+    // Helper to escape commas and quotes in CSV fields
+    const formatCSVField = (field) => {
+      if (field === null || field === undefined) return '""';
+      const str = String(field).replace(/"/g, '""'); // Escape double quotes
+      return `"${str}"`;
+    };
+
     if (activeTab === "events") {
-      headers = ["ID", "Full Name", "Email", "Phone", "Institution", "Department", "Passing Year", "Interest", "Referral", "Expectations", "Timestamp"];
+      headers = ["ID", "Full Name", "Email", "Phone", "Institution", "Department", "Passing Year", "Interest", "Referral", "Expectations", "AI/ML Enrollment", "Confirmation Status", "Timestamp"];
       rows = data.map(item => {
-        const date = new Date(item.timestamp?.seconds * 1000).toLocaleString();
-        return [item.id, item.fullName, item.email, item.phone, item.institution, item.department, item.passingYear, item.interest, item.referral, item.expectations?.replace(/,/g, " "), date];
+        const ts = item.timestamp?.seconds || item.createdAt?.seconds;
+        const date = ts ? new Date(ts * 1000).toLocaleString() : "N/A";
+        return [
+          item.id, item.fullName, item.email, item.phone, item.institution, 
+          item.department, item.passingYear, item.interest, item.referral, 
+          item.expectations, item.enrolledInAICourse || "No", 
+          item.confirmationStatus || "Select One", date
+        ].map(formatCSVField);
       });
     } else if (activeTab === "masters") {
-      headers = ["ID", "Name", "Email", "Phone", "Campus", "Course", "Current Year", "Year of Completion", "Address", "Timestamp"];
+      headers = ["ID", "Name", "Email", "Phone", "Campus", "Course", "Current Year", "Year of Completion", "Address", "AI/ML Enrollment", "Confirmation Status", "Timestamp"];
       rows = data.map(item => {
-        const date = new Date(item.timestamp?.seconds * 1000).toLocaleString();
-        return [item.id, item.name, item.email, item.phone, item.campus, item.course, item.year, item.yearOfCompletion, item.address?.replace(/,/g, " "), date];
+        const ts = item.timestamp?.seconds || item.createdAt?.seconds;
+        const date = ts ? new Date(ts * 1000).toLocaleString() : "N/A";
+        return [
+          item.id, item.name, item.email, item.phone, item.campus, 
+          item.course, item.year, item.yearOfCompletion, item.address, 
+          item.enrolledInAICourse || "No", item.confirmationStatus || "Select One", date
+        ].map(formatCSVField);
       });
     } else if (activeTab === "aptitude") {
-      headers = ["ID", "Name", "Email", "Phone", "Score", "Accuracy (%)", "Status", "Started At", "Completed At"];
+      headers = ["ID", "Name", "Email", "Phone", "Score", "Accuracy (%)", "Status", "AI/ML Enrollment", "Started At", "Completed At"];
       rows = data.map(item => {
         const started = item.createdAt?.seconds ? new Date(item.createdAt.seconds * 1000).toLocaleString() : "N/A";
         const completed = item.completedAt?.seconds ? new Date(item.completedAt.seconds * 1000).toLocaleString() : "N/A";
-        return [item.id, item.name, item.email, item.phone, item.score || 0, item.accuracy || 0, item.status, started, completed];
+        return [
+          item.id, item.name, item.email, item.phone, item.score || 0, 
+          item.accuracy || 0, item.status, item.enrolledInAICourse || "No", started, completed
+        ].map(formatCSVField);
       });
     } else if (activeTab === "contacts") {
       headers = ["ID", "Owner", "Contact Name", "Contact Phone", "Contact Email", "Timestamp"];
       data.forEach(batch => {
-        const date = new Date(batch.timestamp?.seconds * 1000).toLocaleString();
+        const ts = batch.timestamp?.seconds || batch.createdAt?.seconds;
+        const date = ts ? new Date(ts * 1000).toLocaleString() : "N/A";
         batch.contacts?.forEach(c => {
-          rows.push([batch.id, batch.ownerName, c.name, c.phone, c.email, date]);
+          rows.push([batch.id, batch.ownerName, c.name, c.phone, c.email, date].map(formatCSVField));
         });
+      });
+    } else if (activeTab === "files") {
+      headers = ["ID", "Owner", "Category", "File Name", "File URL", "Timestamp"];
+      rows = data.map(item => {
+        const ts = item.timestamp?.seconds || item.createdAt?.seconds;
+        const date = ts ? new Date(ts * 1000).toLocaleString() : "N/A";
+        return [item.id, item.ownerName, item.category, item.fileName, item.fileURL, date].map(formatCSVField);
+      });
+    } else if (activeTab === "slots") {
+      headers = ["ID", "Full Name", "Phone", "Parent's Name", "Address", "Payment Mode", "Payment ID", "Status", "Timestamp"];
+      rows = data.map(item => {
+        const ts = item.timestamp?.seconds || item.createdAt?.seconds;
+        const date = ts ? new Date(ts * 1000).toLocaleString() : "N/A";
+        return [
+          item.id, item.fullName, item.phone, item.parentsName, item.address, item.paymentMode || "N/A", item.paymentId || "N/A", item.status || "N/A", date
+        ].map(formatCSVField);
       });
     }
 
     const csvContent = [
-      headers.join(","),
+      headers.map(formatCSVField).join(","),
       ...rows.map(e => e.join(","))
     ].join("\n");
 
@@ -119,10 +259,15 @@ export default function AdminDashboard() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `DeepStaq_${activeTab}_${new Date().toLocaleDateString()}.csv`);
+    
+    // Safer filename: replace slashes/dots/spaces with underscores or use ISO date
+    const dateStr = new Date().toISOString().split('T')[0];
+    link.setAttribute("download", `DeepStaq_${activeTab}_${dateStr}.csv`);
+    
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const stats = useMemo(() => {
@@ -150,6 +295,7 @@ export default function AdminDashboard() {
       case "aptitude": return "Aptitude Assessment";
       case "attendance": return "Live Check-In";
       case "contacts": return "Collected Contacts";
+      case "slots": return "Slot Bookings";
       default: return "Dashboard";
     }
   };
@@ -217,10 +363,23 @@ export default function AdminDashboard() {
                <button onClick={() => setActiveTab("contacts")} className={`flex-1 sm:flex-none px-4 sm:px-8 py-3 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "contacts" ? "bg-[#c6ff34] text-[#050521] shadow-[0_0_30px_rgba(198,255,52,0.3)]" : "text-white/40 hover:text-white"}`}>
                  Contacts
                </button>
+              
+               <button onClick={() => setActiveTab("slots")} className={`flex-1 sm:flex-none px-4 sm:px-8 py-3 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "slots" ? "bg-[#c6ff34] text-[#050521] shadow-[0_0_30px_rgba(198,255,52,0.3)]" : "text-white/40 hover:text-white"}`}>
+                 Slots
+               </button>
             </div>
          </div>
 
-         <div className="relative">
+          {activeTab === "slots" && (
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center lg:justify-end mb-8">
+               <button onClick={() => setIsAddSlotOpen(true)} className="flex items-center gap-3 px-8 py-4 bg-[#c6ff34] text-[#050521] text-xs font-black uppercase tracking-widest rounded-2xl hover:scale-105 transition-all shadow-[0_10px_30px_rgba(198,255,52,0.2)] hover:shadow-[0_10px_40px_rgba(198,255,52,0.4)]">
+                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                 <span>Create Booking</span>
+               </button>
+            </motion.div>
+          )}
+
+          <div className="relative">
             <AnimatePresence mode="wait">
                {loading && activeTab !== "attendance" ? (
                  <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="py-40 flex flex-col items-center justify-center gap-8">
@@ -266,6 +425,48 @@ export default function AdminDashboard() {
                                   ))}
                                 </div>
                               </div>
+                            ) : activeTab === "files" ? (
+                              <div className="flex flex-col md:flex-row gap-8 items-center">
+                                <div className="flex-1 space-y-2">
+                                  <div className="flex items-center gap-3">
+                                    <div className="p-3 bg-[#c6ff34]/10 rounded-2xl border border-[#c6ff34]/20">
+                                      <Icons.File className="w-6 h-6 text-[#c6ff34]" />
+                                    </div>
+                                    <div>
+                                      <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Batch_Owner</p>
+                                      <h3 className="text-xl font-black uppercase tracking-tighter text-[#c6ff34]">{item.ownerName}</h3>
+                                    </div>
+                                  </div>
+                                  <div className="pt-4">
+                                    <p className="text-[10px] font-black text-white/60 uppercase tracking-widest">
+                                      Category: <span className="text-white">{item.category}</span>
+                                    </p>
+                                    <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mt-1">
+                                      File: <span className="text-white/40 italic">{item.fileName}</span>
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex-1 border-t md:border-t-0 md:border-l border-white/5 pt-6 md:pt-0 md:pl-8 space-y-4">
+                                  <div>
+                                    <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Upload_Timestamp</p>
+                                    <p className="text-xs font-black text-white uppercase">
+                                      {item.timestamp?.seconds 
+                                        ? new Date(item.timestamp.seconds * 1000).toLocaleString() 
+                                        : (item.createdAt?.seconds ? new Date(item.createdAt.seconds * 1000).toLocaleString() : "PROCESSED")}
+                                    </p>
+                                  </div>
+                                  <a 
+                                    href={item.fileURL} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#c6ff34] text-[#050521] rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] transition-all"
+                                  >
+                                    <Icons.ExternalLink className="w-4 h-4" />
+                                    View_Stored_Data
+                                  </a>
+                                </div>
+                              </div>
                             ) : (
                               <>
                                 <div className="absolute top-0 right-8 px-4 py-1.5 bg-white/5 rounded-b-xl text-[8px] font-black text-white/20 uppercase tracking-widest">
@@ -281,6 +482,10 @@ export default function AdminDashboard() {
                                          <h3 className="text-xl md:text-3xl font-black tracking-tighter truncate uppercase leading-tight">{item.fullName || item.name}</h3>
                                          <p className="text-[10px] md:text-xs font-bold text-white/40 truncate">{item.email}</p>
                                          <p className="text-[9px] md:text-[10px] font-black text-[#c6ff34] uppercase tracking-widest mt-1">{item.phone}</p>
+                                         <div className={`mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[8px] font-black uppercase tracking-widest ${item.enrolledInAICourse === "Yes" ? "bg-[#c6ff34]/10 border-[#c6ff34]/30 text-[#c6ff34]" : "bg-white/5 border-white/10 text-white/20"}`}>
+                                            <div className={`w-1 h-1 rounded-full ${item.enrolledInAICourse === "Yes" ? "bg-[#c6ff34] animate-pulse" : "bg-white/20"}`} />
+                                            AI Course: {item.enrolledInAICourse || "No"}
+                                         </div>
                                       </div>
                                    </div>
 
@@ -300,7 +505,7 @@ export default function AdminDashboard() {
                                                </p>
                                             </div>
                                             <div>
-                                               <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Time</p>
+                                               <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Joined_At</p>
                                                <p className="text-xs md:text-sm font-black text-white truncate">
                                                  {item.createdAt?.seconds ? new Date(item.createdAt.seconds * 1000).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : "N/A"}
                                                </p>
@@ -312,6 +517,19 @@ export default function AdminDashboard() {
                                                </p>
                                             </div>
                                          </>
+                                      ) : activeTab === "slots" ? (
+                                        <>
+                                           <div>
+                                              <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Parent's Name</p>
+                                              <p className="text-xs md:text-sm font-black uppercase text-white truncate">{item.parentsName || "N/A"}</p>
+                                           </div>
+                                           <div className="col-span-1">
+                                              <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Booked_At</p>
+                                              <p className="text-[10px] md:text-xs font-black text-white truncate">
+                                                {new Date((item.timestamp?.seconds || item.createdAt?.seconds) * 1000).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                                              </p>
+                                           </div>
+                                        </>
                                       ) : (
                                          <>
                                             <div className="col-span-1">
@@ -323,17 +541,11 @@ export default function AdminDashboard() {
                                                <p className="text-xs md:text-sm font-black uppercase text-white truncate">{item.department || item.course}</p>
                                             </div>
                                             <div>
-                                               <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">{activeTab === 'masters' ? 'Year of Study' : 'Passing Year'}</p>
+                                               <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">{activeTab === 'masters' ? 'Year' : 'Passing Year'}</p>
                                                <p className="text-xs md:text-sm font-black text-white">{item.year || item.passingYear}</p>
                                             </div>
-                                            {activeTab === 'masters' && (
-                                               <div>
-                                                  <p className="text-[8px] md:text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Completion</p>
-                                                  <p className="text-xs md:text-sm font-black text-white">{item.yearOfCompletion}</p>
-                                               </div>
-                                            )}
                                             <div className="col-span-1">
-                                               <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Joint_At</p>
+                                               <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Joined_At</p>
                                                <p className="text-[10px] md:text-xs font-black text-white truncate">
                                                  {new Date((item.timestamp?.seconds || item.createdAt?.seconds) * 1000).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                                                </p>
@@ -346,38 +558,91 @@ export default function AdminDashboard() {
                                        <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 group-hover:border-[#c6ff34]/20 transition-all space-y-3">
                                           {activeTab === 'aptitude' ? (
                                             <>
-                                              <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Status_Report</p>
+                                              <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Final_Report</p>
                                               <p className="text-[10px] md:text-xs font-bold leading-relaxed text-white/60 italic">
-                                                {item.completedAt ? "Sync finalized. Assessment complete." : "Awaiting sync. Test in progress or abandoned."}
+                                                {item.completedAt ? `Test finalized on ${new Date(item.completedAt.seconds * 1000).toLocaleDateString()}` : "Awaiting test completion."}
                                               </p>
                                             </>
                                           ) : activeTab === 'masters' ? (
                                             <>
+                                              <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                  <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Payment</p>
+                                                  <p className="text-[10px] md:text-xs font-bold text-white/60 uppercase">{item.status || "N/A"}</p>
+                                                </div>
+                                                <div>
+                                                  <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Completion</p>
+                                                  <p className="text-[10px] md:text-xs font-bold text-white/60">{item.yearOfCompletion || "N/A"}</p>
+                                                </div>
+                                              </div>
                                               <div>
-                                                <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Postal_Address</p>
+                                                <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Address</p>
                                                 <p className="text-[10px] md:text-xs font-bold leading-relaxed text-white/60">{item.address || "No address provided"}</p>
                                               </div>
                                             </>
+                                          ) : activeTab === 'slots' ? (
+                                            <div className="space-y-4">
+                                              <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                  <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Payment</p>
+                                                  <p className="text-[10px] md:text-xs font-bold text-white/60 uppercase">{item.paymentMode ? item.paymentMode.replace(/_/g, " ") : "N/A"}</p>
+                                                </div>
+                                                <div>
+                                                  <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Status</p>
+                                                  <p className="text-[10px] md:text-xs font-bold text-white/60 uppercase">{item.status || "N/A"}</p>
+                                                </div>
+                                              </div>
+                                              {item.paymentId && (
+                                                <div>
+                                                  <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Ref_ID</p>
+                                                  <p className="text-[10px] md:text-xs font-bold text-[#c6ff34] truncate">{item.paymentId}</p>
+                                                </div>
+                                              )}
+                                              <div>
+                                                <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Address</p>
+                                                <p className="text-[10px] md:text-xs font-bold leading-relaxed text-white/60">{item.address || "N/A"}</p>
+                                              </div>
+                                            </div>
                                           ) : (
                                             <>
                                               <div className="grid grid-cols-2 gap-4">
                                                 <div>
-                                                  <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Heard_From</p>
-                                                  <p className="text-[10px] md:text-xs font-bold text-white/60">{item.referral || "N/A"}</p>
-                                                </div>
-                                                <div>
                                                   <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">AI_Aware</p>
                                                   <p className="text-[10px] md:text-xs font-bold text-white/60 capitalize">{item.heardOfAI || "N/A"}</p>
                                                 </div>
+                                                <div>
+                                                  <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Referral</p>
+                                                  <p className="text-[10px] md:text-xs font-bold text-white/60">{item.referral || "N/A"}</p>
+                                                </div>
                                               </div>
                                               <div>
-                                                <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Expectations</p>
-                                                <p className="text-[10px] md:text-xs font-bold leading-relaxed text-white/60 line-clamp-2">{item.expectations || "No message provided"}</p>
+                                                <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Interest_Area</p>
+                                                <p className="text-[10px] md:text-xs font-bold text-white/60">{item.interest || "No area specified"}</p>
                                               </div>
-                                            </>
-                                          )}
-                                       </div>
-                                   </div>
+                                              <div>
+                                                 <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Expectations</p>
+                                                 <p className="text-[10px] md:text-xs font-bold leading-relaxed text-white/60">{item.expectations || "No message provided"}</p>
+                                               </div>
+                                             </>
+                                           )}
+                                        </div>
+                                        
+                                        {(activeTab === 'events' || activeTab === 'masters') && (
+                                          <div className="p-4 rounded-2xl bg-[#c6ff34]/5 border border-[#c6ff34]/20 space-y-3">
+                                            <p className="text-[8px] md:text-[9px] font-black text-[#c6ff34] uppercase tracking-widest mb-1">Phone & Email Confirmation Status</p>
+                                            <select 
+                                              value={item.confirmationStatus || "Select One"} 
+                                              onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                                              className="w-full bg-[#050521] border border-[#c6ff34]/30 rounded-xl px-3 py-2 text-[10px] font-black uppercase tracking-widest text-[#c6ff34] focus:outline-none focus:border-[#c6ff34] transition-all cursor-pointer"
+                                            >
+                                              <option value="Select One">Select One</option>
+                                              <option value="Confirmation">Confirmation</option>
+                                              <option value="Not Confirmation">Not Confirmation</option>
+                                              <option value="Maybe">Maybe</option>
+                                            </select>
+                                          </div>
+                                        )}
+                                    </div>
                                 </div>
                               </>
                             )}
@@ -389,6 +654,42 @@ export default function AdminDashboard() {
             </AnimatePresence>
          </div>
       </main>
+
+      <AnimatePresence>
+        {isAddSlotOpen && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-[#050521]/90 backdrop-blur-sm">
+             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-[#050521] border border-[#c6ff34]/20 rounded-[32px] p-6 md:p-8 w-full max-w-lg shadow-[0_0_50px_rgba(198,255,52,0.15)] relative">
+                <button onClick={() => setIsAddSlotOpen(false)} className="absolute top-6 right-6 text-white/40 hover:text-white transition-colors">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+                <h2 className="text-2xl font-black uppercase mb-6 text-[#c6ff34] tracking-tight">Add Slot Data</h2>
+                <form onSubmit={handleAddSlotSubmit} className="space-y-4">
+                  <input type="text" placeholder="Full Name" required value={addSlotData.fullName} onChange={(e) => setAddSlotData({...addSlotData, fullName: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold focus:border-[#c6ff34] focus:outline-none transition-colors" />
+                  <input type="tel" placeholder="Phone Number" required pattern="[0-9]{10}" maxLength={10} value={addSlotData.phone} onChange={(e) => setAddSlotData({...addSlotData, phone: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold focus:border-[#c6ff34] focus:outline-none transition-colors" />
+                  <input type="text" placeholder="Parent's Name" required value={addSlotData.parentsName} onChange={(e) => setAddSlotData({...addSlotData, parentsName: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold focus:border-[#c6ff34] focus:outline-none transition-colors" />
+                  <textarea placeholder="Address" required value={addSlotData.address} onChange={(e) => setAddSlotData({...addSlotData, address: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold focus:border-[#c6ff34] focus:outline-none min-h-[80px] transition-colors resize-none" />
+                  
+                  <div className="flex flex-col sm:flex-row gap-4 pt-2">
+                    <label className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${paymentMethod === 'Cash' ? 'bg-[#c6ff34]/10 border-[#c6ff34] text-[#c6ff34]' : 'bg-white/5 border-white/10 text-white/40'}`}>
+                      <input type="radio" name="paymentMethod" value="Cash" checked={paymentMethod === 'Cash'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />
+                      <span className="text-xs font-black uppercase tracking-widest">Cash on Hand</span>
+                    </label>
+                    <label className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${paymentMethod === 'Online' ? 'bg-[#c6ff34]/10 border-[#c6ff34] text-[#c6ff34]' : 'bg-white/5 border-white/10 text-white/40'}`}>
+                      <input type="radio" name="paymentMethod" value="Online" checked={paymentMethod === 'Online'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />
+                      <span className="text-xs font-black uppercase tracking-widest">Online Payment</span>
+                    </label>
+                  </div>
+                  
+                  <div className="pt-6">
+                    <button type="submit" disabled={addingSlot} className="w-full bg-[#c6ff34] text-[#050521] py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_10px_30px_rgba(198,255,52,0.2)]">
+                      {addingSlot ? "Processing..." : paymentMethod === 'Online' ? "Pay ₹3000 & Save" : "Save Record"}
+                    </button>
+                  </div>
+                </form>
+             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -401,7 +702,7 @@ function AttendanceSection() {
   const [attendanceData, setAttendanceData] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchAttendance = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const result = attendanceMode === "MASTER" ? await getAttendanceList() : await getEventAttendanceList();
@@ -414,8 +715,8 @@ function AttendanceSection() {
   }, [attendanceMode]);
 
   useEffect(() => {
-    fetchAttendance();
-  }, [fetchAttendance]);
+    fetchData();
+  }, [fetchData]);
 
   useEffect(() => {
     let html5QrCode = null;
@@ -449,7 +750,7 @@ function AttendanceSection() {
                   
                   setScannedName(result.studentName);
                   setTimeout(() => setScannedName(null), 5000);
-                  fetchAttendance();
+                  fetchData();
                 } catch (err) {
                   setScanError(err.message);
                   setTimeout(() => setScanError(null), 5000);
@@ -481,7 +782,7 @@ function AttendanceSection() {
         html5QrCode.stop().catch(e => console.log("Silent Cleanup:", e));
       }
     };
-  }, [scanning, attendanceMode, fetchAttendance]);
+  }, [scanning, attendanceMode, fetchData]);
 
   return (
     <div className="space-y-12">
@@ -525,7 +826,7 @@ function AttendanceSection() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
            <h3 className="text-xl md:text-3xl font-black uppercase tracking-tighter">{attendanceMode === 'MASTER' ? 'Master' : 'Workshop'} <span className="text-[#c6ff34]">Manifest</span></h3>
-           <button onClick={fetchAttendance} className="text-[10px] font-black text-white/20 uppercase tracking-widest hover:text-[#c6ff34] transition-colors flex items-center gap-2">
+           <button onClick={fetchData} className="text-[10px] font-black text-white/20 uppercase tracking-widest hover:text-[#c6ff34] transition-colors flex items-center gap-2">
               <Icons.Refresh className="w-3 h-3" /> Refresh
            </button>
         </div>
