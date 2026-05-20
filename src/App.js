@@ -13,6 +13,7 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ContactCollection from "./pages/ContactCollection";
 import Slot from "./pages/Slot";
+import CertificateGenerator from "./pages/CertificateGenerator";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./styles/global.css";
 
@@ -32,6 +33,7 @@ function App() {
           <Route path="/aptitude-test/result" element={<AptitudeResult />} />
           <Route path="/sync-contacts" element={<ContactCollection />} />
           <Route path="/slot" element={<Slot />} />
+          <Route path="/certificate" element={<CertificateGenerator />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           {/* <Route path="/admin/signup" element={<AdminSignup />} /> */}
           <Route 

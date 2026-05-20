@@ -3,6 +3,7 @@
     "rules": "firestore.rules"
   },
   "hosting": {
+    "site": "deepstaq-98c0d",
     "public": "build",
     "ignore": [
       "firebase.json",

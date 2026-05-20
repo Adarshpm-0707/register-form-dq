@@ -9,6 +9,7 @@ import {
   getAttendanceList, 
   markEventAttendance, 
   getEventAttendanceList,
+  markAttendanceById,
   getCollectedContacts,
   getUploadedContactFiles,
   updateConfirmationStatus,
@@ -77,6 +78,27 @@ export default function AdminDashboard() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [syncError, setSyncError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredData = useMemo(() => {
+    if (!searchQuery.trim()) return data;
+    const lowerQuery = searchQuery.toLowerCase().trim();
+    return data.filter(item => {
+      const name = item.fullName || item.name || item.ownerName || "";
+      const phone = item.phone || "";
+      const nameMatch = name.toLowerCase().includes(lowerQuery);
+      const phoneMatch = phone.toLowerCase().includes(lowerQuery);
+      
+      if (activeTab === "contacts" && item.contacts) {
+         const hasContactMatch = item.contacts.some(c => 
+            (c.name || "").toLowerCase().includes(lowerQuery) || 
+            (c.phone || "").toLowerCase().includes(lowerQuery)
+         );
+         return nameMatch || phoneMatch || hasContactMatch;
+      }
+      return nameMatch || phoneMatch;
+    });
+  }, [data, searchQuery, activeTab]);
 
   const [isAddSlotOpen, setIsAddSlotOpen] = useState(false);
   const [addingSlot, setAddingSlot] = useState(false);
@@ -172,6 +194,20 @@ export default function AdminDashboard() {
       alert("Failed to update status: " + err.message);
     }
   };
+  const handleAdmit = async (id) => {
+    try {
+      const collectionName = activeTab === "events" ? "event_registrations" : "master_registrations";
+      await markAttendanceById(collectionName, id);
+      
+      // Update local state to reflect change immediately
+      setData(prevData => prevData.map(item => 
+        item.id === id ? { ...item, attended: true, attendedAt: { seconds: Math.floor(Date.now() / 1000) } } : item
+      ));
+    } catch (err) {
+      alert("Failed to admit: " + err.message);
+    }
+  };
+
 
   useEffect(() => {
     fetchData();
@@ -370,6 +406,21 @@ export default function AdminDashboard() {
             </div>
          </div>
 
+         <div className="mb-8 relative w-full max-w-2xl mx-auto lg:mx-0">
+           <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+             <svg className="h-5 w-5 text-white/40" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+             </svg>
+           </div>
+           <input
+             type="text"
+             placeholder="SEARCH BY NAME OR PHONE NUMBER..."
+             value={searchQuery}
+             onChange={(e) => setSearchQuery(e.target.value)}
+             className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-xs font-black uppercase tracking-widest text-white placeholder-white/20 focus:border-[#c6ff34] focus:outline-none focus:bg-white/[0.08] transition-all shadow-xl"
+           />
+         </div>
+
           {activeTab === "slots" && (
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center lg:justify-end mb-8">
                <button onClick={() => setIsAddSlotOpen(true)} className="flex items-center gap-3 px-8 py-4 bg-[#c6ff34] text-[#050521] text-xs font-black uppercase tracking-widest rounded-2xl hover:scale-105 transition-all shadow-[0_10px_30px_rgba(198,255,52,0.2)] hover:shadow-[0_10px_40px_rgba(198,255,52,0.4)]">
@@ -393,13 +444,13 @@ export default function AdminDashboard() {
                     <button onClick={() => fetchData()} className="text-[10px] font-black uppercase tracking-widest px-8 py-4 bg-[#ff3b3b] text-white rounded-xl">Retry_Sync</button>
                  </motion.div>
                ) : activeTab === "attendance" ? (
-                 <AttendanceSection />
+                 <AttendanceSection searchQuery={searchQuery} />
                ) : (
                  <motion.div key="data" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                    {data.length === 0 ? (
+                    {filteredData.length === 0 ? (
                        <div className="py-32 text-center text-white/10 font-black uppercase tracking-[0.5em] text-sm">Empty_Result_Set</div>
                     ) : (
-                       data.map((item, idx) => (
+                       filteredData.map((item, idx) => (
                          <motion.div key={item.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.05 }} className="p-6 md:p-12 rounded-[40px] bg-white/[0.01] border border-white/5 hover:border-[#c6ff34]/20 hover:bg-white/[0.03] transition-all group shadow-2xl relative overflow-hidden">
                             {activeTab === "contacts" ? (
                               <div className="space-y-8">
@@ -479,7 +530,12 @@ export default function AdminDashboard() {
                                          {(item.fullName || item.name || "?")[0].toUpperCase()}
                                       </div>
                                       <div className="min-w-0">
-                                         <h3 className="text-xl md:text-3xl font-black tracking-tighter truncate uppercase leading-tight">{item.fullName || item.name}</h3>
+                                         <h3 className="text-xl md:text-3xl font-black tracking-tighter uppercase leading-tight flex items-center gap-3">
+                                            <span className="truncate">{item.fullName || item.name}</span>
+                                            {item.confirmationStatus === "Confirmation" && (
+                                               <Icons.Check className="w-6 h-6 md:w-8 md:h-8 text-[#c6ff34] flex-shrink-0" />
+                                            )}
+                                         </h3>
                                          <p className="text-[10px] md:text-xs font-bold text-white/40 truncate">{item.email}</p>
                                          <p className="text-[9px] md:text-[10px] font-black text-[#c6ff34] uppercase tracking-widest mt-1">{item.phone}</p>
                                          <div className={`mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[8px] font-black uppercase tracking-widest ${item.enrolledInAICourse === "Yes" ? "bg-[#c6ff34]/10 border-[#c6ff34]/30 text-[#c6ff34]" : "bg-white/5 border-white/10 text-white/20"}`}>
@@ -640,6 +696,19 @@ export default function AdminDashboard() {
                                               <option value="Not Confirmation">Not Confirmation</option>
                                               <option value="Maybe">Maybe</option>
                                             </select>
+                                            {!item.attended ? (
+                                              <button
+                                                onClick={() => handleAdmit(item.id)}
+                                                className="w-full bg-[#c6ff34] text-[#050521] py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] transition-all shadow-[0_5px_15px_rgba(198,255,52,0.2)]"
+                                              >
+                                                Admit & Mark Attendance
+                                              </button>
+                                            ) : (
+                                              <div className="w-full bg-white/10 text-[#c6ff34] py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-center border border-white/5 flex items-center justify-center gap-2">
+                                                <Icons.Check className="w-4 h-4" />
+                                                Admitted
+                                              </div>
+                                            )}
                                           </div>
                                         )}
                                     </div>
@@ -694,19 +763,40 @@ export default function AdminDashboard() {
   );
 }
 
-function AttendanceSection() {
-  const [attendanceMode, setAttendanceMode] = useState("MASTER"); 
+function AttendanceSection({ searchQuery = "" }) {
+  const [attendanceMode, setAttendanceMode] = useState("ALL"); 
   const [scanning, setScanning] = useState(false);
   const [scannedName, setScannedName] = useState(null);
   const [scanError, setScanError] = useState(null);
   const [attendanceData, setAttendanceData] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const filteredAttendanceData = useMemo(() => {
+    if (!searchQuery.trim()) return attendanceData;
+    const lowerQuery = searchQuery.toLowerCase().trim();
+    return attendanceData.filter(item => {
+      const name = item.name || item.fullName || "";
+      const phone = item.phone || ""; 
+      return name.toLowerCase().includes(lowerQuery) || phone.toLowerCase().includes(lowerQuery);
+    });
+  }, [attendanceData, searchQuery]);
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const result = attendanceMode === "MASTER" ? await getAttendanceList() : await getEventAttendanceList();
-      setAttendanceData(result);
+      if (attendanceMode === "ALL") {
+        const [masterResult, eventResult] = await Promise.all([
+          getAttendanceList(),
+          getEventAttendanceList()
+        ]);
+        const combined = [...masterResult, ...eventResult].sort((a, b) => 
+          (b.attendedAt?.seconds || 0) - (a.attendedAt?.seconds || 0)
+        );
+        setAttendanceData(combined);
+      } else {
+        const result = attendanceMode === "MASTER" ? await getAttendanceList() : await getEventAttendanceList();
+        setAttendanceData(result);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -743,9 +833,15 @@ function AttendanceSection() {
                   if (attendanceMode === "MASTER") {
                     if (decodedText.startsWith("WORKSHOP_")) throw new Error("Workshop ticket. Switch mode!");
                     result = await markAttendance(decodedText);
-                  } else {
+                  } else if (attendanceMode === "WORKSHOP") {
                     if (!decodedText.startsWith("WORKSHOP_")) throw new Error("Master Class ticket. Switch mode!");
                     result = await markEventAttendance(decodedText);
+                  } else {
+                    if (decodedText.startsWith("WORKSHOP_")) {
+                      result = await markEventAttendance(decodedText);
+                    } else {
+                      result = await markAttendance(decodedText);
+                    }
                   }
                   
                   setScannedName(result.studentName);
@@ -787,9 +883,10 @@ function AttendanceSection() {
   return (
     <div className="space-y-12">
       <div className="flex justify-center">
-        <div className="inline-flex p-1 bg-white/5 border border-white/10 rounded-2xl">
-          <button onClick={() => { setScanning(false); setAttendanceMode("MASTER"); }} className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${attendanceMode === "MASTER" ? "bg-[#c6ff34] text-[#050521]" : "text-white/40"}`}>Master Class</button>
-          <button onClick={() => { setScanning(false); setAttendanceMode("WORKSHOP"); }} className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${attendanceMode === "WORKSHOP" ? "bg-[#c6ff34] text-[#050521]" : "text-white/40"}`}>AI Workshop</button>
+        <div className="inline-flex flex-wrap p-1 bg-white/5 border border-white/10 rounded-2xl justify-center gap-1">
+          <button onClick={() => { setScanning(false); setAttendanceMode("ALL"); }} className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${attendanceMode === "ALL" ? "bg-[#c6ff34] text-[#050521]" : "text-white/40 hover:text-white"}`}>All Records</button>
+          <button onClick={() => { setScanning(false); setAttendanceMode("MASTER"); }} className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${attendanceMode === "MASTER" ? "bg-[#c6ff34] text-[#050521]" : "text-white/40 hover:text-white"}`}>Master Class</button>
+          <button onClick={() => { setScanning(false); setAttendanceMode("WORKSHOP"); }} className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${attendanceMode === "WORKSHOP" ? "bg-[#c6ff34] text-[#050521]" : "text-white/40 hover:text-white"}`}>AI Workshop</button>
         </div>
       </div>
 
@@ -825,14 +922,14 @@ function AttendanceSection() {
 
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-           <h3 className="text-xl md:text-3xl font-black uppercase tracking-tighter">{attendanceMode === 'MASTER' ? 'Master' : 'Workshop'} <span className="text-[#c6ff34]">Manifest</span></h3>
+           <h3 className="text-xl md:text-3xl font-black uppercase tracking-tighter">{attendanceMode === 'MASTER' ? 'Master' : attendanceMode === 'WORKSHOP' ? 'Workshop' : 'Global'} <span className="text-[#c6ff34]">Manifest</span></h3>
            <button onClick={fetchData} className="text-[10px] font-black text-white/20 uppercase tracking-widest hover:text-[#c6ff34] transition-colors flex items-center gap-2">
               <Icons.Refresh className="w-3 h-3" /> Refresh
            </button>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {attendanceData.map((item, idx) => (
+          {filteredAttendanceData.map((item, idx) => (
             <motion.div key={item.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: idx * 0.05 }} className="p-6 rounded-[32px] bg-white/[0.02] border border-white/5 hover:border-[#c6ff34]/30 transition-all flex items-center gap-4 group">
               <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white/5 text-white/20 flex items-center justify-center text-lg md:text-2xl font-black flex-shrink-0 group-hover:bg-[#c6ff34] group-hover:text-[#050521] transition-all">
                 {(item.name || item.fullName || "?")[0].toUpperCase()}
@@ -843,7 +940,7 @@ function AttendanceSection() {
               </div>
             </motion.div>
           ))}
-          {!loading && attendanceData.length === 0 && (
+          {!loading && filteredAttendanceData.length === 0 && (
             <div className="col-span-full py-20 text-center text-white/5 font-black uppercase tracking-[0.5em] border border-white/5 rounded-[40px]">No_Checkins_Recorded</div>
           )}
         </div>

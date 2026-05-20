@@ -324,6 +324,26 @@ export const getEventAttendanceList = async () => {
 };
 
 /**
+ * Marks attendance for a student using their Firestore document ID
+ */
+export const markAttendanceById = async (collectionName, docId) => {
+  try {
+    const studentRef = doc(db, collectionName, docId);
+    
+    await updateDoc(studentRef, {
+      attended: true,
+      attendedAt: serverTimestamp(),
+      ...(collectionName === "event_registrations" ? { attendanceStatus: "Checked-In" } : {})
+    });
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error marking attendance by ID:", error);
+    throw error;
+  }
+};
+
+/**
  * Saves a batch of collected contacts to Firestore
  */
 export const saveCollectedContacts = async (ownerName, contacts) => {
