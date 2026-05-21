@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PDFDocument, rgb } from 'pdf-lib';
-import fontkit from '@pdf-lib/fontkit';
+import * as fontkit from '@pdf-lib/fontkit';
+
 
 const CERTIFICATE_NAMES = [
   "Pranav krishnan N K",
@@ -67,8 +68,8 @@ export default function CertificateGenerator() {
   const [templateCanvas, setTemplateCanvas] = useState(null);
   const displayCanvasRef = useRef(null);
 
-  // Position constant: 270 points from the bottom of 595.5 points height (moved slightly downward from 280)
-  const TEXT_Y_POINTS = 270;
+  // Position constant: 289 points from the bottom of 595.5 points height (perfectly centered between lines)
+  const TEXT_Y_POINTS = 289;
 
   // Load PDF.js library dynamically
   useEffect(() => {
@@ -129,7 +130,13 @@ export default function CertificateGenerator() {
     let isMounted = true;
     const renderTemplate = async () => {
       try {
-        const loadingTask = window.pdfjsLib.getDocument({ data: new Uint8Array(templateBuffer) });
+        let currentTemplate = templateBuffer;
+        if (currentTemplate.byteLength === 0) {
+          const res = await fetch('/certificate-template.pdf');
+          currentTemplate = await res.arrayBuffer();
+          setTemplateBuffer(currentTemplate);
+        }
+        const loadingTask = window.pdfjsLib.getDocument({ data: new Uint8Array(currentTemplate.slice(0)) });
         const pdf = await loadingTask.promise;
         const page = await pdf.getPage(1);
         
@@ -194,10 +201,24 @@ export default function CertificateGenerator() {
     if (!templateBuffer || !fontBuffer || !name.trim()) return;
     setGenerating(true);
     try {
-      const pdfDoc = await PDFDocument.load(templateBuffer);
-      pdfDoc.registerFontkit(fontkit);
+      let currentTemplate = templateBuffer;
+      if (currentTemplate.byteLength === 0) {
+        const res = await fetch('/certificate-template.pdf');
+        currentTemplate = await res.arrayBuffer();
+        setTemplateBuffer(currentTemplate);
+      }
       
-      const customFont = await pdfDoc.embedFont(fontBuffer);
+      let currentFont = fontBuffer;
+      if (currentFont.byteLength === 0) {
+        const res = await fetch('/DMSans-Bold.ttf');
+        currentFont = await res.arrayBuffer();
+        setFontBuffer(currentFont);
+      }
+
+      const pdfDoc = await PDFDocument.load(currentTemplate.slice(0));
+      pdfDoc.registerFontkit(fontkit.default || fontkit);
+      
+      const customFont = await pdfDoc.embedFont(currentFont.slice(0));
       const pages = pdfDoc.getPages();
       const page = pages[0];
       const { width } = page.getSize();
@@ -222,11 +243,14 @@ export default function CertificateGenerator() {
       const link = document.createElement('a');
       link.download = `Certificate_${name.trim().replace(/\s+/g, '_') || 'Blank'}.pdf`;
       link.href = docUrl;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
       
       setTimeout(() => URL.revokeObjectURL(docUrl), 100);
     } catch (err) {
       console.error('Error generating PDF:', err);
+      alert('Error generating PDF: ' + err.message);
     } finally {
       setGenerating(false);
     }
