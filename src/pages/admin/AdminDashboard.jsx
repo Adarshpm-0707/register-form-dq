@@ -79,6 +79,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [syncError, setSyncError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [attendanceMode, setAttendanceMode] = useState("ALL");
 
   const filteredData = useMemo(() => {
     if (!searchQuery.trim()) return data;
@@ -154,7 +155,6 @@ export default function AdminDashboard() {
   };
 
   const fetchData = useCallback(async () => {
-    if (activeTab === "attendance") return;
     setLoading(true);
     setSyncError(null);
     try {
@@ -171,6 +171,18 @@ export default function AdminDashboard() {
         result = await getUploadedContactFiles();
       } else if (activeTab === "slots") {
         result = await getSlotRegistrations();
+      } else if (activeTab === "attendance") {
+        if (attendanceMode === "ALL") {
+          const [masterResult, eventResult] = await Promise.all([
+            getAttendanceList(),
+            getEventAttendanceList()
+          ]);
+          result = [...masterResult, ...eventResult].sort((a, b) => 
+            (b.attendedAt?.seconds || 0) - (a.attendedAt?.seconds || 0)
+          );
+        } else {
+          result = attendanceMode === "MASTER" ? await getAttendanceList() : await getEventAttendanceList();
+        }
       }
       setData(result);
     } catch (err) {
@@ -179,7 +191,7 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [activeTab]);
+  }, [activeTab, attendanceMode]);
   
   const handleStatusChange = async (id, status) => {
     try {
@@ -284,6 +296,19 @@ export default function AdminDashboard() {
           item.id, item.fullName, item.phone, item.parentsName, item.address, item.paymentMode || "N/A", item.paymentId || "N/A", item.status || "N/A", date
         ].map(formatCSVField);
       });
+    } else if (activeTab === "attendance") {
+      headers = ["ID", "Name", "Email", "Phone", "Type", "Check-in Time"];
+      rows = data.map(item => {
+        const ts = item.attendedAt?.seconds;
+        const date = ts ? new Date(ts * 1000).toLocaleString() : "N/A";
+        const name = item.name || item.fullName || "N/A";
+        const email = item.email || "N/A";
+        const phone = item.phone || "N/A";
+        const type = item.type === "MASTER_CLASS" ? "Master Class" : (item.type === "EVENT_ENTRY" ? "AI Workshop" : "N/A");
+        return [
+          item.id, name, email, phone, type, date
+        ].map(formatCSVField);
+      });
     }
 
     const csvContent = [
@@ -312,7 +337,7 @@ export default function AdminDashboard() {
     return {
       total: data.length,
       today: data.filter(item => {
-        const ts = item.timestamp?.seconds || item.createdAt?.seconds;
+        const ts = item.timestamp?.seconds || item.createdAt?.seconds || item.attendedAt?.seconds;
         return ts && new Date(ts * 1000).toLocaleDateString() === today;
       }).length,
       recent: data.slice(0, 5)
@@ -444,7 +469,14 @@ export default function AdminDashboard() {
                     <button onClick={() => fetchData()} className="text-[10px] font-black uppercase tracking-widest px-8 py-4 bg-[#ff3b3b] text-white rounded-xl">Retry_Sync</button>
                  </motion.div>
                ) : activeTab === "attendance" ? (
-                 <AttendanceSection searchQuery={searchQuery} />
+                 <AttendanceSection 
+                    searchQuery={searchQuery}
+                    attendanceMode={attendanceMode}
+                    setAttendanceMode={setAttendanceMode}
+                    attendanceData={filteredData}
+                    loading={loading}
+                    onRefresh={fetchData}
+                  />
                ) : (
                  <motion.div key="data" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                     {filteredData.length === 0 ? (
@@ -763,50 +795,10 @@ export default function AdminDashboard() {
   );
 }
 
-function AttendanceSection({ searchQuery = "" }) {
-  const [attendanceMode, setAttendanceMode] = useState("ALL"); 
+function AttendanceSection({ searchQuery = "", attendanceMode, setAttendanceMode, attendanceData, loading, onRefresh }) {
   const [scanning, setScanning] = useState(false);
   const [scannedName, setScannedName] = useState(null);
   const [scanError, setScanError] = useState(null);
-  const [attendanceData, setAttendanceData] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const filteredAttendanceData = useMemo(() => {
-    if (!searchQuery.trim()) return attendanceData;
-    const lowerQuery = searchQuery.toLowerCase().trim();
-    return attendanceData.filter(item => {
-      const name = item.name || item.fullName || "";
-      const phone = item.phone || ""; 
-      return name.toLowerCase().includes(lowerQuery) || phone.toLowerCase().includes(lowerQuery);
-    });
-  }, [attendanceData, searchQuery]);
-
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      if (attendanceMode === "ALL") {
-        const [masterResult, eventResult] = await Promise.all([
-          getAttendanceList(),
-          getEventAttendanceList()
-        ]);
-        const combined = [...masterResult, ...eventResult].sort((a, b) => 
-          (b.attendedAt?.seconds || 0) - (a.attendedAt?.seconds || 0)
-        );
-        setAttendanceData(combined);
-      } else {
-        const result = attendanceMode === "MASTER" ? await getAttendanceList() : await getEventAttendanceList();
-        setAttendanceData(result);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [attendanceMode]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
 
   useEffect(() => {
     let html5QrCode = null;
@@ -846,7 +838,7 @@ function AttendanceSection({ searchQuery = "" }) {
                   
                   setScannedName(result.studentName);
                   setTimeout(() => setScannedName(null), 5000);
-                  fetchData();
+                  onRefresh();
                 } catch (err) {
                   setScanError(err.message);
                   setTimeout(() => setScanError(null), 5000);
@@ -878,7 +870,7 @@ function AttendanceSection({ searchQuery = "" }) {
         html5QrCode.stop().catch(e => console.log("Silent Cleanup:", e));
       }
     };
-  }, [scanning, attendanceMode, fetchData]);
+  }, [scanning, attendanceMode, onRefresh]);
 
   return (
     <div className="space-y-12">
@@ -923,24 +915,33 @@ function AttendanceSection({ searchQuery = "" }) {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
            <h3 className="text-xl md:text-3xl font-black uppercase tracking-tighter">{attendanceMode === 'MASTER' ? 'Master' : attendanceMode === 'WORKSHOP' ? 'Workshop' : 'Global'} <span className="text-[#c6ff34]">Manifest</span></h3>
-           <button onClick={fetchData} className="text-[10px] font-black text-white/20 uppercase tracking-widest hover:text-[#c6ff34] transition-colors flex items-center gap-2">
+           <button onClick={onRefresh} className="text-[10px] font-black text-white/20 uppercase tracking-widest hover:text-[#c6ff34] transition-colors flex items-center gap-2">
               <Icons.Refresh className="w-3 h-3" /> Refresh
            </button>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAttendanceData.map((item, idx) => (
+          {attendanceData.map((item, idx) => (
             <motion.div key={item.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: idx * 0.05 }} className="p-6 rounded-[32px] bg-white/[0.02] border border-white/5 hover:border-[#c6ff34]/30 transition-all flex items-center gap-4 group">
               <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white/5 text-white/20 flex items-center justify-center text-lg md:text-2xl font-black flex-shrink-0 group-hover:bg-[#c6ff34] group-hover:text-[#050521] transition-all">
                 {(item.name || item.fullName || "?")[0].toUpperCase()}
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="font-black uppercase tracking-tight truncate text-sm md:text-lg">{item.name || item.fullName}</p>
-                <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Entry: {new Date(item.attendedAt?.seconds * 1000).toLocaleTimeString()}</p>
+                <p className="text-[10px] md:text-xs font-bold text-white/40 truncate mt-0.5">{item.email || "No Email Provided"}</p>
+                <p className="text-[9px] md:text-[10px] font-black text-[#c6ff34] uppercase tracking-widest mt-1">{item.phone || "No Phone Provided"}</p>
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
+                  <span className="text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded bg-[#c6ff34]/10 border border-[#c6ff34]/20 text-[#c6ff34]">
+                    {item.type === "MASTER_CLASS" ? "Master Class" : "AI Workshop"}
+                  </span>
+                  <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
+                    {item.attendedAt?.seconds ? new Date(item.attendedAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "N/A"}
+                  </span>
+                </div>
               </div>
             </motion.div>
           ))}
-          {!loading && filteredAttendanceData.length === 0 && (
+          {!loading && attendanceData.length === 0 && (
             <div className="col-span-full py-20 text-center text-white/5 font-black uppercase tracking-[0.5em] border border-white/5 rounded-[40px]">No_Checkins_Recorded</div>
           )}
         </div>
