@@ -2,12 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Mono:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Mono:wght@400;700&family=Outfit:wght@100..900&display=swap");
 
 :root {
   color-scheme: dark;
   --primary: #c6ff34;
+  --primary-dim: #a3d628;
   --background: #050521;
+  --surface: #0a0a2e;
+  --glass: rgba(10, 10, 46, 0.6);
 }
 
 body {
@@ -39,12 +42,14 @@ input, button, select, textarea, a {
   background: rgba(198, 255, 52, 0.5);
 }
 
-/* Animations */
+/* ======================== */
+/*   FUTURISTIC ANIMATIONS  */
+/* ======================== */
+
 @keyframes gradient-x {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
-
 .animate-gradient-x {
   background-size: 200% 200%;
   animation: gradient-x 5s ease infinite;
@@ -67,11 +72,77 @@ input, button, select, textarea, a {
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0) translateX(-50%); }
-  50% { transform: translateY(-10px) translateX(-50%); }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
 }
 .animate-float {
   animation: float 4s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(198,255,52,0.15), 0 0 60px rgba(198,255,52,0.05); }
+  50% { box-shadow: 0 0 40px rgba(198,255,52,0.25), 0 0 100px rgba(198,255,52,0.1); }
+}
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+.animate-scanline {
+  animation: scanline 6s linear infinite;
+}
+
+@keyframes holo-shift {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 100% 50%; }
+  50% { background-position: 100% 0%; }
+  75% { background-position: 0% 100%; }
+  100% { background-position: 0% 50%; }
+}
+.animate-holo {
+  background-size: 300% 300%;
+  animation: holo-shift 6s ease infinite;
+}
+
+@keyframes border-rotate {
+  0% { --angle: 0deg; }
+  100% { --angle: 360deg; }
+}
+
+@keyframes text-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.animate-text-shimmer {
+  background-size: 200% auto;
+  animation: text-shimmer 4s linear infinite;
+}
+
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(50px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(50px) rotate(-360deg); }
+}
+.animate-orbit {
+  animation: orbit 12s linear infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  50% { transform: scale(1.1); opacity: 0.2; }
+  100% { transform: scale(0.8); opacity: 0.6; }
+}
+.animate-pulse-ring {
+  animation: pulse-ring 3s ease-in-out infinite;
+}
+
+@keyframes data-stream {
+  0% { opacity: 0; transform: translateY(20px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-20px); }
 }
 
 /* Hide scrollbar for elements while keeping functionality */
@@ -81,4 +152,38 @@ input, button, select, textarea, a {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Futuristic glassmorphism card */
+.glass-card {
+  background: linear-gradient(135deg, rgba(198,255,52,0.03) 0%, rgba(10,10,46,0.8) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(198,255,52,0.08);
+}
+
+.glass-card:hover {
+  border-color: rgba(198,255,52,0.2);
+  background: linear-gradient(135deg, rgba(198,255,52,0.06) 0%, rgba(10,10,46,0.9) 100%);
+}
+
+/* Holographic text effect */
+.holo-text {
+  background: linear-gradient(90deg, #c6ff34, #ffffff, #c6ff34, #ffffff, #c6ff34);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: text-shimmer 4s linear infinite;
+}
+
+/* Neon glow utilities */
+.neon-border {
+  border: 1px solid rgba(198,255,52,0.15);
+  box-shadow: 0 0 15px rgba(198,255,52,0.05), inset 0 0 15px rgba(198,255,52,0.02);
+}
+
+.neon-border:hover {
+  border-color: rgba(198,255,52,0.3);
+  box-shadow: 0 0 30px rgba(198,255,52,0.1), inset 0 0 30px rgba(198,255,52,0.03);
 }

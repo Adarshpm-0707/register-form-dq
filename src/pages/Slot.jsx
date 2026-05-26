@@ -3,7 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Background3D from "../components/Background3D";
+import Footer from "../components/Footer";
 import { saveSlotRegistration } from "../services/dbService";
+
 
 const Icons = {
   ArrowLeft: () => (
@@ -259,6 +261,7 @@ export default function Slot() {
         </form>
       </main>
 
+      <Footer />
     </div>
   );
 }

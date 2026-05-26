@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Background3D from "../components/Background3D";
-import BottomSF from "./BottomSF";
+import Footer from "../components/Footer";
+
 
 
 // Premium SVG Icons
@@ -11,19 +12,6 @@ const Icons = {
   Star: ({ className }) => (
     <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" fill="currentColor"/>
-    </svg>
-  ),
-  Calendar: ({ className }) => (
-    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-      <line x1="16" y1="2" x2="16" y2="6"></line>
-      <line x1="8" y1="2" x2="8" y2="6"></line>
-      <line x1="3" y1="10" x2="21" y2="10"></line>
-    </svg>
-  ),
-  Clock: ({ className }) => (
-    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
     </svg>
   )
 };
@@ -52,55 +40,7 @@ const TerminalLine = ({ text, delay = 0 }) => {
   );
 };
 
-const CountdownTimer = ({ targetDate }) => {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0, hours: 0, minutes: 0, seconds: 0
-  });
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const distance = new Date(targetDate).getTime() - now;
-
-      if (distance < 0) {
-        clearInterval(timer);
-        return;
-      }
-
-      setTimeLeft({
-        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((distance % (1000 * 60)) / 1000)
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [targetDate]);
-
-  const units = [
-    { label: "Days", value: timeLeft.days },
-    { label: "Hours", value: timeLeft.hours },
-    { label: "Min", value: timeLeft.minutes },
-    { label: "Sec", value: timeLeft.seconds }
-  ];
-
-  return (
-    <div className="grid grid-cols-4 gap-2 md:gap-4 w-full">
-      {units.map((unit, i) => (
-        <div key={i} className="flex flex-col items-center justify-center p-2 md:p-6 rounded-xl md:rounded-[32px] bg-[#ff3b3b]/5 border border-[#ff3b3b]/20 backdrop-blur-3xl relative overflow-hidden group shadow-xl">
-          <div className="absolute top-0 left-0 w-full h-[3px] bg-[#ff3b3b] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-          <span className="text-base sm:text-xl md:text-3xl font-black text-[#ff3b3b] tabular-nums tracking-tighter leading-none mb-1 md:mb-2">
-            {String(unit.value).padStart(2, '0')}
-          </span>
-          <span className="text-[7px] md:text-[10px] font-black text-[#ff3b3b]/60 uppercase tracking-[0.1em] md:tracking-[0.2em]">
-            {unit.label}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-};
 
 export default function Home() {
   return (
@@ -111,13 +51,14 @@ export default function Home() {
       <div className="absolute inset-0 bg-[linear-gradient(rgba(198,255,52,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(198,255,52,0.03)_1px,transparent_1px)] bg-[size:100px_100px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_80%)] pointer-events-none -z-10" />
 
       {/* Hero Content Wrapper */}
-      <main className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 pt-24 md:pt-40 pb-48 flex flex-col items-center">
+      <main className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 pt-24 md:pt-32 pb-16 md:pb-24 flex flex-col items-center">
         
         {/* Top Section: Title (Left) and Description (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center mb-16 md:mb-24 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center mb-16 md:mb-20 w-full">
           
           {/* Title Section */}
           <motion.div 
+
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -152,62 +93,20 @@ export default function Home() {
                 </p>
              </div>
 
-             <Link to="/register" className="relative z-20 block w-full mt-8 md:mt-10">
+             <Link to="/slot" className="relative z-20 block w-full mt-8 md:mt-10">
                <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="w-full sm:w-auto px-8 md:px-14 py-4 md:py-7 rounded-xl md:rounded-[24px] bg-[#c6ff34] text-[#050521] font-black text-lg md:text-2xl uppercase tracking-tighter hover:shadow-[0_0_50px_rgba(198,255,52,0.4)] transition-all flex items-center justify-center gap-4 group"
                >
-                  Register Now
+                  Book Your Slot
                   <Icons.Star className="w-5 h-5 md:w-8 md:h-8 group-hover:rotate-90 transition-transform duration-500" />
                </motion.button>
              </Link>
           </motion.div>
         </div>
 
-        {/* Bottom Section: Timer and Info Cards */}
-        <motion.div 
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-          className="flex flex-col items-center w-full max-w-5xl"
-        >
-          {/* HUD Header */}
-          <div className="w-full mb-6 flex items-center justify-between px-4">
-             <div className="flex items-center gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#ff3b3b] animate-pulse" />
-                <span className="text-[9px] md:text-xs font-black uppercase tracking-[0.4em] text-[#ff3b3b]">Live_Countdown</span>
-             </div>
-          </div>
 
-          {/* Countdown Timer */}
-          <div className="w-full mb-8 md:mb-16">
-            <CountdownTimer targetDate="May 20, 2026 09:00:00" />
-          </div>
-
-          {/* Info Cards Row */}
-          <div className="w-full flex flex-col md:flex-row gap-4 md:gap-8">
-             <div className="flex-1 p-6 md:p-10 rounded-2xl md:rounded-[40px] bg-white/[0.02] border border-white/10 backdrop-blur-3xl flex items-center justify-center gap-5 md:gap-10 group shadow-xl transition-all hover:bg-white/[0.04]">
-                <div className="w-12 h-12 md:w-20 md:h-20 rounded-xl md:rounded-[28px] bg-[#c6ff34]/10 flex items-center justify-center text-[#c6ff34] group-hover:scale-110 transition-transform">
-                   <Icons.Calendar className="w-6 h-6 md:w-10 md:h-10" />
-                </div>
-                <div>
-                   <p className="text-xl md:text-4xl font-black text-white uppercase tracking-tight">May 20th</p>
-                   <p className="text-[9px] md:text-[11px] text-[#c6ff34]/60 font-bold tracking-[0.3em] uppercase mt-1">EVENT DATE</p>
-                </div>
-             </div>
-             <div className="flex-1 p-6 md:p-10 rounded-2xl md:rounded-[40px] bg-white/[0.02] border border-white/10 backdrop-blur-3xl flex items-center justify-center gap-5 md:gap-10 group shadow-xl transition-all hover:bg-white/[0.04]">
-                <div className="w-12 h-12 md:w-20 md:h-20 rounded-xl md:rounded-[28px] bg-[#c6ff34]/10 flex items-center justify-center text-[#c6ff34] group-hover:scale-110 transition-transform">
-                   <Icons.Clock className="w-6 h-6 md:w-10 md:h-10" />
-                </div>
-                <div>
-                   <p className="text-xl md:text-4xl font-black text-white uppercase tracking-tight">09:00 AM</p>
-                   <p className="text-[9px] md:text-[11px] text-[#c6ff34]/60 font-bold tracking-[0.3em] uppercase mt-1">LAUNCH TIME</p>
-                </div>
-             </div>
-          </div>
-        </motion.div>
 
         {/* AI/ML Professional Diploma Section */}
         <motion.div 
@@ -215,7 +114,7 @@ export default function Home() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="w-full max-w-5xl mt-24 md:mt-40"
+          className="w-full max-w-5xl mt-16 md:mt-24"
         >
           <div className="flex flex-col items-center text-center space-y-4 mb-10 md:mb-16">
              <div className="text-[10px] font-black text-[#c6ff34] uppercase tracking-[0.5em]">Academic_Core_Syllabus</div>
@@ -299,7 +198,17 @@ export default function Home() {
                   <span className="text-white/40">root@deepstaq:~#</span>
                   <span className="w-2 h-4 md:w-3 md:h-6 bg-[#c6ff34]" />
                 </div>
-
+                
+                <Link to="/slot" className="relative z-20 block w-full md:w-auto">
+                  <motion.button
+                     whileHover={{ scale: 1.05 }}
+                     whileTap={{ scale: 0.95 }}
+                     className="w-full sm:w-auto px-6 md:px-10 py-3 md:py-5 rounded-xl md:rounded-[18px] bg-[#c6ff34] text-[#050521] font-black text-sm md:text-lg uppercase tracking-tighter hover:shadow-[0_0_30px_rgba(198,255,52,0.4)] transition-all flex items-center justify-center gap-3 group"
+                  >
+                     Book Your Slot
+                     <Icons.Star className="w-4 h-4 md:w-5 md:h-5 group-hover:rotate-90 transition-transform duration-500" />
+                  </motion.button>
+                </Link>
               </div>
             </div>
           </div>
@@ -311,7 +220,7 @@ export default function Home() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="w-full max-w-5xl mt-24 md:mt-40 space-y-8 md:space-y-12"
+          className="w-full max-w-5xl mt-16 md:mt-24 space-y-8 md:space-y-12"
         >
           <div className="flex flex-col items-center text-center space-y-4">
              <div className="text-[10px] font-black text-[#c6ff34] uppercase tracking-[0.5em]">Geospatial_Synchronization</div>
@@ -322,7 +231,7 @@ export default function Home() {
              <div className="absolute inset-0 bg-gradient-to-br from-[#c6ff34]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
              <iframe 
                 title="DeepStaq Location Map"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3902.1217693001217!2d75.3585186751075!3d12.035136988200742!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba43f0010b7f36d%3A0x9c49492776d29c0a!2sChiravakku%20Happiness%20square!5e0!3m2!1sen!2sin!4v1778239275569!5m2!1sen!2sin" 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d345.1010860007865!2d75.37608783658978!3d11.879088254920028!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba4416f1b71991b%3A0x5863b746bbeab982!2sAleefconcepts!5e0!3m2!1sen!2sin!4v1779429880932!5m2!1sen!2sin" 
                 width="100%" 
                 height="100%" 
                 style={{ border: 0, borderRadius: '20px', filter: 'grayscale(1) invert(0.9) contrast(1.2)' }} 
@@ -340,8 +249,7 @@ export default function Home() {
         </motion.div>
       </main>
 
-      {/* Bottom Section - Home Page Only */}
-      <BottomSF />
+      <Footer />
     </div>
   );
 }

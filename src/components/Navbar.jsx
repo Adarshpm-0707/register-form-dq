@@ -21,7 +21,6 @@ function Navbar() {
 
   const navLinks = [
     { name: "HOME", path: "/" },
-    { name: "APTITUDE TEST", path: "/aptitude-test" },
     { name: "SLOT", path: "/slot" }
   ];
 
@@ -49,27 +48,11 @@ function Navbar() {
               {link.name}
             </Link>
           ))}
-          <Link to="/register">
-            <motion.button
-              whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(198,255,52,0.4)" }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-3 bg-[#c6ff34] text-[#050521] text-xs font-black uppercase tracking-[0.2em] rounded-full transition-all"
-            >
-              REGISTER
-            </motion.button>
-          </Link>
+
         </div>
 
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center gap-3">
-          <Link to="/register">
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              className="px-4 py-2 bg-[#c6ff34] text-[#050521] text-[9px] font-black uppercase tracking-[0.1em] rounded-full shadow-[0_0_15px_rgba(198,255,52,0.3)]"
-            >
-              REGISTER
-            </motion.button>
-          </Link>
           <button 
             onClick={() => setIsOpen(!isOpen)}
             className="p-2 rounded-full bg-white/5 border border-white/10 text-white hover:text-[#c6ff34] transition-all"
