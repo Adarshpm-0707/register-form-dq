@@ -1,5 +1,5 @@
 import { db, storage } from "../firebase/firebase";
-import { collection, addDoc, serverTimestamp, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, query, where, updateDoc, doc, setDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 /**
@@ -125,12 +125,13 @@ export const getMasterRegistrations = async () => {
  */
 export const saveSlotRegistration = async (formData) => {
   try {
-    const docRef = await addDoc(collection(db, "slot_registrations"), {
+    const docRef = doc(db, "slot_registrations", formData.fullName);
+    await setDoc(docRef, {
       ...formData,
       type: "SLOT",
       timestamp: serverTimestamp(),
     });
-    return { success: true, id: docRef.id };
+    return { success: true, id: formData.fullName };
   } catch (error) {
     console.error("Error saving slot registration:", error);
     throw error;
@@ -443,6 +444,21 @@ export const getUploadedContactFiles = async () => {
     return data.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
   } catch (error) {
     console.error("Error fetching uploaded contact files:", error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches all registered admins
+ */
+export const getAdmins = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "admins"));
+    const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Sort by timestamp descending
+    return data.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+  } catch (error) {
+    console.error("Error fetching admins:", error);
     throw error;
   }
 };

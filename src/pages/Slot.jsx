@@ -1,267 +1,276 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import Background3D from "../components/Background3D";
-import Footer from "../components/Footer";
+import { Link } from "react-router-dom";
 import { saveSlotRegistration } from "../services/dbService";
+import Background3D from "../components/Background3D";
+import WaterBubbles from "../components/WaterBubbles";
 
-
-const Icons = {
-  ArrowLeft: () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-    </svg>
-  ),
-  Check: () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12"/>
-    </svg>
-  )
-};
-
-const loadRazorpay = () => {
-  return new Promise((resolve) => {
+const loadRazorpay = () =>
+  new Promise((resolve) => {
     if (window.Razorpay) return resolve(true);
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.id = "razorpay-sdk";
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
   });
-};
+
+const modules = [
+  { icon: "🐍", label: "Python Foundations" },
+  { icon: "📐", label: "Math & Statistics" },
+  { icon: "🤖", label: "Machine Learning" },
+  { icon: "🧠", label: "Deep Learning & NLP" },
+  { icon: "✨", label: "Generative AI" },
+  { icon: "⚙️", label: "MLOps" },
+  { icon: "🕵️", label: "Agentic AI" },
+];
+
+function Field({ label, children }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="text-[10px] md:text-[11px] font-black text-[#050521] uppercase tracking-widest">
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
 
 export default function Slot() {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [formData, setFormData] = useState({
+  const [payId, setPayId] = useState("");
+  const [form, setForm] = useState({
     fullName: "",
     phone: "",
+    parentsName: "",
     address: "",
-    parentsName: ""
   });
 
-  const handleChange = (e) => {
+  const change = (e) => {
     const { name, value } = e.target;
-    
-    if (name === "fullName" || name === "parentsName") {
-      if (value !== "" && !/^[a-zA-Z\s]*$/.test(value)) return;
-    }
-    
+    if ((name === "fullName" || name === "parentsName") && value && !/^[a-zA-Z\s]*$/.test(value)) return;
     if (name === "phone") {
-      if (value !== "" && !/^\d*$/.test(value)) return;
+      if (value && !/^\d*$/.test(value)) return;
       if (value.length > 10) return;
     }
-
-    setFormData({ ...formData, [name]: value });
+    setForm({ ...form, [name]: value });
   };
 
-  const [paymentId, setPaymentId] = useState("");
-
-  const handleSubmit = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      const isLoaded = await loadRazorpay();
-      if (!isLoaded) throw new Error("Razorpay SDK failed to load.");
 
-      const options = {
+    try {
+      const ok = await loadRazorpay();
+      if (!ok) throw new Error("Razorpay failed to load");
+
+      const rzp = new window.Razorpay({
         key: "rzp_live_SnxCrKgLPqpHnz",
-        amount: 3000 * 100, // 3000 INR in paise
+        amount: 300000, 
         currency: "INR",
         name: "DEEPSTAQ",
-        description: "Slot Booking",
-        handler: async (response) => {
+        description: "Slot Booking - AI/ML Diploma",
+        handler: async (res) => {
           try {
-            setLoading(true);
             await saveSlotRegistration({
-              ...formData,
-              paymentId: response.razorpay_payment_id,
-              status: "Paid"
+              ...form,
+              paymentId: res.razorpay_payment_id,
+              status: "Paid",
             });
-            setPaymentId(response.razorpay_payment_id);
+            setPayId(res.razorpay_payment_id);
             setSuccess(true);
             setLoading(false);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          } catch (err) {
-            console.error("Firestore Error:", err);
-            alert("Payment successful but failed to save data. Please contact support.");
+          } catch {
+            alert("Save failed - contact support.");
             setLoading(false);
           }
         },
-        prefill: {
-          name: formData.fullName,
-          contact: formData.phone
-        },
-        theme: {
-          color: "#c6ff34"
-        },
-        modal: {
-          ondismiss: () => {
-            setLoading(false);
-          }
-        }
-      };
+        prefill: { name: form.fullName, contact: form.phone },
+        theme: { color: "#050521" },
+        modal: { ondismiss: () => setLoading(false) },
+      });
 
-      const rzp = new window.Razorpay(options);
       rzp.open();
-      // Reset loading after modal opens
-      setTimeout(() => setLoading(false), 1500);
-
-    } catch (error) {
-      console.error("Payment Error:", error);
-      alert(`Error: ${error.message}`);
+    } catch (err) {
+      alert(err.message);
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden bg-[#050521] text-white selection:bg-[#c6ff34]/30">
+    <div className="min-h-screen bg-white text-[#050521] overflow-x-hidden font-sans">
       <Background3D />
-      <Navbar />
-      
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(198,255,52,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(198,255,52,0.03)_1px,transparent_1px)] bg-[size:100px_100px] [mask-image:radial-gradient(ellipse_at_center,black,transparent:80%)] pointer-events-none -z-10" />
+      <WaterBubbles />
 
-      <main className="relative z-10 w-full max-w-3xl mx-auto px-4 sm:px-6 pt-24 md:pt-32 pb-20 md:pb-32 flex flex-col min-h-screen justify-center">
-        
-        {/* Back Button */}
-        <button 
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-white/40 hover:text-[#c6ff34] transition-colors mb-6 md:mb-10 group uppercase text-[10px] md:text-sm font-black tracking-[0.2em] self-start"
-        >
-          <Icons.ArrowLeft /> Back
-        </button>
-
-        {/* Header */}
-        <div className="mb-8 md:mb-12">
-           <div className="flex items-end justify-between mb-3 md:mb-4">
-              <h1 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none">
-                 BOOK <span className="text-[#c6ff34]">SLOT</span>
+      {/* 
+          pt-28 ensures content starts below the navigation bar on mobile.
+          pt-40 ensures content starts below the navigation bar on desktop.
+      */}
+      <div className="relative z-10 max-w-[1400px] mx-auto px-5 pt-28 pb-12 md:pt-40 md:px-12 md:pb-24">
+        <AnimatePresence mode="wait">
+          {success ? (
+            /* ════ SUCCESS VIEW ════ */
+            <motion.div
+              key="success"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center justify-center min-h-[50vh] text-center"
+            >
+              <div className="w-20 h-20 md:w-24 md:h-24 bg-[#c6ff34] border-4 border-[#050521] rounded-full flex items-center justify-center text-3xl md:text-4xl mb-6 md:mb-8 shadow-[6px_6px_0px_0px_#050521]">
+                ✓
+              </div>
+              <h1 className="text-4xl md:text-7xl font-black uppercase tracking-tighter mb-4">
+                Seat <span className="text-stroke-dark">Secured.</span>
               </h1>
-           </div>
-           
-           <div className="h-1 md:h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
-              <div className="h-full bg-[#c6ff34] shadow-[0_0_20px_rgba(198,255,52,0.6)] w-full" />
-           </div>
-        </div>
+              <p className="font-mono text-xs md:text-sm text-slate-500 mb-8 md:mb-10 max-w-md">
+                Welcome to the cohort. A confirmation email and pre-course roadmap have been sent to your device.
+              </p>
+              
+              <div className="bg-white border-2 border-[#050521] p-6 md:p-8 rounded-2xl md:rounded-3xl shadow-[8px_8px_0px_0px_#c6ff34] text-left w-full max-w-md">
+                <div className="space-y-4 font-mono text-xs md:text-sm">
+                  <div className="flex justify-between border-b border-slate-100 pb-2">
+                    <span className="text-slate-400 uppercase">Student</span>
+                    <span className="font-bold">{form.fullName}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-100 pb-2">
+                    <span className="text-slate-400 uppercase">Amount</span>
+                    <span className="font-bold">₹3,000.00</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400 uppercase">Ref ID</span>
+                    <span className="font-bold text-[9px] md:text-[10px] break-all ml-4">{payId}</span>
+                  </div>
+                </div>
+              </div>
 
-        <form onSubmit={handleSubmit} className="relative w-full">
-          <AnimatePresence mode="wait">
-            
-            {success ? (
+              <Link to="/" className="mt-10">
+                <button className="px-10 py-4 bg-[#050521] text-white font-black uppercase tracking-widest rounded-xl hover:bg-[#c6ff34] hover:text-[#050521] transition-all shadow-[6px_6px_0px_0px_#050521]">
+                  Back to Home
+                </button>
+              </Link>
+            </motion.div>
+          ) : (
+            /* ════ MAIN REGISTRATION VIEW ════ */
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+              
+              {/* LEFT COLUMN: INFO */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-8 md:p-16 rounded-[32px] md:rounded-[48px] bg-white/[0.02] border border-[#c6ff34]/30 backdrop-blur-3xl text-center space-y-8 relative overflow-hidden"
+                initial={{ x: -30, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                className="space-y-8 md:space-y-10"
               >
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 md:w-64 md:h-64 bg-[#c6ff34]/10 blur-[80px] pointer-events-none" />
+                <div>
+                  <h1 className="text-4xl md:text-8xl font-black uppercase leading-[0.9] tracking-tighter mb-4 md:mb-6">
+                    Reserve <br />
+                    <span className="text-stroke-dark">Your Slot.</span>
+                  </h1>
+                  <p className="text-slate-500 font-mono text-xs md:text-sm max-w-md leading-relaxed">
+                    Join the most intensive AI engineering diploma. Secure your seat with a refundable deposit and start your journey today.
+                  </p>
+                </div>
 
-                 <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-[#c6ff34] text-[#050521] flex items-center justify-center mx-auto shadow-[0_0_40px_rgba(198,255,52,0.4)] relative z-10">
-                    <Icons.Check />
-                 </div>
-
-                 <div className="space-y-3">
-                    <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tighter">Slot <span className="text-[#c6ff34]">Booked!</span></h2>
-                    <p className="text-slate-400 text-xs md:text-sm font-bold tracking-widest uppercase">We will contact you shortly</p>
-                    
-                    <div className="bg-[#050521]/50 border border-white/10 rounded-2xl p-4 max-w-xs mx-auto space-y-3 mt-6 text-left shadow-inner">
-                       <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                         <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-white/40">Mode</span>
-                         <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-white">Online Payment</span>
-                       </div>
-                       <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                         <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-white/40">Status</span>
-                         <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-[#c6ff34]">Paid</span>
-                       </div>
-                       {paymentId && (
-                         <div className="flex justify-between items-center">
-                           <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-white/40">Ref ID</span>
-                           <span className="text-[10px] md:text-xs font-black tracking-widest text-[#c6ff34] truncate max-w-[120px]">{paymentId}</span>
-                         </div>
-                       )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                  {modules.map((m, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 md:p-4 bg-slate-50 border-2 border-[#050521] rounded-xl md:rounded-2xl group hover:bg-[#c6ff34] transition-colors">
+                      <span className="text-xl md:text-2xl">{m.icon}</span>
+                      <span className="font-black uppercase text-[9px] md:text-[10px] tracking-widest">{m.label}</span>
                     </div>
-                 </div>
-
-                 <div className="max-w-xs mx-auto space-y-4 pt-4">
-                    <button 
-                      onClick={() => navigate("/")}
-                      className="w-full py-3 bg-[#c6ff34] text-[#050521] font-black text-xs md:text-sm uppercase tracking-widest rounded-xl hover:scale-105 transition-all shadow-[0_10px_30px_rgba(198,255,52,0.3)]"
-                    >
-                      Return Home
-                    </button>
-                 </div>
+                  ))}
+                </div>
               </motion.div>
-            ) : (
+
+              {/* RIGHT COLUMN: FORM */}
               <motion.div
-                key="form"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.02 }}
-                className="space-y-6"
+                initial={{ x: 30, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                className="relative"
               >
-                <div className="p-6 sm:p-8 md:p-10 rounded-[24px] md:rounded-[32px] bg-white/[0.02] border border-white/10 backdrop-blur-3xl shadow-xl">
-                   <h2 className="text-base md:text-2xl font-black uppercase mb-6 md:mb-8 flex items-center gap-3">
-                      <span className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-[#c6ff34]/10 text-[#c6ff34] flex items-center justify-center text-xs md:text-lg">1</span>
-                      Slot Details
-                   </h2>
-                   
-                   <div className="space-y-5 md:space-y-8">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8">
-                        <div className="space-y-2">
-                          <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-white/40 ml-2">Full Name</label>
-                          <input 
-                            type="text" name="fullName" value={formData.fullName} onChange={handleChange}
-                            className="w-full bg-white/[0.03] border border-white/10 rounded-xl md:rounded-2xl px-4 py-3 md:px-5 md:py-4 focus:border-[#c6ff34] focus:outline-none transition-all placeholder:text-white/10 font-bold text-sm md:text-base shadow-inner"
-                            placeholder="Your Name" required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-white/40 ml-2">Phone Number</label>
-                          <input 
-                            type="tel" name="phone" value={formData.phone} onChange={handleChange}
-                            pattern="[0-9]{10}" title="Phone number must be exactly 10 digits" maxLength={10}
-                            className="w-full bg-white/[0.03] border border-white/10 rounded-xl md:rounded-2xl px-4 py-3 md:px-5 md:py-4 focus:border-[#c6ff34] focus:outline-none transition-all placeholder:text-white/10 font-bold text-sm md:text-base shadow-inner"
-                            placeholder="10-digit mobile number" required
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-white/40 ml-2">Parent's Name</label>
-                        <input 
-                          type="text" name="parentsName" value={formData.parentsName} onChange={handleChange}
-                          className="w-full bg-white/[0.03] border border-white/10 rounded-xl md:rounded-2xl px-4 py-3 md:px-5 md:py-4 focus:border-[#c6ff34] focus:outline-none transition-all placeholder:text-white/10 font-bold text-sm md:text-base shadow-inner"
-                          placeholder="Parent's Name" required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-white/40 ml-2">Address</label>
-                        <textarea 
-                          name="address" value={formData.address} onChange={handleChange}
-                          className="w-full bg-white/[0.03] border border-white/10 rounded-xl md:rounded-2xl px-4 py-3 md:px-5 md:py-4 focus:border-[#c6ff34] focus:outline-none transition-all placeholder:text-white/10 font-bold min-h-[100px] md:min-h-[120px] text-sm md:text-base shadow-inner resize-y"
-                          placeholder="Your full address..." required
-                        />
-                      </div>
-                   </div>
-                </div>
-                <div className="flex pt-2">
-                  <button 
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-[#c6ff34] text-[#050521] font-black py-4 md:py-5 rounded-xl md:rounded-2xl uppercase tracking-[0.2em] text-xs md:text-sm shadow-[0_15px_40px_rgba(198,255,52,0.25)] hover:shadow-[0_20px_50px_rgba(198,255,52,0.4)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 active:scale-[0.98] disabled:opacity-50"
-                  >
-                    {loading ? "Processing..." : "Pay ₹3000 & Book Slot"} <Icons.Check />
-                  </button>
+                <div className="bg-white border-2 border-[#050521] rounded-2xl md:rounded-[2.5rem] p-6 md:p-12 shadow-[10px_10px_0px_0px_#c6ff34]">
+                  <div className="mb-8 md:mb-10 flex justify-between items-end">
+                    <div>
+                      <span className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest block mb-1">Booking Amount</span>
+                      <div className="text-3xl md:text-4xl font-black">₹3,000</div>
+                    </div>
+                  </div>
+
+                  <form onSubmit={submit} className="space-y-5 md:space-y-6">
+                    <Field label="Full Name">
+                      <input
+                        name="fullName"
+                        value={form.fullName}
+                        onChange={change}
+                        placeholder="Full Name"
+                        required
+                        className="w-full bg-slate-50 border-2 border-[#050521] rounded-xl px-4 py-3 md:px-5 md:py-4 font-bold focus:bg-white focus:shadow-[4px_4px_0px_0px_#050521] transition-all outline-none text-sm md:text-base"
+                      />
+                    </Field>
+
+                    <Field label="WhatsApp Phone">
+                      <input
+                        name="phone"
+                        value={form.phone}
+                        onChange={change}
+                        placeholder="10-digit number"
+                        pattern="[0-9]{10}"
+                        required
+                        className="w-full bg-slate-50 border-2 border-[#050521] rounded-xl px-4 py-3 md:px-5 md:py-4 font-bold focus:bg-white focus:shadow-[4px_4px_0px_0px_#050521] transition-all outline-none text-sm md:text-base"
+                      />
+                    </Field>
+
+                    <Field label="Parent / Guardian Name">
+                      <input
+                        name="parentsName"
+                        value={form.parentsName}
+                        onChange={change}
+                        placeholder="Required for admission"
+                        required
+                        className="w-full bg-slate-50 border-2 border-[#050521] rounded-xl px-4 py-3 md:px-5 md:py-4 font-bold focus:bg-white focus:shadow-[4px_4px_0px_0px_#050521] transition-all outline-none text-sm md:text-base"
+                      />
+                    </Field>
+
+                    <Field label="Full Address">
+                      <textarea
+                        name="address"
+                        value={form.address}
+                        onChange={change}
+                        placeholder="House No, Street, City, ZIP"
+                        required
+                        rows={3}
+                        className="w-full bg-slate-50 border-2 border-[#050521] rounded-xl px-4 py-3 md:px-5 md:py-4 font-bold focus:bg-white focus:shadow-[4px_4px_0px_0px_#050521] transition-all outline-none resize-none text-sm md:text-base"
+                      />
+                    </Field>
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className={`w-full py-5 md:py-6 rounded-xl md:rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] md:text-sm transition-all flex items-center justify-center gap-3 shadow-[6px_6px_0px_0px_#050521] active:translate-y-1 active:shadow-none ${
+                        loading 
+                          ? "bg-slate-200 text-slate-400 cursor-not-allowed" 
+                          : "bg-[#050521] text-white hover:bg-[#c6ff34] hover:text-[#050521]"
+                      }`}
+                    >
+                      {loading ? (
+                        <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-slate-400 border-t-slate-600 rounded-full animate-spin" />
+                      ) : (
+                        "Confirm Enrolment →"
+                      )}
+                    </button>
+                  </form>
+                  
+                  <div className="mt-8 flex justify-center gap-4 md:gap-6">
+                    {["🔒 Secure", "📋 Verified", "⚡ Instant"].map((tag, i) => (
+                      <span key={i} className="text-[8px] md:text-[9px] font-black uppercase text-slate-400 tracking-widest">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </motion.div>
-            )}
-
-          </AnimatePresence>
-        </form>
-      </main>
-
-      <Footer />
+            </div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

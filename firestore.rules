@@ -3,40 +3,54 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // Function to check if the user is authenticated and an admin
+    function isAdmin() {
+      return request.auth != null 
+        && exists(/databases/$(database)/documents/admins/$(request.auth.token.email)) 
+        && get(/databases/$(database)/documents/admins/$(request.auth.token.email)).data.role == 'admin';
+    }
+
     // Security for Event Registrations
     match /event_registrations/{document} {
-      allow write: if true;   // Anyone can register
-      allow read: if true;    // Dashboard needs this to show data
+      allow create: if true;   
+      allow read, update, delete: if isAdmin();
     }
     
     // Security for Master Class Registrations
     match /master_registrations/{document} {
-      allow write: if true;   // Anyone can register
-      allow read: if true;    // Dashboard needs this to show data
+      allow create: if true;   
+      allow read, update, delete: if isAdmin();
     }
 
     // Security for Aptitude Test Leads
     match /aptitude_test_leads/{document} {
-      allow write: if true;   // Anyone can start/finish test
-      allow read: if true;    // Needed for progress and results
+      allow create: if true;   
+      allow read, update, delete: if isAdmin();
     }
 
     // Security for Collected Contacts
     match /collected_contacts/{document} {
-      allow write: if true;   // Anyone can sync contacts
-      allow read: if true;    // Admin dashboard needs to show them
+      allow create: if true;   
+      allow read, update, delete: if isAdmin();
     }
 
     // Security for Uploaded Contact Files
     match /uploaded_contact_files/{document} {
-      allow write: if true;   
-      allow read: if true;    
+      allow create: if true;   
+      allow read, update, delete: if isAdmin();
     }
 
     // Security for Slot Registrations
     match /slot_registrations/{document} {
-      allow write: if true;   
-      allow read: if true;    
+      allow create: if true;   
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Security for Admins
+    match /admins/{document} {
+      allow read: if request.auth != null && request.auth.token.email == document;
+      allow read, write: if isAdmin();
+      allow create: if request.auth != null && request.auth.token.email == document;
     }
 
     // Lock everything else by default

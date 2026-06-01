@@ -1,0 +1,247 @@
+.home-dot-grid {
+  background-image: radial-gradient(circle, rgba(5, 5, 33, 0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.home-display-xl {
+  font-size: clamp(52px, 10vw, 148px);
+}
+
+.home-display-lg {
+  font-size: clamp(36px, 6vw, 80px);
+}
+
+.home-display-md {
+  font-size: clamp(36px, 5vw, 72px);
+}
+
+.home-display-sm {
+  font-size: clamp(32px, 5vw, 64px);
+}
+
+.text-stroke-dark {
+  color: transparent;
+  -webkit-text-stroke: 1.5px #050521;
+}
+
+.text-stroke-dark-lg {
+  color: transparent;
+  -webkit-text-stroke: 2px #050521;
+}
+
+.background-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+@keyframes water-sheen {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%) skewX(-20deg);
+  }
+  30%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+@keyframes water-ripple {
+  0%,
+  100% {
+    box-shadow: 0 2px 0 rgba(255, 255, 255, 0.35) inset,
+      0 8px 32px rgba(100, 180, 255, 0.08),
+      0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 2px 0 rgba(255, 255, 255, 0.5) inset,
+      0 8px 40px rgba(100, 200, 255, 0.14),
+      0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+}
+
+.water-nav {
+  animation: water-ripple 4s ease-in-out infinite;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(180, 220, 255, 0.03) 50%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-left-color: rgba(255, 255, 255, 0.3);
+  border-top: 1.5px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 2px 0 rgba(255, 255, 255, 0.35) inset,
+    0 -1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 8px 32px rgba(100, 180, 255, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.water-nav-mobile {
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(180, 220, 255, 0.04) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1.5px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 2px 0 rgba(255, 255, 255, 0.3) inset,
+    0 16px 48px rgba(100, 180, 255, 0.1);
+}
+
+.water-sheen-bar {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 30%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+  animation: water-sheen 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.water-nav-top-gloss {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.7) 40%,
+    rgba(255, 255, 255, 0.7) 60%,
+    transparent
+  );
+}
+
+.water-nav-bottom-reflection {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+}
+
+.water-logo-glow {
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))
+    drop-shadow(0 0 4px rgba(198, 255, 52, 0.3));
+}
+
+.water-link {
+  color: rgba(0, 0, 0, 0.72);
+  text-shadow: 0 1px 8px rgba(255, 255, 255, 0.6),
+    0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.water-link-underline {
+  background: linear-gradient(90deg, rgba(198, 255, 52, 0.8), rgba(255, 255, 255, 0.6));
+  box-shadow: 0 0 8px rgba(198, 255, 52, 0.7);
+}
+
+.water-menu-button {
+  color: rgba(0, 0, 0, 0.7);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-top: 1.5px solid rgba(255, 255, 255, 0.5);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.water-mobile-sheen {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+}
+
+.water-mobile-link {
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 8px rgba(255, 255, 255, 0.5);
+}
+
+.water-mobile-dot {
+  box-shadow: 0 0 8px rgba(198, 255, 52, 0.8);
+}
+
+.water-mobile-caption {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes bubble-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(110vh) translateX(0) scale(1);
+  }
+  10%,
+  90% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(50vh) translateX(var(--drift)) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12vh) translateX(calc(var(--drift) * 1.5)) scale(0.9);
+  }
+}
+
+@keyframes bubble-wobble {
+  0%,
+  100% {
+    border-radius: 60% 40% 55% 45% / 55% 45% 55% 45%;
+  }
+  25% {
+    border-radius: 50% 50% 40% 60% / 45% 55% 45% 55%;
+  }
+  50% {
+    border-radius: 40% 60% 60% 40% / 60% 40% 60% 40%;
+  }
+  75% {
+    border-radius: 55% 45% 50% 50% / 50% 50% 45% 55%;
+  }
+}
+
+.water-bubble {
+  position: absolute;
+  bottom: -100px;
+  left: var(--left);
+  width: var(--size);
+  height: var(--size);
+  background: radial-gradient(
+    circle at 35% 35%,
+    rgb(255 255 255 / var(--highlight)) 0%,
+    rgb(198 255 52 / var(--lime)) 30%,
+    rgb(100 180 255 / var(--blue)) 60%,
+    transparent 100%
+  );
+  border: 1px solid rgb(255 255 255 / var(--border-alpha));
+  box-shadow: inset 0 0 var(--inner-glow) rgb(255 255 255 / var(--inner-alpha)),
+    0 0 var(--outer-glow) rgb(198 255 52 / var(--outer-alpha));
+  animation: bubble-rise var(--rise-duration) var(--delay) infinite cubic-bezier(0.4, 0, 0.6, 1),
+    bubble-wobble var(--wobble-duration) var(--delay) infinite ease-in-out;
+  will-change: transform, opacity;
+}
+
+.water-bubble-1 { --left: 2%; --size: 38px; --drift: -24px; --highlight: 0.24; --lime: 0.06; --blue: 0.08; --border-alpha: 0.16; --inner-glow: 12px; --inner-alpha: 0.08; --outer-glow: 8px; --outer-alpha: 0.04; --rise-duration: 18s; --wobble-duration: 7s; --delay: 0s; }
+.water-bubble-2 { --left: 7%; --size: 64px; --drift: 32px; --highlight: 0.20; --lime: 0.05; --blue: 0.08; --border-alpha: 0.14; --inner-glow: 20px; --inner-alpha: 0.07; --outer-glow: 13px; --outer-alpha: 0.04; --rise-duration: 24s; --wobble-duration: 9s; --delay: -8s; }
+.water-bubble-3 { --left: 12%; --size: 26px; --drift: -34px; --highlight: 0.28; --lime: 0.07; --blue: 0.10; --border-alpha: 0.18; --inner-glow: 8px; --inner-alpha: 0.09; --outer-glow: 6px; --outer-alpha: 0.05; --rise-duration: 13s; --wobble-duration: 5s; --delay: -3s; }
+.water-bubble-4 { --left: 18%; --size: 78px; --drift: 18px; --highlight: 0.18; --lime: 0.04; --blue: 0.07; --border-alpha: 0.13; --inner-glow: 24px; --inner-alpha: 0.07; --outer-glow: 16px; --outer-alpha: 0.035; --rise-duration: 26s; --wobble-duration: 10s; --delay: -14s; }
+.water-bubble-5 { --left: 23%; --size: 44px; --drift: 38px; --highlight: 0.22; --lime: 0.05; --blue: 0.08; --border-alpha: 0.15; --inner-glow: 13px; --inner-alpha: 0.08; --outer-glow: 9px; --outer-alpha: 0.04; --rise-duration: 17s; --wobble-duration: 7s; --delay: -5s; }
+.water-bubble-6 { --left: 29%; --size: 58px; --drift: -16px; --highlight: 0.19; --lime: 0.05; --blue: 0.08; --border-alpha: 0.14; --inner-glow: 17px; --inner-alpha: 0.07; --outer-glow: 12px; --outer-alpha: 0.04; --rise-duration: 21s; --wobble-duration: 8s; --delay: -11s; }
+.water-bubble-7 { --left: 34%; --size: 22px; --drift: 26px; --highlight: 0.30; --lime: 0.07; --blue: 0.11; --border-alpha: 0.19; --inner-glow: 7px; --inner-alpha: 0.10; --outer-glow: 5px; --outer-alpha: 0.05; --rise-duration: 12s; --wobble-duration: 5s; --delay: -1s; }
+.water-bubble-8 { --left: 39%; --size: 72px; --drift: -36px; --highlight: 0.17; --lime: 0.04; --blue: 0.07; --border-alpha: 0.13; --inner-glow: 22px; --inner-alpha: 0.07; --outer-glow: 14px; --outer-alpha: 0.035; --rise-duration: 25s; --wobble-duration: 10s; --delay: -16s; }
+.water-bubble-9 { --left: 44%; --size: 34px; --drift: 14px; --highlight: 0.25; --lime: 0.06; --blue: 0.09; --border-alpha: 0.16; --inner-glow: 10px; --inner-alpha: 0.08; --outer-glow: 7px; --outer-alpha: 0.04; --rise-duration: 15s; --wobble-duration: 6s; --delay: -7s; }
+.water-bubble-10 { --left: 49%; --size: 52px; --drift: -28px; --highlight: 0.21; --lime: 0.05; --blue: 0.08; --border-alpha: 0.15; --inner-glow: 16px; --inner-alpha: 0.08; --outer-glow: 10px; --outer-alpha: 0.04; --rise-duration: 20s; --wobble-duration: 8s; --delay: -12s; }
+.water-bubble-11 { --left: 54%; --size: 82px; --drift: 34px; --highlight: 0.16; --lime: 0.04; --blue: 0.06; --border-alpha: 0.12; --inner-glow: 25px; --inner-alpha: 0.06; --outer-glow: 16px; --outer-alpha: 0.03; --rise-duration: 27s; --wobble-duration: 11s; --delay: -19s; }
+.water-bubble-12 { --left: 59%; --size: 28px; --drift: -12px; --highlight: 0.29; --lime: 0.07; --blue: 0.10; --border-alpha: 0.18; --inner-glow: 9px; --inner-alpha: 0.09; --outer-glow: 6px; --outer-alpha: 0.05; --rise-duration: 14s; --wobble-duration: 6s; --delay: -4s; }
+.water-bubble-13 { --left: 64%; --size: 48px; --drift: 40px; --highlight: 0.22; --lime: 0.05; --blue: 0.08; --border-alpha: 0.15; --inner-glow: 15px; --inner-alpha: 0.08; --outer-glow: 10px; --outer-alpha: 0.04; --rise-duration: 19s; --wobble-duration: 8s; --delay: -9s; }
+.water-bubble-14 { --left: 69%; --size: 66px; --drift: -38px; --highlight: 0.18; --lime: 0.04; --blue: 0.07; --border-alpha: 0.13; --inner-glow: 20px; --inner-alpha: 0.07; --outer-glow: 13px; --outer-alpha: 0.035; --rise-duration: 23s; --wobble-duration: 9s; --delay: -15s; }
+.water-bubble-15 { --left: 74%; --size: 24px; --drift: 20px; --highlight: 0.30; --lime: 0.07; --blue: 0.11; --border-alpha: 0.19; --inner-glow: 7px; --inner-alpha: 0.10; --outer-glow: 5px; --outer-alpha: 0.05; --rise-duration: 12s; --wobble-duration: 5s; --delay: -6s; }
+.water-bubble-16 { --left: 79%; --size: 74px; --drift: -22px; --highlight: 0.17; --lime: 0.04; --blue: 0.07; --border-alpha: 0.13; --inner-glow: 22px; --inner-alpha: 0.07; --outer-glow: 15px; --outer-alpha: 0.035; --rise-duration: 26s; --wobble-duration: 10s; --delay: -20s; }
+.water-bubble-17 { --left: 84%; --size: 42px; --drift: 30px; --highlight: 0.23; --lime: 0.06; --blue: 0.09; --border-alpha: 0.16; --inner-glow: 13px; --inner-alpha: 0.08; --outer-glow: 9px; --outer-alpha: 0.04; --rise-duration: 16s; --wobble-duration: 7s; --delay: -2s; }
+.water-bubble-18 { --left: 89%; --size: 56px; --drift: -30px; --highlight: 0.20; --lime: 0.05; --blue: 0.08; --border-alpha: 0.14; --inner-glow: 17px; --inner-alpha: 0.07; --outer-glow: 11px; --outer-alpha: 0.04; --rise-duration: 22s; --wobble-duration: 9s; --delay: -13s; }
+.water-bubble-19 { --left: 94%; --size: 32px; --drift: 16px; --highlight: 0.27; --lime: 0.06; --blue: 0.10; --border-alpha: 0.17; --inner-glow: 10px; --inner-alpha: 0.09; --outer-glow: 7px; --outer-alpha: 0.05; --rise-duration: 15s; --wobble-duration: 6s; --delay: -10s; }
+.water-bubble-20 { --left: 98%; --size: 70px; --drift: -40px; --highlight: 0.18; --lime: 0.04; --blue: 0.07; --border-alpha: 0.13; --inner-glow: 21px; --inner-alpha: 0.07; --outer-glow: 14px; --outer-alpha: 0.035; --rise-duration: 24s; --wobble-duration: 10s; --delay: -18s; }
+.water-bubble-21 { --left: 4%; --size: 20px; --drift: 36px; --highlight: 0.31; --lime: 0.07; --blue: 0.11; --border-alpha: 0.19; --inner-glow: 6px; --inner-alpha: 0.10; --outer-glow: 4px; --outer-alpha: 0.05; --rise-duration: 11s; --wobble-duration: 5s; --delay: -17s; }
+.water-bubble-22 { --left: 16%; --size: 50px; --drift: -18px; --highlight: 0.21; --lime: 0.05; --blue: 0.08; --border-alpha: 0.15; --inner-glow: 15px; --inner-alpha: 0.08; --outer-glow: 10px; --outer-alpha: 0.04; --rise-duration: 18s; --wobble-duration: 8s; --delay: -21s; }
+.water-bubble-23 { --left: 27%; --size: 36px; --drift: 24px; --highlight: 0.25; --lime: 0.06; --blue: 0.09; --border-alpha: 0.16; --inner-glow: 11px; --inner-alpha: 0.08; --outer-glow: 8px; --outer-alpha: 0.04; --rise-duration: 16s; --wobble-duration: 7s; --delay: -24s; }
+.water-bubble-24 { --left: 37%; --size: 62px; --drift: -26px; --highlight: 0.19; --lime: 0.05; --blue: 0.08; --border-alpha: 0.14; --inner-glow: 19px; --inner-alpha: 0.07; --outer-glow: 12px; --outer-alpha: 0.04; --rise-duration: 23s; --wobble-duration: 9s; --delay: -22s; }
+.water-bubble-25 { --left: 57%; --size: 30px; --drift: 22px; --highlight: 0.28; --lime: 0.07; --blue: 0.10; --border-alpha: 0.18; --inner-glow: 9px; --inner-alpha: 0.09; --outer-glow: 6px; --outer-alpha: 0.05; --rise-duration: 13s; --wobble-duration: 6s; --delay: -23s; }
+.water-bubble-26 { --left: 67%; --size: 76px; --drift: -34px; --highlight: 0.17; --lime: 0.04; --blue: 0.07; --border-alpha: 0.13; --inner-glow: 23px; --inner-alpha: 0.07; --outer-glow: 15px; --outer-alpha: 0.035; --rise-duration: 26s; --wobble-duration: 10s; --delay: -25s; }
+.water-bubble-27 { --left: 82%; --size: 46px; --drift: 28px; --highlight: 0.22; --lime: 0.05; --blue: 0.08; --border-alpha: 0.15; --inner-glow: 14px; --inner-alpha: 0.08; --outer-glow: 9px; --outer-alpha: 0.04; --rise-duration: 19s; --wobble-duration: 8s; --delay: -26s; }
+.water-bubble-28 { --left: 92%; --size: 54px; --drift: -20px; --highlight: 0.20; --lime: 0.05; --blue: 0.08; --border-alpha: 0.14; --inner-glow: 16px; --inner-alpha: 0.07; --outer-glow: 11px; --outer-alpha: 0.04; --rise-duration: 21s; --wobble-duration: 8s; --delay: -27s; }
