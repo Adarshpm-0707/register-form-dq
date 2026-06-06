@@ -69,8 +69,13 @@ export default function Footer() {
               </Link>
             </li>
             <li>
+              <Link to="/blog" className="text-white hover:text-[#c6ff34] transition-colors text-xs font-black uppercase tracking-widest">
+                [ 02 ] Blog
+              </Link>
+            </li>
+            <li>
               <Link to="/slot" className="text-white hover:text-[#c6ff34] transition-colors text-xs font-black uppercase tracking-widest">
-                [ 02 ] Reserve Slot
+                [ 03 ] Reserve Slot
               </Link>
             </li>
           </ul>

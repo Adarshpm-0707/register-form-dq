@@ -104,10 +104,10 @@ function ModuleRoadSection() {
    SUCCESS ROADMAP
 ───────────────────────────────────────────── */
 const roadmapData = [
-  { week: "PHASE 01", title: "Foundations", task: "Python Core & Advanced Math for Gradients.", color: "bg-white" },
-  { week: "PHASE 02", title: "Intelligence", task: "Classical ML, Scikit-Learn & Feature Engineering.", color: "bg-white" },
-  { week: "PHASE 03", title: "Deep Learning", task: "Neural Networks, Computer Vision & PyTorch.", color: "bg-white" },
-  { week: "PHASE 04", title: "Deployment", task: "Agentic Systems, LLMs & MLOps at Scale.", color: "bg-[#c6ff34]" },
+  { week: "PHASE 01", title: "Foundations", task: "Python Core & Advanced Math for Gradients.", color: "bg-gradient-to-br from-red-600 to-orange-500 text-[#050521]", numberBg: "bg-[#050521] text-red-500", weekColor: "text-[#050521]/60", taskColor: "text-[#050521]/80" },
+  { week: "PHASE 02", title: "Intelligence", task: "Classical ML, Scikit-Learn & Feature Engineering.", color: "bg-gradient-to-br from-orange-500 to-yellow-400 text-[#050521]", numberBg: "bg-[#050521] text-orange-500", weekColor: "text-[#050521]/60", taskColor: "text-[#050521]/80" },
+  { week: "PHASE 03", title: "Deep Learning", task: "Neural Networks, Computer Vision & PyTorch.", color: "bg-gradient-to-br from-yellow-400 to-green-400 text-[#050521]", numberBg: "bg-[#050521] text-yellow-500", weekColor: "text-[#050521]/60", taskColor: "text-[#050521]/80" },
+  { week: "PHASE 04", title: "Deployment", task: "Agentic Systems, LLMs & MLOps at Scale.", color: "bg-gradient-to-br from-green-400 to-emerald-400 text-[#050521]", numberBg: "bg-[#050521] text-emerald-500", weekColor: "text-[#050521]/60", taskColor: "text-[#050521]/80" },
 ];
 
 function SuccessRoadmap() {
@@ -118,22 +118,48 @@ function SuccessRoadmap() {
           <h3 className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-none">The Career <br/><span className="text-stroke-dark">Sprint.</span></h3>
           <p className="text-slate-400 font-mono text-sm mt-4 md:mt-6 uppercase tracking-widest">Blueprint for your AI Career Transformation.</p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 md:gap-8">
-          {roadmapData.map((item, i) => (
-            <motion.div 
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              viewport={{ once: true }}
-              className={`${item.color} border-2 border-[#050521] p-6 md:p-8 rounded-[2rem] shadow-[8px_8px_0px_0px_#050521] relative group flex flex-col h-full`}
-            >
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-[#050521] text-[#c6ff34] flex items-center justify-center font-black mb-4 md:mb-6 group-hover:rotate-12 transition-transform shrink-0">0{i+1}</div>
-              <span className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest block mb-1 md:mb-2">{item.week}</span>
-              <h4 className="text-xl md:text-2xl font-black uppercase leading-tight mb-2 md:mb-4">{item.title}</h4>
-              <p className="text-xs font-mono text-slate-600 leading-relaxed grow">{item.task}</p>
-            </motion.div>
-          ))}
+        <div className="relative">
+          {/* Desktop connecting dashed line */}
+          <div className="absolute top-1/2 left-8 right-8 h-0.5 border-t-4 border-dashed border-[#050521] -translate-y-1/2 hidden xl:block z-0" />
+          
+          {/* Mobile connecting dashed line */}
+          <div className="absolute left-1/2 top-8 bottom-8 w-0 border-l-4 border-dashed border-[#050521] -translate-x-1/2 sm:hidden z-0" />
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 md:gap-8 relative z-10">
+            {roadmapData.map((item, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                viewport={{ once: true }}
+                className={`${item.color} border-2 border-[#050521] p-6 md:p-8 rounded-[2rem] shadow-[8px_8px_0px_0px_#050521] relative group flex flex-col h-full z-10`}
+              >
+                <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center font-black mb-4 md:mb-6 group-hover:rotate-12 transition-transform shrink-0 ${item.numberBg}`}>0{i+1}</div>
+                <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest block mb-1 md:mb-2 ${item.weekColor}`}>{item.week}</span>
+                <h4 className="text-xl md:text-2xl font-black uppercase leading-tight mb-2 md:mb-4">{item.title}</h4>
+                <p className={`text-xs font-mono leading-relaxed grow ${item.taskColor}`}>{item.task}</p>
+
+                {/* Bridge arrow badge for desktop (pointing right) */}
+                {i < 3 && (
+                  <div className="absolute left-full top-1/2 -translate-y-1/2 -ml-4 w-8 h-8 rounded-full bg-[#050521] text-[#c6ff34] border-2 border-[#050521] flex items-center justify-center z-20 hidden xl:flex shadow-[2px_2px_0px_0px_#050521] transition-all group-hover:translate-x-1 group-hover:scale-110">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                )}
+
+                {/* Bridge arrow badge for mobile (pointing down) */}
+                {i < 3 && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#050521] text-[#c6ff34] border-2 border-[#050521] flex items-center justify-center z-20 sm:hidden shadow-[2px_2px_0px_0px_#050521] transition-all group-hover:translate-y-1 group-hover:scale-110">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -214,25 +240,58 @@ export default function Home() {
       <section className="relative min-h-[100svh] flex flex-col justify-center px-6 sm:px-12 lg:px-20 py-20">
         <div className="max-w-[1400px] mx-auto w-full z-10">
           <div className="space-y-1">
-            <motion.h1 initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="text-[18vw] sm:text-[clamp(4rem,9vw,9rem)] font-black uppercase leading-[0.82] tracking-tighter">Every</motion.h1>
-            <motion.h1 initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="text-[18vw] sm:text-[clamp(4rem,9vw,9rem)] text-stroke-dark-lg font-black uppercase leading-[0.82] tracking-tighter">Graduate</motion.h1>
-            <motion.h1 initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="text-[18vw] sm:text-[clamp(4rem,9vw,9rem)] font-black uppercase leading-[0.82] tracking-tighter">Deserves to</motion.h1>
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.3 }} className="flex flex-wrap items-center gap-4 mt-2">
-               <span className="bg-[#050521] text-[#c6ff34] px-5 py-2 rounded-2xl text-[14vw] sm:text-[clamp(4rem,9vw,9rem)] font-black uppercase leading-none">BUILD</span>
-               <span className="text-[18vw] sm:text-[clamp(4rem,9vw,9rem)] font-black uppercase leading-none">AI.</span>
+            <motion.h1 
+              initial={{ y: 60, opacity: 0 }} 
+              animate={{ y: 0, opacity: 1 }} 
+              transition={{ type: "spring", stiffness: 70, damping: 12 }}
+              className="text-[12vw] sm:text-[clamp(3rem,6.5vw,6.5rem)] font-black uppercase leading-[0.82] tracking-tighter"
+            >
+              Every
+            </motion.h1>
+            <motion.h1 
+              initial={{ y: 60, opacity: 0 }} 
+              animate={{ y: 0, opacity: 1 }} 
+              transition={{ type: "spring", stiffness: 70, damping: 12, delay: 0.1 }}
+              className="text-[12vw] sm:text-[clamp(3rem,6.5vw,6.5rem)] text-stroke-dark-lg font-black uppercase leading-[0.82] tracking-tighter"
+            >
+              Graduate
+            </motion.h1>
+            <motion.h1 
+              initial={{ y: 60, opacity: 0 }} 
+              animate={{ y: 0, opacity: 1 }} 
+              transition={{ type: "spring", stiffness: 70, damping: 12, delay: 0.2 }}
+              className="text-[12vw] sm:text-[clamp(3rem,6.5vw,6.5rem)] font-black uppercase leading-[0.82] tracking-tighter"
+            >
+              Deserves to
+            </motion.h1>
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0 }} 
+              animate={{ scale: 1, opacity: 1 }} 
+              transition={{ type: "spring", stiffness: 90, damping: 12, delay: 0.3 }}
+              className="flex flex-wrap items-center gap-4 mt-2"
+            >
+               <span className="bg-[#050521] text-[#c6ff34] px-5 py-2 rounded-2xl text-[10vw] sm:text-[clamp(2.5rem,6vw,6rem)] font-black uppercase leading-none">BUILD</span>
+               <span className="text-[12vw] sm:text-[clamp(3rem,6.5vw,6.5rem)] font-black uppercase leading-none">AI.</span>
             </motion.div>
           </div>
-          <div className="mt-12 flex flex-col sm:flex-row gap-8 items-start sm:items-center">
-            <p className="text-slate-500 font-mono text-sm max-w-xs leading-relaxed">The only 100% hands-on diploma designed to turn graduates into AI engineers.</p>
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <Link to="/slot" className="w-full sm:w-auto">
-                <button className="w-full px-12 py-5 bg-[#050521] text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-[8px_8px_0px_0px_#c6ff34] active:translate-y-1 active:shadow-none transition-all">Reserve Slot →</button>
-              </Link>
-              <a href="#curriculum" className="w-full sm:w-auto">
-                <button className="w-full px-12 py-5 border-2 border-[#050521] text-[#050521] font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-[#050521] hover:text-white transition-all">Curriculum</button>
-              </a>
-            </div>
-          </div>
+          
+          <motion.div 
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 100, damping: 15, delay: 0.45 }}
+            className="mt-12 flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
+          >
+            <Link to="/slot" className="w-full sm:w-auto">
+              <button className="w-full px-12 py-5 bg-[#050521] text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-[8px_8px_0px_0px_#c6ff34] active:translate-y-1 active:shadow-none transition-all hover:scale-105 duration-200">
+                Reserve Slot →
+              </button>
+            </Link>
+            <a href="#curriculum" className="w-full sm:w-auto">
+              <button className="w-full px-12 py-5 border-2 border-[#050521] text-[#050521] font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-[#050521] hover:text-white transition-all hover:scale-105 duration-200">
+                Curriculum
+              </button>
+            </a>
+          </motion.div>
         </div>
       </section>
 

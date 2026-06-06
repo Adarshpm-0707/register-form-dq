@@ -462,3 +462,19 @@ export const getAdmins = async () => {
     throw error;
   }
 };
+
+/**
+ * Saves contact form message submissions to Firestore
+ */
+export const saveContactMessage = async (formData) => {
+  try {
+    const docRef = await addDoc(collection(db, "contact_messages"), {
+      ...formData,
+      timestamp: serverTimestamp(),
+    });
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error("Error saving contact message:", error);
+    throw error;
+  }
+};

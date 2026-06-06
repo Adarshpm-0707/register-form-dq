@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import emailjs from "@emailjs/browser";
+import { saveContactMessage } from "../services/dbService";
 
 function Contact() {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
@@ -11,6 +12,10 @@ function Contact() {
     setStatus("Sending...");
     
     try {
+      // 1. Save to Firebase Firestore database
+      await saveContactMessage(formData);
+
+      // 2. Send email notification via EmailJS
       await emailjs.send(
         process.env.REACT_APP_EMAILJS_SERVICE_ID,
         process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
@@ -29,7 +34,7 @@ function Contact() {
       setFormData({ name: "", email: "", message: "" });
       setTimeout(() => setStatus(""), 3000);
     } catch (error) {
-      console.error("Error sending email:", error);
+      console.error("Error submitting contact form:", error);
       setStatus("Failed to send. Try again.");
       setTimeout(() => setStatus(""), 3000);
     }

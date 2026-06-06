@@ -57,6 +57,7 @@ function Navbar() {
 
   const navLinks = [
     { name: "HOME", path: "/" },
+    { name: "BLOG", path: "/blog" },
     { name: "SLOT", path: "/slot" },
     { name: "CONTACT", path: "/contact" },
   ];
