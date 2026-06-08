@@ -69,11 +69,7 @@ function Navbar() {
       transition={{ duration: 0.4, ease: "easeInOut" }}
       className="fixed top-4 md:top-6 left-0 w-full z-[100] px-4 md:px-12 flex justify-center pointer-events-none"
     >
-      <nav className="water-nav w-full max-w-7xl flex items-center justify-between px-5 md:px-10 py-3 md:py-4 rounded-full pointer-events-auto relative">
-        {/* Visual Effects */}
-        <div className="water-sheen-bar" />
-        <div className="water-nav-top-gloss absolute top-0 left-6 right-6 h-[1.5px] rounded-full pointer-events-none opacity-50" />
-
+      <nav className="w-full max-w-7xl flex items-center justify-between px-5 md:px-10 py-3 md:py-4 rounded-full bg-white border border-slate-200/80 shadow-[0_8px_30px_rgba(0,0,0,0.04)] pointer-events-auto relative">
         {/* LOGO */}
         <Link
           to="/"
@@ -82,7 +78,8 @@ function Navbar() {
           <img
             src={logo}
             alt="DeepStaq Logo"
-            className="water-logo-glow h-5 md:h-7 w-auto object-contain"
+            className="h-5 md:h-7 w-auto object-contain"
+            style={{ filter: "brightness(0) invert(7%) sepia(16%) saturate(3603%) hue-rotate(211deg) brightness(94%) contrast(109%)" }}
           />
         </Link>
 
@@ -92,10 +89,10 @@ function Navbar() {
             <Link
               key={link.path}
               to={link.path}
-              className="water-link relative text-xs font-black uppercase tracking-[0.3em] transition-all duration-300 group text-[#050521]"
+              className="relative text-xs font-black uppercase tracking-[0.3em] transition-all duration-300 group text-[#050521]"
             >
               {link.name}
-              <span className="water-link-underline absolute -bottom-1 left-0 w-0 h-[2px] bg-[#c6ff34] group-hover:w-full transition-all duration-300 rounded-full shadow-[0_0_8px_#c6ff34]" />
+              <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-[#c6ff34] group-hover:w-full transition-all duration-300 rounded-full" />
             </Link>
           ))}
         </div>
@@ -121,8 +118,7 @@ function Navbar() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="water-nav-mobile absolute top-[calc(100%+12px)] left-0 w-full rounded-[24px] p-6 md:hidden z-50 flex flex-col gap-4 shadow-2xl border border-[#050521]/10 overflow-hidden"
-              style={{ backdropFilter: "blur(20px)", backgroundColor: "rgba(255, 255, 255, 0.9)" }}
+              className="absolute top-[calc(100%+12px)] left-0 w-full rounded-[24px] p-6 md:hidden z-50 flex flex-col gap-4 shadow-xl border border-slate-200 bg-white overflow-hidden"
             >
               {navLinks.map((link) => (
                 <Link
