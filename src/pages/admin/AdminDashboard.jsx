@@ -9,7 +9,8 @@ import {
   getMasterRegistrations, 
   getAptitudeLeads,
   getCollectedContacts,
-  getUploadedContactFiles
+  getUploadedContactFiles,
+  getWebinarRegistrations
 } from "../../services/dbService";
 
 const DataCard = ({ item, headers }) => {
@@ -116,6 +117,7 @@ function AdminDashboard() {
   const [aptitudeData, setAptitudeData] = useState([]);
   const [collectedData, setCollectedData] = useState([]);
   const [uploadedData, setUploadedData] = useState([]);
+  const [webinarData, setWebinarData] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [activeTab, setActiveTab] = useState("slot");
 
@@ -150,13 +152,14 @@ function AdminDashboard() {
   const fetchData = async () => {
     setLoadingData(true);
     try {
-      const [slots, events, masters, aptitudes, collected, uploaded] = await Promise.all([
+      const [slots, events, masters, aptitudes, collected, uploaded, webinars] = await Promise.all([
         getSlotRegistrations(),
         getEventRegistrations(),
         getMasterRegistrations(),
         getAptitudeLeads(),
         getCollectedContacts(),
-        getUploadedContactFiles()
+        getUploadedContactFiles(),
+        getWebinarRegistrations()
       ]);
       setSlotData(slots);
       setEventData(events);
@@ -164,6 +167,7 @@ function AdminDashboard() {
       setAptitudeData(aptitudes);
       setCollectedData(collected);
       setUploadedData(uploaded);
+      setWebinarData(webinars);
     } catch (error) {
       console.error("Error fetching data:", error);
       alert("Failed to fetch data.");
@@ -249,6 +253,7 @@ function AdminDashboard() {
     if (activeTab === "aptitude") return aptitudeData;
     if (activeTab === "collected") return collectedData;
     if (activeTab === "uploaded") return uploadedData;
+    if (activeTab === "webinar") return webinarData;
 
     return slotData;
   };
@@ -261,6 +266,7 @@ function AdminDashboard() {
       case "aptitude": return "Aptitude Leads";
       case "collected": return "Collected Contacts";
       case "uploaded": return "Uploaded Files";
+      case "webinar": return "Webinar Registrations";
       default: return "Dashboard";
     }
   };
@@ -334,6 +340,14 @@ function AdminDashboard() {
           >
              <span>Collected Contacts</span>
              <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "collected" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{collectedData.length}</span>
+          </button>
+
+          <button 
+             onClick={() => setActiveTab("webinar")}
+             className={`flex-shrink-0 md:w-full text-left px-5 py-4 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 ${activeTab === "webinar" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
+          >
+             <span>Webinar Entry</span>
+             <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "webinar" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{webinarData.length}</span>
           </button>
 
         </div>

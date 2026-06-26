@@ -3,6 +3,7 @@ import { motion, useScroll, useSpring } from "framer-motion";
 import { Link } from "react-router-dom";
 import Background3D from "../components/Background3D";
 import WaterBubbles from "../components/WaterBubbles";
+import heroAiImage from "../assets/hero_ai_image.png";
 
 /* ─────────────────────────────────────────────
    TICKER TAPE
@@ -202,7 +203,7 @@ function CountUp({ end, suffix = "" }) {
 ───────────────────────────────────────────── */
 const faqItems = [
   { q: "Do I need prior experience?", a: "No. We start from absolute zero — our Python & Math Essentials modules ensure every student builds a solid foundation." },
-  { q: "How long is the programme?", a: "The full diploma runs 6 months part-time. Intensive tracks can complete in 4 months." },
+  { q: "How long is the programme?", a: "The full diploma runs 6 months part-time" },
   { q: "Is it industry-recognised?", a: "Yes. DeepStaq certificates are co-validated with our hiring partners." },
   { q: "What is the fee structure?", a: "We offer monthly instalments, upfront discounts, and income share agreements." },
 ];
@@ -237,61 +238,89 @@ export default function Home() {
       <Background3D />
       <WaterBubbles />
 
-      <section className="relative min-h-[100svh] flex flex-col justify-center px-6 sm:px-12 lg:px-20 py-20">
-        <div className="max-w-[1400px] mx-auto w-full z-10">
-          <div className="space-y-1">
-            <motion.h1 
-              initial={{ y: 60, opacity: 0 }} 
-              animate={{ y: 0, opacity: 1 }} 
-              transition={{ type: "spring", stiffness: 70, damping: 12 }}
-              className="text-[12vw] sm:text-[clamp(3rem,6.5vw,6.5rem)] font-black uppercase leading-[0.82] tracking-tighter"
-            >
-              Every
-            </motion.h1>
-            <motion.h1 
-              initial={{ y: 60, opacity: 0 }} 
-              animate={{ y: 0, opacity: 1 }} 
-              transition={{ type: "spring", stiffness: 70, damping: 12, delay: 0.1 }}
-              className="text-[12vw] sm:text-[clamp(3rem,6.5vw,6.5rem)] text-stroke-dark-lg font-black uppercase leading-[0.82] tracking-tighter"
-            >
-              Graduate
-            </motion.h1>
-            <motion.h1 
-              initial={{ y: 60, opacity: 0 }} 
-              animate={{ y: 0, opacity: 1 }} 
-              transition={{ type: "spring", stiffness: 70, damping: 12, delay: 0.2 }}
-              className="text-[12vw] sm:text-[clamp(3rem,6.5vw,6.5rem)] font-black uppercase leading-[0.82] tracking-tighter"
-            >
-              Deserves to
-            </motion.h1>
+      <section className="relative min-h-[100svh] flex flex-col justify-center px-6 sm:px-12 lg:px-20 py-20 overflow-hidden">
+        <div className="max-w-[1400px] mx-auto w-full z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center pt-8 sm:pt-10 lg:pt-0">
+          
+          <div className="lg:col-span-7 flex flex-col justify-center">
+            <div className="space-y-1">
+              <motion.h1 
+                initial={{ y: 60, opacity: 0 }} 
+                animate={{ y: 0, opacity: 1 }} 
+                transition={{ type: "spring", stiffness: 70, damping: 12 }}
+                className="text-[12vw] sm:text-[clamp(3rem,6.5vw,6.5rem)] font-black uppercase leading-[0.82] tracking-tighter"
+              >
+                Every
+              </motion.h1>
+              <motion.h1 
+                initial={{ y: 60, opacity: 0 }} 
+                animate={{ y: 0, opacity: 1 }} 
+                transition={{ type: "spring", stiffness: 70, damping: 12, delay: 0.1 }}
+                className="text-[12vw] sm:text-[clamp(3rem,6.5vw,6.5rem)] text-stroke-dark-lg font-black uppercase leading-[0.82] tracking-tighter"
+              >
+                Graduate
+              </motion.h1>
+              <motion.h1 
+                initial={{ y: 60, opacity: 0 }} 
+                animate={{ y: 0, opacity: 1 }} 
+                transition={{ type: "spring", stiffness: 70, damping: 12, delay: 0.2 }}
+                className="text-[12vw] sm:text-[clamp(3rem,6.5vw,6.5rem)] font-black uppercase leading-[0.82] tracking-tighter"
+              >
+                Deserves to
+              </motion.h1>
+              <motion.div 
+                initial={{ scale: 0.8, opacity: 0 }} 
+                animate={{ scale: 1, opacity: 1 }} 
+                transition={{ type: "spring", stiffness: 90, damping: 12, delay: 0.3 }}
+                className="flex flex-wrap items-center gap-4 mt-2"
+              >
+                 <span className="bg-[#050521] text-[#c6ff34] px-5 py-2 rounded-2xl text-[10vw] sm:text-[clamp(2.5rem,6vw,6rem)] font-black uppercase leading-none">BUILD</span>
+                 <span className="text-[12vw] sm:text-[clamp(3rem,6.5vw,6.5rem)] font-black uppercase leading-none">AI.</span>
+              </motion.div>
+            </div>
+            
             <motion.div 
-              initial={{ scale: 0.8, opacity: 0 }} 
-              animate={{ scale: 1, opacity: 1 }} 
-              transition={{ type: "spring", stiffness: 90, damping: 12, delay: 0.3 }}
-              className="flex flex-wrap items-center gap-4 mt-2"
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 100, damping: 15, delay: 0.45 }}
+              className="mt-12 flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
             >
-               <span className="bg-[#050521] text-[#c6ff34] px-5 py-2 rounded-2xl text-[10vw] sm:text-[clamp(2.5rem,6vw,6rem)] font-black uppercase leading-none">BUILD</span>
-               <span className="text-[12vw] sm:text-[clamp(3rem,6.5vw,6.5rem)] font-black uppercase leading-none">AI.</span>
+              <Link to="/slot" className="w-full sm:w-auto">
+                <button className="w-full px-12 py-5 bg-[#050521] text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-[8px_8px_0px_0px_#c6ff34] active:translate-y-1 active:shadow-none transition-all hover:scale-105 duration-200">
+                  Reserve Slot →
+                </button>
+              </Link>
+              <a href="#curriculum" className="w-full sm:w-auto">
+                <button className="w-full px-12 py-5 border-2 border-[#050521] text-[#050521] font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-[#050521] hover:text-white transition-all hover:scale-105 duration-200">
+                  Curriculum
+                </button>
+              </a>
             </motion.div>
           </div>
-          
-          <motion.div 
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 100, damping: 15, delay: 0.45 }}
-            className="mt-12 flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
-          >
-            <Link to="/slot" className="w-full sm:w-auto">
-              <button className="w-full px-12 py-5 bg-[#050521] text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-[8px_8px_0px_0px_#c6ff34] active:translate-y-1 active:shadow-none transition-all hover:scale-105 duration-200">
-                Reserve Slot →
-              </button>
-            </Link>
-            <a href="#curriculum" className="w-full sm:w-auto">
-              <button className="w-full px-12 py-5 border-2 border-[#050521] text-[#050521] font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-[#050521] hover:text-white transition-all hover:scale-105 duration-200">
-                Curriculum
-              </button>
-            </a>
-          </motion.div>
+ 
+          <div className="lg:col-span-5 flex justify-center w-full">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, rotate: 2 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 80, damping: 15, delay: 0.4 }}
+              className="relative w-[80%] sm:w-[65%] lg:w-full max-w-[380px] lg:max-w-[420px] aspect-square rounded-[2rem] lg:rounded-[2.5rem] border-4 border-[#050521] bg-[#050521] overflow-hidden shadow-[8px_8px_0px_0px_#c6ff34] lg:shadow-[12px_12px_0px_0px_#c6ff34]"
+            >
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#050521] via-transparent to-[#c6ff34]/20 pointer-events-none z-10" />
+              <motion.img 
+                src={heroAiImage} 
+                alt="AI Neural Network" 
+                className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+                animate={{
+                  y: [0, -10, 0],
+                }}
+                transition={{
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+            </motion.div>
+          </div>
+
         </div>
       </section>
 
@@ -300,10 +329,10 @@ export default function Home() {
         <div className="py-20 px-6 sm:px-12 max-w-[1400px] mx-auto">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-16 gap-x-8 text-center">
             {[
-              { val: 97, suffix: "%", label: "Placement Rate" },
-              { val: 500, suffix: "+", label: "Graduates" },
-              { val: 6, suffix: " mo", label: "Expert Track" },
-              { val: 40, suffix: "+", label: "Live Projects" },
+              { val: 100, suffix: "%", label: "Placement Assistance" },
+              { val: 10, suffix: "+", label: "Live projects" },
+              { val: 6, suffix: "/mo.", label: "Professional Course" },
+              { val: 20, suffix: "+", label: "AI Tools" },
             ].map((s, i) => (
               <div key={i} className="flex flex-col items-center">
                 <div className="text-5xl md:text-7xl font-black text-[#050521] leading-none mb-3 tracking-tighter"><CountUp end={s.val} suffix={s.suffix} /></div>
@@ -328,16 +357,7 @@ export default function Home() {
       </section>
 
       {/* ════ REDUCED BOTTOM CTA ════ */}
-      <section className="bg-[#050521] py-16 md:py-20 px-6 text-center border-t-4 border-[#c6ff34]">
-        <h2 className="text-5xl md:text-7xl font-black text-[#c6ff34] uppercase tracking-tighter mb-10 leading-none">
-          Ready to<br />Build?
-        </h2>
-        <Link to="/slot">
-          <button className="px-10 py-5 bg-[#c6ff34] text-[#050521] font-black text-[11px] uppercase tracking-[0.3em] rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[8px_8px_0px_0px_rgba(198,255,52,0.3)]">
-            Join the Cohort →
-          </button>
-        </Link>
-      </section>
+   
     </div>
   );
 }

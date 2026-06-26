@@ -59,6 +59,7 @@ function Navbar() {
     { name: "HOME", path: "/" },
     { name: "BLOG", path: "/blog" },
     { name: "SLOT", path: "/slot" },
+    { name: "WEBINAR", path: "/webinar" },
     { name: "CONTACT", path: "/contact" },
   ];
 

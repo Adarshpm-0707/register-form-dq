@@ -18,6 +18,10 @@ const SEO_CONFIG = {
     title: "Contact Us | Connect with DeepStaq",
     description: "Have questions about our curriculum, installments, or schedule? Get in touch with our admissions team to learn more about the diploma program."
   },
+  "/webinar": {
+    title: "Free AI/ML Webinar | DeepStaq",
+    description: "Register for our free AI/ML Webinar. Code neural networks, learn Machine Learning, and explore agentic AI with our expert-led build session."
+  },
   "/admin": {
     title: "Admin Dashboard | DeepStaq Management",
     description: "Secure administrator dashboard for DeepStaq application reviews, cohort management, and registration tracking."

@@ -85,6 +85,7 @@ export const getEventRegistrations = async () => {
     // Filter unique by normalized phone number
     const seen = new Set();
     return sorted.filter(item => {
+      if (item.type === "WEBINAR") return false;
       const normalized = normalizePhone(item.phone);
       if (!normalized || seen.has(normalized)) return false;
       seen.add(normalized);
@@ -478,3 +479,46 @@ export const saveContactMessage = async (formData) => {
     throw error;
   }
 };
+
+/**
+ * Saves webinar registration data to Firestore (stored under event_registrations to leverage existing rules)
+ */
+export const saveWebinarRegistration = async (formData) => {
+  try {
+    const docRef = await addDoc(collection(db, "event_registrations"), {
+      ...formData,
+      type: "WEBINAR",
+      timestamp: serverTimestamp(),
+    });
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error("Error saving webinar registration:", error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches all webinar registrations
+ */
+export const getWebinarRegistrations = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "event_registrations"));
+    const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Sort by timestamp descending
+    const sorted = data.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+    
+    // Filter unique by normalized phone
+    const seen = new Set();
+    return sorted.filter(item => {
+      if (item.type !== "WEBINAR") return false;
+      const normalized = normalizePhone(item.phone);
+      if (!normalized || seen.has(normalized)) return false;
+      seen.add(normalized);
+      return true;
+    });
+  } catch (error) {
+    console.error("Error fetching webinar registrations:", error);
+    throw error;
+  }
+};
+
