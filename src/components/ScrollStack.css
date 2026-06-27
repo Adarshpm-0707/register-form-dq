@@ -1,0 +1,79 @@
+.scroll-stack-scroller {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: visible;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: scroll-position;
+}
+
+.scroll-stack-scroller.scroll-stack-window-scroller {
+  overflow-y: visible !important;
+  height: auto !important;
+}
+
+
+.scroll-stack-inner {
+  padding: 5vh 0 12rem;
+  min-height: 80vh;
+}
+
+@media (min-width: 768px) {
+  .scroll-stack-inner {
+    padding: 8vh 0 20rem;
+  }
+}
+
+
+.scroll-stack-card-wrapper {
+  position: relative;
+}
+
+.scroll-stack-card {
+  transform-origin: top center;
+  will-change: transform, filter;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  box-shadow: 0 10px 30px rgba(5, 5, 33, 0.1);
+  height: 28rem; /* Mobile height */
+  width: 100%;
+  max-width: 420px;
+  margin: 20px auto; /* Mobile vertical margin */
+  padding: 0; /* Zero padding to allow full-bleed top image, styling inside the card handle padding */
+  border-radius: 24px;
+  box-sizing: border-box;
+  overflow: hidden; /* Round the image corners at the top */
+  /* Improve mobile performance */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  position: relative;
+  transition: box-shadow 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .scroll-stack-card {
+    height: 32rem; /* Desktop height */
+    margin: 30px auto;
+  }
+}
+
+.scroll-stack-card:hover {
+  box-shadow: 0 20px 40px rgba(5, 5, 33, 0.15);
+}
+
+.scroll-stack-end {
+  width: 100%;
+  height: 20px;
+}
+
+@media (min-width: 1024px) {
+  .scroll-stack-end {
+    height: 280px;
+  }
+}
+

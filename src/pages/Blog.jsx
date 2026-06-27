@@ -102,7 +102,7 @@ export default function Blog() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#050521] overflow-x-hidden font-sans relative">
+    <div className="min-h-screen bg-white text-[#050521] overflow-x-clip font-sans relative">
       <Background3D />
       <WaterBubbles />
 

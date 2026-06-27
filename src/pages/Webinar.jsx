@@ -200,7 +200,7 @@ export default function Webinar() {
                         required
                         value={form.fullName}
                         onChange={change}
-                        placeholder="John Doe"
+                        placeholder="fullName"
                         className="w-full border-2 border-[#050521]/10 focus:border-[#050521] rounded-xl px-4 py-3.5 outline-none transition-all text-sm font-semibold placeholder:text-slate-300 bg-slate-50/50"
                       />
                     </Field>
@@ -213,7 +213,7 @@ export default function Webinar() {
                         required
                         value={form.phone}
                         onChange={change}
-                        placeholder="10-digit mobile number"
+                        placeholder="10-digit Whatsapp number"
                         className="w-full border-2 border-[#050521]/10 focus:border-[#050521] rounded-xl px-4 py-3.5 outline-none transition-all text-sm font-semibold placeholder:text-slate-300 bg-slate-50/50"
                       />
                     </Field>
