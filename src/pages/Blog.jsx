@@ -1070,7 +1070,7 @@ export default function Blog() {
               </div>
               
               <div className="lg:col-span-2 flex flex-col gap-4 w-full">
-                <Link to="/slot" className="w-full">
+                <Link to="/admission" className="w-full">
                   <button className="w-full py-5 bg-[#c6ff34] text-[#050521] font-black text-xs uppercase tracking-widest rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-[8px_8px_0px_0px_rgba(198,255,52,0.25)] border-2 border-[#050521]">
                     Reserve Seat Now →
                   </button>

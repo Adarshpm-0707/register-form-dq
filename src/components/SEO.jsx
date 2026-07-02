@@ -10,17 +10,9 @@ const SEO_CONFIG = {
     title: "DeepStaq Blog | AI/ML Insights & Career Guides",
     description: "Expert guides, career transition strategies, and technical insights on PyTorch, Large Language Models, MLOps, and agentic workflows."
   },
-  "/slot": {
-    title: "Register | DeepStaq AI/ML Diploma Cohort",
-    description: "Secure your seat in the upcoming cohort. Apply today, choose your payment track, and start your journey to becoming an AI engineer."
-  },
   "/contact": {
     title: "Contact Us | Connect with DeepStaq",
     description: "Have questions about our curriculum, installments, or schedule? Get in touch with our admissions team to learn more about the diploma program."
-  },
-  "/webinar": {
-    title: "Free AI/ML Webinar | DeepStaq",
-    description: "Register for our free AI/ML Webinar. Code neural networks, learn Machine Learning, and explore agentic AI with our expert-led build session."
   },
   "/admin": {
     title: "Admin Dashboard | DeepStaq Management",
