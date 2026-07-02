@@ -4,9 +4,10 @@ import { Link } from "react-router-dom";
 import Background3D from "../components/Background3D";
 import WaterBubbles from "../components/WaterBubbles";
 import HeroVRSection from "../components/HeroVRSection";
+import CircularGallery from "../components/CircularGallery";
 
-// ScrollStack and career image imports
-import ScrollStack, { ScrollStackItem } from "../components/ScrollStack";
+
+// Career image imports
 import aiMlEngineerImg from "../assets/careers/ai_ml_engineer.png";
 import generativeAiDevImg from "../assets/careers/generative_ai_dev.png";
 import dataScientistImg from "../assets/careers/data_scientist.png";
@@ -302,17 +303,6 @@ const careerRolesData = [
 ];
 
 export default function Home() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   const handleDownloadBrochure = () => {
     const element = document.createElement("a");
     const file = new Blob([
@@ -373,7 +363,7 @@ export default function Home() {
               transition={{ type: "spring", stiffness: 100, damping: 15, delay: 0.45 }}
               className="mt-8 sm:mt-12 flex flex-col sm:flex-row flex-wrap gap-4 w-full sm:w-auto items-center justify-center lg:justify-start"
             >
-              <Link to="/slot" className="w-full sm:w-auto">
+              <Link to="/admission" className="w-full sm:w-auto">
                 <button className="w-full px-12 py-5 bg-[#050521] text-white font-black text-sm md:text-base uppercase tracking-widest rounded-xl shadow-[6px_6px_0px_0px_#c6ff34] active:translate-y-1 active:shadow-none transition-all hover:scale-105 duration-200">
                   Apply Now
                 </button>
@@ -505,13 +495,13 @@ export default function Home() {
         <div className="max-w-[1200px] mx-auto relative z-10">
 
           {/* ── Header row ── */}
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-16 pb-10 border-b border-white/10">
-            <div className="space-y-4 max-w-2xl">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between items-center text-center lg:text-left gap-8 mb-16 pb-10 border-b border-white/10">
+            <div className="space-y-4 max-w-2xl flex flex-col items-center lg:items-start">
               <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-[#c6ff34] border border-[#c6ff34]/30 bg-[#c6ff34]/5 px-4 py-1.5 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff34] animate-pulse" />
                 Portfolio Building
               </span>
-              <h2 className="text-5xl md:text-[clamp(3.5rem,7vw,6.5rem)] font-black uppercase tracking-tighter leading-none">
+              <h2 className="text-4xl sm:text-5xl md:text-[clamp(3.5rem,7vw,6.5rem)] font-black uppercase tracking-tighter leading-none">
                 Capstone<br />
                 <span className="text-stroke-light text-transparent">Projects.</span>
               </h2>
@@ -520,11 +510,11 @@ export default function Home() {
               </p>
             </div>
             {/* Evaluation Summary Pill */}
-            <div className="flex gap-6 flex-wrap">
+            <div className="flex gap-4 sm:gap-6 justify-center lg:justify-start flex-wrap w-full lg:w-auto">
               {[{ label: "Capstone Project", pct: "60%", active: true }, { label: "Theory Exam", pct: "40%", active: false }].map((item, i) => (
-                <div key={i} className={`flex flex-col items-center justify-center border-2 rounded-2xl px-8 py-6 gap-1 ${item.active ? "border-[#c6ff34] bg-[#c6ff34]/5" : "border-white/10 bg-white/3"}`}>
-                  <span className={`text-5xl font-black leading-none ${item.active ? "text-[#c6ff34]" : "text-white/40"}`}>{item.pct}</span>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">{item.label}</span>
+                <div key={i} className={`flex-1 min-w-[140px] sm:min-w-[160px] flex flex-col items-center justify-center border-2 rounded-2xl px-6 sm:px-8 py-5 sm:py-6 gap-1 ${item.active ? "border-[#c6ff34] bg-[#c6ff34]/5" : "border-white/10 bg-white/3"}`}>
+                  <span className={`text-4xl sm:text-5xl font-black leading-none ${item.active ? "text-[#c6ff34]" : "text-white/40"}`}>{item.pct}</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1 text-center">{item.label}</span>
                 </div>
               ))}
             </div>
@@ -534,7 +524,7 @@ export default function Home() {
           <CapstoneGrid />
 
           {/* ── Evaluation detail bar ── */}
-          <div className="border border-white/10 rounded-2xl p-6 md:p-8 bg-white/3 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="border border-white/10 rounded-2xl p-6 md:p-8 bg-white/3 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
             {[
               {
                 badge: "PRACTICAL", badgeColor: "text-[#c6ff34] bg-[#c6ff34]/10 border-[#c6ff34]/20",
@@ -547,18 +537,18 @@ export default function Home() {
                 desc: "Covers ML mathematics, neural architectures, tuning trade-offs, vector lookup mechanics, and pipeline engineering."
               }
             ].map((crit, i) => (
-              <div key={i} className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
+              <div key={i} className="space-y-3.5 p-4 sm:p-0 bg-white/[0.02] sm:bg-transparent rounded-xl sm:rounded-none border border-white/5 sm:border-none">
+                <div className="flex flex-row items-center justify-between gap-2">
+                  <div className="flex flex-col items-start text-left">
                     <span className={`text-[9px] font-black uppercase tracking-widest border px-2 py-0.5 rounded ${crit.badgeColor}`}>{crit.badge}</span>
-                    <h4 className="text-sm font-black uppercase tracking-wider text-white mt-1">{crit.title}</h4>
+                    <h4 className="text-sm font-black uppercase tracking-wider text-white mt-1.5">{crit.title}</h4>
                   </div>
-                  <span className={`text-4xl font-black leading-none ${crit.pctColor}`}>{crit.pct}%</span>
+                  <span className={`text-3xl sm:text-4xl font-black leading-none ${crit.pctColor}`}>{crit.pct}%</span>
                 </div>
                 <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                   <div className={`h-full rounded-full ${crit.barColor}`} style={{ width: `${crit.pct}%` }} />
                 </div>
-                <p className="text-[11px] text-slate-400 font-mono leading-relaxed">{crit.desc}</p>
+                <p className="text-[11px] text-slate-400 font-mono leading-relaxed text-left sm:text-left">{crit.desc}</p>
               </div>
             ))}
           </div>
@@ -596,52 +586,60 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-24 px-5 border-b-2 border-[#050521]">
-        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-4">
-            <div className="lg:sticky lg:top-[20vh] space-y-6">
-              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">
-                Career<br /><span className="text-stroke-dark">Opportunities.</span>
-              </h2>
-              <p className="text-slate-500 text-sm font-medium leading-relaxed">
-                After completing the programme, students possess the technical portfolio required to pursue multiple roles:
-              </p>
-              {!isMobile && (
-                <div className="pt-4 hidden lg:block">
-                  <p className="text-slate-400 font-mono text-xs uppercase tracking-widest animate-pulse">
-                    Scroll to explore roles ↓
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="lg:col-span-8">
-            <ScrollStack useWindowScroll={true} itemDistance={80} baseScale={0.88} itemStackDistance={25}>
-              {careerRolesData.map((role, idx) => (
-                <ScrollStackItem key={idx}>
-                  <div className="w-full h-full bg-white border-2 border-[#050521] rounded-2xl overflow-hidden shadow-[6px_6px_0px_0px_#050521] hover:shadow-[6px_6px_0px_0px_#c6ff34] transition-all flex flex-col justify-between">
-                    <div className="relative h-[60%] sm:h-[65%] w-full border-b-2 border-[#050521] overflow-hidden">
-                      <img 
-                        src={role.img} 
-                        alt={role.title} 
-                        className="w-full h-full object-cover grayscale contrast-[1.1] hover:grayscale-0 transition-all duration-500"
-                        loading={idx > 1 ? "lazy" : undefined}
-                      />
-                      <span className="absolute top-4 left-4 bg-[#c6ff34] text-[#050521] font-mono text-[9px] font-black uppercase tracking-widest px-3 py-1 border border-[#050521] rounded-full shadow-[2px_2px_0px_0px_#050521]">
-                        {role.track}
-                      </span>
-                    </div>
-                    <div className="p-5 sm:p-6 flex-1 flex flex-col justify-center bg-white">
-                      <h4 className="text-lg sm:text-xl font-black uppercase tracking-tight text-[#050521] mb-2">{role.title}</h4>
-                      <p className="text-xs text-slate-500 font-mono leading-relaxed">{role.desc}</p>
-                    </div>
-                  </div>
-                </ScrollStackItem>
-              ))}
-            </ScrollStack>
-          </div>
+      {/* ── Career Opportunities ─────────────────────── */}
+      <section className="py-16 md:py-24 border-b-2 border-[#050521] bg-[#050521] overflow-hidden">
+        {/* Centered Header */}
+        <div className="max-w-[900px] mx-auto text-center mb-12 md:mb-16 px-5 space-y-4">
+          <motion.span
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-block font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#c6ff34] bg-[#c6ff34]/10 border border-[#c6ff34]/30 px-4 py-2 rounded-full"
+          >
+            Programme Outcomes
+          </motion.span>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tighter leading-[0.88] text-white"
+          >
+            Career<br />
+            <span style={{ WebkitTextStroke: "2px #c6ff34", color: "transparent" }}>
+              Opportunities.
+            </span>
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="text-slate-400 text-sm md:text-base font-medium leading-relaxed max-w-[550px] mx-auto"
+          >
+            After completing the programme, students possess the technical portfolio required to pursue multiple high-demand roles in AI.
+          </motion.p>
+          <p className="text-[#c6ff34]/50 font-mono text-[10px] uppercase tracking-widest animate-pulse">
+            ← Drag or swipe to explore →
+          </p>
+        </div>
+
+        {/* CircularGallery — WebGL curved carousel, responsive on mobile/tablet/desktop */}
+        <div className="w-full h-[360px] sm:h-[450px] lg:h-[500px] relative">
+          <CircularGallery
+            items={careerRolesData.map(role => ({ image: role.img, text: role.title }))}
+            bend={3}
+            textColor="#c6ff34"
+            borderRadius={0.05}
+            scrollSpeed={2.5}
+            scrollEase={0.04}
+            fontUrl="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap"
+            font="bold 22px Orbitron"
+          />
         </div>
       </section>
+
+
 
 
       {/* Tools & Technologies */}
@@ -758,7 +756,7 @@ export default function Home() {
           </p>
 
           <div className="pt-8">
-            <Link to="/slot">
+            <Link to="/admission">
               <button className="px-12 py-5 bg-[#050521] text-white hover:bg-white hover:text-[#050521] font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-[6px_6px_0px_0px_#050521] hover:scale-105 active:translate-y-1 duration-200">
                 Reserve Seat Now
               </button>

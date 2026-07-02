@@ -1,0 +1,30 @@
+/* CircularGallery — layout */
+.circular-gallery {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: grab;
+
+  /* Critical for mobile: allow vertical page scroll while we handle horizontal drag */
+  touch-action: pan-y;
+
+  /* Prevent text/image selection during drag */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.circular-gallery:active {
+  cursor: grabbing;
+}
+
+.circular-gallery canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.circular-gallery:focus-visible {
+  outline: 2px solid #c6ff34;
+  outline-offset: 4px;
+}

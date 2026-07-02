@@ -58,8 +58,7 @@ function Navbar() {
   const navLinks = [
     { name: "HOME", path: "/" },
     { name: "BLOG", path: "/blog" },
-    { name: "SLOT", path: "/slot" },
-    { name: "WEBINAR", path: "/webinar" },
+    { name: "ADMISSION", path: "/admission" },
     { name: "CONTACT", path: "/contact" },
   ];
 

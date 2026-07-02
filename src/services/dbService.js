@@ -522,3 +522,70 @@ export const getWebinarRegistrations = async () => {
   }
 };
 
+/**
+ * Saves student admission data, uploading associated documents to Cloudinary
+ */
+export const saveAdmissionRegistration = async (formData, files) => {
+  try {
+    const documentURLs = {};
+    const cloudName = "dfn6pdbz";
+    const uploadPreset = "firebase_upload";
+    
+    // Upload files to Cloudinary if they exist
+    for (const [key, file] of Object.entries(files)) {
+      if (file) {
+        const data = new FormData();
+        data.append("file", file);
+        data.append("upload_preset", uploadPreset);
+
+        // Upload all documents as 'image' resource type to support download transformations (like fl_attachment)
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+          {
+            method: "POST",
+            body: data,
+          }
+        );
+
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.error?.message || "Failed to upload file to Cloudinary");
+        }
+
+        const result = await response.json();
+        documentURLs[key] = result.secure_url;
+      }
+    }
+    
+    // Add documents URL back into form data
+    const submissionData = {
+      ...formData,
+      documents: documentURLs,
+      type: "ADMISSION",
+      timestamp: serverTimestamp()
+    };
+    
+    const docRef = await addDoc(collection(db, "student_admissions"), submissionData);
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error("Error saving admission registration:", error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches all student admission registrations
+ */
+export const getAdmissionRegistrations = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "student_admissions"));
+    const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Sort by timestamp descending
+    return data.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+  } catch (error) {
+    console.error("Error fetching admission registrations:", error);
+    throw error;
+  }
+};
+
+

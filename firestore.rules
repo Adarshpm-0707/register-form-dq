@@ -84,6 +84,14 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // Security for Student Admissions
+    match /student_admissions/{document} {
+      allow create: if isStringOfSize(request.resource.data.fullName, 150)
+                    && isStringOfSize(request.resource.data.phone, 20)
+                    && request.resource.data.timestamp == request.time;
+      allow read, update, delete: if isAdmin();
+    }
+
     // Security for Admins - Strict Ownership, Write restricted to existing Admins (no self privilege escalation)
     match /admins/{document} {
       allow read: if request.auth != null && request.auth.token.email == document;

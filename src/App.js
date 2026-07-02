@@ -6,9 +6,8 @@ import ScrollToTop from "./components/ScrollToTop";
 import BackToTopButton from "./components/BackToTopButton";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import Slot from "./pages/Slot";
 import Contact from "./pages/Contact";
-import Webinar from "./pages/Webinar";
+import Admission from "./pages/Admission";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminLogin from "./pages/admin/AdminLogin";
 import SecurityGuard from "./components/SecurityGuard";
@@ -42,8 +41,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/blog" element={<Blog />} />
-            <Route path="/slot" element={<Slot />} />
-            <Route path="/webinar" element={<Webinar />} />
+            <Route path="/admission" element={<Admission />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/login" element={<AdminLogin />} />
