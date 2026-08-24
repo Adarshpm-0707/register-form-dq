@@ -41,13 +41,19 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // Security for Aptitude Test Submissions
+    match /aptitude_submissions/{document} {
+      allow create: if isStringOfSize(request.resource.data.fullName, 100)
+                    && isStringOfSize(request.resource.data.phone, 20)
+                    && isStringOfSize(request.resource.data.email, 100);
+      allow read, update, delete: if isAdmin();
+    }
+
     // Security for Aptitude Test Leads
     match /aptitude_test_leads/{document} {
       allow create: if isStringOfSize(request.resource.data.fullName, 100)
                     && isStringOfSize(request.resource.data.phone, 20)
-                    && isStringOfSize(request.resource.data.email, 100)
-                    && request.resource.data.status == 'started'
-                    && request.resource.data.createdAt == request.time;
+                    && isStringOfSize(request.resource.data.email, 100);
       allow read, update, delete: if isAdmin();
     }
 

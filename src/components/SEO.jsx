@@ -3,8 +3,12 @@ import { useLocation } from "react-router-dom";
 
 const SEO_CONFIG = {
   "/": {
-    title: "DeepStaq | Build AI & Transition into Tech",
-    description: "The premier hands-on AI/ML academy. Code neural networks, build RAG pipelines, fine-tune LLMs, and launch production-grade agentic AI systems."
+    title: "Deepstaq | AI courses and training | Learn AI skills",
+    description: "Learn AI skills with Deepstaq through expert AI courses and training in Artificial Intelligence, Machine Learning, Generative AI, Agentic AI, and modern AI development"
+  },
+  "/programs": {
+    title: "6-Month Intensive Training Program | Deepstaq Kannur",
+    description: "Practical upskilling for the modern creative industry. Master Creative Designing, Digital Marketing, and AI Prompt Engineering with 100% practical training."
   },
   "/blog": {
     title: "DeepStaq Blog | AI/ML Insights & Career Guides",
@@ -25,8 +29,8 @@ const SEO_CONFIG = {
 };
 
 const DEFAULT_SEO = {
-  title: "DeepStaq | Next-Gen AI/ML Academy",
-  description: "Become a certified AI/ML practitioner. Master neural networks, RAG pipelines, fine-tuned LLMs, and agentic AI through hands-on GPU build sessions."
+  title: "Deepstaq | AI courses and training | Learn AI skills",
+  description: "Learn AI skills with Deepstaq through expert AI courses and training in Artificial Intelligence, Machine Learning, Generative AI, Agentic AI, and modern AI development"
 };
 
 export default function SEO() {

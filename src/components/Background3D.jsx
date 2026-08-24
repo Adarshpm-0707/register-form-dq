@@ -18,7 +18,7 @@ function Grid() {
   );
 }
 
-function Nodes({ count = 25 }) {
+function Nodes({ count = 20 }) {
   const group = useRef();
   const nodes = useMemo(() => {
     return Array.from({ length: count }, () => ({
@@ -34,11 +34,13 @@ function Nodes({ count = 25 }) {
 
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
-    group.current.children.forEach((child, i) => {
-      child.position.y += Math.sin(time * nodes[i].speed) * 0.005;
-      child.rotation.x += 0.005;
-      child.rotation.y += 0.005;
-    });
+    if (group.current && group.current.children) {
+      group.current.children.forEach((child, i) => {
+        child.position.y += Math.sin(time * nodes[i].speed) * 0.005;
+        child.rotation.x += 0.005;
+        child.rotation.y += 0.005;
+      });
+    }
   });
 
   return (
@@ -53,7 +55,7 @@ function Nodes({ count = 25 }) {
   );
 }
 
-function Particles({ count = 6000 }) {
+function Particles({ count = 4000 }) {
   const points = useRef();
   const scrollPos = useRef(0);
 
@@ -61,7 +63,7 @@ function Particles({ count = 6000 }) {
     const handleScroll = () => {
       scrollPos.current = window.scrollY / (document.body.scrollHeight - window.innerHeight);
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -113,14 +115,14 @@ function Particles({ count = 6000 }) {
 
 function Background3D() {
   return (
-    <div className="fixed inset-0 -z-10 bg-[#050521] overflow-hidden">
-      <Canvas camera={{ position: [0, 0, 25], fov: 60 }}>
+    <div className="fixed inset-0 -z-10 bg-[#050521] overflow-hidden pointer-events-none">
+      <Canvas camera={{ position: [0, 0, 25], fov: 60 }} gl={{ powerPreference: "high-performance", antialias: false }}>
         <color attach="background" args={["#050521"]} />
         <fog attach="fog" args={["#050521", 20, 50]} />
         <ambientLight intensity={0.3} />
         <Grid />
-        <Nodes count={30} />
-        <Particles count={8000} />
+        <Nodes count={20} />
+        <Particles count={4000} />
       </Canvas>
       {/* HUD Scanline & Grain */}
       <div className="background-noise absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay bg-black" />
@@ -129,4 +131,4 @@ function Background3D() {
   );
 }
 
-export default Background3D;
+export default React.memo(Background3D);

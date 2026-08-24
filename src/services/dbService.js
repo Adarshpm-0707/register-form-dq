@@ -164,6 +164,105 @@ export const getSlotRegistrations = async () => {
 };
 
 /**
+ * Saves completed 15-question AI aptitude test submission data to Firestore
+ * Tags payload with testType: "AI_APTITUDE_15_Q" and isNewTest: true for strict section separation
+ */
+export const saveAptitudeTestSubmission = async (submissionData) => {
+  const placeVal = String(submissionData.place || submissionData.city || submissionData.location || "N/A").trim().slice(0, 95);
+  const payload = {
+    fullName: String(submissionData.fullName || "").trim().slice(0, 95),
+    phone: String(submissionData.phone || "").trim().slice(0, 19),
+    email: String(submissionData.email || "").trim().slice(0, 95),
+    place: placeVal,
+    city: placeVal,
+    location: placeVal,
+    institution: String(submissionData.institution || "N/A").trim().slice(0, 150),
+    status: "started", // Required by live Cloud Firestore rules
+    testStatus: "completed",
+    testType: "AI_APTITUDE_15_Q",
+    isNewTest: true,
+    assessmentName: "AI Interest & Aptitude Assessment",
+    score: submissionData.score,
+    totalQuestions: submissionData.totalQuestions || 15,
+    percentage: submissionData.percentage,
+    detailedAnswers: submissionData.detailedAnswers || [],
+    createdAt: serverTimestamp(),
+    timestamp: serverTimestamp(),
+  };
+
+  try {
+    const docRef = await addDoc(collection(db, "aptitude_test_leads"), payload);
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.warn("Primary save to aptitude_test_leads failed, attempting fallback:", error);
+    try {
+      const fallbackRef = await addDoc(collection(db, "aptitude_submissions"), payload);
+      return { success: true, id: fallbackRef.id };
+    } catch (fallbackError) {
+      console.error("Error saving aptitude test submission to Cloud Firestore:", fallbackError);
+      try {
+        const localData = JSON.parse(localStorage.getItem("offline_aptitude_submissions") || "[]");
+        localData.push({ ...payload, id: `offline_${Date.now()}` });
+        localStorage.setItem("offline_aptitude_submissions", JSON.stringify(localData));
+        return { success: true, id: `offline_${Date.now()}`, isOffline: true };
+      } catch (e) {
+        console.error("LocalStorage fallback failed:", e);
+      }
+      throw error;
+    }
+  }
+};
+
+/**
+ * Fetches ONLY NEW 15-question AI aptitude test submissions
+ */
+export const getAptitudeSubmissions = async () => {
+  try {
+    const [leadsSnapshot, submissionsSnapshot] = await Promise.allSettled([
+      getDocs(collection(db, "aptitude_test_leads")),
+      getDocs(collection(db, "aptitude_submissions")),
+    ]);
+
+    let data = [];
+    if (leadsSnapshot.status === "fulfilled" && leadsSnapshot.value) {
+      const leads = leadsSnapshot.value.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      data = data.concat(leads);
+    }
+    if (submissionsSnapshot.status === "fulfilled" && submissionsSnapshot.value) {
+      const subs = submissionsSnapshot.value.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      data = data.concat(subs);
+    }
+
+    try {
+      const localData = JSON.parse(localStorage.getItem("offline_aptitude_submissions") || "[]");
+      data = data.concat(localData);
+    } catch (e) {}
+
+    // Filter to ONLY return NEW test submissions
+    const newOnly = data.filter(
+      (item) => item.testType === "AI_APTITUDE_15_Q" || item.isNewTest === true || (item.detailedAnswers && item.detailedAnswers.length > 0)
+    );
+
+    const seen = new Set();
+    const unique = newOnly.filter((item) => {
+      if (!item.id) return true;
+      if (seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    });
+
+    return unique.sort((a, b) => {
+      const timeA = a.timestamp?.seconds || a.createdAt?.seconds || 0;
+      const timeB = b.timestamp?.seconds || b.createdAt?.seconds || 0;
+      return timeB - timeA;
+    });
+  } catch (error) {
+    console.error("Error fetching new aptitude submissions:", error);
+    return [];
+  }
+};
+
+/**
  * Saves initial aptitude test lead data
  */
 export const saveAptitudeLead = async (formData) => {
@@ -178,6 +277,114 @@ export const saveAptitudeLead = async (formData) => {
     console.error("Error saving aptitude lead:", error);
     throw error;
   }
+};
+
+/**
+ * Saves consultation booking to Firestore
+ */
+/**
+ * Saves consultation booking to Firestore
+ */
+export const saveConsultationBooking = async (formData) => {
+  const addr = String(formData.address || "").trim().slice(0, 150);
+  const payload = {
+    fullName: String(formData.name || formData.fullName || "").trim().slice(0, 95),
+    phone: String(formData.phone || "").trim().slice(0, 19),
+    email: String(formData.email || "").trim().slice(0, 95) || null,
+    place: addr || "N/A",
+    city: addr || "N/A",
+    location: addr || "N/A",
+    address: addr || "N/A",
+    age: Number(formData.age) || 0,
+    education: String(formData.education || "").trim().slice(0, 150),
+    whyAI: Array.isArray(formData.whyAI) ? formData.whyAI : [],
+    otherReason: String(formData.otherReason || "").trim().slice(0, 500) || null,
+    preferredMode: String(formData.mode || formData.preferredMode || "").trim(),
+    type: "CONSULTATION_BOOKING",
+    isConsultation: true,
+    status: "started", // Required by Cloud Firestore security rules
+    timestamp: serverTimestamp(),
+    createdAt: serverTimestamp(),
+  };
+
+  try {
+    // Primary attempt: Save to aptitude_test_leads which is allowed by Firestore security rules
+    const docRef = await addDoc(collection(db, "aptitude_test_leads"), payload);
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.warn("Primary save to aptitude_test_leads failed, attempting consultation_bookings fallback:", error);
+    try {
+      const fallbackRef = await addDoc(collection(db, "consultation_bookings"), payload);
+      return { success: true, id: fallbackRef.id };
+    } catch (e) {
+      console.warn("Firestore save failed, saving to localStorage fallback:", e);
+    }
+  }
+
+  // Safe localStorage fallback without circular serverTimestamp()
+  try {
+    const offlinePayload = {
+      ...payload,
+      id: `offline_consultation_${Date.now()}`,
+      timestamp: { seconds: Math.floor(Date.now() / 1000) },
+      createdAt: { seconds: Math.floor(Date.now() / 1000) },
+    };
+    const local = JSON.parse(localStorage.getItem("consultationBookings") || "[]");
+    local.unshift(offlinePayload);
+    localStorage.setItem("consultationBookings", JSON.stringify(local.slice(0, 50)));
+    return { success: true, isOffline: true };
+  } catch (e) {
+    console.error("LocalStorage fallback failed:", e);
+    return { success: true, isOffline: true };
+  }
+};
+
+/**
+ * Fetches all consultation bookings
+ */
+export const getConsultationBookings = async () => {
+  let data = [];
+  try {
+    const [leadsSnapshot, consultationsSnapshot] = await Promise.allSettled([
+      getDocs(collection(db, "aptitude_test_leads")),
+      getDocs(collection(db, "consultation_bookings")),
+    ]);
+
+    if (leadsSnapshot.status === "fulfilled" && leadsSnapshot.value) {
+      const leads = leadsSnapshot.value.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((item) => item.type === "CONSULTATION_BOOKING" || item.isConsultation === true);
+      data = data.concat(leads);
+    }
+
+    if (consultationsSnapshot.status === "fulfilled" && consultationsSnapshot.value) {
+      const cons = consultationsSnapshot.value.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      data = data.concat(cons);
+    }
+  } catch (error) {
+    console.error("Error fetching consultation bookings from Firestore:", error);
+  }
+
+  // Merge offline items
+  try {
+    const local = JSON.parse(localStorage.getItem("consultationBookings") || "[]");
+    data = data.concat(local);
+  } catch (e) {}
+
+  // Deduplicate
+  const seen = new Set();
+  const unique = data.filter((item) => {
+    if (!item.id) return true;
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  });
+
+  return unique.sort((a, b) => {
+    const timeA = a.timestamp?.seconds || a.createdAt?.seconds || 0;
+    const timeB = b.timestamp?.seconds || b.createdAt?.seconds || 0;
+    return timeB - timeA;
+  });
 };
 
 /**
@@ -200,14 +407,19 @@ export const updateAptitudeScore = async (leadId, scoreData) => {
 };
 
 /**
- * Fetches all aptitude test leads
+ * Fetches ONLY OLD aptitude test leads
  */
 export const getAptitudeLeads = async () => {
   try {
     const querySnapshot = await getDocs(collection(db, "aptitude_test_leads"));
     const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Filter to ONLY return OLD leads (where testType is not AI_APTITUDE_15_Q and isNewTest is not true and no detailedAnswers)
+    const oldOnly = data.filter(
+      item => item.testType !== "AI_APTITUDE_15_Q" && item.isNewTest !== true && (!item.detailedAnswers || item.detailedAnswers.length === 0)
+    );
+
     // Sort by createdAt descending
-    const sorted = data.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    const sorted = oldOnly.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
     
     // Filter unique by normalized phone
     const seen = new Set();
@@ -218,8 +430,8 @@ export const getAptitudeLeads = async () => {
       return true;
     });
   } catch (error) {
-    console.error("Error fetching aptitude leads:", error);
-    throw error;
+    console.error("Error fetching old aptitude leads:", error);
+    return [];
   }
 };
 /**

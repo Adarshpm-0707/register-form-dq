@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import Background3D from "../components/Background3D";
-import WaterBubbles from "../components/WaterBubbles";
 
 // FAQ data
 const faqItems = [
@@ -103,8 +101,6 @@ export default function Blog() {
 
   return (
     <div className="min-h-screen bg-white text-[#050521] overflow-x-clip font-sans relative">
-      <Background3D />
-      <WaterBubbles />
 
       {/* Hero Section */}
       <section className="relative z-10 min-h-[100svh] flex flex-col justify-center pt-28 pb-16 md:pt-40 md:pb-24 px-6 md:px-12 bg-white text-[#050521] border-b-2 border-[#050521]">

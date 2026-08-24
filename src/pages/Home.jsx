@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { Link } from "react-router-dom";
-import Background3D from "../components/Background3D";
-import WaterBubbles from "../components/WaterBubbles";
 import HeroVRSection from "../components/HeroVRSection";
 import CircularGallery from "../components/CircularGallery";
 
@@ -303,22 +301,9 @@ const careerRolesData = [
 ];
 
 export default function Home() {
-  const handleDownloadBrochure = () => {
-    const element = document.createElement("a");
-    const file = new Blob([
-      "Deepstaq Professional Diploma in AI/ML & Generative AI\n6-Month Intensive Programme syllabus & outcomes details."
-    ], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
-    element.download = "Deepstaq_AI_ML_Brochure.txt";
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-  };
 
   return (
     <div className="min-h-screen bg-white text-[#050521] overflow-x-clip font-sans">
-      <Background3D />
-      <WaterBubbles />
 
       {/* Hero Section */}
       <section className="relative min-h-[100svh] flex flex-col justify-center px-6 sm:px-12 lg:px-20 py-20 overflow-hidden">
@@ -363,17 +348,16 @@ export default function Home() {
               transition={{ type: "spring", stiffness: 100, damping: 15, delay: 0.45 }}
               className="mt-8 sm:mt-12 flex flex-col sm:flex-row flex-wrap gap-4 w-full sm:w-auto items-center justify-center lg:justify-start"
             >
-              <Link to="/admission" className="w-full sm:w-auto">
-                <button className="w-full px-12 py-5 bg-[#050521] text-white font-black text-sm md:text-base uppercase tracking-widest rounded-xl shadow-[6px_6px_0px_0px_#c6ff34] active:translate-y-1 active:shadow-none transition-all hover:scale-105 duration-200">
-                  Apply Now
+              <Link to="/aptitude" className="w-full sm:w-auto">
+                <button className="w-full px-12 py-5 bg-[#050521] text-[#c6ff34] font-black text-sm md:text-base uppercase tracking-widest rounded-xl shadow-[6px_6px_0px_0px_#c6ff34] active:translate-y-1 active:shadow-none transition-all hover:scale-105 duration-200">
+                  Take Aptitude Test
                 </button>
               </Link>
-              <button
-                onClick={handleDownloadBrochure}
-                className="w-full sm:w-auto px-12 py-5 border-2 border-[#050521] text-[#050521] font-black text-sm md:text-base uppercase tracking-widest rounded-xl hover:bg-[#050521] hover:text-white transition-all hover:scale-105 duration-200"
-              >
-                Download Brochure
-              </button>
+              <Link to="/consultation" className="w-full sm:w-auto">
+                <button className="w-full sm:w-auto px-12 py-5 border-2 border-[#050521] text-[#050521] font-black text-sm md:text-base uppercase tracking-widest rounded-xl hover:bg-[#050521] hover:text-[#c6ff34] transition-all hover:scale-105 duration-200">
+                  Book Your Consultation
+                </button>
+              </Link>
             </motion.div>
           </div>
 
@@ -755,9 +739,14 @@ export default function Home() {
             Future Won't Wait. Why Should You?
           </p>
 
-          <div className="pt-8">
+          <div className="pt-8 flex flex-col sm:flex-row justify-center gap-4">
+            <Link to="/aptitude">
+              <button className="px-12 py-5 bg-[#050521] text-[#c6ff34] hover:bg-white hover:text-[#050521] font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-[6px_6px_0px_0px_#050521] hover:scale-105 active:translate-y-1 duration-200">
+                Take Aptitude Test
+              </button>
+            </Link>
             <Link to="/admission">
-              <button className="px-12 py-5 bg-[#050521] text-white hover:bg-white hover:text-[#050521] font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-[6px_6px_0px_0px_#050521] hover:scale-105 active:translate-y-1 duration-200">
+              <button className="px-12 py-5 border-2 border-[#050521] text-[#050521] hover:bg-[#050521] hover:text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all hover:scale-105 active:translate-y-1 duration-200">
                 Reserve Seat Now
               </button>
             </Link>
