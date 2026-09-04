@@ -14,7 +14,18 @@ import "./styles/effects.css";
 // Lazy-loaded pages for instant code-splitting and zero navigation lag
 const Home = lazy(() => import("./pages/Home"));
 const Programs = lazy(() => import("./pages/Programs"));
+
+// 7 Dedicated AI/ML Course & Guide Pages
+const AiCourse = lazy(() => import("./pages/AiCourse"));
+const MachineLearningCourse = lazy(() => import("./pages/MachineLearningCourse"));
+const AiMlCourse = lazy(() => import("./pages/AiMlCourse"));
+const OfflineAiCourse = lazy(() => import("./pages/OfflineAiCourse"));
+const AiCourseKannur = lazy(() => import("./pages/AiCourseKannur"));
+const OnlineAiCourse = lazy(() => import("./pages/OnlineAiCourse"));
+const AiMlCourseGuide = lazy(() => import("./pages/AiMlCourseGuide"));
+
 const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Aptitude = lazy(() => import("./pages/Aptitude"));
 const Admission = lazy(() => import("./pages/Admission"));
 const Contact = lazy(() => import("./pages/Contact"));
@@ -58,7 +69,18 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/programs" element={<Programs />} />
+
+            {/* 7 Separate AI/ML Course & Guide Pages */}
+            <Route path="/ai-course" element={<AiCourse />} />
+            <Route path="/machine-learning-course" element={<MachineLearningCourse />} />
+            <Route path="/ai-ml-course" element={<AiMlCourse />} />
+            <Route path="/offline-ai-course" element={<OfflineAiCourse />} />
+            <Route path="/ai-course-kannur" element={<AiCourseKannur />} />
+            <Route path="/online-ai-course" element={<OnlineAiCourse />} />
+            <Route path="/ai-ml-course-guide" element={<AiMlCourseGuide />} />
+
             <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/aptitude" element={<Aptitude />} />
             <Route path="/admission" element={<Admission />} />
             <Route path="/contact" element={<Contact />} />
