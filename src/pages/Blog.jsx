@@ -10,7 +10,7 @@ export default function Blog() {
   const toggleFAQ = (faqKey) => {
     setOpenFAQs((prev) => ({
       ...prev,
-      [faqKey]: !prev[faqKey]
+      [faqKey]: !prev[faqKey],
     }));
   };
 
@@ -21,11 +21,20 @@ export default function Blog() {
     }
   };
 
-  const categories = ["All", "AI Fundamentals", "Machine Learning", "AI vs ML", "Agentic AI", "Career Roadmap", "Learning Timeline"];
+  const categories = [
+    "All",
+    "AI Fundamentals",
+    "Machine Learning",
+    "AI vs ML",
+    "Agentic AI",
+    "Career Roadmap",
+    "Learning Timeline",
+  ];
 
-  const filteredPosts = selectedCategory === "All"
-    ? BLOG_POSTS
-    : BLOG_POSTS.filter((p) => p.category === selectedCategory);
+  const filteredPosts =
+    selectedCategory === "All"
+      ? BLOG_POSTS
+      : BLOG_POSTS.filter((p) => p.category === selectedCategory);
 
   return (
     <div className="min-h-screen bg-white text-[#050521] overflow-x-clip font-sans relative">
@@ -42,11 +51,8 @@ export default function Blog() {
               AI & MACHINE LEARNING GUIDES 2026
             </span>
             <h1 className="text-4xl md:text-7xl font-black uppercase tracking-tighter leading-[0.95] max-w-5xl text-[#050521]">
-              DeepStaq Knowledge Base:{" "}
-              <span className="text-stroke-dark-lg">
-                Master AI & ML
-              </span>{" "}
-              from Scratch to Production
+              <span className="text-stroke-dark-lg">Master AI & ML</span> from
+              Scratch to Production
             </h1>
             <div className="flex flex-wrap justify-center md:justify-start items-center gap-6 text-xs font-mono uppercase text-slate-500">
               <span className="flex items-center gap-1.5 font-bold text-[#050521]">
@@ -59,7 +65,10 @@ export default function Blog() {
               <span>Industry-Focused Practical Learning</span>
             </div>
             <p className="text-slate-600 font-mono text-sm md:text-base max-w-3xl leading-relaxed">
-              Explore our 6 foundational guides on Artificial Intelligence, Machine Learning, Deep Learning, Generative AI, and Agentic AI workflows. Built for developers, students, and professionals aiming to move from AI consumers to AI builders.
+              Explore our 6 foundational guides on Artificial Intelligence,
+              Machine Learning, Deep Learning, Generative AI, and Agentic AI
+              workflows. Built for developers, students, and professionals
+              aiming to move from AI consumers to AI builders.
             </p>
           </motion.div>
         </div>
@@ -73,7 +82,8 @@ export default function Blog() {
               Explore All 6 Sections
             </h2>
             <p className="text-xs md:text-sm font-mono text-slate-500 mt-1">
-              Select any guide to jump directly to its complete content or open its dedicated page.
+              Select any guide to jump directly to its complete content or open
+              its dedicated page.
             </p>
           </div>
 
@@ -140,39 +150,15 @@ export default function Blog() {
       </section>
 
       {/* Full 6 Sections In-Depth Reading Area */}
-      <section className="relative z-10 py-16 px-6 md:px-12 max-w-[1400px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 items-start">
-          
-          {/* Left Sticky Sidebar Directory */}
-          <aside className="sticky top-36 hidden lg:block col-span-1">
-            <div className="bg-slate-50 border-2 border-[#050521] rounded-3xl p-6 shadow-[6px_6px_0px_0px_#050521]">
-              <h3 className="text-sm font-black uppercase tracking-[0.2em] text-[#050521] mb-6 flex items-center gap-2">
-                <span>📋</span> 6 Blog Sections
-              </h3>
-              <ul className="space-y-4">
-                {BLOG_POSTS.map((post, idx) => (
-                  <li key={post.id}>
-                    <button
-                      onClick={() => handleScrollTo(post.id)}
-                      className="text-left text-xs font-mono font-bold uppercase tracking-wider text-slate-600 hover:text-[#050521] hover:translate-x-1 transition-all duration-200 block"
-                    >
-                      <span className="text-emerald-600 mr-1.5">0{idx + 1}.</span>
-                      {post.title.split(":")[0].replace(" (2026)", "").replace(" (2026 Guide)", "")}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </aside>
-
-          {/* Right Main Content Stream of All 6 Sections */}
-          <main className="col-span-1 lg:col-span-3 space-y-24">
-            {BLOG_POSTS.map((post, postIndex) => (
-              <article
-                key={post.id}
-                id={post.id}
-                className="scroll-mt-36 bg-white border-2 border-[#050521] rounded-3xl p-6 md:p-12 shadow-[8px_8px_0px_0px_#050521] space-y-8"
-              >
+      <section className="relative z-10 py-16 px-6 md:px-12 max-w-5xl mx-auto">
+        {/* Main Content Stream of All 6 Sections */}
+        <main className="w-full space-y-24">
+          {BLOG_POSTS.map((post, postIndex) => (
+            <article
+              key={post.id}
+              id={post.id}
+              className="scroll-mt-36 bg-white border-2 border-[#050521] rounded-3xl p-6 md:p-12 shadow-[8px_8px_0px_0px_#050521] space-y-8"
+            >
                 {/* Section Header */}
                 <div className="space-y-4 pb-6 border-b-2 border-[#050521]">
                   <div className="flex flex-wrap items-center gap-3">
@@ -193,7 +179,10 @@ export default function Blog() {
 
                   <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
                     <div className="text-xs font-mono text-slate-500">
-                      Target Keyword: <strong className="text-[#050521]">"{post.targetKeyword}"</strong>
+                      Target Keyword:{" "}
+                      <strong className="text-[#050521]">
+                        "{post.targetKeyword}"
+                      </strong>
                     </div>
                     <Link
                       to={`/blog/${post.slug}`}
@@ -213,7 +202,7 @@ export default function Blog() {
                           {sec.heading}
                         </h3>
                       )}
-                      
+
                       <div className="prose prose-slate max-w-none text-slate-700 text-sm md:text-base leading-relaxed whitespace-pre-line font-sans">
                         {sec.content}
                       </div>
@@ -224,7 +213,10 @@ export default function Blog() {
                             <thead>
                               <tr className="bg-[#050521] text-white font-mono uppercase">
                                 {sec.table.headers.map((h, hi) => (
-                                  <th key={hi} className="p-3.5 border-b-2 border-[#050521]">
+                                  <th
+                                    key={hi}
+                                    className="p-3.5 border-b-2 border-[#050521]"
+                                  >
                                     {h}
                                   </th>
                                 ))}
@@ -301,7 +293,8 @@ export default function Blog() {
                       Ready to build hands-on with DeepStaq?
                     </h4>
                     <p className="text-xs font-mono text-slate-500 mt-0.5">
-                      Explore our intensive industry programs with live GPU builds.
+                      Explore our intensive industry programs with live GPU
+                      builds.
                     </p>
                   </div>
                   <div className="flex gap-2 w-full md:w-auto">
@@ -316,7 +309,6 @@ export default function Blog() {
               </article>
             ))}
           </main>
-        </div>
       </section>
     </div>
   );
