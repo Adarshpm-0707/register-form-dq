@@ -98,6 +98,16 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // Security for Scholarship Applications
+    match /scholarship_applications/{document} {
+      allow create: if isStringOfSize(request.resource.data.fullName, 150)
+                    && isStringOfSize(request.resource.data.phone, 20)
+                    && (!('email' in request.resource.data) || isStringOfSize(request.resource.data.email, 100))
+                    && (!('whyJoinReason' in request.resource.data) || isStringOfSize(request.resource.data.whyJoinReason, 2000))
+                    && request.resource.data.type == 'SCHOLARSHIP_APPLICATION';
+      allow read, update, delete: if isAdmin();
+    }
+
     // Security for Admins - Strict Ownership, Write restricted to existing Admins (no self privilege escalation)
     match /admins/{document} {
       allow read: if request.auth != null && request.auth.token.email == document;

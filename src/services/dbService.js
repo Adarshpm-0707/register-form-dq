@@ -800,4 +800,161 @@ export const getAdmissionRegistrations = async () => {
   }
 };
 
+/**
+ * Saves scholarship application data to Firestore with strict input sanitization
+ */
+export const saveScholarshipApplication = async (formData) => {
+  const sanitize = (str, max = 500) => String(str || "").replace(/[<>]/g, "").trim().slice(0, max);
+  const cleanPhone = String(formData.phone || "").replace(/\D/g, "").slice(-10);
 
+  const payload = {
+    fullName: sanitize(formData.fullName, 100),
+    phone: cleanPhone,
+    email: sanitize(formData.email, 100).toLowerCase(),
+    age: Math.min(Math.max(Number(formData.age) || 18, 14), 70),
+    cityDistrict: sanitize(formData.cityDistrict || formData.city, 100),
+    instagramHandle: sanitize(formData.instagramHandle || (formData.followingInstagram ? "Verified Follower" : ""), 100),
+    followingInstagram: Boolean(formData.followingInstagram !== undefined ? formData.followingInstagram : true),
+    
+    // Section 2: Background
+    educationLevel: sanitize(formData.educationLevel, 100),
+    currentOccupation: sanitize(formData.currentOccupation, 100),
+    occupationOther: sanitize(formData.occupationOther, 100),
+    hasLaptopAndInternet: sanitize(formData.hasLaptopAndInternet, 20),
+    priorCodingAiExposure: sanitize(formData.priorCodingAiExposure, 50),
+    
+    // Section 3: Intent & Fit
+    whyJoinReason: sanitize(formData.whyJoinReason, 1000),
+    postCourseGoal: sanitize(formData.postCourseGoal, 100),
+    canCommitOctoberBatch: sanitize(formData.canCommitOctoberBatch, 20),
+    
+    // Section 4: Logistics & Consent
+    availableForExam: sanitize(formData.availableForExam, 20),
+    agreedFollowDeepStaq: Boolean(formData.agreedFollowDeepStaq),
+    agreedDiscontinueLiability: Boolean(formData.agreedDiscontinueLiability),
+    
+    // Administrative & evaluation metadata (enforced defaults for public submission)
+    type: "SCHOLARSHIP_APPLICATION",
+    status: "Submitted", // Public cannot inject approved or shortlisted status
+    marks: null, // Marks are strictly assigned by admins
+    scholarshipGranted: null,
+    adminRemarks: "",
+    timestamp: serverTimestamp(),
+    createdAt: serverTimestamp(),
+  };
+
+  try {
+    const docRef = await addDoc(collection(db, "scholarship_applications"), payload);
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.warn("Primary save to scholarship_applications failed, attempting fallback:", error);
+    try {
+      const fallbackRef = await addDoc(collection(db, "aptitude_test_leads"), {
+        ...payload,
+        status: "started",
+        isScholarship: true,
+      });
+      return { success: true, id: fallbackRef.id };
+    } catch (fallbackError) {
+      console.error("Firestore fallback failed:", fallbackError);
+      try {
+        const localData = JSON.parse(localStorage.getItem("offline_scholarship_applications") || "[]");
+        const offlineId = `offline_scholarship_${Date.now()}`;
+        localData.unshift({
+          ...payload,
+          id: offlineId,
+          timestamp: { seconds: Math.floor(Date.now() / 1000) },
+          createdAt: { seconds: Math.floor(Date.now() / 1000) }
+        });
+        localStorage.setItem("offline_scholarship_applications", JSON.stringify(localData.slice(0, 50)));
+        return { success: true, id: offlineId, isOffline: true };
+      } catch (e) {
+        console.error("LocalStorage fallback failed:", e);
+      }
+      throw error;
+    }
+  }
+};
+
+/**
+ * Fetches all scholarship applications
+ */
+export const getScholarshipApplications = async () => {
+  let data = [];
+  try {
+    const [scholarshipSnapshot, leadsSnapshot] = await Promise.allSettled([
+      getDocs(collection(db, "scholarship_applications")),
+      getDocs(collection(db, "aptitude_test_leads")),
+    ]);
+
+    if (scholarshipSnapshot.status === "fulfilled" && scholarshipSnapshot.value) {
+      const list = scholarshipSnapshot.value.docs.map((d) => ({ id: d.id, ...d.data() }));
+      data = data.concat(list);
+    }
+
+    if (leadsSnapshot.status === "fulfilled" && leadsSnapshot.value) {
+      const scholarshipLeads = leadsSnapshot.value.docs
+        .map((d) => ({ id: d.id, ...d.data() }))
+        .filter((item) => item.type === "SCHOLARSHIP_APPLICATION" || item.isScholarship === true);
+      data = data.concat(scholarshipLeads);
+    }
+  } catch (error) {
+    console.error("Error fetching scholarship applications:", error);
+  }
+
+  // Merge offline entries if any
+  try {
+    const localData = JSON.parse(localStorage.getItem("offline_scholarship_applications") || "[]");
+    data = data.concat(localData);
+  } catch (e) {}
+
+  // Deduplicate by ID
+  const seen = new Set();
+  const unique = data.filter((item) => {
+    if (!item.id) return true;
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  });
+
+  return unique.sort((a, b) => {
+    const timeA = a.timestamp?.seconds || a.createdAt?.seconds || 0;
+    const timeB = b.timestamp?.seconds || b.createdAt?.seconds || 0;
+    return timeB - timeA;
+  });
+};
+
+/**
+ * Updates scholarship application evaluation data (marks, status, scholarship granted, admin remarks)
+ */
+export const updateScholarshipApplication = async (id, updateData) => {
+  try {
+    const docRef = doc(db, "scholarship_applications", id);
+    await updateDoc(docRef, {
+      ...updateData,
+      updatedAt: serverTimestamp(),
+    });
+    return { success: true };
+  } catch (error) {
+    console.warn("Primary update in scholarship_applications failed, trying fallback in aptitude_test_leads:", error);
+    try {
+      const fallbackRef = doc(db, "aptitude_test_leads", id);
+      await updateDoc(fallbackRef, {
+        ...updateData,
+        updatedAt: serverTimestamp(),
+      });
+      return { success: true };
+    } catch (e) {
+      // Local storage update fallback
+      try {
+        const localData = JSON.parse(localStorage.getItem("offline_scholarship_applications") || "[]");
+        const updated = localData.map((item) => item.id === id ? { ...item, ...updateData } : item);
+        localStorage.setItem("offline_scholarship_applications", JSON.stringify(updated));
+        return { success: true, isOffline: true };
+      } catch (localErr) {
+        console.error("Failed to update scholarship record locally:", localErr);
+      }
+      throw error;
+    }
+  }
+};

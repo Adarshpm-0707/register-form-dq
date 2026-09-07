@@ -28,6 +28,7 @@ const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Aptitude = lazy(() => import("./pages/Aptitude"));
 const Admission = lazy(() => import("./pages/Admission"));
+const Scholarship = lazy(() => import("./pages/Scholarship"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Consultation = lazy(() => import("./pages/Consultation"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -83,6 +84,7 @@ function App() {
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/aptitude" element={<Aptitude />} />
             <Route path="/admission" element={<Admission />} />
+            <Route path="/scholarship" element={<Scholarship />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/consultation" element={<Consultation />} />
             <Route path="/admin" element={<AdminDashboard />} />

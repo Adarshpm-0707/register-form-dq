@@ -49,6 +49,7 @@ export default function Footer() {
     { name: "Programs", path: "/programs", icon: "🚀" },
     { name: "Blog Hub", path: "/blog", icon: "📚" },
     { name: "Aptitude Test", path: "/aptitude", icon: "🧠" },
+    { name: "Scholarship", path: "/scholarship", icon: "🎓" },
     { name: "Admission", path: "/admission", icon: "📝" },
     { name: "Consultation", path: "/consultation", icon: "💬" },
     { name: "Contact Us", path: "/contact", icon: "📍" },
@@ -104,19 +105,15 @@ export default function Footer() {
             <span className="text-[11px] font-mono font-black uppercase tracking-widest text-[#c6ff34]">
               Quick Navigation
             </span>
-            <span className="text-[10px] font-mono text-slate-500">7 Sections</span>
+            <span className="text-[10px] font-mono text-slate-500">8 Sections</span>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            {navItems.map((item, idx) => (
+            {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`p-3 rounded-2xl border transition-all flex items-center justify-between font-mono text-xs ${
-                  idx === 6
-                    ? "col-span-2 bg-[#c6ff34]/10 border-[#c6ff34]/40 text-[#c6ff34] font-black"
-                    : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
-                }`}
+                className="p-3 rounded-2xl border transition-all flex items-center justify-between font-mono text-xs bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
               >
                 <span className="flex items-center gap-2 truncate">
                   <span>{item.icon}</span>

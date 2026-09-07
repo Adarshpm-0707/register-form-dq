@@ -100,6 +100,7 @@ function Navbar() {
     { name: "COURSES", path: "/programs" },
     { name: "BLOG", path: "/blog", hasBlogDropdown: true },
     { name: "APTITUDE TEST", path: "/aptitude" },
+    { name: "SCHOLARSHIP", path: "/scholarship" },
     { name: "ADMISSION", path: "/admission" },
     { name: "CONTACT", path: "/contact" },
   ];

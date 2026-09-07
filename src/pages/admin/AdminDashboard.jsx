@@ -8,13 +8,15 @@ import {
   getSlotRegistrations, 
   getEventRegistrations, 
   getMasterRegistrations, 
-  getAptitudeLeads,
-  getAptitudeSubmissions,
-  getCollectedContacts,
-  getUploadedContactFiles,
-  getWebinarRegistrations,
-  getAdmissionRegistrations,
-  getConsultationBookings
+  getAptitudeLeads, 
+  getAptitudeSubmissions, 
+  getCollectedContacts, 
+  getUploadedContactFiles, 
+  getWebinarRegistrations, 
+  getAdmissionRegistrations, 
+  getConsultationBookings,
+  getScholarshipApplications,
+  updateScholarshipApplication
 } from "../../services/dbService";
 
 const DataCard = ({ item, headers, onDelete }) => {
@@ -637,6 +639,325 @@ const ConsultationCard = ({ item, onDelete }) => {
   );
 };
 
+const ScholarshipCard = ({ item, onDelete, onUpdate }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [marks, setMarks] = useState(item.marks !== undefined && item.marks !== null ? item.marks : "");
+  const [status, setStatus] = useState(item.status || "Submitted");
+  const [scholarshipGranted, setScholarshipGranted] = useState(item.scholarshipGranted || "None");
+  const [adminRemarks, setAdminRemarks] = useState(item.adminRemarks || "");
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
+
+  const cleanPhone = item.phone ? item.phone.toString().replace(/\D/g, "").slice(-10) : "";
+  const submissionDate = item.timestamp
+    ? new Date(item.timestamp.seconds * 1000).toLocaleString()
+    : item.createdAt?.seconds
+    ? new Date(item.createdAt.seconds * 1000).toLocaleString()
+    : "-";
+
+  const handleSaveEvaluation = async () => {
+    setIsSaving(true);
+    try {
+      await onUpdate(item.id, {
+        marks: marks !== "" ? (isNaN(marks) ? marks : Number(marks)) : null,
+        status,
+        scholarshipGranted,
+        adminRemarks,
+      });
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 2500);
+    } catch (err) {
+      console.error("Error updating scholarship evaluation:", err);
+      alert("Failed to update evaluation data.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const getStatusBadgeColor = (st) => {
+    switch (st) {
+      case "100% Scholarship Granted":
+      case "75% Scholarship Granted":
+      case "50% Scholarship Granted":
+      case "25% Scholarship Granted":
+        return "bg-green-100 text-green-800 border-green-300";
+      case "Shortlisted":
+      case "Exam Scheduled":
+        return "bg-blue-100 text-blue-800 border-blue-300";
+      case "Under Review":
+        return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      case "Rejected / Ineligible":
+        return "bg-red-100 text-red-800 border-red-300";
+      default:
+        return "bg-[#c6ff34]/30 text-[#050521] border-[#050521]/20";
+    }
+  };
+
+  const cleanInsta = (item.instagramHandle || "").replace(/^@/, "").trim();
+
+  return (
+    <div className="bg-white border-2 border-[#050521] rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-6 md:p-8 shadow-[4px_4px_0px_0px_#050521] hover:shadow-[8px_8px_0px_0px_#c6ff34] transition-all duration-300 flex flex-col gap-4 sm:gap-5 w-full min-w-0 overflow-hidden">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4 pb-4 border-b border-[#050521]/10 w-full min-w-0">
+        <div className="w-full min-w-0">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
+            <span className="bg-[#050521] text-[#c6ff34] px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest">
+              🎓 AI/ML Scholarship
+            </span>
+            <span className={`px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest border ${getStatusBadgeColor(status)}`}>
+              {status}
+            </span>
+            {marks !== "" && marks !== null && (
+              <span className="bg-[#c6ff34] text-[#050521] px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest border border-[#050521]/20">
+                Score / Marks: {marks}
+              </span>
+            )}
+            {scholarshipGranted && scholarshipGranted !== "None" && (
+              <span className="bg-emerald-600 text-white px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest">
+                {scholarshipGranted} Scholarship
+              </span>
+            )}
+          </div>
+          <h3 className="text-base sm:text-lg md:text-xl font-black text-[#050521] uppercase tracking-tight break-words">
+            {item.fullName || "Anonymous Applicant"}
+          </h3>
+          <p className="text-[11px] sm:text-xs text-slate-600 font-medium flex flex-wrap items-center gap-2 mt-1">
+            <span>📍 {item.cityDistrict || item.city || "Location Not Provided"}</span>
+            <span>•</span>
+            <span>🎂 Age: {item.age || "N/A"}</span>
+            {item.followingInstagram || item.agreedFollowDeepStaq ? (
+              <>
+                <span>•</span>
+                <span className="text-purple-700 font-bold flex items-center gap-1">
+                  📸 IG Follow Verified ✓
+                </span>
+              </>
+            ) : cleanInsta && cleanInsta.toLowerCase() !== "verified follower" ? (
+              <>
+                <span>•</span>
+                <a
+                  href={`https://instagram.com/${cleanInsta}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-purple-700 hover:text-purple-900 font-bold underline flex items-center gap-1"
+                >
+                  📸 @{cleanInsta}
+                </a>
+              </>
+            ) : null}
+          </p>
+        </div>
+        <span className="text-[9px] sm:text-[10px] font-bold text-[#050521] bg-slate-100 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-[#050521]/10 shrink-0 self-start">
+          {submissionDate}
+        </span>
+      </div>
+
+      {/* Basic & Background Info Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-slate-50 p-3.5 sm:p-4 rounded-2xl border border-[#050521]/10 w-full min-w-0">
+        <div className="min-w-0">
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/50 block">Phone / WhatsApp</span>
+          <a
+            href={`https://api.whatsapp.com/send?phone=91${cleanPhone}`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs font-bold text-green-700 hover:underline flex items-center gap-1 mt-0.5 truncate"
+          >
+            📱 {item.phone || "-"}
+          </a>
+        </div>
+        <div className="min-w-0">
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/50 block">Email Address</span>
+          <span className="text-xs font-bold text-[#050521] break-all mt-0.5 block">{item.email || "-"}</span>
+        </div>
+        <div className="min-w-0">
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/50 block">Education Level</span>
+          <span className="text-xs font-bold text-[#050521] mt-0.5 block truncate">{item.educationLevel || "-"}</span>
+        </div>
+        <div className="min-w-0">
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/50 block">Current Occupation</span>
+          <span className="text-xs font-bold text-[#050521] mt-0.5 block truncate">
+            {item.currentOccupation === "Other" && item.occupationOther ? `Other: ${item.occupationOther}` : item.currentOccupation || "-"}
+          </span>
+        </div>
+      </div>
+
+      {/* Critical Filters & Flags */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <div className={`p-3 rounded-xl border flex items-center gap-2 text-xs font-bold ${item.hasLaptopAndInternet === "Yes" ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-700"}`}>
+          <span>{item.hasLaptopAndInternet === "Yes" ? "💻✓ Laptop & Internet Access" : "💻✕ No Laptop / Internet"}</span>
+        </div>
+        <div className="p-3 rounded-xl border bg-slate-50 border-slate-200 text-[#050521] text-xs font-bold flex items-center gap-2">
+          <span>🧠 Coding Exposure: <strong className="uppercase">{item.priorCodingAiExposure || "None"}</strong></span>
+        </div>
+        <div className="p-3 rounded-xl border bg-slate-50 border-slate-200 text-[#050521] text-xs font-bold flex items-center gap-2">
+          <span>🎯 Post-Course Goal: <strong>{item.postCourseGoal || "Exploring"}</strong></span>
+        </div>
+      </div>
+
+      {/* Motivation Statement */}
+      {item.whyJoinReason && (
+        <div className="bg-[#c6ff34]/10 border border-[#050521]/20 p-3.5 rounded-2xl w-full min-w-0">
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521] block mb-1">
+            Reason for Joining AI Program:
+          </span>
+          <p className="text-xs font-medium text-[#050521] italic break-words leading-relaxed">
+            "{item.whyJoinReason}"
+          </p>
+        </div>
+      )}
+
+      {/* Expanded Logistics & Commitments */}
+      {isExpanded && (
+        <div className="space-y-4 pt-3 border-t border-[#050521]/10 animate-in fade-in duration-300">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <div>
+              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 block">Available For Exam</span>
+              <span className="text-xs font-bold text-[#050521]">{item.availableForExam || "Not Specified"}</span>
+            </div>
+            <div>
+              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 block">October Batch Commitment</span>
+              <span className="text-xs font-bold text-[#050521]">{item.canCommitOctoberBatch === "Yes" ? "✓ 100% Committed" : item.canCommitOctoberBatch || "-"}</span>
+            </div>
+            <div>
+              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 block">Terms & Policy Agreed</span>
+              <span className="text-xs font-bold text-green-700">✓ Yes (Follow & Mid-way Undertaking)</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Interactive Admin Marks & Evaluation Box */}
+      <div className="bg-[#050521]/5 border-2 border-[#050521] p-4 sm:p-5 rounded-2xl space-y-3.5 mt-1">
+        <div className="flex items-center justify-between">
+          <span className="text-[9px] font-black uppercase tracking-widest text-[#050521] flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#c6ff34] border border-[#050521]" />
+            Scholarship Evaluation & Marks Management
+          </span>
+          {savedSuccess && (
+            <span className="text-[10px] font-black uppercase tracking-wider text-green-700 bg-green-100 px-2.5 py-0.5 rounded-lg border border-green-300 animate-pulse">
+              ✓ Saved!
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Entrance Exam Marks */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-widest text-[#050521]/60 block mb-1">
+              Entrance Exam Marks / Score
+            </label>
+            <input
+              type="text"
+              value={marks}
+              onChange={(e) => setMarks(e.target.value)}
+              placeholder="e.g. 85 / 100"
+              className="w-full bg-white border border-[#050521]/20 rounded-xl px-3 py-2 text-xs font-bold text-[#050521] outline-none focus:border-[#050521]"
+            />
+          </div>
+
+          {/* Scholarship Status */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-widest text-[#050521]/60 block mb-1">
+              Scholarship Status
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full bg-white border border-[#050521]/20 rounded-xl px-3 py-2 text-xs font-bold text-[#050521] outline-none focus:border-[#050521]"
+            >
+              <option value="Submitted">Submitted (Pending Exam)</option>
+              <option value="Exam Scheduled">Exam Scheduled</option>
+              <option value="Under Review">Under Review</option>
+              <option value="Shortlisted">Shortlisted</option>
+              <option value="100% Scholarship Granted">100% Scholarship Granted</option>
+              <option value="75% Scholarship Granted">75% Scholarship Granted</option>
+              <option value="50% Scholarship Granted">50% Scholarship Granted</option>
+              <option value="25% Scholarship Granted">25% Scholarship Granted</option>
+              <option value="Selected (Paid Seat)">Selected (Paid Seat)</option>
+              <option value="Rejected / Ineligible">Rejected / Ineligible</option>
+            </select>
+          </div>
+
+          {/* Scholarship Bracket */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-widest text-[#050521]/60 block mb-1">
+              Scholarship Bracket
+            </label>
+            <select
+              value={scholarshipGranted}
+              onChange={(e) => setScholarshipGranted(e.target.value)}
+              className="w-full bg-white border border-[#050521]/20 rounded-xl px-3 py-2 text-xs font-bold text-[#050521] outline-none focus:border-[#050521]"
+            >
+              <option value="None">None</option>
+              <option value="100%">100% Free Tuition</option>
+              <option value="75%">75% Fee Waiver</option>
+              <option value="50%">50% Fee Waiver</option>
+              <option value="25%">25% Fee Waiver</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Admin Remarks */}
+        <div>
+          <label className="text-[8px] font-black uppercase tracking-widest text-[#050521]/60 block mb-1">
+            Admin Remarks / Interview Notes
+          </label>
+          <input
+            type="text"
+            value={adminRemarks}
+            onChange={(e) => setAdminRemarks(e.target.value)}
+            placeholder="Add internal evaluation remarks or test notes..."
+            className="w-full bg-white border border-[#050521]/20 rounded-xl px-3 py-2 text-xs font-medium text-[#050521] outline-none focus:border-[#050521]"
+          />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleSaveEvaluation}
+          disabled={isSaving}
+          className="w-full py-2.5 bg-[#050521] hover:bg-slate-800 text-[#c6ff34] font-black text-[10px] uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+        >
+          {isSaving ? "Saving Evaluation..." : "💾 Update Marks & Status"}
+        </button>
+      </div>
+
+      {/* Actions Strip */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-2.5 pt-3 border-t border-[#050521]/10 w-full">
+        <button
+          type="button"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-[#050521] py-2 px-3 rounded-lg hover:bg-slate-100 transition-colors"
+        >
+          {isExpanded ? "▲ Show Less Details" : "▼ View Full Submission Answers"}
+        </button>
+
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <a
+            href={`https://api.whatsapp.com/send?phone=91${cleanPhone}&text=${encodeURIComponent(
+              `Hi ${item.fullName || ""}, regarding your DeepStaq AI/ML Scholarship Application (Status: ${status})...`
+            )}`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex-1 sm:flex-initial px-4 py-2.5 bg-[#25D366] text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-[#20bd5a] transition-all flex items-center justify-center gap-2 shadow-sm"
+          >
+            <span>WhatsApp</span>
+          </a>
+
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(item.id, item.fullName || "this scholarship application")}
+              className="px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-500 hover:text-white text-red-600 text-[10px] font-black uppercase tracking-wider transition-all border border-red-200 flex items-center justify-center gap-1.5"
+            >
+              🗑 Delete
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function AdminDashboard() {
   const [user, setUser] = useState(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
@@ -651,8 +972,9 @@ function AdminDashboard() {
   const [webinarData, setWebinarData] = useState([]);
   const [admissionData, setAdmissionData] = useState([]);
   const [consultationData, setConsultationData] = useState([]);
+  const [scholarshipData, setScholarshipData] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
-  const [activeTab, setActiveTab] = useState("slot");
+  const [activeTab, setActiveTab] = useState("scholarship");
   const [searchQuery, setSearchQuery] = useState("");
 
   const navigate = useNavigate();
@@ -690,7 +1012,7 @@ function AdminDashboard() {
   const fetchData = async () => {
     setLoadingData(true);
     try {
-      const [slots, events, masters, oldAptitudes, newAptitudes, collected, uploaded, webinars, admissions, consultations] = await Promise.all([
+      const [slots, events, masters, oldAptitudes, newAptitudes, collected, uploaded, webinars, admissions, consultations, scholarships] = await Promise.all([
         getSlotRegistrations(),
         getEventRegistrations(),
         getMasterRegistrations(),
@@ -700,7 +1022,8 @@ function AdminDashboard() {
         getUploadedContactFiles(),
         getWebinarRegistrations(),
         getAdmissionRegistrations(),
-        getConsultationBookings()
+        getConsultationBookings(),
+        getScholarshipApplications()
       ]);
       setSlotData(slots);
       setEventData(events);
@@ -712,11 +1035,24 @@ function AdminDashboard() {
       setWebinarData(webinars);
       setAdmissionData(admissions);
       setConsultationData(consultations);
+      setScholarshipData(scholarships);
     } catch (error) {
       console.error("Error fetching data:", error);
       alert("Failed to fetch data.");
     } finally {
       setLoadingData(false);
+    }
+  };
+
+  const handleUpdateScholarship = async (id, updateData) => {
+    try {
+      await updateScholarshipApplication(id, updateData);
+      setScholarshipData((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, ...updateData } : item))
+      );
+    } catch (error) {
+      console.error("Error updating scholarship in state:", error);
+      throw error;
     }
   };
 
@@ -779,6 +1115,7 @@ function AdminDashboard() {
     }
 
     const collectionMap = {
+      scholarship: "scholarship_applications",
       slot: "slot_registrations",
       event: "event_registrations",
       master: "master_registrations",
@@ -807,6 +1144,12 @@ function AdminDashboard() {
 
     // Remove from local offline storage if present
     try {
+      const localScholarship = JSON.parse(localStorage.getItem("offline_scholarship_applications") || "[]");
+      const filteredSch = localScholarship.filter((item) => item.id !== id);
+      localStorage.setItem("offline_scholarship_applications", JSON.stringify(filteredSch));
+    } catch (e) {}
+
+    try {
       const localData = JSON.parse(localStorage.getItem("offline_aptitude_submissions") || "[]");
       const filtered = localData.filter((item) => item.id !== id);
       localStorage.setItem("offline_aptitude_submissions", JSON.stringify(filtered));
@@ -819,6 +1162,7 @@ function AdminDashboard() {
     } catch (e) {}
 
     // Update state to remove deleted record from UI immediately
+    setScholarshipData((prev) => prev.filter((item) => item.id !== id));
     setSlotData((prev) => prev.filter((item) => item.id !== id));
     setEventData((prev) => prev.filter((item) => item.id !== id));
     setMasterData((prev) => prev.filter((item) => item.id !== id));
@@ -834,6 +1178,21 @@ function AdminDashboard() {
   const renderCards = (data) => {
     if (data.length === 0) {
       return <p className="text-center py-10 text-[#050521]/50 font-bold uppercase tracking-widest">No registrations found.</p>;
+    }
+
+    if (activeTab === "scholarship") {
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          {data.map((item) => (
+            <ScholarshipCard
+              key={item.id}
+              item={item}
+              onDelete={handleDeleteRecord}
+              onUpdate={handleUpdateScholarship}
+            />
+          ))}
+        </div>
+      );
     }
     
     if (activeTab === "admission") {
@@ -879,6 +1238,7 @@ function AdminDashboard() {
   };
 
   const getActiveData = () => {
+    if (activeTab === "scholarship") return scholarshipData;
     if (activeTab === "slot") return slotData;
     if (activeTab === "event") return eventData;
     if (activeTab === "master") return masterData;
@@ -890,7 +1250,7 @@ function AdminDashboard() {
     if (activeTab === "admission") return admissionData;
     if (activeTab === "consultation") return consultationData;
 
-    return slotData;
+    return scholarshipData;
   };
 
   const getFilteredData = () => {
@@ -919,6 +1279,7 @@ function AdminDashboard() {
 
   const getTabTitle = () => {
     switch (activeTab) {
+      case "scholarship": return "Scholarship Applications";
       case "slot": return "Slot Registrations";
       case "event": return "Event Entry";
       case "master": return "Master Class";
@@ -961,6 +1322,17 @@ function AdminDashboard() {
           <div className="hidden md:block mb-2 px-2">
             <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">Collections</h3>
           </div>
+
+          <button 
+             onClick={() => setActiveTab("scholarship")}
+             className={`flex-shrink-0 md:w-full text-left px-5 py-4 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 ${activeTab === "scholarship" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
+          >
+             <span className="flex items-center gap-2">
+               <span>🎓</span>
+               <span>Scholarship Applications</span>
+             </span>
+             <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "scholarship" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{scholarshipData.length}</span>
+          </button>
           
           <button 
              onClick={() => setActiveTab("slot")}
