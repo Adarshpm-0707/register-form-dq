@@ -801,9 +801,65 @@ export const getAdmissionRegistrations = async () => {
 };
 
 /**
- * Saves scholarship application data to Firestore with strict input sanitization
+ * Saves initial scholarship lead data (Section 1: Basic Details) to Firestore
  */
-export const saveScholarshipApplication = async (formData) => {
+export const saveScholarshipLead = async (formData) => {
+  const sanitize = (str, max = 500) => String(str || "").replace(/[<>]/g, "").trim().slice(0, max);
+  const cleanPhone = String(formData.phone || "").replace(/\D/g, "").slice(-10);
+
+  const payload = {
+    fullName: sanitize(formData.fullName, 100),
+    phone: cleanPhone,
+    email: sanitize(formData.email, 100).toLowerCase(),
+    age: Math.min(Math.max(Number(formData.age) || 18, 14), 70),
+    cityDistrict: sanitize(formData.cityDistrict || formData.city, 100),
+    type: "SCHOLARSHIP_APPLICATION",
+    status: "Lead / Step 1 Completed",
+    isScholarshipLead: true,
+    marks: null,
+    scholarshipGranted: null,
+    adminRemarks: "",
+    timestamp: serverTimestamp(),
+    createdAt: serverTimestamp(),
+  };
+
+  try {
+    const docRef = await addDoc(collection(db, "scholarship_applications"), payload);
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.warn("Primary lead save to scholarship_applications failed, attempting fallback:", error);
+    try {
+      const fallbackRef = await addDoc(collection(db, "aptitude_test_leads"), {
+        ...payload,
+        status: "started",
+        isScholarship: true,
+      });
+      return { success: true, id: fallbackRef.id };
+    } catch (fallbackError) {
+      console.error("Firestore lead fallback failed:", fallbackError);
+      try {
+        const localData = JSON.parse(localStorage.getItem("offline_scholarship_applications") || "[]");
+        const offlineId = `offline_scholarship_${Date.now()}`;
+        localData.unshift({
+          ...payload,
+          id: offlineId,
+          timestamp: { seconds: Math.floor(Date.now() / 1000) },
+          createdAt: { seconds: Math.floor(Date.now() / 1000) }
+        });
+        localStorage.setItem("offline_scholarship_applications", JSON.stringify(localData.slice(0, 50)));
+        return { success: true, id: offlineId, isOffline: true };
+      } catch (e) {
+        console.error("LocalStorage fallback failed:", e);
+      }
+      throw error;
+    }
+  }
+};
+
+/**
+ * Saves completed scholarship application data to Firestore with strict input sanitization
+ */
+export const saveScholarshipApplication = async (formData, existingId = null) => {
   const sanitize = (str, max = 500) => String(str || "").replace(/[<>]/g, "").trim().slice(0, max);
   const cleanPhone = String(formData.phone || "").replace(/\D/g, "").slice(-10);
 
@@ -830,21 +886,42 @@ export const saveScholarshipApplication = async (formData) => {
     
     // Section 4: Logistics & Consent
     availableForExam: sanitize(formData.availableForExam, 20),
-    agreedFollowDeepStaq: Boolean(formData.agreedFollowDeepStaq),
+    agreedFollowDeepStaq: Boolean(formData.agreedFollowDeepStaq || formData.followingInstagram),
     agreedDiscontinueLiability: Boolean(formData.agreedDiscontinueLiability),
     
-    // Administrative & evaluation metadata (enforced defaults for public submission)
+    // Administrative & evaluation metadata
     type: "SCHOLARSHIP_APPLICATION",
-    status: "Submitted", // Public cannot inject approved or shortlisted status
-    marks: null, // Marks are strictly assigned by admins
+    status: "Submitted", // Application is now fully submitted
+    isScholarshipLead: false,
+    marks: null,
     scholarshipGranted: null,
     adminRemarks: "",
     timestamp: serverTimestamp(),
-    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
   };
 
+  if (existingId && !existingId.startsWith("offline_")) {
+    try {
+      const docRef = doc(db, "scholarship_applications", existingId);
+      await setDoc(docRef, payload, { merge: true });
+      return { success: true, id: existingId };
+    } catch (updateErr) {
+      console.warn("Update by existing ID failed in scholarship_applications, attempting fallback:", updateErr);
+      try {
+        const fallbackRef = doc(db, "aptitude_test_leads", existingId);
+        await setDoc(fallbackRef, { ...payload, isScholarship: true, status: "started" }, { merge: true });
+        return { success: true, id: existingId };
+      } catch (fallbackUpdateErr) {
+        console.warn("Fallback update failed, falling through to addDoc creation:", fallbackUpdateErr);
+      }
+    }
+  }
+
   try {
-    const docRef = await addDoc(collection(db, "scholarship_applications"), payload);
+    const docRef = await addDoc(collection(db, "scholarship_applications"), {
+      ...payload,
+      createdAt: serverTimestamp(),
+    });
     return { success: true, id: docRef.id };
   } catch (error) {
     console.warn("Primary save to scholarship_applications failed, attempting fallback:", error);
@@ -853,20 +930,22 @@ export const saveScholarshipApplication = async (formData) => {
         ...payload,
         status: "started",
         isScholarship: true,
+        createdAt: serverTimestamp(),
       });
       return { success: true, id: fallbackRef.id };
     } catch (fallbackError) {
       console.error("Firestore fallback failed:", fallbackError);
       try {
         const localData = JSON.parse(localStorage.getItem("offline_scholarship_applications") || "[]");
-        const offlineId = `offline_scholarship_${Date.now()}`;
-        localData.unshift({
+        const offlineId = existingId || `offline_scholarship_${Date.now()}`;
+        const filtered = localData.filter((item) => item.id !== existingId);
+        filtered.unshift({
           ...payload,
           id: offlineId,
           timestamp: { seconds: Math.floor(Date.now() / 1000) },
           createdAt: { seconds: Math.floor(Date.now() / 1000) }
         });
-        localStorage.setItem("offline_scholarship_applications", JSON.stringify(localData.slice(0, 50)));
+        localStorage.setItem("offline_scholarship_applications", JSON.stringify(filtered.slice(0, 50)));
         return { success: true, id: offlineId, isOffline: true };
       } catch (e) {
         console.error("LocalStorage fallback failed:", e);

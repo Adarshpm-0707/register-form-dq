@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { saveScholarshipApplication } from "../services/dbService";
+import { saveScholarshipApplication, saveScholarshipLead } from "../services/dbService";
 
 const EDUCATION_OPTIONS = [
   { value: "School", label: "School (10th / 12th)" },
@@ -43,6 +43,8 @@ const STEPS = [
 export default function Scholarship() {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [savingStep1, setSavingStep1] = useState(false);
+  const [savedApplicationId, setSavedApplicationId] = useState(() => sessionStorage.getItem("ds_scholarship_doc_id") || "");
   const [submitted, setSubmitted] = useState(false);
   const [submissionId, setSubmissionId] = useState("");
   const [errors, setErrors] = useState({});
@@ -55,7 +57,6 @@ export default function Scholarship() {
     email: "",
     age: "",
     cityDistrict: "",
-    followingInstagram: false,
 
     // Section 2: Background
     educationLevel: "",
@@ -69,8 +70,9 @@ export default function Scholarship() {
     postCourseGoal: "",
     canCommitOctoberBatch: "",
 
-    // Section 4: Logistics & Consent
+    // Section 4: Logistics & Verification
     availableForExam: "",
+    followingInstagram: false,
     agreedFollowDeepStaq: false,
     agreedDiscontinueLiability: false,
   });
@@ -97,7 +99,7 @@ export default function Scholarship() {
 
     setForm((prev) => {
       const nextVal = !prev.followingInstagram;
-      return { ...prev, followingInstagram: nextVal };
+      return { ...prev, followingInstagram: nextVal, agreedFollowDeepStaq: nextVal };
     });
 
     if (errors.followingInstagram) {
@@ -128,9 +130,6 @@ export default function Scholarship() {
       }
       if (!form.cityDistrict.trim()) {
         newErrors.cityDistrict = "Please enter your City or District.";
-      }
-      if (!form.followingInstagram) {
-        newErrors.followingInstagram = "Please confirm that you follow @deepstaq on Instagram.";
       }
     }
 
@@ -168,8 +167,8 @@ export default function Scholarship() {
       if (!form.availableForExam) {
         newErrors.availableForExam = "Please indicate your availability to take the scholarship entrance exam.";
       }
-      if (!form.agreedFollowDeepStaq) {
-        newErrors.agreedFollowDeepStaq = "You must confirm following the DeepStaq page and accepting terms.";
+      if (!form.followingInstagram) {
+        newErrors.followingInstagram = "Please confirm that you follow @deepstaq on Instagram.";
       }
       if (!form.agreedDiscontinueLiability) {
         newErrors.agreedDiscontinueLiability = "You must acknowledge and accept the course terms.";
@@ -180,11 +179,27 @@ export default function Scholarship() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep((prev) => Math.min(prev + 1, 4));
-      window.scrollTo({ top: 150, behavior: "smooth" });
+  const handleNext = async () => {
+    if (!validateStep(currentStep)) return;
+
+    // Automatically save customer data to database when clicking Next on Section 1
+    if (currentStep === 1) {
+      setSavingStep1(true);
+      try {
+        const res = await saveScholarshipLead(form);
+        if (res?.id) {
+          setSavedApplicationId(res.id);
+          sessionStorage.setItem("ds_scholarship_doc_id", res.id);
+        }
+      } catch (err) {
+        console.warn("Auto-saving Section 1 lead failed:", err);
+      } finally {
+        setSavingStep1(false);
+      }
     }
+
+    setCurrentStep((prev) => Math.min(prev + 1, 4));
+    window.scrollTo({ top: 150, behavior: "smooth" });
   };
 
   const handlePrev = () => {
@@ -206,7 +221,8 @@ export default function Scholarship() {
 
     setLoading(true);
     try {
-      const res = await saveScholarshipApplication(form);
+      const existingId = savedApplicationId || sessionStorage.getItem("ds_scholarship_doc_id");
+      const res = await saveScholarshipApplication(form, existingId);
       sessionStorage.setItem("ds_last_scholarship_sub", String(Date.now()));
       setSubmissionId(res?.id || `SCH-${Date.now().toString().slice(-6)}`);
       setSubmitted(true);
@@ -453,59 +469,6 @@ export default function Scholarship() {
                           } focus:border-[#050521] focus:bg-white text-xs sm:text-sm font-medium text-[#050521] outline-none transition-all`}
                         />
                         {errors.cityDistrict && <p className="text-[11px] text-red-500 font-bold">{errors.cityDistrict}</p>}
-                      </div>
-
-                      {/* 6. Instagram Follow Verification Checkbox */}
-                      <div className="space-y-1.5 sm:col-span-2 pt-1">
-                        <div
-                          onClick={handleInstagramCheckboxClick}
-                          className={`flex items-start gap-3 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border cursor-pointer transition-all ${
-                            form.followingInstagram
-                              ? "bg-[#c6ff34]/15 border-[#050521]"
-                              : hasVisitedInstagram
-                              ? "bg-purple-50/70 border-purple-300 hover:bg-purple-50"
-                              : "bg-slate-50 hover:bg-slate-100/80 border-slate-200"
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            name="followingInstagram"
-                            checked={form.followingInstagram}
-                            onChange={() => {}} // Controlled via container click
-                            className="mt-0.5 w-4 h-4 sm:w-5 sm:h-5 text-[#050521] rounded border-slate-300 focus:ring-0 cursor-pointer accent-[#050521] shrink-0 pointer-events-none"
-                          />
-                          <div className="text-[11px] sm:text-xs font-medium text-slate-700 leading-relaxed w-full">
-                            <div className="flex flex-wrap items-center justify-between gap-1.5 mb-1">
-                              <span className="text-[#050521] font-black uppercase text-xs">
-                                6. Instagram Follow Verification <span className="text-red-500">*</span>
-                              </span>
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border shadow-sm ${
-                                form.followingInstagram
-                                  ? "bg-green-100 text-green-800 border-green-300"
-                                  : hasVisitedInstagram
-                                  ? "bg-[#c6ff34] text-[#050521] border-[#050521]"
-                                  : "bg-white text-blue-600 border-slate-200"
-                              }`}>
-                                {form.followingInstagram
-                                  ? "✓ Follow Confirmed"
-                                  : hasVisitedInstagram
-                                  ? "Click again to confirm follow"
-                                  : "1st Click: Opens @deepstaq ↗"}
-                              </span>
-                            </div>
-                            <span>
-                              I confirm that I am following the official DeepStaq Instagram page (<strong>@deepstaq</strong>) to verify my eligibility.
-                            </span>
-                            {!hasVisitedInstagram && (
-                              <p className="text-[10px] font-bold text-slate-500 mt-1">
-                                💡 Tip: Clicking will open Instagram in a new tab to follow, then click again to check the box.
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        {errors.followingInstagram && (
-                          <p className="text-[11px] text-red-500 font-bold">{errors.followingInstagram}</p>
-                        )}
                       </div>
                     </div>
                   </motion.div>
@@ -808,10 +771,10 @@ export default function Scholarship() {
                   >
                     <div className="border-b border-slate-100 pb-3 sm:pb-4 mb-4 sm:mb-6">
                       <h2 className="text-lg sm:text-xl font-black text-[#050521] uppercase tracking-wide">
-                        Section 4: Logistics & Consent
+                        Section 4: Logistics & Verification
                       </h2>
                       <p className="text-xs text-slate-500 mt-0.5">
-                        Exam availability confirmation and terms agreement.
+                        Exam availability, Instagram verification, and terms undertaking.
                       </p>
                     </div>
 
@@ -848,31 +811,67 @@ export default function Scholarship() {
                       )}
                     </div>
 
-                    {/* Declarations Checkboxes */}
-                    <div className="space-y-3 pt-1">
-                      <h3 className="text-xs font-black uppercase tracking-wider text-[#050521]">
-                        Declarations & Terms Agreement
-                      </h3>
-
-                      {/* Checkbox 1 */}
-                      <label className="flex items-start gap-3 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 cursor-pointer transition-colors">
+                    {/* 2. Instagram Follow Verification Checkbox (Moved from Section 1) */}
+                    <div className="space-y-2 pt-1">
+                      <label className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-[#050521] block">
+                        2. Instagram Follow Verification <span className="text-red-500">*</span>
+                      </label>
+                      <div
+                        onClick={handleInstagramCheckboxClick}
+                        className={`flex items-start gap-3 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border cursor-pointer transition-all ${
+                          form.followingInstagram
+                            ? "bg-[#c6ff34]/15 border-[#050521]"
+                            : hasVisitedInstagram
+                            ? "bg-purple-50/70 border-purple-300 hover:bg-purple-50"
+                            : "bg-slate-50 hover:bg-slate-100/80 border-slate-200"
+                        }`}
+                      >
                         <input
                           type="checkbox"
-                          name="agreedFollowDeepStaq"
-                          checked={form.agreedFollowDeepStaq}
-                          onChange={handleChange}
-                          className="mt-0.5 w-4 h-4 sm:w-5 sm:h-5 text-[#050521] rounded border-slate-300 focus:ring-0 cursor-pointer accent-[#050521] shrink-0"
+                          name="followingInstagram"
+                          checked={form.followingInstagram}
+                          onChange={() => {}} // Controlled via container click
+                          className="mt-0.5 w-4 h-4 sm:w-5 sm:h-5 text-[#050521] rounded border-slate-300 focus:ring-0 cursor-pointer accent-[#050521] shrink-0 pointer-events-none"
                         />
-                        <div className="text-[11px] sm:text-xs font-medium text-slate-700 leading-relaxed">
-                          <strong className="text-[#050521] block mb-0.5">Instagram Follow & Terms Verification</strong>
-                          I confirm I am following the DeepStaq page (<a href="https://www.instagram.com/deepstaq/" target="_blank" rel="noreferrer" className="text-blue-600 underline font-bold">@deepstaq</a>) and understand the scholarship terms and conditions.
+                        <div className="text-[11px] sm:text-xs font-medium text-slate-700 leading-relaxed w-full">
+                          <div className="flex flex-wrap items-center justify-between gap-1.5 mb-1">
+                            <span className="text-[#050521] font-black uppercase text-xs">
+                              DeepStaq Official Page Follow
+                            </span>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded border shadow-sm ${
+                              form.followingInstagram
+                                ? "bg-green-100 text-green-800 border-green-300"
+                                : hasVisitedInstagram
+                                ? "bg-[#c6ff34] text-[#050521] border-[#050521]"
+                                : "bg-white text-blue-600 border-slate-200"
+                            }`}>
+                              {form.followingInstagram
+                                ? "✓ Follow Confirmed"
+                                : hasVisitedInstagram
+                                ? "Click again to confirm follow"
+                                : "1st Click: Opens @deepstaq ↗"}
+                            </span>
+                          </div>
+                          <span>
+                            I confirm that I am following the official DeepStaq Instagram page (<strong>@deepstaq</strong>) to verify my eligibility.
+                          </span>
+                          {!hasVisitedInstagram && (
+                            <p className="text-[10px] font-bold text-slate-500 mt-1">
+                              💡 Tip: Clicking will open Instagram in a new tab to follow, then click again to check the box.
+                            </p>
+                          )}
                         </div>
-                      </label>
-                      {errors.agreedFollowDeepStaq && (
-                        <p className="text-[11px] text-red-500 font-bold">{errors.agreedFollowDeepStaq}</p>
+                      </div>
+                      {errors.followingInstagram && (
+                        <p className="text-[11px] text-red-500 font-bold">{errors.followingInstagram}</p>
                       )}
+                    </div>
 
-                      {/* Checkbox 2 */}
+                    {/* 3. Course Completion Undertaking */}
+                    <div className="space-y-2 pt-1">
+                      <label className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-[#050521] block">
+                        3. Terms Undertaking <span className="text-red-500">*</span>
+                      </label>
                       <label className="flex items-start gap-3 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 cursor-pointer transition-colors">
                         <input
                           type="checkbox"
@@ -883,7 +882,7 @@ export default function Scholarship() {
                         />
                         <div className="text-[11px] sm:text-xs font-medium text-slate-700 leading-relaxed">
                           <strong className="text-[#050521] block mb-0.5">Course Completion Undertaking</strong>
-                          I understand that discontinuing the course mid-way may involve a fee liability as per the terms.
+                          I understand that discontinuing the course mid-way may involve a fee liability as per the scholarship terms.
                         </div>
                       </label>
                       {errors.agreedDiscontinueLiability && (
@@ -913,10 +912,20 @@ export default function Scholarship() {
                   <button
                     type="button"
                     onClick={handleNext}
-                    className="w-full sm:w-auto px-7 py-3.5 sm:py-4 rounded-xl bg-[#050521] text-[#c6ff34] font-black uppercase text-xs tracking-widest hover:bg-[#050521]/90 shadow-[3px_3px_0px_0px_#c6ff34] sm:shadow-[4px_4px_0px_0px_#c6ff34] hover:translate-x-0.5 hover:translate-y-0.5 transition-all flex items-center justify-center gap-2 sm:ml-auto"
+                    disabled={savingStep1}
+                    className="w-full sm:w-auto px-7 py-3.5 sm:py-4 rounded-xl bg-[#050521] text-[#c6ff34] font-black uppercase text-xs tracking-widest hover:bg-[#050521]/90 shadow-[3px_3px_0px_0px_#c6ff34] sm:shadow-[4px_4px_0px_0px_#c6ff34] hover:translate-x-0.5 hover:translate-y-0.5 transition-all flex items-center justify-center gap-2 sm:ml-auto disabled:opacity-75"
                   >
-                    <span>Next Section</span>
-                    <span>→</span>
+                    {savingStep1 ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-[#c6ff34] border-t-transparent rounded-full animate-spin" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Next Section</span>
+                        <span>→</span>
+                      </>
+                    )}
                   </button>
                 ) : (
                   <button

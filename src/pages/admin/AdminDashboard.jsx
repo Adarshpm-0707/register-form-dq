@@ -686,6 +686,9 @@ const ScholarshipCard = ({ item, onDelete, onUpdate }) => {
         return "bg-blue-100 text-blue-800 border-blue-300";
       case "Under Review":
         return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      case "Lead / Step 1 Completed":
+      case "Step 1 Lead":
+        return "bg-amber-100 text-amber-900 border-amber-300";
       case "Rejected / Ineligible":
         return "bg-red-100 text-red-800 border-red-300";
       default:
@@ -705,7 +708,7 @@ const ScholarshipCard = ({ item, onDelete, onUpdate }) => {
               🎓 AI/ML Scholarship
             </span>
             <span className={`px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest border ${getStatusBadgeColor(status)}`}>
-              {status}
+              {status === "Lead / Step 1 Completed" ? "⚡ Step 1 Lead (In Progress)" : status}
             </span>
             {marks !== "" && marks !== null && (
               <span className="bg-[#c6ff34] text-[#050521] px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest border border-[#050521]/20">
@@ -771,26 +774,26 @@ const ScholarshipCard = ({ item, onDelete, onUpdate }) => {
         </div>
         <div className="min-w-0">
           <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/50 block">Education Level</span>
-          <span className="text-xs font-bold text-[#050521] mt-0.5 block truncate">{item.educationLevel || "-"}</span>
+          <span className="text-xs font-bold text-[#050521] mt-0.5 block truncate">{item.educationLevel || (item.isScholarshipLead || item.status === "Lead / Step 1 Completed" ? "⏳ Pending Step 2" : "-")}</span>
         </div>
         <div className="min-w-0">
           <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/50 block">Current Occupation</span>
           <span className="text-xs font-bold text-[#050521] mt-0.5 block truncate">
-            {item.currentOccupation === "Other" && item.occupationOther ? `Other: ${item.occupationOther}` : item.currentOccupation || "-"}
+            {item.currentOccupation === "Other" && item.occupationOther ? `Other: ${item.occupationOther}` : item.currentOccupation || (item.isScholarshipLead || item.status === "Lead / Step 1 Completed" ? "⏳ Pending Step 2" : "-")}
           </span>
         </div>
       </div>
 
       {/* Critical Filters & Flags */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        <div className={`p-3 rounded-xl border flex items-center gap-2 text-xs font-bold ${item.hasLaptopAndInternet === "Yes" ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-700"}`}>
-          <span>{item.hasLaptopAndInternet === "Yes" ? "💻✓ Laptop & Internet Access" : "💻✕ No Laptop / Internet"}</span>
+        <div className={`p-3 rounded-xl border flex items-center gap-2 text-xs font-bold ${item.hasLaptopAndInternet === "Yes" ? "bg-green-50 border-green-200 text-green-800" : item.hasLaptopAndInternet === "No" ? "bg-red-50 border-red-200 text-red-700" : "bg-slate-50 border-slate-200 text-slate-500"}`}>
+          <span>{item.hasLaptopAndInternet === "Yes" ? "💻✓ Laptop & Internet Access" : item.hasLaptopAndInternet === "No" ? "💻✕ No Laptop / Internet" : "💻 Laptop Access: Pending"}</span>
         </div>
         <div className="p-3 rounded-xl border bg-slate-50 border-slate-200 text-[#050521] text-xs font-bold flex items-center gap-2">
-          <span>🧠 Coding Exposure: <strong className="uppercase">{item.priorCodingAiExposure || "None"}</strong></span>
+          <span>🧠 Coding Exposure: <strong className="uppercase">{item.priorCodingAiExposure || "Pending"}</strong></span>
         </div>
         <div className="p-3 rounded-xl border bg-slate-50 border-slate-200 text-[#050521] text-xs font-bold flex items-center gap-2">
-          <span>🎯 Post-Course Goal: <strong>{item.postCourseGoal || "Exploring"}</strong></span>
+          <span>🎯 Post-Course Goal: <strong>{item.postCourseGoal || "Pending"}</strong></span>
         </div>
       </div>
 
@@ -866,6 +869,7 @@ const ScholarshipCard = ({ item, onDelete, onUpdate }) => {
               className="w-full bg-white border border-[#050521]/20 rounded-xl px-3 py-2 text-xs font-bold text-[#050521] outline-none focus:border-[#050521]"
             >
               <option value="Submitted">Submitted (Pending Exam)</option>
+              <option value="Lead / Step 1 Completed">Lead / Step 1 Completed (In Progress)</option>
               <option value="Exam Scheduled">Exam Scheduled</option>
               <option value="Under Review">Under Review</option>
               <option value="Shortlisted">Shortlisted</option>
