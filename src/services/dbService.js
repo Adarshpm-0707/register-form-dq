@@ -1,5 +1,5 @@
 import { db, storage } from "../firebase/firebase";
-import { collection, addDoc, serverTimestamp, getDocs, query, where, updateDoc, doc, setDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, query, where, updateDoc, doc, setDoc, deleteDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 /**
@@ -1035,5 +1035,167 @@ export const updateScholarshipApplication = async (id, updateData) => {
       }
       throw error;
     }
+  }
+};
+
+/**
+ * Saves or updates interactive popup lead step data to Firestore
+ * Progressively stores Name -> Phone -> Email -> Purpose
+ */
+export const savePopupLeadStep = async (stepData, existingId = null) => {
+  const sanitize = (str, max = 500) => String(str || "").replace(/[<>]/g, "").trim().slice(0, max);
+  
+  const payload = {
+    type: "POPUP_LEAD",
+    step: Number(stepData.step || 2),
+    completed: Boolean(stepData.completed),
+    status: stepData.status || (stepData.completed ? "Completed" : `In Progress (Step ${stepData.step || 2})`),
+  };
+
+  if (stepData.fullName !== undefined) payload.fullName = sanitize(stepData.fullName, 120);
+  if (stepData.phone !== undefined) payload.phone = sanitize(stepData.phone, 30);
+  if (stepData.countryCode !== undefined) payload.countryCode = sanitize(stepData.countryCode, 10);
+  if (stepData.email !== undefined) payload.email = sanitize(stepData.email, 120).toLowerCase();
+  if (stepData.purpose !== undefined) payload.purpose = sanitize(stepData.purpose, 200);
+  if (stepData.purposeOther !== undefined) payload.purposeOther = sanitize(stepData.purposeOther, 300);
+  if (stepData.leadSource !== undefined) payload.leadSource = sanitize(stepData.leadSource, 100);
+
+  // If existing doc ID provided, merge updates
+  if (existingId && !existingId.startsWith("offline_")) {
+    try {
+      const docRef = doc(db, "popup_leads", existingId);
+      await setDoc(docRef, { ...payload, updatedAt: serverTimestamp() }, { merge: true });
+      return { success: true, id: existingId };
+    } catch (err) {
+      console.warn("Update to popup_leads failed, attempting offline update:", err);
+    }
+  }
+
+  // If no existingId or new document creation
+  if (!existingId || existingId.startsWith("offline_")) {
+    try {
+      const docRef = await addDoc(collection(db, "popup_leads"), {
+        ...payload,
+        createdAt: serverTimestamp(),
+        timestamp: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      return { success: true, id: docRef.id };
+    } catch (err) {
+      console.warn("Primary save to popup_leads failed, saving to localStorage:", err);
+    }
+  }
+
+  // LocalStorage Fallback
+  try {
+    const local = JSON.parse(localStorage.getItem("offline_popup_leads") || "[]");
+    const docId = existingId || `offline_popup_${Date.now()}`;
+    const existingIndex = local.findIndex((item) => item.id === docId);
+
+    const offlineItem = {
+      ...(existingIndex >= 0 ? local[existingIndex] : {}),
+      ...payload,
+      id: docId,
+      timestamp: { seconds: Math.floor(Date.now() / 1000) },
+      createdAt: { seconds: Math.floor(Date.now() / 1000) },
+      updatedAt: { seconds: Math.floor(Date.now() / 1000) },
+      isOffline: true,
+    };
+
+    if (existingIndex >= 0) {
+      local[existingIndex] = offlineItem;
+    } else {
+      local.unshift(offlineItem);
+    }
+
+    localStorage.setItem("offline_popup_leads", JSON.stringify(local.slice(0, 100)));
+    return { success: true, id: docId, isOffline: true };
+  } catch (e) {
+    console.error("LocalStorage save failed for popup lead:", e);
+    return { success: true, id: `offline_${Date.now()}`, isOffline: true };
+  }
+};
+
+/**
+ * Fetches all popup leads from Firestore and local fallback
+ */
+export const getPopupLeads = async () => {
+  let data = [];
+  try {
+    const querySnapshot = await getDocs(collection(db, "popup_leads"));
+    data = querySnapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (error) {
+    console.error("Error fetching popup leads from Firestore:", error);
+  }
+
+  // Merge offline entries if any
+  try {
+    const localData = JSON.parse(localStorage.getItem("offline_popup_leads") || "[]");
+    data = data.concat(localData);
+  } catch (e) {}
+
+  // Deduplicate by ID
+  const seen = new Set();
+  const unique = data.filter((item) => {
+    if (!item.id) return true;
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  });
+
+  return unique.sort((a, b) => {
+    const timeA = a.updatedAt?.seconds || a.timestamp?.seconds || a.createdAt?.seconds || 0;
+    const timeB = b.updatedAt?.seconds || b.timestamp?.seconds || b.createdAt?.seconds || 0;
+    return timeB - timeA;
+  });
+};
+
+/**
+ * Updates lead status or admin notes
+ */
+export const updatePopupLeadStatus = async (id, updateData) => {
+  try {
+    if (!id.startsWith("offline_")) {
+      const docRef = doc(db, "popup_leads", id);
+      await updateDoc(docRef, {
+        ...updateData,
+        updatedAt: serverTimestamp(),
+      });
+      return { success: true };
+    }
+  } catch (error) {
+    console.warn("Firestore update failed, fallback to local storage:", error);
+  }
+
+  try {
+    const localData = JSON.parse(localStorage.getItem("offline_popup_leads") || "[]");
+    const updated = localData.map((item) => (item.id === id ? { ...item, ...updateData } : item));
+    localStorage.setItem("offline_popup_leads", JSON.stringify(updated));
+    return { success: true, isOffline: true };
+  } catch (e) {
+    console.error("Failed to update popup lead locally:", e);
+    throw e;
+  }
+};
+
+/**
+ * Deletes a popup lead by ID
+ */
+export const deletePopupLead = async (id) => {
+  try {
+    if (!id.startsWith("offline_")) {
+      await deleteDoc(doc(db, "popup_leads", id));
+    }
+  } catch (err) {
+    console.warn("Firestore delete failed, removing from local storage:", err);
+  }
+
+  try {
+    const local = JSON.parse(localStorage.getItem("offline_popup_leads") || "[]");
+    const filtered = local.filter((item) => item.id !== id);
+    localStorage.setItem("offline_popup_leads", JSON.stringify(filtered));
+    return { success: true };
+  } catch (e) {
+    console.error("Failed to delete popup lead locally:", e);
   }
 };

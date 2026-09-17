@@ -8,6 +8,7 @@ import SecurityGuard from "./components/SecurityGuard";
 import SEO from "./components/SEO";
 import Background3D from "./components/Background3D";
 import WaterBubbles from "./components/WaterBubbles";
+import LeadPopupModal from "./components/LeadPopupModal";
 import "./styles/global.css";
 import "./styles/effects.css";
 
@@ -49,6 +50,7 @@ const AppLayout = ({ children }) => {
       {!isAdmin && <Background3D />}
       {!isAdmin && <WaterBubbles />}
       {!isAdmin && <Navbar />}
+      {!isAdmin && <LeadPopupModal />}
       <div className="flex-grow">
         <Suspense fallback={<PageFallback />}>
           {children}

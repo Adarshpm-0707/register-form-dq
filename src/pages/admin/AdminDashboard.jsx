@@ -16,7 +16,10 @@ import {
   getAdmissionRegistrations, 
   getConsultationBookings,
   getScholarshipApplications,
-  updateScholarshipApplication
+  updateScholarshipApplication,
+  getPopupLeads,
+  updatePopupLeadStatus,
+  deletePopupLead
 } from "../../services/dbService";
 
 const DataCard = ({ item, headers, onDelete }) => {
@@ -962,6 +965,219 @@ const ScholarshipCard = ({ item, onDelete, onUpdate }) => {
   );
 };
 
+const PopupLeadCard = ({ item, onDelete, onUpdate }) => {
+  const [status, setStatus] = useState(item.leadStatus || (item.completed ? "New Lead" : "Drop-off Lead"));
+  const [notes, setNotes] = useState(item.adminNotes || "");
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
+
+  const submissionDate = item.updatedAt
+    ? new Date(item.updatedAt.seconds * 1000).toLocaleString()
+    : item.timestamp
+    ? new Date(item.timestamp.seconds * 1000).toLocaleString()
+    : item.createdAt?.seconds
+    ? new Date(item.createdAt.seconds * 1000).toLocaleString()
+    : "-";
+
+  const rawPhone = item.phone || "";
+  const cleanPhone = rawPhone.replace(/\D/g, "");
+
+  const handleSaveStatus = async () => {
+    setIsSaving(true);
+    try {
+      if (onUpdate) {
+        await onUpdate(item.id, {
+          leadStatus: status,
+          adminNotes: notes,
+        });
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 3000);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to update status.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const getStepBadge = () => {
+    if (item.completed) {
+      return (
+        <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-green-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          Completed All Steps
+        </span>
+      );
+    }
+    if (item.phone) {
+      return (
+        <span className="px-3 py-1 bg-amber-100 text-amber-900 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-amber-500" />
+          Partial: Step {item.step || 3} (Phone Captured)
+        </span>
+      );
+    }
+    return (
+      <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-[10px] font-black uppercase tracking-wider border border-slate-300 flex items-center gap-1.5">
+        <span className="w-2 h-2 rounded-full bg-slate-400" />
+        Partial: Step 2 (Name Only)
+      </span>
+    );
+  };
+
+  return (
+    <div className="bg-white border-2 border-[#050521] rounded-[1.75rem] p-5 sm:p-6 shadow-[4px_4px_0px_0px_#050521] hover:shadow-[6px_6px_0px_0px_#c6ff34] transition-all duration-300 flex flex-col gap-4">
+      {/* Top Meta */}
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 pb-3 border-b border-slate-100">
+        <div>
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span className="font-mono text-[9px] text-[#050521]/50 uppercase tracking-widest">
+              ID: {item.id.slice(0, 8)}
+            </span>
+            {getStepBadge()}
+          </div>
+          <h3 className="text-lg font-black text-[#050521] tracking-tight">
+            {item.fullName || "Anonymous Visitor"}
+          </h3>
+        </div>
+        <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-xl border border-slate-200 shrink-0">
+          {submissionDate}
+        </span>
+      </div>
+
+      {/* Contact & Inquiry Details Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+            Phone Number
+          </span>
+          <span className="text-sm font-bold text-slate-900 block">
+            {item.phone || "Not entered yet"}
+          </span>
+        </div>
+
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+            Email Address
+          </span>
+          <span className="text-sm font-bold text-slate-900 break-all block">
+            {item.email || "Not entered yet"}
+          </span>
+        </div>
+
+        <div className="sm:col-span-2 pt-2 border-t border-slate-200/60">
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1">
+            Purpose / Inquiry Topic
+          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-block px-3 py-1 bg-[#050521] text-[#c6ff34] rounded-xl text-xs font-bold">
+              {item.purpose || (item.completed ? "Consultation / General" : "In Progress")}
+            </span>
+            {item.purposeOther && (
+              <span className="text-xs text-slate-600 italic">
+                Note: "{item.purposeOther}"
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions Strip */}
+      <div className="flex flex-wrap gap-2 pt-1">
+        {cleanPhone && (
+          <>
+            <a
+              href={`https://api.whatsapp.com/send?phone=${cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone}&text=${encodeURIComponent(
+                `Hello ${item.fullName || ""}, this is DeepStaq following up on your consultation enquiry for: ${item.purpose || "our AI programs"}.`
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex-1 min-w-[120px] py-2 px-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm"
+            >
+              <span>💬 WhatsApp</span>
+            </a>
+
+            <a
+              href={`tel:${cleanPhone}`}
+              className="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 shadow-sm"
+            >
+              <span>📞 Call</span>
+            </a>
+          </>
+        )}
+
+        {item.email && (
+          <a
+            href={`mailto:${item.email}?subject=${encodeURIComponent("DeepStaq AI Consultation Enquiry")}&body=${encodeURIComponent(`Hi ${item.fullName || ""},\n\nThank you for reaching out to DeepStaq regarding: ${item.purpose || "our courses"}.\n\nBest regards,\nDeepStaq Team`)}`}
+            className="py-2 px-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1"
+          >
+            <span>✉️ Email</span>
+          </a>
+        )}
+      </div>
+
+      {/* Lead Status & Notes Box */}
+      <div className="bg-[#050521]/5 border border-[#050521]/20 p-3.5 rounded-2xl flex flex-col gap-2.5">
+        <div className="flex items-center justify-between">
+          <span className="text-[9px] font-black uppercase tracking-widest text-[#050521]">
+            Lead Management
+          </span>
+          {savedSuccess && (
+            <span className="text-[9px] font-black text-green-700 bg-green-100 px-2 py-0.5 rounded-md border border-green-300">
+              ✓ Saved!
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
+          >
+            <option value="New Lead">🟢 New Lead</option>
+            <option value="Contacted">🟡 Contacted</option>
+            <option value="Follow-up Scheduled">🔵 Follow-up Scheduled</option>
+            <option value="In Discussion">🟣 In Discussion</option>
+            <option value="Enrolled">⭐ Enrolled / Converted</option>
+            <option value="Dropped / Not Interested">⚪ Dropped / Not Interested</option>
+          </select>
+
+          <input
+            type="text"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Add internal remarks / call notes..."
+            className="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#050521]"
+          />
+        </div>
+
+        <div className="flex justify-between items-center pt-1">
+          <button
+            type="button"
+            onClick={handleSaveStatus}
+            disabled={isSaving}
+            className="py-1.5 px-4 bg-[#050521] hover:bg-slate-800 text-[#c6ff34] font-black text-[10px] uppercase tracking-wider rounded-xl transition-all disabled:opacity-50"
+          >
+            {isSaving ? "Saving..." : "💾 Update Status"}
+          </button>
+
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(item.id, item.fullName || "this lead")}
+              className="text-red-500 hover:text-red-700 text-[10px] font-black uppercase tracking-wider py-1 px-2 rounded-lg hover:bg-red-50 transition-colors"
+            >
+              🗑 Delete
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function AdminDashboard() {
   const [user, setUser] = useState(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
@@ -977,6 +1193,7 @@ function AdminDashboard() {
   const [admissionData, setAdmissionData] = useState([]);
   const [consultationData, setConsultationData] = useState([]);
   const [scholarshipData, setScholarshipData] = useState([]);
+  const [popupLeadData, setPopupLeadData] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [activeTab, setActiveTab] = useState("scholarship");
   const [searchQuery, setSearchQuery] = useState("");
@@ -1016,7 +1233,7 @@ function AdminDashboard() {
   const fetchData = async () => {
     setLoadingData(true);
     try {
-      const [slots, events, masters, oldAptitudes, newAptitudes, collected, uploaded, webinars, admissions, consultations, scholarships] = await Promise.all([
+      const [slots, events, masters, oldAptitudes, newAptitudes, collected, uploaded, webinars, admissions, consultations, scholarships, popupLeads] = await Promise.all([
         getSlotRegistrations(),
         getEventRegistrations(),
         getMasterRegistrations(),
@@ -1027,7 +1244,8 @@ function AdminDashboard() {
         getWebinarRegistrations(),
         getAdmissionRegistrations(),
         getConsultationBookings(),
-        getScholarshipApplications()
+        getScholarshipApplications(),
+        getPopupLeads()
       ]);
       setSlotData(slots);
       setEventData(events);
@@ -1040,11 +1258,24 @@ function AdminDashboard() {
       setAdmissionData(admissions);
       setConsultationData(consultations);
       setScholarshipData(scholarships);
+      setPopupLeadData(popupLeads);
     } catch (error) {
       console.error("Error fetching data:", error);
       alert("Failed to fetch data.");
     } finally {
       setLoadingData(false);
+    }
+  };
+
+  const handleUpdatePopupLead = async (id, updateData) => {
+    try {
+      await updatePopupLeadStatus(id, updateData);
+      setPopupLeadData((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, ...updateData } : item))
+      );
+    } catch (error) {
+      console.error("Error updating popup lead:", error);
+      throw error;
     }
   };
 
@@ -1118,6 +1349,16 @@ function AdminDashboard() {
       return;
     }
 
+    if (activeTab === "popup_leads") {
+      try {
+        await deletePopupLead(id);
+      } catch (err) {
+        console.warn("Primary delete popup lead failed:", err);
+      }
+      setPopupLeadData((prev) => prev.filter((item) => item.id !== id));
+      return;
+    }
+
     const collectionMap = {
       scholarship: "scholarship_applications",
       slot: "slot_registrations",
@@ -1184,6 +1425,21 @@ function AdminDashboard() {
       return <p className="text-center py-10 text-[#050521]/50 font-bold uppercase tracking-widest">No registrations found.</p>;
     }
 
+    if (activeTab === "popup_leads") {
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          {data.map((item) => (
+            <PopupLeadCard
+              key={item.id}
+              item={item}
+              onDelete={handleDeleteRecord}
+              onUpdate={handleUpdatePopupLead}
+            />
+          ))}
+        </div>
+      );
+    }
+
     if (activeTab === "scholarship") {
       return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
@@ -1242,6 +1498,7 @@ function AdminDashboard() {
   };
 
   const getActiveData = () => {
+    if (activeTab === "popup_leads") return popupLeadData;
     if (activeTab === "scholarship") return scholarshipData;
     if (activeTab === "slot") return slotData;
     if (activeTab === "event") return eventData;
@@ -1283,6 +1540,7 @@ function AdminDashboard() {
 
   const getTabTitle = () => {
     switch (activeTab) {
+      case "popup_leads": return "Website Leads (Interactive Popup)";
       case "scholarship": return "Scholarship Applications";
       case "slot": return "Slot Registrations";
       case "event": return "Event Entry";
@@ -1326,6 +1584,17 @@ function AdminDashboard() {
           <div className="hidden md:block mb-2 px-2">
             <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">Collections</h3>
           </div>
+
+          <button 
+             onClick={() => setActiveTab("popup_leads")}
+             className={`flex-shrink-0 md:w-full text-left px-5 py-4 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 ${activeTab === "popup_leads" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
+          >
+             <span className="flex items-center gap-2">
+               <span>⚡</span>
+               <span>Website Leads (Popup)</span>
+             </span>
+             <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "popup_leads" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{popupLeadData.length}</span>
+          </button>
 
           <button 
              onClick={() => setActiveTab("scholarship")}
@@ -1462,6 +1731,49 @@ function AdminDashboard() {
               {searchQuery ? `Showing ${getFilteredData().length} of ${getActiveData().length} records` : `${getActiveData().length} records found`}
             </p>
           </div>
+
+          {/* Quick Metrics Banner for Popup Leads */}
+          {activeTab === "popup_leads" && !loadingData && (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-7">
+              <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <span className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">Total Captured</span>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-2xl sm:text-3xl font-black text-[#050521]">{popupLeadData.length}</span>
+                  <span className="text-[10px] font-bold text-slate-400">leads</span>
+                </div>
+              </div>
+
+              <div className="bg-emerald-50/70 p-4 sm:p-5 rounded-2xl border border-emerald-200/80 shadow-sm flex flex-col justify-between">
+                <span className="text-[9px] font-black uppercase tracking-[0.15em] text-emerald-800">Completed All Steps</span>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-2xl sm:text-3xl font-black text-emerald-900">
+                    {popupLeadData.filter((i) => i.completed).length}
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-700">100% finished</span>
+                </div>
+              </div>
+
+              <div className="bg-amber-50/70 p-4 sm:p-5 rounded-2xl border border-amber-200/80 shadow-sm flex flex-col justify-between">
+                <span className="text-[9px] font-black uppercase tracking-[0.15em] text-amber-800">Partial (Phone Captured)</span>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-2xl sm:text-3xl font-black text-amber-900">
+                    {popupLeadData.filter((i) => !i.completed && i.phone).length}
+                  </span>
+                  <span className="text-[10px] font-bold text-amber-700">recoverable</span>
+                </div>
+              </div>
+
+              <div className="bg-blue-50/70 p-4 sm:p-5 rounded-2xl border border-blue-200/80 shadow-sm flex flex-col justify-between">
+                <span className="text-[9px] font-black uppercase tracking-[0.15em] text-blue-800">Consultation Inquiries</span>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-2xl sm:text-3xl font-black text-blue-900">
+                    {popupLeadData.filter((i) => (i.purpose || "").toLowerCase().includes("consultation")).length}
+                  </span>
+                  <span className="text-[10px] font-bold text-blue-700">priority</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Search Input */}
           {!loadingData && (
