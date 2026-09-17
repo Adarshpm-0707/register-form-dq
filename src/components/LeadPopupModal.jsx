@@ -33,10 +33,12 @@ export default function LeadPopupModal({ forceOpen = false, onCloseCallback = nu
       return;
     }
 
-    // Gentle delay for smooth entrance on load/reload
+    // Wait 5 seconds after site load before showing the popup
     const timer = setTimeout(() => {
-      setIsOpen(true);
-    }, 700);
+      if (!window.location.pathname.startsWith("/admin") && sessionStorage.getItem("lead_popup_completed") !== "true") {
+        setIsOpen(true);
+      }
+    }, 5000);
 
     return () => clearTimeout(timer);
   }, []);
