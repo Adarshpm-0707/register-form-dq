@@ -323,42 +323,6 @@ export default function Programs() {
     },
   ];
 
-  const whatYouWillLearn = [
-    {
-      icon: Icons.Palette,
-      category: "CREATIVE DESIGNING",
-      subtitle: "Visual Communication & Branding",
-      desc: "Learn visual communication, branding identity, social media design, advertising creatives, and industry-standard design workflows.",
-      tools: ["Adobe Photoshop", "Adobe Illustrator", "Canva", "Figma"],
-      color: "from-purple-500/10 to-indigo-500/10",
-    },
-    {
-      icon: Icons.TrendingUp,
-      category: "DIGITAL MARKETING",
-      subtitle: "Performance & Campaign Strategy",
-      desc: "Master social media marketing, SEO, content strategy, Meta Ads, LinkedIn marketing, and digital campaign planning.",
-      tools: [
-        "Meta Business Suite",
-        "LinkedIn",
-        "SEO Platforms",
-        "Content Strategy",
-      ],
-      color: "from-lime-500/10 to-emerald-500/10",
-    },
-    {
-      icon: Icons.Cpu,
-      category: "AI PROMPT ENGINEERING",
-      subtitle: "Modern AI Tool Orchestration",
-      desc: "Use cutting-edge AI tools to dramatically improve creativity, productivity, content creation, deep research, and marketing workflows.",
-      tools: [
-        "ChatGPT",
-        "Google Gemini",
-        "AI Creative Tools",
-        "Workflow Automation",
-      ],
-      color: "from-blue-500/10 to-cyan-500/10",
-    },
-  ];
 
   const whyChooseUs = [
     {
@@ -520,7 +484,7 @@ export default function Programs() {
               className="mt-8 sm:mt-12 flex flex-col sm:flex-row flex-wrap gap-4 w-full sm:w-auto items-center justify-center lg:justify-start"
             >
               <a
-                href="https://wa.me/919495957011?text=Hello%20Deepstaq%2C%20I%20am%20interested%20in%20your%206-Month%20Creative%20Pro%20Program."
+                href="https://wa.me/919495957011?text=Hello%20Deepstaq%2C%20I%20would%20like%20to%20know%20more%20about%20the%20Creative%20Pro%20Course."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto"
@@ -532,7 +496,7 @@ export default function Programs() {
                   >
                     <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.285-.143-1.685-.832-1.947-.927-.262-.095-.453-.143-.644.143-.191.285-.738.927-.905 1.117-.167.191-.334.214-.619.071-.285-.143-1.206-.445-2.298-1.418-.849-.757-1.423-1.692-1.59-1.977-.167-.285-.018-.439.125-.581.129-.128.285-.334.428-.5.143-.167.19-.285.285-.476.095-.191.047-.357-.024-.5-.071-.143-.644-1.551-.882-2.12-.231-.555-.468-.48-.644-.488-.166-.008-.357-.01-.548-.01-.191 0-.5.071-.762.357s-1.001.977-1.001 2.382c0 1.405 1.024 2.763 1.167 2.954.143.191 2.014 3.076 4.88 4.316.682.295 1.214.471 1.629.603.685.218 1.309.187 1.802.114.549-.081 1.685-.689 1.923-1.355.238-.666.238-1.236.167-1.355-.071-.119-.262-.19-.547-.333z" />
                   </svg>
-                  <span>Contact Us</span>
+                  <span>More About The Course</span>
                 </button>
               </a>
             </motion.div>
@@ -711,80 +675,6 @@ export default function Programs() {
         </div>
       </section>
 
-      {/* ─────────────────────────────────────────────
-          WHAT YOU'LL LEARN (3 CORE PILLARS)
-      ───────────────────────────────────────────── */}
-      <section className="py-24 px-6 sm:px-12 border-b-2 border-[#050521]">
-        <div className="max-w-[1300px] mx-auto space-y-16">
-          <div className="space-y-4 text-center md:text-left">
-            <span className="text-xs font-black uppercase tracking-widest text-[#050521] bg-[#c6ff34] border border-[#050521] px-4 py-1.5 rounded-full inline-block">
-              Curriculum Pillars
-            </span>
-            <h2 className="text-4xl sm:text-6xl font-black uppercase tracking-tighter">
-              What You'll <span className="text-stroke-dark">Learn.</span>
-            </h2>
-            <p className="text-slate-600 font-mono text-sm max-w-xl">
-              Comprehensive 3-in-1 skill stack designed to make you an
-              indispensable creative professional in today's AI-driven market.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {whatYouWillLearn.map((pillar, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="relative bg-white border-2 border-[#050521] rounded-[2rem] p-8 shadow-[8px_8px_0px_0px_#050521] hover:shadow-[12px_12px_0px_0px_#c6ff34] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
-              >
-                <div className="space-y-6">
-                  {/* Top Header */}
-                  <div className="flex items-center justify-between">
-                    <div className="w-14 h-14 rounded-2xl bg-[#050521] text-[#c6ff34] flex items-center justify-center shadow-[4px_4px_0px_0px_#c6ff34]">
-                      <pillar.icon className="w-7 h-7" />
-                    </div>
-                    <span className="text-xs font-mono font-black uppercase tracking-widest text-[#050521]/40">
-                      Module 0{idx + 1}
-                    </span>
-                  </div>
-
-                  <div className="space-y-2">
-                    <h3 className="text-2xl font-black uppercase tracking-tight text-[#050521]">
-                      {pillar.category}
-                    </h3>
-                    <p className="text-xs font-bold uppercase tracking-wider text-[#050521]/70 bg-slate-100 px-3 py-1 rounded-md inline-block">
-                      {pillar.subtitle}
-                    </p>
-                  </div>
-
-                  <p className="text-sm font-mono text-slate-600 leading-relaxed">
-                    {pillar.desc}
-                  </p>
-                </div>
-
-                {/* Tools Grid */}
-                <div className="mt-8 pt-6 border-t-2 border-[#050521]/10 space-y-3">
-                  <div className="text-[10px] font-black uppercase tracking-widest text-[#050521]/60">
-                    Mastered Capabilities:
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {pillar.tools.map((t, i) => (
-                      <span
-                        key={i}
-                        className="text-[11px] font-bold text-[#050521] bg-[#c6ff34]/20 border border-[#050521]/20 px-3 py-1 rounded-lg"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ─────────────────────────────────────────────
           WHY CHOOSE DEEPSTAQ?

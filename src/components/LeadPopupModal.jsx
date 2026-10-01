@@ -20,32 +20,40 @@ export default function LeadPopupModal({ forceOpen = false, onCloseCallback = nu
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Automatic open on site load / reload (except admin pages)
+  // Automatic open on site load / reload (home page only)
   useEffect(() => {
-    if (window.location.pathname.startsWith("/admin")) {
+    // Only show on home page ("/")
+    if (location.pathname !== "/") {
       setIsOpen(false);
       return;
     }
 
-    // If user has already completed the form in this session, keep popup removed so they can browse freely
-    if (sessionStorage.getItem("lead_popup_completed") === "true") {
+    // If user has already completed or dismissed the form in this session, keep popup removed
+    if (
+      sessionStorage.getItem("lead_popup_completed") === "true" ||
+      sessionStorage.getItem("lead_popup_dismissed") === "true"
+    ) {
       setIsOpen(false);
       return;
     }
 
-    // Wait 5 seconds after site load before showing the popup
+    // Wait 5 seconds after landing on home page before showing the popup
     const timer = setTimeout(() => {
-      if (!window.location.pathname.startsWith("/admin") && sessionStorage.getItem("lead_popup_completed") !== "true") {
+      if (
+        location.pathname === "/" &&
+        sessionStorage.getItem("lead_popup_completed") !== "true" &&
+        sessionStorage.getItem("lead_popup_dismissed") !== "true"
+      ) {
         setIsOpen(true);
       }
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [location.pathname]);
 
-  // Ensure modal is closed if navigating to admin
+  // Ensure modal is closed if navigating away from home page
   useEffect(() => {
-    if (location.pathname.startsWith("/admin")) {
+    if (location.pathname !== "/") {
       setIsOpen(false);
     }
   }, [location.pathname]);
@@ -60,6 +68,7 @@ export default function LeadPopupModal({ forceOpen = false, onCloseCallback = nu
 
   const handleClose = () => {
     setIsOpen(false);
+    sessionStorage.setItem("lead_popup_dismissed", "true");
     if (onCloseCallback) onCloseCallback();
   };
 
@@ -261,8 +270,8 @@ export default function LeadPopupModal({ forceOpen = false, onCloseCallback = nu
     navigate("/programs");
   };
 
-  // Don't render modal on admin routes
-  if (location.pathname.startsWith("/admin")) return null;
+  // Only render modal and floating launcher on the home page ("/")
+  if (location.pathname !== "/") return null;
 
   return (
     <>

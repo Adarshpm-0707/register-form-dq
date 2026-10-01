@@ -44,13 +44,14 @@ const PageFallback = () => (
 const AppLayout = ({ children }) => {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith("/admin");
+  const isHome = location.pathname === "/";
 
   return (
     <div className="relative min-h-screen flex flex-col bg-white text-[#050521]">
       {!isAdmin && <Background3D />}
       {!isAdmin && <WaterBubbles />}
       {!isAdmin && <Navbar />}
-      {!isAdmin && <LeadPopupModal />}
+      {isHome && <LeadPopupModal />}
       <div className="flex-grow">
         <Suspense fallback={<PageFallback />}>
           {children}

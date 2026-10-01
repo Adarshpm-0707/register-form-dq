@@ -3,6 +3,7 @@ import { motion, useScroll, useSpring } from "framer-motion";
 import { Link } from "react-router-dom";
 import HeroVRSection from "../components/HeroVRSection";
 import CircularGallery from "../components/CircularGallery";
+import OurEventsSection from "../components/OurEventsSection";
 
 
 // Career image imports
@@ -367,6 +368,9 @@ export default function Home() {
 
         </div>
       </section>
+
+      {/* Our Events Section */}
+      <OurEventsSection />
 
       {/* Ticker & Core Statistics */}
       <section className="bg-[#c6ff34] border-y-2 border-[#050521]">
