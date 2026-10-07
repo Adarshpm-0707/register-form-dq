@@ -448,9 +448,7 @@ export default function AiForEveryone() {
                         <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#c6ff34]">
                           ⏳ Offer Ends In:
                         </p>
-                        <p className="text-[8px] font-mono text-slate-400">
-                          Resets every Saturday at 4:00 PM
-                        </p>
+                     
                       </div>
                     </div>
 
