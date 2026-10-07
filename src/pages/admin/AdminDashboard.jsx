@@ -1285,7 +1285,7 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
   };
 
   const whatsappMessage = isPaid
-    ? `Hi ${candidateName}! Thank you for registering for the DeepStaq AI For Everyone initiative and completing your ₹99 payment (Ref: ${item.id?.slice(0, 8)}, Payment ID: ${paymentId || "Confirmed"}). Welcome aboard!`
+    ? `Hi ${candidateName}! Thank you for registering for the DeepStaq AI For Everyone initiative and completing your ₹99 payment (Ref: ${item.id?.slice(0, 8)}, Payment ID: ${paymentId || "Confirmed"}). Welcome aboard! Please join our official WhatsApp Community here for class links and materials: https://chat.whatsapp.com/KxVV7ep74TV0GHy5SU2FXl`
     : `Hi ${candidateName}! We noticed you started registering for the DeepStaq AI For Everyone initiative (₹99 special offer) but didn't complete the payment. Would you like any assistance to complete your registration?`;
 
   return (
