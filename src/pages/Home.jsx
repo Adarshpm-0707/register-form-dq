@@ -498,6 +498,73 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── AI For Everyone Initiative Section ── */}
+      <section className="py-20 md:py-28 px-6 sm:px-12 lg:px-20 border-b-2 border-[#050521] bg-gradient-to-r from-slate-900 via-[#050521] to-slate-950 text-white relative overflow-hidden">
+        {/* Ambient Glows */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#c6ff34]/10 rounded-full blur-[140px] pointer-events-none -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#c6ff34]/5 rounded-full blur-[120px] pointer-events-none translate-y-1/3 -translate-x-1/3" />
+
+        <div className="max-w-[1300px] mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+          <div className="lg:col-span-7 space-y-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#c6ff34]/10 border border-[#c6ff34]/30 text-[#c6ff34]">
+              <span className="w-2 h-2 rounded-full bg-[#c6ff34] animate-pulse" />
+              <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.25em]">New Public Initiative</span>
+            </div>
+
+            <h2 className="text-4xl sm:text-6xl md:text-7xl font-black uppercase tracking-tighter leading-[0.95] text-white">
+              AI FOR <br />
+              <span style={{ WebkitTextStroke: "2px #c6ff34", color: "transparent" }}>
+                EVERYONE.
+              </span>
+            </h2>
+
+            <p className="text-slate-300 text-sm sm:text-base md:text-lg font-medium leading-relaxed max-w-xl">
+              Artificial Intelligence is not just for software engineers. Discover our hands-on, beginner-friendly program designed for students, professionals, and curious learners to master daily AI tools with zero coding required.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-4 pt-2">
+              <Link to="/ai-for-everyone">
+                <button className="px-8 sm:px-10 py-4 sm:py-5 bg-[#c6ff34] text-[#050521] hover:bg-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-[5px_5px_0px_0px_white] hover:shadow-[5px_5px_0px_0px_#c6ff34] hover:scale-105 active:translate-y-1 duration-200 cursor-pointer">
+                  Register for AI For Everyone →
+                </button>
+              </Link>
+              <Link to="/ai-for-everyone">
+                <button className="px-8 sm:px-10 py-4 sm:py-5 border-2 border-white/20 text-white hover:border-[#c6ff34] hover:text-[#c6ff34] font-black text-xs uppercase tracking-widest rounded-xl transition-all hover:scale-105 active:translate-y-1 duration-200 cursor-pointer">
+                  Explore Curriculum
+                </button>
+              </Link>
+            </div>
+          </div>
+
+          <div className="lg:col-span-5">
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-6 sm:p-8 backdrop-blur-md space-y-4 shadow-2xl">
+              <div className="flex justify-between items-center pb-3 border-b border-white/10">
+                <span className="font-mono text-xs uppercase tracking-wider text-[#c6ff34]">Cohort Details</span>
+                <span className="text-[10px] font-mono px-2.5 py-1 rounded bg-[#c6ff34]/20 text-[#c6ff34] border border-[#c6ff34]/30">Open Enrollment</span>
+              </div>
+              <div className="space-y-3 font-mono text-xs text-slate-300">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Eligibility</span>
+                  <span className="font-bold text-white">Anyone (Zero Coding)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Format</span>
+                  <span className="font-bold text-white">Online & Offline Hub</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Tools</span>
+                  <span className="font-bold text-white">ChatGPT, Claude, Canva AI</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Certification</span>
+                  <span className="font-bold text-[#c6ff34]">Official DeepStaq Certificate</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ / Queries Section */}
       <section className="py-24 md:py-32 px-6 sm:px-12 lg:px-20 border-b-2 border-[#050521]">
         <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20">

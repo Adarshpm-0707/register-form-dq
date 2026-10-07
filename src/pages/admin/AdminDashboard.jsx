@@ -19,7 +19,10 @@ import {
   updateScholarshipApplication,
   getPopupLeads,
   updatePopupLeadStatus,
-  deletePopupLead
+  deletePopupLead,
+  getAiForEveryoneRegistrations,
+  updateAiForEveryoneRegistration,
+  deleteAiForEveryoneRegistration
 } from "../../services/dbService";
 
 const DataCard = ({ item, headers, onDelete }) => {
@@ -1178,6 +1181,367 @@ const PopupLeadCard = ({ item, onDelete, onUpdate }) => {
   );
 };
 
+const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
+  const isInitiallyPaid = item.paymentStatus === "paid" || Boolean(item.paymentId);
+  const [status, setStatus] = useState(item.status || (isInitiallyPaid ? "Paid & Confirmed" : "New"));
+  const [paymentStatus, setPaymentStatus] = useState(item.paymentStatus || (item.paymentId ? "paid" : "unpaid"));
+  const [paymentId, setPaymentId] = useState(item.paymentId || "");
+  const [notes, setNotes] = useState(item.adminNotes || "");
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
+  const [phoneCopied, setPhoneCopied] = useState(false);
+  const [payIdCopied, setPayIdCopied] = useState(false);
+
+  const isPaid = paymentStatus === "paid" || Boolean(paymentId);
+
+  const submissionDate = item.updatedAt?.seconds
+    ? new Date(item.updatedAt.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+    : item.timestamp?.seconds
+    ? new Date(item.timestamp.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+    : item.createdAt?.seconds
+    ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+    : "-";
+
+  const rawPhone = item.phone || "";
+  const cleanPhone = rawPhone.replace(/\D/g, "");
+  const candidateName = item.fullName || item.name || "Candidate";
+
+  const handleCopyPhone = () => {
+    if (!cleanPhone) return;
+    navigator.clipboard.writeText(cleanPhone);
+    setPhoneCopied(true);
+    setTimeout(() => setPhoneCopied(false), 2000);
+  };
+
+  const handleCopyPayId = () => {
+    if (!paymentId) return;
+    navigator.clipboard.writeText(paymentId);
+    setPayIdCopied(true);
+    setTimeout(() => setPayIdCopied(false), 2000);
+  };
+
+  const handleSaveStatus = async () => {
+    setIsSaving(true);
+    try {
+      if (onUpdate) {
+        await onUpdate(item.id, {
+          status,
+          paymentStatus,
+          paymentId: paymentId.trim(),
+          amountPaid: paymentStatus === "paid" ? (item.amountPaid || 99) : 0,
+          adminNotes: notes,
+        });
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 3000);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to update status.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const getStatusBadge = () => {
+    const s = (status || "").toLowerCase();
+    if (s.includes("enrolled") || s.includes("confirmed")) {
+      return (
+        <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          ⭐ Enrolled
+        </span>
+      );
+    }
+    if (s.includes("contacted") || s.includes("called")) {
+      return (
+        <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-amber-500" />
+          🟡 Contacted
+        </span>
+      );
+    }
+    if (s.includes("follow")) {
+      return (
+        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-blue-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-blue-500" />
+          🔵 Follow-Up
+        </span>
+      );
+    }
+    if (s.includes("not interested") || s.includes("drop")) {
+      return (
+        <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-[10px] font-black uppercase tracking-wider border border-slate-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-slate-400" />
+          ⚪ Not Interested
+        </span>
+      );
+    }
+    return (
+      <span className="px-3 py-1 bg-[#c6ff34]/20 text-[#050521] rounded-full text-[10px] font-black uppercase tracking-wider border border-[#c6ff34] flex items-center gap-1.5">
+        <span className="w-2 h-2 rounded-full bg-[#050521] animate-ping" />
+        🟢 New Registration
+      </span>
+    );
+  };
+
+  const whatsappMessage = isPaid
+    ? `Hi ${candidateName}! Thank you for registering for the DeepStaq AI For Everyone initiative and completing your ₹99 payment (Ref: ${item.id?.slice(0, 8)}, Payment ID: ${paymentId || "Confirmed"}). Welcome aboard!`
+    : `Hi ${candidateName}! We noticed you started registering for the DeepStaq AI For Everyone initiative (₹99 special offer) but didn't complete the payment. Would you like any assistance to complete your registration?`;
+
+  return (
+    <div className={`bg-white border-2 ${isPaid ? "border-emerald-600 shadow-[4px_4px_0px_0px_#059669]" : "border-[#050521] shadow-[4px_4px_0px_0px_#050521]"} rounded-[1.75rem] p-5 sm:p-6 hover:shadow-[6px_6px_0px_0px_#c6ff34] transition-all duration-300 flex flex-col gap-4`}>
+      {/* Top Meta Bar */}
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 pb-3 border-b border-slate-100">
+        <div>
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span className="font-mono text-[9px] text-[#050521]/60 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-md font-bold">
+              REF: {item.id ? item.id.slice(0, 10) : "N/A"}
+            </span>
+            <span className="bg-[#c6ff34] text-[#050521] px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border border-[#050521]/20">
+              AI For Everyone
+            </span>
+            {/* Prominent Paid vs Unpaid Badge */}
+            {isPaid ? (
+              <span className="px-3 py-1 bg-emerald-600 text-white rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-[#c6ff34]" />
+                ✓ Paid (₹99)
+              </span>
+            ) : (
+              <span className="px-3 py-1 bg-amber-500 text-white rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                ⏳ Unpaid (₹99 Pending)
+              </span>
+            )}
+            {getStatusBadge()}
+          </div>
+          <h3 className="text-xl font-black text-[#050521] tracking-tight uppercase">
+            {candidateName}
+          </h3>
+        </div>
+        <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-xl border border-slate-200 shrink-0">
+          {submissionDate}
+        </span>
+      </div>
+
+      {/* Primary Details Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+            Phone Number
+          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-black font-mono text-slate-900">
+              +91 {cleanPhone || item.phone || "-"}
+            </span>
+            {cleanPhone && (
+              <button
+                type="button"
+                onClick={handleCopyPhone}
+                className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-md transition-colors"
+                title="Copy phone number"
+              >
+                {phoneCopied ? "✓ Copied" : "Copy"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+            Place / Town
+          </span>
+          <span className="text-sm font-bold text-slate-900 block truncate">
+            📍 {item.place || item.city || item.location || "Not specified"}
+          </span>
+        </div>
+
+        <div className="sm:col-span-2 pt-2 border-t border-slate-200/60">
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1">
+            Education / Qualification
+          </span>
+          <span className="inline-block px-3 py-1 bg-[#050521] text-[#c6ff34] rounded-xl text-xs font-bold">
+            🎓 {item.education || "Not specified"}
+          </span>
+        </div>
+
+        {/* Payment & Razorpay Status Box */}
+        <div className="sm:col-span-2 pt-2 border-t border-slate-200/60">
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1.5">
+            Payment Details
+          </span>
+          {isPaid ? (
+            <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-emerald-700 font-black text-xs">✓ Amount Paid: ₹99</span>
+                <span className="text-slate-400 text-xs">|</span>
+                <span className="text-xs font-mono font-bold text-emerald-900 truncate">
+                  {paymentId ? `Razorpay ID: ${paymentId}` : "Payment Confirmed"}
+                </span>
+              </div>
+              {paymentId && (
+                <button
+                  type="button"
+                  onClick={handleCopyPayId}
+                  className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-200 hover:bg-emerald-300 text-emerald-900 rounded transition-colors"
+                >
+                  {payIdCopied ? "✓ Copied ID" : "Copy ID"}
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-amber-800 font-black text-xs">⏳ ₹99 Payment Incomplete</span>
+                <span className="text-slate-400 text-xs">|</span>
+                <span className="text-[11px] text-amber-700 font-medium">Candidate submitted form but dropped off at gateway</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {item.address && (
+          <div className="sm:col-span-2 pt-2 border-t border-slate-200/60">
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+              Full Address
+            </span>
+            <span className="text-xs font-medium text-slate-800 block break-words">
+              {item.address}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Quick Contact Action Buttons */}
+      <div className="flex flex-wrap gap-2 pt-1">
+        {cleanPhone && (
+          <>
+            <a
+              href={`https://api.whatsapp.com/send?phone=91${cleanPhone}&text=${encodeURIComponent(whatsappMessage)}`}
+              target="_blank"
+              rel="noreferrer"
+              className={`flex-1 min-w-[140px] py-2.5 px-3 ${isPaid ? "bg-[#25D366] hover:bg-[#20bd5a]" : "bg-amber-600 hover:bg-amber-700"} text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm`}
+            >
+              <span>{isPaid ? "💬 WhatsApp Confirmation" : "💬 WhatsApp Payment Follow-up"}</span>
+            </a>
+
+            <a
+              href={`tel:${cleanPhone}`}
+              className="py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 shadow-sm"
+            >
+              <span>📞 Call</span>
+            </a>
+          </>
+        )}
+      </div>
+
+      {/* Lead Management & Status / Payment Editor */}
+      <div className="bg-[#050521]/5 border border-[#050521]/20 p-3.5 rounded-2xl flex flex-col gap-2.5">
+        <div className="flex items-center justify-between">
+          <span className="text-[9px] font-black uppercase tracking-widest text-[#050521]">
+            Registration & Payment Management
+          </span>
+          {savedSuccess && (
+            <span className="text-[9px] font-black text-green-700 bg-green-100 px-2 py-0.5 rounded-md border border-green-300">
+              ✓ Saved!
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {/* Status selector */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Lead Status
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
+            >
+              <option value="New">🟢 New Registration</option>
+              <option value="Contacted">🟡 Contacted / Called</option>
+              <option value="Follow-up Scheduled">🔵 Follow-up Scheduled</option>
+              <option value="Paid & Confirmed">⭐ Paid & Confirmed</option>
+              <option value="Enrolled">🎓 Enrolled / Onboarded</option>
+              <option value="Not Interested">⚪ Not Interested / Dropped</option>
+            </select>
+          </div>
+
+          {/* Payment Status selector */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Payment Status
+            </label>
+            <select
+              value={paymentStatus}
+              onChange={(e) => {
+                const nextVal = e.target.value;
+                setPaymentStatus(nextVal);
+                if (nextVal === "paid" && !status.includes("Confirmed")) {
+                  setStatus("Paid & Confirmed");
+                }
+              }}
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
+            >
+              <option value="paid">🟢 Paid (₹99 Completed)</option>
+              <option value="unpaid">🟠 Unpaid (Pending)</option>
+            </select>
+          </div>
+
+          {/* Razorpay Payment ID */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Razorpay Payment ID
+            </label>
+            <input
+              type="text"
+              value={paymentId}
+              onChange={(e) => setPaymentId(e.target.value)}
+              placeholder="e.g. pay_..."
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-medium text-slate-800 focus:outline-none focus:border-[#050521]"
+            />
+          </div>
+
+          {/* Remarks/Notes */}
+          <div className="sm:col-span-3">
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Internal Remarks / Follow-up Notes
+            </label>
+            <input
+              type="text"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add internal remarks / call notes..."
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#050521]"
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center pt-1">
+          <button
+            type="button"
+            onClick={handleSaveStatus}
+            disabled={isSaving}
+            className="py-1.5 px-4 bg-[#050521] hover:bg-slate-800 text-[#c6ff34] font-black text-[10px] uppercase tracking-wider rounded-xl transition-all disabled:opacity-50"
+          >
+            {isSaving ? "Saving..." : "💾 Update Status & Payment"}
+          </button>
+
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(item.id, candidateName)}
+              className="text-red-500 hover:text-red-700 text-[10px] font-black uppercase tracking-wider py-1 px-2 rounded-lg hover:bg-red-50 transition-colors"
+            >
+              🗑 Delete
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function AdminDashboard() {
   const [user, setUser] = useState(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
@@ -1194,11 +1558,20 @@ function AdminDashboard() {
   const [consultationData, setConsultationData] = useState([]);
   const [scholarshipData, setScholarshipData] = useState([]);
   const [popupLeadData, setPopupLeadData] = useState([]);
+  const [aiForEveryoneData, setAiForEveryoneData] = useState([]);
+  const [aiPaymentTab, setAiPaymentTab] = useState("all"); // "all" | "paid" | "unpaid"
   const [loadingData, setLoadingData] = useState(true);
   const [activeTab, setActiveTab] = useState("scholarship");
   const [searchQuery, setSearchQuery] = useState("");
 
   const navigate = useNavigate();
+
+  const paidAiStudents = aiForEveryoneData.filter(
+    (item) => item.paymentStatus === "paid" || Boolean(item.paymentId)
+  );
+  const unpaidAiStudents = aiForEveryoneData.filter(
+    (item) => item.paymentStatus !== "paid" && !item.paymentId
+  );
 
   useEffect(() => {
     setSearchQuery("");
@@ -1233,7 +1606,7 @@ function AdminDashboard() {
   const fetchData = async () => {
     setLoadingData(true);
     try {
-      const [slots, events, masters, oldAptitudes, newAptitudes, collected, uploaded, webinars, admissions, consultations, scholarships, popupLeads] = await Promise.all([
+      const [slots, events, masters, oldAptitudes, newAptitudes, collected, uploaded, webinars, admissions, consultations, scholarships, popupLeads, aiForEveryone] = await Promise.all([
         getSlotRegistrations(),
         getEventRegistrations(),
         getMasterRegistrations(),
@@ -1245,7 +1618,8 @@ function AdminDashboard() {
         getAdmissionRegistrations(),
         getConsultationBookings(),
         getScholarshipApplications(),
-        getPopupLeads()
+        getPopupLeads(),
+        getAiForEveryoneRegistrations()
       ]);
       setSlotData(slots);
       setEventData(events);
@@ -1259,6 +1633,7 @@ function AdminDashboard() {
       setConsultationData(consultations);
       setScholarshipData(scholarships);
       setPopupLeadData(popupLeads);
+      setAiForEveryoneData(aiForEveryone);
     } catch (error) {
       console.error("Error fetching data:", error);
       alert("Failed to fetch data.");
@@ -1291,6 +1666,18 @@ function AdminDashboard() {
     }
   };
 
+  const handleUpdateAiForEveryone = async (id, updateData) => {
+    try {
+      await updateAiForEveryoneRegistration(id, updateData);
+      setAiForEveryoneData((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, ...updateData } : item))
+      );
+    } catch (error) {
+      console.error("Error updating AI For Everyone registration:", error);
+      throw error;
+    }
+  };
+
   const handleLogout = async () => {
     await signOut(auth);
     navigate("/admin/login");
@@ -1299,6 +1686,58 @@ function AdminDashboard() {
   const downloadCSV = () => {
     const data = getFilteredData();
     if (data.length === 0) return alert("No data to download in this tab.");
+
+    if (activeTab === "ai_for_everyone") {
+      const headers = [
+        "Reference ID",
+        "Full Name",
+        "Phone",
+        "Place",
+        "Education",
+        "Payment Status",
+        "Payment ID (Razorpay)",
+        "Amount (INR)",
+        "Address",
+        "Lead Status",
+        "Admin Notes",
+        "Registration Date"
+      ];
+      const csvRows = [headers.join(",")];
+      data.forEach((item) => {
+        const isPaid = item.paymentStatus === "paid" || Boolean(item.paymentId);
+        const dateStr = item.updatedAt?.seconds
+          ? new Date(item.updatedAt.seconds * 1000).toLocaleString("en-IN")
+          : item.timestamp?.seconds
+          ? new Date(item.timestamp.seconds * 1000).toLocaleString("en-IN")
+          : item.createdAt?.seconds
+          ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-IN")
+          : "";
+        const clean = (val) => `"${String(val ?? "").replace(/"/g, '""')}"`;
+        csvRows.push([
+          clean(item.id),
+          clean(item.fullName || item.name),
+          clean(item.phone),
+          clean(item.place || item.city || item.location),
+          clean(item.education),
+          clean(isPaid ? "PAID" : "UNPAID"),
+          clean(item.paymentId || ""),
+          clean(isPaid ? (item.amountPaid || 99) : 0),
+          clean(item.address),
+          clean(item.status || "New"),
+          clean(item.adminNotes || ""),
+          clean(dateStr),
+        ].join(","));
+      });
+      const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `ai_for_everyone_${aiPaymentTab}_students_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
 
     const allKeys = new Set();
     data.forEach(item => Object.keys(item).forEach(k => allKeys.add(k)));
@@ -1359,6 +1798,16 @@ function AdminDashboard() {
       return;
     }
 
+    if (activeTab === "ai_for_everyone") {
+      try {
+        await deleteAiForEveryoneRegistration(id);
+      } catch (err) {
+        console.warn("Primary delete AI For Everyone record failed:", err);
+      }
+      setAiForEveryoneData((prev) => prev.filter((item) => item.id !== id));
+      return;
+    }
+
     const collectionMap = {
       scholarship: "scholarship_applications",
       slot: "slot_registrations",
@@ -1370,7 +1819,8 @@ function AdminDashboard() {
       uploaded: "uploaded_contact_files",
       webinar: "webinar_registrations",
       admission: "admissions",
-      consultation: "consultation_bookings"
+      consultation: "consultation_bookings",
+      ai_for_everyone: "ai_for_everyone_registrations"
     };
 
     const collectionName = collectionMap[activeTab] || "aptitude_test_leads";
@@ -1406,7 +1856,14 @@ function AdminDashboard() {
       localStorage.setItem("consultationBookings", JSON.stringify(filteredCons));
     } catch (e) {}
 
-    // Update state to remove deleted record from UI immediately
+    if (activeTab === "ai_for_everyone") {
+      try {
+        await deleteAiForEveryoneRegistration(id);
+      } catch (err) {
+        console.warn("Delete ai for everyone error:", err);
+      }
+    }
+
     setScholarshipData((prev) => prev.filter((item) => item.id !== id));
     setSlotData((prev) => prev.filter((item) => item.id !== id));
     setEventData((prev) => prev.filter((item) => item.id !== id));
@@ -1418,10 +1875,35 @@ function AdminDashboard() {
     setWebinarData((prev) => prev.filter((item) => item.id !== id));
     setAdmissionData((prev) => prev.filter((item) => item.id !== id));
     setConsultationData((prev) => prev.filter((item) => item.id !== id));
+    setAiForEveryoneData((prev) => prev.filter((item) => item.id !== id));
   };
 
   const renderCards = (data) => {
     if (data.length === 0) {
+      if (activeTab === "ai_for_everyone") {
+        if (aiPaymentTab === "paid") {
+          return (
+            <div className="bg-white border-2 border-dashed border-emerald-300 rounded-3xl p-12 text-center my-6">
+              <span className="text-4xl block mb-2">🟢</span>
+              <h4 className="text-base font-black uppercase text-[#050521]">No Paid Students Yet</h4>
+              <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                Registrations will appear in this section once candidates complete the ₹99 payment on Razorpay.
+              </p>
+            </div>
+          );
+        }
+        if (aiPaymentTab === "unpaid") {
+          return (
+            <div className="bg-white border-2 border-dashed border-amber-300 rounded-3xl p-12 text-center my-6">
+              <span className="text-4xl block mb-2">🎉</span>
+              <h4 className="text-base font-black uppercase text-[#050521]">No Unpaid Students</h4>
+              <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                All registered candidates have successfully completed payment, or there are no pending drop-offs.
+              </p>
+            </div>
+          );
+        }
+      }
       return <p className="text-center py-10 text-[#050521]/50 font-bold uppercase tracking-widest">No registrations found.</p>;
     }
 
@@ -1449,6 +1931,21 @@ function AdminDashboard() {
               item={item}
               onDelete={handleDeleteRecord}
               onUpdate={handleUpdateScholarship}
+            />
+          ))}
+        </div>
+      );
+    }
+
+    if (activeTab === "ai_for_everyone") {
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          {data.map((item) => (
+            <AiForEveryoneCard
+              key={item.id}
+              item={item}
+              onDelete={handleDeleteRecord}
+              onUpdate={handleUpdateAiForEveryone}
             />
           ))}
         </div>
@@ -1510,6 +2007,11 @@ function AdminDashboard() {
     if (activeTab === "webinar") return webinarData;
     if (activeTab === "admission") return admissionData;
     if (activeTab === "consultation") return consultationData;
+    if (activeTab === "ai_for_everyone") {
+      if (aiPaymentTab === "paid") return paidAiStudents;
+      if (aiPaymentTab === "unpaid") return unpaidAiStudents;
+      return aiForEveryoneData;
+    }
 
     return scholarshipData;
   };
@@ -1552,6 +2054,10 @@ function AdminDashboard() {
       case "webinar": return "Webinar Registrations";
       case "admission": return "Student Admissions";
       case "consultation": return "Free Consultations";
+      case "ai_for_everyone":
+        if (aiPaymentTab === "paid") return "AI For Everyone — Paid Students (₹99)";
+        if (aiPaymentTab === "unpaid") return "AI For Everyone — Unpaid Leads";
+        return "AI For Everyone — All Registrations";
       default: return "Dashboard";
     }
   };
@@ -1594,6 +2100,27 @@ function AdminDashboard() {
                <span>Website Leads (Popup)</span>
              </span>
              <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "popup_leads" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{popupLeadData.length}</span>
+          </button>
+
+          <button 
+             onClick={() => {
+               setActiveTab("ai_for_everyone");
+               setAiPaymentTab("all");
+             }}
+             className={`flex-shrink-0 md:w-full text-left px-5 py-4 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 ${activeTab === "ai_for_everyone" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
+          >
+             <span className="flex items-center gap-2">
+               <span>✨</span>
+               <span>AI For Everyone</span>
+             </span>
+             <div className="flex items-center gap-1.5">
+               {paidAiStudents.length > 0 && (
+                 <span className={`px-2 py-0.5 rounded-md text-[8px] font-mono font-bold ${activeTab === "ai_for_everyone" ? "bg-[#050521] text-[#c6ff34]" : "bg-emerald-500/20 text-emerald-400"}`}>
+                   {paidAiStudents.length} Paid
+                 </span>
+               )}
+               <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "ai_for_everyone" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{aiForEveryoneData.length}</span>
+             </div>
           </button>
 
           <button 
@@ -1773,6 +2300,107 @@ function AdminDashboard() {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Quick Metrics Banner for AI For Everyone */}
+          {activeTab === "ai_for_everyone" && !loadingData && (
+            <>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
+                <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">Total Registered</span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-2xl sm:text-3xl font-black text-[#050521]">{aiForEveryoneData.length}</span>
+                    <span className="text-[10px] font-bold text-slate-400">candidates</span>
+                  </div>
+                </div>
+
+                <div className="bg-emerald-50/70 p-4 sm:p-5 rounded-2xl border border-emerald-200/80 shadow-sm flex flex-col justify-between">
+                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-emerald-800">🟢 Paid Students</span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-2xl sm:text-3xl font-black text-emerald-900">
+                      {paidAiStudents.length}
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-700">₹{paidAiStudents.length * 99} collected</span>
+                  </div>
+                </div>
+
+                <div className="bg-amber-50/70 p-4 sm:p-5 rounded-2xl border border-amber-200/80 shadow-sm flex flex-col justify-between">
+                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-amber-800">🟠 Unpaid / Pending</span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-2xl sm:text-3xl font-black text-amber-900">
+                      {unpaidAiStudents.length}
+                    </span>
+                    <span className="text-[10px] font-bold text-amber-700">dropped off</span>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50/70 p-4 sm:p-5 rounded-2xl border border-blue-200/80 shadow-sm flex flex-col justify-between">
+                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-blue-800">Payment Conversion</span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-2xl sm:text-3xl font-black text-blue-900">
+                      {aiForEveryoneData.length > 0 ? Math.round((paidAiStudents.length / aiForEveryoneData.length) * 100) : 0}%
+                    </span>
+                    <span className="text-[10px] font-bold text-blue-700">paid rate</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dedicated Paid vs Unpaid Sections Switcher */}
+              <div className="flex flex-wrap items-center gap-2 mb-6 p-1.5 bg-white rounded-2xl border border-slate-200 shadow-sm w-fit">
+                <button
+                  type="button"
+                  onClick={() => setAiPaymentTab("all")}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+                    aiPaymentTab === "all"
+                      ? "bg-[#050521] text-[#c6ff34] shadow-sm"
+                      : "text-slate-600 hover:text-[#050521] hover:bg-slate-100"
+                  }`}
+                >
+                  <span>All Registrations</span>
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                    aiPaymentTab === "all" ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
+                  }`}>
+                    {aiForEveryoneData.length}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAiPaymentTab("paid")}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+                    aiPaymentTab === "paid"
+                      ? "bg-emerald-600 text-white shadow-sm"
+                      : "text-emerald-800 hover:text-emerald-900 hover:bg-emerald-50"
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>🟢 Paid Students (₹99)</span>
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                    aiPaymentTab === "paid" ? "bg-white/25 text-white" : "bg-emerald-100 text-emerald-800"
+                  }`}>
+                    {paidAiStudents.length}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAiPaymentTab("unpaid")}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+                    aiPaymentTab === "unpaid"
+                      ? "bg-amber-600 text-white shadow-sm"
+                      : "text-amber-800 hover:text-amber-900 hover:bg-amber-50"
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span>🟠 Unpaid Students</span>
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                    aiPaymentTab === "unpaid" ? "bg-white/25 text-white" : "bg-amber-100 text-amber-800"
+                  }`}>
+                    {unpaidAiStudents.length}
+                  </span>
+                </button>
+              </div>
+            </>
           )}
 
           {/* Search Input */}

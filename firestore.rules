@@ -114,6 +114,12 @@ service cloud.firestore {
       allow read, delete: if isAdmin();
     }
 
+    // Security for AI For Everyone Registrations
+    match /ai_for_everyone_registrations/{document} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
+    }
+
     // Security for Admins - Strict Ownership, Write restricted to existing Admins (no self privilege escalation)
     match /admins/{document} {
       allow read: if request.auth != null && request.auth.token.email == document;

@@ -1,7 +1,6 @@
 import React, { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
-import BackToTopButton from "./components/BackToTopButton";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import SecurityGuard from "./components/SecurityGuard";
@@ -32,6 +31,7 @@ const Admission = lazy(() => import("./pages/Admission"));
 const Scholarship = lazy(() => import("./pages/Scholarship"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Consultation = lazy(() => import("./pages/Consultation"));
+const AiForEveryone = lazy(() => import("./pages/AiForEveryone"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 
@@ -68,7 +68,6 @@ function App() {
       <Router>
         <SEO />
         <ScrollToTop />
-        <BackToTopButton />
         <AppLayout>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -90,6 +89,8 @@ function App() {
             <Route path="/scholarship" element={<Scholarship />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/consultation" element={<Consultation />} />
+            <Route path="/ai-for-everyone" element={<AiForEveryone />} />
+            <Route path="/aiforeveryone" element={<AiForEveryone />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/login" element={<AdminLogin />} />
           </Routes>

@@ -1123,7 +1123,9 @@ export const getPopupLeads = async () => {
   let data = [];
   try {
     const querySnapshot = await getDocs(collection(db, "popup_leads"));
-    data = querySnapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    data = querySnapshot.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .filter((item) => item.type !== "AI_FOR_EVERYONE" && !item.isAiForEveryone && item.program !== "AI For Everyone");
   } catch (error) {
     console.error("Error fetching popup leads from Firestore:", error);
   }
@@ -1199,3 +1201,271 @@ export const deletePopupLead = async (id) => {
     console.error("Failed to delete popup lead locally:", e);
   }
 };
+
+/**
+ * Saves AI For Everyone registration data to Firestore with multi-tier fallback
+ */
+export const saveAiForEveryoneRegistration = async (formData) => {
+  const sanitize = (str, max = 500) => String(str || "").replace(/[<>]/g, "").trim().slice(0, max);
+  const cleanPhone = String(formData.phone || "").replace(/\D/g, "").slice(-10);
+
+  const payload = {
+    fullName: sanitize(formData.fullName || formData.name, 100),
+    name: sanitize(formData.fullName || formData.name, 100),
+    phone: cleanPhone,
+    address: sanitize(formData.address, 250),
+    place: sanitize(formData.place || formData.city || formData.location, 100),
+    city: sanitize(formData.place || formData.city || formData.location, 100),
+    location: sanitize(formData.place || formData.city || formData.location, 100),
+    education: sanitize(formData.education, 100),
+    program: "AI For Everyone",
+    type: "AI_FOR_EVERYONE",
+    isAiForEveryone: true,
+    originalPrice: Number(formData.originalPrice || 899),
+    amount: Number(formData.amount || 99),
+    amountPaid: Number(formData.amountPaid || 0),
+    paymentStatus: sanitize(formData.paymentStatus || "unpaid", 20),
+    paymentId: sanitize(formData.paymentId || "", 100),
+    status: sanitize(formData.status || (formData.paymentStatus === "paid" ? "Paid & Confirmed" : "Unpaid Lead"), 50),
+    adminNotes: sanitize(formData.adminNotes || "", 500),
+    timestamp: serverTimestamp(),
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  };
+
+  try {
+    // Primary attempt: Save to ai_for_everyone_registrations
+    const docRef = await addDoc(collection(db, "ai_for_everyone_registrations"), payload);
+    return { success: true, id: docRef.id, collection: "ai_for_everyone_registrations" };
+  } catch (error) {
+    console.warn("Primary save to ai_for_everyone_registrations failed, attempting popup_leads fallback:", error);
+    try {
+      // Fallback Tier 1: popup_leads (open create permission in production)
+      const fallbackRef = await addDoc(collection(db, "popup_leads"), {
+        ...payload,
+        leadSource: "AI For Everyone Form",
+        purpose: "AI For Everyone Registration",
+        completed: true,
+      });
+      return { success: true, id: fallbackRef.id, collection: "popup_leads" };
+    } catch (fallbackError) {
+      console.warn("popup_leads fallback failed, attempting event_registrations fallback:", fallbackError);
+      try {
+        // Fallback Tier 2: event_registrations
+        const eventRef = await addDoc(collection(db, "event_registrations"), {
+          name: payload.fullName,
+          fullName: payload.fullName,
+          phone: payload.phone,
+          address: payload.address,
+          place: payload.place,
+          education: payload.education,
+          program: "AI For Everyone",
+          type: "EVENT_ENTRY",
+          isAiForEveryone: true,
+          status: "New",
+          timestamp: serverTimestamp(),
+          createdAt: serverTimestamp(),
+        });
+        return { success: true, id: eventRef.id, collection: "event_registrations" };
+      } catch (eventError) {
+        console.error("All Firestore saves failed for AI For Everyone registration, saving locally:", eventError);
+        try {
+          const localData = JSON.parse(localStorage.getItem("offline_ai_for_everyone_registrations") || "[]");
+          const offlineId = `offline_aife_${Date.now()}`;
+          localData.unshift({
+            ...payload,
+            id: offlineId,
+            timestamp: { seconds: Math.floor(Date.now() / 1000) },
+            createdAt: { seconds: Math.floor(Date.now() / 1000) },
+            updatedAt: { seconds: Math.floor(Date.now() / 1000) },
+            isOffline: true,
+          });
+          localStorage.setItem("offline_ai_for_everyone_registrations", JSON.stringify(localData.slice(0, 100)));
+          return { success: true, id: offlineId, isOffline: true };
+        } catch (localErr) {
+          console.error("LocalStorage fallback failed:", localErr);
+        }
+        throw error;
+      }
+    }
+  }
+};
+
+/**
+ * Fetches all AI For Everyone registrations across collections and offline storage
+ */
+export const getAiForEveryoneRegistrations = async () => {
+  let data = [];
+  try {
+    const [mainSnapshot, popupSnapshot, leadsSnapshot, eventSnapshot] = await Promise.allSettled([
+      getDocs(collection(db, "ai_for_everyone_registrations")),
+      getDocs(collection(db, "popup_leads")),
+      getDocs(collection(db, "aptitude_test_leads")),
+      getDocs(collection(db, "event_registrations")),
+    ]);
+
+    if (mainSnapshot.status === "fulfilled" && mainSnapshot.value) {
+      const mainList = mainSnapshot.value.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+        _collection: "ai_for_everyone_registrations",
+      }));
+      data = data.concat(mainList);
+    }
+
+    if (popupSnapshot.status === "fulfilled" && popupSnapshot.value) {
+      const popupList = popupSnapshot.value.docs
+        .map((d) => ({ id: d.id, ...d.data(), _collection: "popup_leads" }))
+        .filter(
+          (item) =>
+            item.type === "AI_FOR_EVERYONE" ||
+            item.isAiForEveryone === true ||
+            item.program === "AI For Everyone"
+        );
+      data = data.concat(popupList);
+    }
+
+    if (leadsSnapshot.status === "fulfilled" && leadsSnapshot.value) {
+      const leadsList = leadsSnapshot.value.docs
+        .map((d) => ({ id: d.id, ...d.data(), _collection: "aptitude_test_leads" }))
+        .filter(
+          (item) =>
+            item.type === "AI_FOR_EVERYONE" ||
+            item.isAiForEveryone === true ||
+            item.program === "AI For Everyone"
+        );
+      data = data.concat(leadsList);
+    }
+
+    if (eventSnapshot.status === "fulfilled" && eventSnapshot.value) {
+      const eventList = eventSnapshot.value.docs
+        .map((d) => ({ id: d.id, ...d.data(), _collection: "event_registrations" }))
+        .filter(
+          (item) =>
+            item.isAiForEveryone === true ||
+            item.program === "AI For Everyone" ||
+            item.type === "AI_FOR_EVERYONE"
+        );
+      data = data.concat(eventList);
+    }
+  } catch (error) {
+    console.error("Error fetching AI For Everyone registrations:", error);
+  }
+
+  // Merge offline entries if any
+  try {
+    const localData = JSON.parse(localStorage.getItem("offline_ai_for_everyone_registrations") || "[]");
+    data = data.concat(localData);
+  } catch (e) {}
+
+  // Sort first: paid entries first, then by most recent timestamp
+  data.sort((a, b) => {
+    const aPaid = (a.paymentStatus === "paid" || Boolean(a.paymentId)) ? 1 : 0;
+    const bPaid = (b.paymentStatus === "paid" || Boolean(b.paymentId)) ? 1 : 0;
+    if (aPaid !== bPaid) return bPaid - aPaid;
+    const timeA = a.updatedAt?.seconds || a.timestamp?.seconds || a.createdAt?.seconds || 0;
+    const timeB = b.updatedAt?.seconds || b.timestamp?.seconds || b.createdAt?.seconds || 0;
+    return timeB - timeA;
+  });
+
+  // Deduplicate by ID and unique phone
+  const seenIds = new Set();
+  const seenPhones = new Set();
+  const unique = [];
+
+  for (const item of data) {
+    if (item.id && seenIds.has(item.id)) continue;
+    if (item.id) seenIds.add(item.id);
+
+    const normPhone = normalizePhone(item.phone);
+    if (normPhone && seenPhones.has(normPhone)) continue;
+    if (normPhone) seenPhones.add(normPhone);
+
+    unique.push(item);
+  }
+
+  return unique.sort((a, b) => {
+    const timeA = a.updatedAt?.seconds || a.timestamp?.seconds || a.createdAt?.seconds || 0;
+    const timeB = b.updatedAt?.seconds || b.timestamp?.seconds || b.createdAt?.seconds || 0;
+    return timeB - timeA;
+  });
+};
+
+/**
+ * Updates status or admin notes for an AI For Everyone registration
+ */
+export const updateAiForEveryoneRegistration = async (id, updateData) => {
+  const sanitize = (str, max = 500) => String(str || "").replace(/[<>]/g, "").trim().slice(0, max);
+  const payload = {
+    updatedAt: serverTimestamp(),
+  };
+  if (updateData.status !== undefined) payload.status = sanitize(updateData.status, 50);
+  if (updateData.paymentStatus !== undefined) payload.paymentStatus = sanitize(updateData.paymentStatus, 50);
+  if (updateData.paymentId !== undefined) payload.paymentId = sanitize(updateData.paymentId, 100);
+  if (updateData.amountPaid !== undefined) payload.amountPaid = Number(updateData.amountPaid);
+  if (updateData.adminNotes !== undefined) payload.adminNotes = sanitize(updateData.adminNotes, 500);
+
+  if (!id.startsWith("offline_")) {
+    const candidateCollections = [
+      "ai_for_everyone_registrations",
+      "popup_leads",
+      "aptitude_test_leads",
+      "event_registrations",
+    ];
+    for (const col of candidateCollections) {
+      try {
+        await updateDoc(doc(db, col, id), payload);
+        break;
+      } catch (err) {
+        // Continue to other collections
+      }
+    }
+  }
+
+  try {
+    const local = JSON.parse(localStorage.getItem("offline_ai_for_everyone_registrations") || "[]");
+    const updatedLocal = local.map((item) =>
+      item.id === id
+        ? { ...item, ...payload, updatedAt: { seconds: Math.floor(Date.now() / 1000) } }
+        : item
+    );
+    localStorage.setItem("offline_ai_for_everyone_registrations", JSON.stringify(updatedLocal));
+  } catch (err) {
+    console.error("Local update failed:", err);
+  }
+
+  return { success: true };
+};
+
+/**
+ * Deletes an AI For Everyone registration across collections and local storage
+ */
+export const deleteAiForEveryoneRegistration = async (id) => {
+  if (!id.startsWith("offline_")) {
+    const candidateCollections = [
+      "ai_for_everyone_registrations",
+      "popup_leads",
+      "aptitude_test_leads",
+      "event_registrations",
+    ];
+    for (const col of candidateCollections) {
+      try {
+        await deleteDoc(doc(db, col, id));
+      } catch (err) {
+        // Continue to other collections
+      }
+    }
+  }
+
+  try {
+    const local = JSON.parse(localStorage.getItem("offline_ai_for_everyone_registrations") || "[]");
+    const filtered = local.filter((item) => item.id !== id);
+    localStorage.setItem("offline_ai_for_everyone_registrations", JSON.stringify(filtered));
+  } catch (e) {
+    console.error("Failed to delete local entry:", e);
+  }
+
+  return { success: true };
+};
+
+

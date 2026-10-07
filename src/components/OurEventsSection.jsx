@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Real event images from src/assets/events/
-import event1Img from "../assets/events/event (1).jpg";
-import event7Img from "../assets/events/event (7).jpg";
-import event8Img from "../assets/events/event (8).jpg";
-import event9Img from "../assets/events/event (9).jpg";
-import event10Img from "../assets/events/event (10).jpg";
-import event11Img from "../assets/events/event (11).jpg";
-import event12Img from "../assets/events/event (12).jpg";
+import event1Img from "../assets/events/event (1).webp";
+import event7Img from "../assets/events/event (7).webp";
+import event8Img from "../assets/events/event (8).webp";
+import event9Img from "../assets/events/event (9).webp";
+import event10Img from "../assets/events/event (10).webp";
+import event11Img from "../assets/events/event (11).webp";
+import event12Img from "../assets/events/event (12).webp";
 
 const subEventsList = [
-  { id: "aiwaken", name: "AIwaken" }
+  { id: "aiwaken", name: "AIwaken" },
+  { id: "aiforeveryone", name: "AI For Everyone", path: "/ai-for-everyone" }
 ];
 
 const eventImages = [
@@ -186,19 +188,30 @@ export default function OurEventsSection() {
 
           {/* Sub Event Selector & Slide Counter Pill */}
           <div className="flex items-center gap-2.5 sm:gap-3">
-            {subEventsList.map((sub) => (
-              <button
-                key={sub.id}
-                onClick={() => setActiveSubEvent(sub.id)}
-                className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider border-2 border-[#050521] transition-all cursor-pointer ${
-                  activeSubEvent === sub.id
-                    ? "bg-[#050521] text-[#c6ff34] shadow-[3px_3px_0px_0px_#c6ff34]"
-                    : "bg-white text-[#050521] hover:bg-slate-100 shadow-[2px_2px_0px_0px_#050521]"
-                }`}
-              >
-                {sub.name}
-              </button>
-            ))}
+            {subEventsList.map((sub) =>
+              sub.path ? (
+                <Link
+                  key={sub.id}
+                  to={sub.path}
+                  className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider border-2 border-[#050521] transition-all cursor-pointer bg-[#c6ff34] text-[#050521] hover:bg-[#050521] hover:text-[#c6ff34] shadow-[3px_3px_0px_0px_#050521] inline-flex items-center gap-1.5"
+                >
+                  <span>{sub.name}</span>
+                  <span className="text-xs font-bold">↗</span>
+                </Link>
+              ) : (
+                <button
+                  key={sub.id}
+                  onClick={() => setActiveSubEvent(sub.id)}
+                  className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider border-2 border-[#050521] transition-all cursor-pointer ${
+                    activeSubEvent === sub.id
+                      ? "bg-[#050521] text-[#c6ff34] shadow-[3px_3px_0px_0px_#c6ff34]"
+                      : "bg-white text-[#050521] hover:bg-slate-100 shadow-[2px_2px_0px_0px_#050521]"
+                  }`}
+                >
+                  {sub.name}
+                </button>
+              )
+            )}
 
             <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border-2 border-[#050521] bg-white text-xs font-mono font-black text-[#050521] shadow-[2px_2px_0px_0px_#050521]">
               <span className="text-slate-500 font-bold">SLIDE</span>
