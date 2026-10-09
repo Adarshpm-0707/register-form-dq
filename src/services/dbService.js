@@ -1125,7 +1125,7 @@ export const getPopupLeads = async () => {
     const querySnapshot = await getDocs(collection(db, "popup_leads"));
     data = querySnapshot.docs
       .map((d) => ({ id: d.id, ...d.data() }))
-      .filter((item) => item.type !== "AI_FOR_EVERYONE" && !item.isAiForEveryone && item.program !== "AI For Everyone");
+      .filter((item) => item.type !== "AI_FOR_EVERYONE" && item.type !== "AI_EASY_AYI" && !item.isAiForEveryone && !item.isAiEasyAyi && item.program !== "AI For Everyone" && item.program !== "AI easy Ayi");
   } catch (error) {
     console.error("Error fetching popup leads from Firestore:", error);
   }
@@ -1203,9 +1203,9 @@ export const deletePopupLead = async (id) => {
 };
 
 /**
- * Saves AI For Everyone registration data to Firestore with multi-tier fallback
+ * Saves AI easy Ayi registration data to Firestore with multi-tier fallback
  */
-export const saveAiForEveryoneRegistration = async (formData) => {
+export const saveAiEasyAyiRegistration = async (formData) => {
   const sanitize = (str, max = 500) => String(str || "").replace(/[<>]/g, "").trim().slice(0, max);
   const cleanPhone = String(formData.phone || "").replace(/\D/g, "").slice(-10);
 
@@ -1218,8 +1218,9 @@ export const saveAiForEveryoneRegistration = async (formData) => {
     city: sanitize(formData.place || formData.city || formData.location, 100),
     location: sanitize(formData.place || formData.city || formData.location, 100),
     education: sanitize(formData.education, 100),
-    program: "AI For Everyone",
-    type: "AI_FOR_EVERYONE",
+    program: "AI easy Ayi",
+    type: "AI_EASY_AYI",
+    isAiEasyAyi: true,
     isAiForEveryone: true,
     originalPrice: Number(formData.originalPrice || 899),
     amount: Number(formData.amount || 99),
@@ -1240,11 +1241,11 @@ export const saveAiForEveryoneRegistration = async (formData) => {
   } catch (error) {
     console.warn("Primary save to ai_for_everyone_registrations failed, attempting popup_leads fallback:", error);
     try {
-      // Fallback Tier 1: popup_leads (open create permission in production)
+      // Fallback Tier 1: popup_leads
       const fallbackRef = await addDoc(collection(db, "popup_leads"), {
         ...payload,
-        leadSource: "AI For Everyone Form",
-        purpose: "AI For Everyone Registration",
+        leadSource: "AI easy Ayi Form",
+        purpose: "AI easy Ayi Registration",
         completed: true,
       });
       return { success: true, id: fallbackRef.id, collection: "popup_leads" };
@@ -1259,8 +1260,9 @@ export const saveAiForEveryoneRegistration = async (formData) => {
           address: payload.address,
           place: payload.place,
           education: payload.education,
-          program: "AI For Everyone",
+          program: "AI easy Ayi",
           type: "EVENT_ENTRY",
+          isAiEasyAyi: true,
           isAiForEveryone: true,
           status: "New",
           timestamp: serverTimestamp(),
@@ -1268,10 +1270,10 @@ export const saveAiForEveryoneRegistration = async (formData) => {
         });
         return { success: true, id: eventRef.id, collection: "event_registrations" };
       } catch (eventError) {
-        console.error("All Firestore saves failed for AI For Everyone registration, saving locally:", eventError);
+        console.error("All Firestore saves failed for AI easy Ayi registration, saving locally:", eventError);
         try {
-          const localData = JSON.parse(localStorage.getItem("offline_ai_for_everyone_registrations") || "[]");
-          const offlineId = `offline_aife_${Date.now()}`;
+          const localData = JSON.parse(localStorage.getItem("offline_ai_easy_ayi_registrations") || localStorage.getItem("offline_ai_for_everyone_registrations") || "[]");
+          const offlineId = `offline_ayi_${Date.now()}`;
           localData.unshift({
             ...payload,
             id: offlineId,
@@ -1280,7 +1282,7 @@ export const saveAiForEveryoneRegistration = async (formData) => {
             updatedAt: { seconds: Math.floor(Date.now() / 1000) },
             isOffline: true,
           });
-          localStorage.setItem("offline_ai_for_everyone_registrations", JSON.stringify(localData.slice(0, 100)));
+          localStorage.setItem("offline_ai_easy_ayi_registrations", JSON.stringify(localData.slice(0, 100)));
           return { success: true, id: offlineId, isOffline: true };
         } catch (localErr) {
           console.error("LocalStorage fallback failed:", localErr);
@@ -1290,11 +1292,12 @@ export const saveAiForEveryoneRegistration = async (formData) => {
     }
   }
 };
+export const saveAiForEveryoneRegistration = saveAiEasyAyiRegistration;
 
 /**
- * Fetches all AI For Everyone registrations across collections and offline storage
+ * Fetches all AI easy Ayi registrations across collections and offline storage
  */
-export const getAiForEveryoneRegistrations = async () => {
+export const getAiEasyAyiRegistrations = async () => {
   let data = [];
   try {
     const [mainSnapshot, popupSnapshot, leadsSnapshot, eventSnapshot] = await Promise.allSettled([
@@ -1319,8 +1322,11 @@ export const getAiForEveryoneRegistrations = async () => {
         .filter(
           (item) =>
             item.type === "AI_FOR_EVERYONE" ||
+            item.type === "AI_EASY_AYI" ||
             item.isAiForEveryone === true ||
-            item.program === "AI For Everyone"
+            item.isAiEasyAyi === true ||
+            item.program === "AI For Everyone" ||
+            item.program === "AI easy Ayi"
         );
       data = data.concat(popupList);
     }
@@ -1331,8 +1337,11 @@ export const getAiForEveryoneRegistrations = async () => {
         .filter(
           (item) =>
             item.type === "AI_FOR_EVERYONE" ||
+            item.type === "AI_EASY_AYI" ||
             item.isAiForEveryone === true ||
-            item.program === "AI For Everyone"
+            item.isAiEasyAyi === true ||
+            item.program === "AI For Everyone" ||
+            item.program === "AI easy Ayi"
         );
       data = data.concat(leadsList);
     }
@@ -1343,18 +1352,25 @@ export const getAiForEveryoneRegistrations = async () => {
         .filter(
           (item) =>
             item.isAiForEveryone === true ||
+            item.isAiEasyAyi === true ||
             item.program === "AI For Everyone" ||
-            item.type === "AI_FOR_EVERYONE"
+            item.program === "AI easy Ayi" ||
+            item.type === "AI_FOR_EVERYONE" ||
+            item.type === "AI_EASY_AYI"
         );
       data = data.concat(eventList);
     }
   } catch (error) {
-    console.error("Error fetching AI For Everyone registrations:", error);
+    console.error("Error fetching AI easy Ayi registrations:", error);
   }
 
   // Merge offline entries if any
   try {
-    const localData = JSON.parse(localStorage.getItem("offline_ai_for_everyone_registrations") || "[]");
+    const localData = JSON.parse(
+      localStorage.getItem("offline_ai_easy_ayi_registrations") ||
+      localStorage.getItem("offline_ai_for_everyone_registrations") ||
+      "[]"
+    );
     data = data.concat(localData);
   } catch (e) {}
 
@@ -1390,11 +1406,12 @@ export const getAiForEveryoneRegistrations = async () => {
     return timeB - timeA;
   });
 };
+export const getAiForEveryoneRegistrations = getAiEasyAyiRegistrations;
 
 /**
- * Updates status or admin notes for an AI For Everyone registration
+ * Updates status or admin notes for an AI easy Ayi registration
  */
-export const updateAiForEveryoneRegistration = async (id, updateData) => {
+export const updateAiEasyAyiRegistration = async (id, updateData) => {
   const sanitize = (str, max = 500) => String(str || "").replace(/[<>]/g, "").trim().slice(0, max);
   const payload = {
     updatedAt: serverTimestamp(),
@@ -1423,24 +1440,29 @@ export const updateAiForEveryoneRegistration = async (id, updateData) => {
   }
 
   try {
-    const local = JSON.parse(localStorage.getItem("offline_ai_for_everyone_registrations") || "[]");
+    const local = JSON.parse(
+      localStorage.getItem("offline_ai_easy_ayi_registrations") ||
+      localStorage.getItem("offline_ai_for_everyone_registrations") ||
+      "[]"
+    );
     const updatedLocal = local.map((item) =>
       item.id === id
         ? { ...item, ...payload, updatedAt: { seconds: Math.floor(Date.now() / 1000) } }
         : item
     );
-    localStorage.setItem("offline_ai_for_everyone_registrations", JSON.stringify(updatedLocal));
+    localStorage.setItem("offline_ai_easy_ayi_registrations", JSON.stringify(updatedLocal));
   } catch (err) {
     console.error("Local update failed:", err);
   }
 
   return { success: true };
 };
+export const updateAiForEveryoneRegistration = updateAiEasyAyiRegistration;
 
 /**
- * Deletes an AI For Everyone registration across collections and local storage
+ * Deletes an AI easy Ayi registration across collections and local storage
  */
-export const deleteAiForEveryoneRegistration = async (id) => {
+export const deleteAiEasyAyiRegistration = async (id) => {
   if (!id.startsWith("offline_")) {
     const candidateCollections = [
       "ai_for_everyone_registrations",
@@ -1458,14 +1480,304 @@ export const deleteAiForEveryoneRegistration = async (id) => {
   }
 
   try {
-    const local = JSON.parse(localStorage.getItem("offline_ai_for_everyone_registrations") || "[]");
+    const local = JSON.parse(
+      localStorage.getItem("offline_ai_easy_ayi_registrations") ||
+      localStorage.getItem("offline_ai_for_everyone_registrations") ||
+      "[]"
+    );
     const filtered = local.filter((item) => item.id !== id);
-    localStorage.setItem("offline_ai_for_everyone_registrations", JSON.stringify(filtered));
+    localStorage.setItem("offline_ai_easy_ayi_registrations", JSON.stringify(filtered));
   } catch (e) {
     console.error("Failed to delete local entry:", e);
   }
 
   return { success: true };
 };
+export const deleteAiForEveryoneRegistration = deleteAiEasyAyiRegistration;
+
+/**
+ * Saves AI Booster Program registration data to Firestore with multi-tier fallback
+ */
+export const saveAiBoosterProgramRegistration = async (formData) => {
+  const sanitize = (str, max = 500) => String(str || "").replace(/[<>]/g, "").trim().slice(0, max);
+  const cleanPhone = String(formData.phone || "").replace(/\D/g, "").slice(-10);
+
+  const payload = {
+    fullName: sanitize(formData.fullName || formData.name, 100),
+    name: sanitize(formData.fullName || formData.name, 100),
+    phone: cleanPhone,
+    place: sanitize(formData.place || formData.city || formData.location, 100),
+    collegeOrSchool: sanitize(formData.collegeOrSchool || formData.institution || formData.schoolOrCollege, 150),
+    institution: sanitize(formData.collegeOrSchool || formData.institution || formData.schoolOrCollege, 150),
+    yearOrSem: sanitize(formData.yearOrSem || formData.year || formData.sem, 100),
+    interestedInAi: sanitize(formData.interestedInAi || "Yes", 100),
+    program: "AI Booster Program",
+    type: "AI_BOOSTER_PROGRAM",
+    isAiBoosterProgram: true,
+    isAiForStudents: true,
+    status: sanitize(formData.status || "New Registration", 50),
+    paymentStatus: sanitize(formData.paymentStatus || "unpaid", 50),
+    paymentId: sanitize(formData.paymentId || "", 100),
+    amountPaid: formData.amountPaid !== undefined ? Number(formData.amountPaid) : 0,
+    originalPrice: formData.originalPrice !== undefined ? Number(formData.originalPrice) : 599,
+    offerPrice: 49,
+    adminNotes: sanitize(formData.adminNotes || "", 500),
+    timestamp: serverTimestamp(),
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  };
+
+  try {
+    // Primary attempt: Save to dedicated collection ai_booster_program_registrations
+    const docRef = await addDoc(collection(db, "ai_booster_program_registrations"), payload);
+    return { success: true, id: docRef.id, collection: "ai_booster_program_registrations" };
+  } catch (error) {
+    console.warn("Primary save to ai_booster_program_registrations failed, attempting ai_for_students_registrations fallback:", error);
+    try {
+      const stuRef = await addDoc(collection(db, "ai_for_students_registrations"), payload);
+      return { success: true, id: stuRef.id, collection: "ai_for_students_registrations" };
+    } catch (stuError) {
+      console.warn("ai_for_students_registrations failed, attempting popup_leads fallback:", stuError);
+      try {
+        // Fallback Tier 2: popup_leads
+        const fallbackRef = await addDoc(collection(db, "popup_leads"), {
+          ...payload,
+          leadSource: "AI Booster Program Form",
+          purpose: "AI Booster Program Registration",
+          completed: true,
+        });
+        return { success: true, id: fallbackRef.id, collection: "popup_leads" };
+      } catch (fallbackError) {
+        console.warn("popup_leads fallback failed, attempting event_registrations fallback:", fallbackError);
+        try {
+          // Fallback Tier 3: event_registrations
+          const eventRef = await addDoc(collection(db, "event_registrations"), {
+            name: payload.fullName,
+            fullName: payload.fullName,
+            phone: payload.phone,
+            place: payload.place,
+            institution: payload.collegeOrSchool,
+            collegeOrSchool: payload.collegeOrSchool,
+            yearOrSem: payload.yearOrSem,
+            interestedInAi: payload.interestedInAi,
+            program: "AI Booster Program",
+            type: "EVENT_ENTRY",
+            isAiBoosterProgram: true,
+            isAiForStudents: true,
+            status: "New Registration",
+            timestamp: serverTimestamp(),
+            createdAt: serverTimestamp(),
+          });
+          return { success: true, id: eventRef.id, collection: "event_registrations" };
+        } catch (eventError) {
+          console.error("All Firestore saves failed for AI Booster Program registration, saving locally:", eventError);
+          try {
+            const localData = JSON.parse(
+              localStorage.getItem("offline_ai_booster_program_registrations") ||
+              localStorage.getItem("offline_ai_for_students_registrations") ||
+              "[]"
+            );
+            const offlineId = `offline_booster_${Date.now()}`;
+            localData.unshift({
+              ...payload,
+              id: offlineId,
+              timestamp: { seconds: Math.floor(Date.now() / 1000) },
+              createdAt: { seconds: Math.floor(Date.now() / 1000) },
+              updatedAt: { seconds: Math.floor(Date.now() / 1000) },
+              isOffline: true,
+            });
+            localStorage.setItem("offline_ai_booster_program_registrations", JSON.stringify(localData.slice(0, 100)));
+            localStorage.setItem("offline_ai_for_students_registrations", JSON.stringify(localData.slice(0, 100)));
+            return { success: true, id: offlineId, isOffline: true };
+          } catch (localErr) {
+            console.error("LocalStorage fallback failed:", localErr);
+          }
+          throw error;
+        }
+      }
+    }
+  }
+};
+export const saveAiForStudentsRegistration = saveAiBoosterProgramRegistration;
+
+/**
+ * Fetches all AI Booster Program registrations across collections and offline storage
+ */
+export const getAiBoosterProgramRegistrations = async () => {
+  let data = [];
+  try {
+    const [boosterSnapshot, stuSnapshot, popupSnapshot, eventSnapshot] = await Promise.allSettled([
+      getDocs(collection(db, "ai_booster_program_registrations")),
+      getDocs(collection(db, "ai_for_students_registrations")),
+      getDocs(collection(db, "popup_leads")),
+      getDocs(collection(db, "event_registrations")),
+    ]);
+
+    if (boosterSnapshot.status === "fulfilled" && boosterSnapshot.value) {
+      const boosterList = boosterSnapshot.value.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+        _collection: "ai_booster_program_registrations",
+      }));
+      data = data.concat(boosterList);
+    }
+
+    if (stuSnapshot.status === "fulfilled" && stuSnapshot.value) {
+      const stuList = stuSnapshot.value.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+        _collection: "ai_for_students_registrations",
+      }));
+      data = data.concat(stuList);
+    }
+
+    if (popupSnapshot.status === "fulfilled" && popupSnapshot.value) {
+      const popupList = popupSnapshot.value.docs
+        .map((d) => ({ id: d.id, ...d.data(), _collection: "popup_leads" }))
+        .filter(
+          (item) =>
+            item.type === "AI_BOOSTER_PROGRAM" ||
+            item.type === "AI_FOR_STUDENTS" ||
+            item.isAiBoosterProgram === true ||
+            item.isAiForStudents === true ||
+            item.program === "AI Booster Program" ||
+            item.program === "AI for Students"
+        );
+      data = data.concat(popupList);
+    }
+
+    if (eventSnapshot.status === "fulfilled" && eventSnapshot.value) {
+      const eventList = eventSnapshot.value.docs
+        .map((d) => ({ id: d.id, ...d.data(), _collection: "event_registrations" }))
+        .filter(
+          (item) =>
+            item.isAiBoosterProgram === true ||
+            item.isAiForStudents === true ||
+            item.program === "AI Booster Program" ||
+            item.program === "AI for Students" ||
+            item.type === "AI_BOOSTER_PROGRAM" ||
+            item.type === "AI_FOR_STUDENTS"
+        );
+      data = data.concat(eventList);
+    }
+  } catch (error) {
+    console.error("Error fetching AI Booster Program registrations:", error);
+  }
+
+  // Merge offline entries if any
+  try {
+    const localData = JSON.parse(
+      localStorage.getItem("offline_ai_booster_program_registrations") ||
+      localStorage.getItem("offline_ai_for_students_registrations") ||
+      "[]"
+    );
+    data = data.concat(localData);
+  } catch (e) {}
+
+  // Deduplicate strictly by ID
+  const seenIds = new Set();
+  const unique = [];
+
+  for (const item of data) {
+    if (item.id && seenIds.has(item.id)) continue;
+    if (item.id) seenIds.add(item.id);
+    unique.push(item);
+  }
+
+  return unique.sort((a, b) => {
+    const timeA = a.updatedAt?.seconds || a.timestamp?.seconds || a.createdAt?.seconds || 0;
+    const timeB = b.updatedAt?.seconds || b.timestamp?.seconds || b.createdAt?.seconds || 0;
+    return timeB - timeA;
+  });
+};
+export const getAiForStudentsRegistrations = getAiBoosterProgramRegistrations;
+
+/**
+ * Updates status or admin notes for an AI Booster Program registration
+ */
+export const updateAiBoosterProgramRegistration = async (id, updateData) => {
+  const sanitize = (str, max = 500) => String(str || "").replace(/[<>]/g, "").trim().slice(0, max);
+  const payload = {
+    updatedAt: serverTimestamp(),
+  };
+  if (updateData.status !== undefined) payload.status = sanitize(updateData.status, 50);
+  if (updateData.adminNotes !== undefined) payload.adminNotes = sanitize(updateData.adminNotes, 500);
+  if (updateData.paymentStatus !== undefined) payload.paymentStatus = sanitize(updateData.paymentStatus, 50);
+  if (updateData.paymentId !== undefined) payload.paymentId = sanitize(updateData.paymentId, 100);
+  if (updateData.amountPaid !== undefined) payload.amountPaid = Number(updateData.amountPaid);
+  if (updateData.originalPrice !== undefined) payload.originalPrice = Number(updateData.originalPrice);
+  if (updateData.offerPrice !== undefined) payload.offerPrice = Number(updateData.offerPrice);
+
+  if (!id.startsWith("offline_")) {
+    const candidateCollections = [
+      "ai_booster_program_registrations",
+      "ai_for_students_registrations",
+      "popup_leads",
+      "event_registrations",
+    ];
+    for (const col of candidateCollections) {
+      try {
+        await updateDoc(doc(db, col, id), payload);
+        break;
+      } catch (err) {
+        // Continue to other collections
+      }
+    }
+  }
+
+  try {
+    const localKeys = ["offline_ai_booster_program_registrations", "offline_ai_for_students_registrations"];
+    localKeys.forEach((key) => {
+      const local = JSON.parse(localStorage.getItem(key) || "[]");
+      const updatedLocal = local.map((item) =>
+        item.id === id
+          ? { ...item, ...payload, updatedAt: { seconds: Math.floor(Date.now() / 1000) } }
+          : item
+      );
+      localStorage.setItem(key, JSON.stringify(updatedLocal));
+    });
+  } catch (err) {
+    console.error("Local update failed:", err);
+  }
+
+  return { success: true };
+};
+export const updateAiForStudentsRegistration = updateAiBoosterProgramRegistration;
+
+/**
+ * Deletes an AI Booster Program registration across collections and local storage
+ */
+export const deleteAiBoosterProgramRegistration = async (id) => {
+  if (!id.startsWith("offline_")) {
+    const candidateCollections = [
+      "ai_booster_program_registrations",
+      "ai_for_students_registrations",
+      "popup_leads",
+      "event_registrations",
+    ];
+    for (const col of candidateCollections) {
+      try {
+        await deleteDoc(doc(db, col, id));
+      } catch (err) {
+        // Continue to other collections
+      }
+    }
+  }
+
+  try {
+    const localKeys = ["offline_ai_booster_program_registrations", "offline_ai_for_students_registrations"];
+    localKeys.forEach((key) => {
+      const local = JSON.parse(localStorage.getItem(key) || "[]");
+      const filtered = local.filter((item) => item.id !== id);
+      localStorage.setItem(key, JSON.stringify(filtered));
+    });
+  } catch (e) {
+    console.error("Failed to delete local booster entry:", e);
+  }
+
+  return { success: true };
+};
+export const deleteAiForStudentsRegistration = deleteAiBoosterProgramRegistration;
+
 
 

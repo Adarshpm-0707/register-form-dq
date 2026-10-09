@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  saveAiForEveryoneRegistration,
-  updateAiForEveryoneRegistration,
+  saveAiEasyAyiRegistration,
+  updateAiEasyAyiRegistration,
 } from "../services/dbService";
 
 const EDUCATION_OPTIONS = [
@@ -73,7 +73,7 @@ const calculateTimeLeft = () => {
   };
 };
 
-export default function AiForEveryone() {
+export default function AiEasyAyi() {
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -169,8 +169,9 @@ export default function AiForEveryone() {
         phone: formData.phone.trim(),
         place: formData.place.trim(),
         education: finalEducation,
-        program: "AI For Everyone",
-        type: "AI_FOR_EVERYONE",
+        program: "AI easy Ayi",
+        type: "AI_EASY_AYI",
+        isAiEasyAyi: true,
         isAiForEveryone: true,
         originalPrice: 899,
         amount: 99,
@@ -182,8 +183,8 @@ export default function AiForEveryone() {
       // 1. Immediately save candidate to database as "unpaid" so lead is never lost
       let regId = pendingRegId;
       if (!regId) {
-        const result = await saveAiForEveryoneRegistration(payload);
-        regId = result?.id || `AFE-${Date.now().toString().slice(-6)}`;
+        const result = await saveAiEasyAyiRegistration(payload);
+        regId = result?.id || `AYI-${Date.now().toString().slice(-6)}`;
         setPendingRegId(regId);
       }
 
@@ -205,7 +206,7 @@ export default function AiForEveryone() {
         amount: 99 * 100, // 9900 paise = ₹99
         currency: "INR",
         name: "DeepStaq",
-        description: "AI For Everyone Registration Fee (Special Offer ₹99)",
+        description: "AI easy Ayi Registration Fee (Special Offer ₹99)",
         image: "/favicon.ico",
         prefill: {
           name: formData.fullName.trim(),
@@ -213,7 +214,7 @@ export default function AiForEveryone() {
         },
         notes: {
           registrationId: regId,
-          course: "AI For Everyone",
+          course: "AI easy Ayi",
           offerPrice: "99",
           originalPrice: "899",
         },
@@ -238,7 +239,7 @@ export default function AiForEveryone() {
             const paymentId = response.razorpay_payment_id;
 
             // 4. Update database record to "paid"
-            await updateAiForEveryoneRegistration(regId, {
+            await updateAiEasyAyiRegistration(regId, {
               paymentStatus: "paid",
               paymentId: paymentId,
               amountPaid: 99,
@@ -336,7 +337,7 @@ export default function AiForEveryone() {
           </div>
 
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-black uppercase tracking-tighter text-[#050521]">
-            AI FOR <span className="text-stroke-dark text-transparent">EVERYONE</span>
+            AI EASY <span className="text-stroke-dark text-transparent">AYI</span>
           </h1>
 
           <p className="text-slate-600 font-medium text-xs sm:text-sm">
@@ -370,7 +371,7 @@ export default function AiForEveryone() {
                   Thank You, {submittedData.fullName}!
                 </h2>
                 <p className="text-slate-600 font-medium text-xs sm:text-sm max-w-md mx-auto">
-                  Your seat for <strong>AI For Everyone</strong> has been successfully booked.
+                  Your seat for <strong>AI easy Ayi</strong> has been successfully booked.
                 </p>
               </div>
 
@@ -445,7 +446,7 @@ export default function AiForEveryone() {
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
                 <a
                   href={`https://wa.me/918075727195?text=${encodeURIComponent(
-                    `Hi DeepStaq! I registered and paid ₹99 for AI For Everyone. Name: ${submittedData.fullName} (Ref: ${submittedData.id}, Payment ID: ${submittedData.paymentId || "N/A"})`
+                    `Hi DeepStaq! I registered and paid ₹99 for AI easy Ayi. Name: ${submittedData.fullName} (Ref: ${submittedData.id}, Payment ID: ${submittedData.paymentId || "N/A"})`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -481,7 +482,6 @@ export default function AiForEveryone() {
                         <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#c6ff34]">
                           ⏳ Offer Ends In:
                         </p>
-                     
                       </div>
                     </div>
 
@@ -731,8 +731,6 @@ export default function AiForEveryone() {
                         </>
                       )}
                     </button>
-
-                    
                   </div>
 
                 </form>

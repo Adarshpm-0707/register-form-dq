@@ -114,8 +114,25 @@ service cloud.firestore {
       allow read, delete: if isAdmin();
     }
 
+    // Security for AI easy Ayi Registrations
+    match /ai_easy_ayi_registrations/{document} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
+    }
+
     // Security for AI For Everyone Registrations
     match /ai_for_everyone_registrations/{document} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
+    }
+
+    // Security for AI for Students / AI Booster Program Registrations
+    match /ai_for_students_registrations/{document} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
+    }
+
+    match /ai_booster_program_registrations/{document} {
       allow create, update: if true;
       allow read, delete: if isAdmin();
     }

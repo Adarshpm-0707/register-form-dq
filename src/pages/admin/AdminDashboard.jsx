@@ -22,7 +22,10 @@ import {
   deletePopupLead,
   getAiForEveryoneRegistrations,
   updateAiForEveryoneRegistration,
-  deleteAiForEveryoneRegistration
+  deleteAiForEveryoneRegistration,
+  getAiBoosterProgramRegistrations,
+  updateAiBoosterProgramRegistration,
+  deleteAiBoosterProgramRegistration
 } from "../../services/dbService";
 
 const DataCard = ({ item, headers, onDelete }) => {
@@ -1285,8 +1288,8 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
   };
 
   const whatsappMessage = isPaid
-    ? `Hi ${candidateName}! Thank you for registering for the DeepStaq AI For Everyone initiative and completing your ₹99 payment (Ref: ${item.id?.slice(0, 8)}, Payment ID: ${paymentId || "Confirmed"}). Welcome aboard! Please join our official WhatsApp Community here for class links and materials: https://chat.whatsapp.com/KxVV7ep74TV0GHy5SU2FXl`
-    : `Hi ${candidateName}! We noticed you started registering for the DeepStaq AI For Everyone initiative (₹99 special offer) but didn't complete the payment. Would you like any assistance to complete your registration?`;
+    ? `Hi ${candidateName}! Thank you for registering for the DeepStaq AI easy Ayi initiative and completing your ₹99 payment (Ref: ${item.id?.slice(0, 8)}, Payment ID: ${paymentId || "Confirmed"}). Welcome aboard! Please join our official WhatsApp Community here for class links and materials: https://chat.whatsapp.com/KxVV7ep74TV0GHy5SU2FXl`
+    : `Hi ${candidateName}! We noticed you started registering for the DeepStaq AI easy Ayi initiative (₹99 special offer) but didn't complete the payment. Would you like any assistance to complete your registration?`;
 
   return (
     <div className={`bg-white border-2 ${isPaid ? "border-emerald-600 shadow-[4px_4px_0px_0px_#059669]" : "border-[#050521] shadow-[4px_4px_0px_0px_#050521]"} rounded-[1.75rem] p-5 sm:p-6 hover:shadow-[6px_6px_0px_0px_#c6ff34] transition-all duration-300 flex flex-col gap-4`}>
@@ -1298,7 +1301,7 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
               REF: {item.id ? item.id.slice(0, 10) : "N/A"}
             </span>
             <span className="bg-[#c6ff34] text-[#050521] px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border border-[#050521]/20">
-              AI For Everyone
+              AI easy Ayi
             </span>
             {/* Prominent Paid vs Unpaid Badge */}
             {isPaid ? (
@@ -1542,6 +1545,371 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
   );
 };
 
+const AiBoosterProgramCard = ({ item, onDelete, onUpdate }) => {
+  const [status, setStatus] = useState(item.status || "New Registration");
+  const [paymentStatus, setPaymentStatus] = useState(
+    item.paymentStatus || (item.status === "Paid & Confirmed" ? "paid" : "unpaid")
+  );
+  const [paymentId, setPaymentId] = useState(item.paymentId || "");
+  const [payIdCopied, setPayIdCopied] = useState(false);
+  const [notes, setNotes] = useState(item.adminNotes || "");
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
+  const [phoneCopied, setPhoneCopied] = useState(false);
+
+  const submissionDate = item.updatedAt?.seconds
+    ? new Date(item.updatedAt.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+    : item.timestamp?.seconds
+    ? new Date(item.timestamp.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+    : item.createdAt?.seconds
+    ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+    : "-";
+
+  const rawPhone = item.phone || "";
+  const cleanPhone = rawPhone.replace(/\D/g, "");
+  const studentName = item.fullName || item.name || "Student";
+  const institution = item.collegeOrSchool || item.institution || "College/School";
+  const isPaid = paymentStatus === "paid" || item.paymentStatus === "paid" || status === "Paid & Confirmed";
+
+  const handleCopyPhone = () => {
+    if (!cleanPhone) return;
+    navigator.clipboard.writeText(cleanPhone);
+    setPhoneCopied(true);
+    setTimeout(() => setPhoneCopied(false), 2000);
+  };
+
+  const handleCopyPayId = () => {
+    const idToCopy = paymentId || item.paymentId;
+    if (!idToCopy) return;
+    navigator.clipboard.writeText(idToCopy);
+    setPayIdCopied(true);
+    setTimeout(() => setPayIdCopied(false), 2000);
+  };
+
+  const handleSaveStatus = async () => {
+    setIsSaving(true);
+    try {
+      if (onUpdate) {
+        await onUpdate(item.id, {
+          status,
+          paymentStatus,
+          paymentId,
+          amountPaid: paymentStatus === "paid" ? (item.amountPaid || 49) : 0,
+          adminNotes: notes,
+        });
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 3000);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to update status.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const getStatusBadge = () => {
+    if (isPaid) {
+      return (
+        <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          ⭐ Paid ₹49 (Confirmed)
+        </span>
+      );
+    }
+    const s = (status || "").toLowerCase();
+    if (s.includes("enrolled") || s.includes("shortlist")) {
+      return (
+        <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          🎓 Enrolled / Shortlisted
+        </span>
+      );
+    }
+    if (s.includes("contacted") || s.includes("called")) {
+      return (
+        <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-amber-500" />
+          🟡 Contacted
+        </span>
+      );
+    }
+    if (s.includes("follow")) {
+      return (
+        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-blue-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-blue-500" />
+          🔵 Follow-Up
+        </span>
+      );
+    }
+    if (s.includes("not interested") || s.includes("drop")) {
+      return (
+        <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-[10px] font-black uppercase tracking-wider border border-slate-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-slate-400" />
+          ⚪ Not Interested
+        </span>
+      );
+    }
+    return (
+      <span className="px-3 py-1 bg-amber-50 text-amber-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-300 flex items-center gap-1.5">
+        <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+        ⏳ ₹49 Pending
+      </span>
+    );
+  };
+
+  const whatsappMessage = `Hi ${studentName}! Thank you for registering for the DeepStaq AI Booster Program from ${institution}. We're excited to have you on board! Join our official student WhatsApp group here for updates, session links, and materials: https://chat.whatsapp.com/KxVV7ep74TV0GHy5SU2FXl`;
+
+  return (
+    <div className="bg-white border-2 border-[#050521] rounded-[1.75rem] p-5 sm:p-6 shadow-[4px_4px_0px_0px_#050521] hover:shadow-[6px_6px_0px_0px_#c6ff34] transition-all duration-300 flex flex-col gap-4">
+      {/* Top Meta Bar */}
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 pb-3 border-b border-slate-100">
+        <div>
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span className="font-mono text-[9px] text-[#050521]/60 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-md font-bold">
+              REF: {item.id ? item.id.slice(0, 10) : "N/A"}
+            </span>
+            <span className="bg-[#c6ff34] text-[#050521] px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border border-[#050521]/20">
+              AI Booster Program
+            </span>
+            {getStatusBadge()}
+          </div>
+          <h3 className="text-xl font-black text-[#050521] tracking-tight uppercase">
+            {studentName}
+          </h3>
+        </div>
+        <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-xl border border-slate-200 shrink-0">
+          {submissionDate}
+        </span>
+      </div>
+
+      {/* Primary Details Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+            Phone Number
+          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-black font-mono text-slate-900">
+              +91 {cleanPhone || item.phone || "-"}
+            </span>
+            {cleanPhone && (
+              <button
+                type="button"
+                onClick={handleCopyPhone}
+                className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-md transition-colors cursor-pointer"
+                title="Copy phone number"
+              >
+                {phoneCopied ? "✓ Copied" : "Copy"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+            Place / Town
+          </span>
+          <span className="text-sm font-bold text-slate-900 block truncate">
+            📍 {item.place || item.city || item.location || "Not specified"}
+          </span>
+        </div>
+
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+            College or School
+          </span>
+          <span className="text-sm font-bold text-slate-900 block break-words">
+            🏫 {item.collegeOrSchool || item.institution || "Not specified"}
+          </span>
+        </div>
+
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+            Year or Sem
+          </span>
+          <span className="text-sm font-bold text-slate-900 block">
+            🎓 {item.yearOrSem || "Not specified"}
+          </span>
+        </div>
+
+        <div className="sm:col-span-2 pt-2 border-t border-slate-200/60">
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1">
+            Are you interested in AI?
+          </span>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#050521] text-[#c6ff34] rounded-xl text-xs font-black">
+            <span>🚀</span>
+            <span>{item.interestedInAi || "Yes"}</span>
+          </div>
+        </div>
+
+        {/* Payment & Razorpay Status Box */}
+        <div className="sm:col-span-2 pt-2 border-t border-slate-200/60">
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1.5">
+            Payment Details
+          </span>
+          {isPaid ? (
+            <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-emerald-700 font-black text-xs">✓ Amount Paid: ₹{item.amountPaid || 49}</span>
+                <span className="text-slate-400 text-xs">|</span>
+                <span className="text-xs font-mono font-bold text-emerald-900 truncate">
+                  {item.paymentId || paymentId ? `Razorpay ID: ${item.paymentId || paymentId}` : "Payment Confirmed"}
+                </span>
+              </div>
+              {(item.paymentId || paymentId) && (
+                <button
+                  type="button"
+                  onClick={handleCopyPayId}
+                  className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-200 hover:bg-emerald-300 text-emerald-900 rounded transition-colors cursor-pointer"
+                >
+                  {payIdCopied ? "✓ Copied ID" : "Copy ID"}
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-amber-800 font-black text-xs">⏳ ₹49 Payment Incomplete</span>
+                <span className="text-slate-400 text-xs">|</span>
+                <span className="text-[11px] text-amber-700 font-medium">Candidate submitted details but dropped off at Razorpay</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Quick Contact Action Buttons */}
+      <div className="flex flex-wrap gap-2 pt-1">
+        {cleanPhone && (
+          <>
+            <a
+              href={`https://api.whatsapp.com/send?phone=91${cleanPhone}&text=${encodeURIComponent(whatsappMessage)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex-1 min-w-[140px] py-2.5 px-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm"
+            >
+              <span>💬 WhatsApp Student</span>
+            </a>
+
+            <a
+              href={`tel:${cleanPhone}`}
+              className="py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 shadow-sm"
+            >
+              <span>📞 Call</span>
+            </a>
+          </>
+        )}
+      </div>
+
+      {/* Lead Management & Status / Remarks Editor */}
+      <div className="bg-[#050521]/5 border border-[#050521]/20 p-3.5 rounded-2xl flex flex-col gap-2.5">
+        <div className="flex items-center justify-between">
+          <span className="text-[9px] font-black uppercase tracking-widest text-[#050521]">
+            Registration Status & Follow-up Notes
+          </span>
+          {savedSuccess && (
+            <span className="text-[9px] font-black text-green-700 bg-green-100 px-2 py-0.5 rounded-md border border-green-300">
+              ✓ Saved!
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {/* Status selector */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Student Status
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
+            >
+              <option value="New Registration">🟢 New Registration</option>
+              <option value="Paid & Confirmed">⭐ Paid & Confirmed</option>
+              <option value="Contacted">🟡 Contacted / Called</option>
+              <option value="Follow-up Scheduled">🔵 Follow-up Scheduled</option>
+              <option value="Enrolled / Shortlisted">🎓 Enrolled / Shortlisted</option>
+              <option value="Not Interested">⚪ Not Interested / Dropped</option>
+            </select>
+          </div>
+
+          {/* Payment Status selector */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Payment Status
+            </label>
+            <select
+              value={paymentStatus}
+              onChange={(e) => {
+                const nextVal = e.target.value;
+                setPaymentStatus(nextVal);
+                if (nextVal === "paid" && !status.includes("Confirmed")) {
+                  setStatus("Paid & Confirmed");
+                }
+              }}
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
+            >
+              <option value="paid">🟢 Paid (₹49 Completed)</option>
+              <option value="unpaid">🟠 Unpaid (Pending)</option>
+            </select>
+          </div>
+
+          {/* Razorpay Payment ID */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Razorpay Payment ID
+            </label>
+            <input
+              type="text"
+              value={paymentId}
+              onChange={(e) => setPaymentId(e.target.value)}
+              placeholder="e.g. pay_..."
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-medium text-slate-800 focus:outline-none focus:border-[#050521]"
+            />
+          </div>
+
+          {/* Remarks/Notes */}
+          <div className="sm:col-span-3">
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Internal Remarks / Follow-up Notes
+            </label>
+            <input
+              type="text"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="e.g. Called student, confirmed payment, added to workshop group..."
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#050521]"
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center pt-1">
+          <button
+            type="button"
+            onClick={handleSaveStatus}
+            disabled={isSaving}
+            className="py-1.5 px-4 bg-[#050521] hover:bg-slate-800 text-[#c6ff34] font-black text-[10px] uppercase tracking-wider rounded-xl transition-all disabled:opacity-50 cursor-pointer"
+          >
+            {isSaving ? "Saving..." : "💾 Update Status & Payment"}
+          </button>
+
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(item.id, studentName)}
+              className="text-red-500 hover:text-red-700 text-[10px] font-black uppercase tracking-wider py-1 px-2 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
+            >
+              🗑 Delete
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function AdminDashboard() {
   const [user, setUser] = useState(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
@@ -1559,7 +1927,9 @@ function AdminDashboard() {
   const [scholarshipData, setScholarshipData] = useState([]);
   const [popupLeadData, setPopupLeadData] = useState([]);
   const [aiForEveryoneData, setAiForEveryoneData] = useState([]);
+  const [aiBoosterProgramData, setAiBoosterProgramData] = useState([]);
   const [aiPaymentTab, setAiPaymentTab] = useState("all"); // "all" | "paid" | "unpaid"
+  const [boosterPaymentTab, setBoosterPaymentTab] = useState("all"); // "all" | "paid" | "unpaid"
   const [loadingData, setLoadingData] = useState(true);
   const [activeTab, setActiveTab] = useState("scholarship");
   const [searchQuery, setSearchQuery] = useState("");
@@ -1572,6 +1942,23 @@ function AdminDashboard() {
   const unpaidAiStudents = aiForEveryoneData.filter(
     (item) => item.paymentStatus !== "paid" && !item.paymentId
   );
+
+  const isItemPaid = (item) => {
+    if (!item) return false;
+    const pStatus = String(item.paymentStatus || "").toLowerCase();
+    const st = String(item.status || "").toLowerCase();
+    return (
+      pStatus === "paid" ||
+      st.includes("paid") ||
+      st.includes("confirmed") ||
+      Boolean(item.paymentId && String(item.paymentId).trim()) ||
+      Number(item.amountPaid) > 0 ||
+      item.isPaid === true
+    );
+  };
+
+  const paidBoosterStudents = aiBoosterProgramData.filter((item) => isItemPaid(item));
+  const unpaidBoosterStudents = aiBoosterProgramData.filter((item) => !isItemPaid(item));
 
   useEffect(() => {
     setSearchQuery("");
@@ -1606,7 +1993,7 @@ function AdminDashboard() {
   const fetchData = async () => {
     setLoadingData(true);
     try {
-      const [slots, events, masters, oldAptitudes, newAptitudes, collected, uploaded, webinars, admissions, consultations, scholarships, popupLeads, aiForEveryone] = await Promise.all([
+      const results = await Promise.allSettled([
         getSlotRegistrations(),
         getEventRegistrations(),
         getMasterRegistrations(),
@@ -1619,24 +2006,26 @@ function AdminDashboard() {
         getConsultationBookings(),
         getScholarshipApplications(),
         getPopupLeads(),
-        getAiForEveryoneRegistrations()
+        getAiForEveryoneRegistrations(),
+        getAiBoosterProgramRegistrations()
       ]);
-      setSlotData(slots);
-      setEventData(events);
-      setMasterData(masters);
-      setOldAptitudeData(oldAptitudes);
-      setNewAptitudeData(newAptitudes);
-      setCollectedData(collected);
-      setUploadedData(uploaded);
-      setWebinarData(webinars);
-      setAdmissionData(admissions);
-      setConsultationData(consultations);
-      setScholarshipData(scholarships);
-      setPopupLeadData(popupLeads);
-      setAiForEveryoneData(aiForEveryone);
+      const val = (idx) => (results[idx].status === "fulfilled" && Array.isArray(results[idx].value)) ? results[idx].value : [];
+      setSlotData(val(0));
+      setEventData(val(1));
+      setMasterData(val(2));
+      setOldAptitudeData(val(3));
+      setNewAptitudeData(val(4));
+      setCollectedData(val(5));
+      setUploadedData(val(6));
+      setWebinarData(val(7));
+      setAdmissionData(val(8));
+      setConsultationData(val(9));
+      setScholarshipData(val(10));
+      setPopupLeadData(val(11));
+      setAiForEveryoneData(val(12));
+      setAiBoosterProgramData(val(13));
     } catch (error) {
       console.error("Error fetching data:", error);
-      alert("Failed to fetch data.");
     } finally {
       setLoadingData(false);
     }
@@ -1674,6 +2063,18 @@ function AdminDashboard() {
       );
     } catch (error) {
       console.error("Error updating AI For Everyone registration:", error);
+      throw error;
+    }
+  };
+
+  const handleUpdateAiBoosterProgram = async (id, updateData) => {
+    try {
+      await updateAiBoosterProgramRegistration(id, updateData);
+      setAiBoosterProgramData((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, ...updateData } : item))
+      );
+    } catch (error) {
+      console.error("Error updating AI Booster Program registration:", error);
       throw error;
     }
   };
@@ -1739,6 +2140,60 @@ function AdminDashboard() {
       return;
     }
 
+    if (activeTab === "ai_booster_program" || activeTab === "ai_for_students") {
+      const headers = [
+        "Reference ID",
+        "Student Name",
+        "Phone",
+        "Place",
+        "College or School",
+        "Year or Sem",
+        "Interested in AI",
+        "Payment Status",
+        "Amount Paid (INR)",
+        "Payment ID (Razorpay)",
+        "Lead Status",
+        "Admin Remarks",
+        "Registration Date"
+      ];
+      const csvRows = [headers.join(",")];
+      data.forEach((item) => {
+        const isPaid = item.paymentStatus === "paid" || item.status === "Paid & Confirmed";
+        const dateStr = item.updatedAt?.seconds
+          ? new Date(item.updatedAt.seconds * 1000).toLocaleString("en-IN")
+          : item.timestamp?.seconds
+          ? new Date(item.timestamp.seconds * 1000).toLocaleString("en-IN")
+          : item.createdAt?.seconds
+          ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-IN")
+          : "";
+        const clean = (val) => `"${String(val ?? "").replace(/"/g, '""')}"`;
+        csvRows.push([
+          clean(item.id),
+          clean(item.fullName || item.name),
+          clean(item.phone),
+          clean(item.place || item.city || item.location),
+          clean(item.collegeOrSchool || item.institution),
+          clean(item.yearOrSem),
+          clean(item.interestedInAi || "Yes"),
+          clean(item.paymentStatus || (isPaid ? "paid" : "unpaid")),
+          clean(item.amountPaid !== undefined ? item.amountPaid : (isPaid ? 49 : 0)),
+          clean(item.paymentId || ""),
+          clean(item.status || "New Registration"),
+          clean(item.adminNotes || ""),
+          clean(dateStr),
+        ].join(","));
+      });
+      const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `ai_booster_program_${boosterPaymentTab}_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+
     const allKeys = new Set();
     data.forEach(item => Object.keys(item).forEach(k => allKeys.add(k)));
     const headers = Array.from(allKeys).filter(k => k !== "id");
@@ -1770,6 +2225,63 @@ function AdminDashboard() {
     const link = document.createElement("a");
     link.setAttribute("href", url);
     link.setAttribute("download", `${activeTab}_data.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportBoosterSubsetCSV = (subset, label = "students") => {
+    if (!subset || subset.length === 0) {
+      alert(`No ${label} records to export.`);
+      return;
+    }
+    const headers = [
+      "Reference ID",
+      "Student Name",
+      "Phone",
+      "Place",
+      "College or School",
+      "Year or Sem",
+      "Interested in AI",
+      "Payment Status",
+      "Amount Paid (INR)",
+      "Payment ID (Razorpay)",
+      "Lead Status",
+      "Admin Remarks",
+      "Registration Date"
+    ];
+    const csvRows = [headers.join(",")];
+    const clean = (val) => `"${String(val ?? "").replace(/"/g, '""')}"`;
+    subset.forEach((item) => {
+      const isPaid = isItemPaid(item);
+      const dateStr = item.updatedAt?.seconds
+        ? new Date(item.updatedAt.seconds * 1000).toLocaleString("en-IN")
+        : item.timestamp?.seconds
+        ? new Date(item.timestamp.seconds * 1000).toLocaleString("en-IN")
+        : item.createdAt?.seconds
+        ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-IN")
+        : "";
+      csvRows.push([
+        clean(item.id),
+        clean(item.fullName || item.name),
+        clean(item.phone),
+        clean(item.place || item.city || item.location),
+        clean(item.collegeOrSchool || item.institution),
+        clean(item.yearOrSem),
+        clean(item.interestedInAi || "Yes"),
+        clean(isPaid ? "PAID" : "UNPAID"),
+        clean(isPaid ? (item.amountPaid || 49) : 0),
+        clean(item.paymentId || ""),
+        clean(item.status || (isPaid ? "Paid & Confirmed" : "New Registration")),
+        clean(item.adminNotes || ""),
+        clean(dateStr),
+      ].join(","));
+    });
+    const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `ai_booster_${label.toLowerCase().replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1808,6 +2320,16 @@ function AdminDashboard() {
       return;
     }
 
+    if (activeTab === "ai_booster_program" || activeTab === "ai_for_students") {
+      try {
+        await deleteAiBoosterProgramRegistration(id);
+      } catch (err) {
+        console.warn("Primary delete AI Booster Program record failed:", err);
+      }
+      setAiBoosterProgramData((prev) => prev.filter((item) => item.id !== id));
+      return;
+    }
+
     const collectionMap = {
       scholarship: "scholarship_applications",
       slot: "slot_registrations",
@@ -1820,7 +2342,9 @@ function AdminDashboard() {
       webinar: "webinar_registrations",
       admission: "admissions",
       consultation: "consultation_bookings",
-      ai_for_everyone: "ai_for_everyone_registrations"
+      ai_for_everyone: "ai_for_everyone_registrations",
+      ai_booster_program: "ai_booster_program_registrations",
+      ai_for_students: "ai_booster_program_registrations"
     };
 
     const collectionName = collectionMap[activeTab] || "aptitude_test_leads";
@@ -1876,6 +2400,7 @@ function AdminDashboard() {
     setAdmissionData((prev) => prev.filter((item) => item.id !== id));
     setConsultationData((prev) => prev.filter((item) => item.id !== id));
     setAiForEveryoneData((prev) => prev.filter((item) => item.id !== id));
+    setAiBoosterProgramData((prev) => prev.filter((item) => item.id !== id));
   };
 
   const renderCards = (data) => {
@@ -1903,6 +2428,39 @@ function AdminDashboard() {
             </div>
           );
         }
+      }
+      if (activeTab === "ai_booster_program" || activeTab === "ai_for_students") {
+        if (boosterPaymentTab === "paid") {
+          return (
+            <div className="bg-white border-2 border-dashed border-emerald-300 rounded-3xl p-12 text-center my-6">
+              <span className="text-4xl block mb-2">🟢</span>
+              <h4 className="text-base font-black uppercase text-[#050521]">No Paid Students Yet</h4>
+              <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                Registrations will appear in this section once candidates complete the ₹49 payment on Razorpay.
+              </p>
+            </div>
+          );
+        }
+        if (boosterPaymentTab === "unpaid") {
+          return (
+            <div className="bg-white border-2 border-dashed border-amber-300 rounded-3xl p-12 text-center my-6">
+              <span className="text-4xl block mb-2">🎉</span>
+              <h4 className="text-base font-black uppercase text-[#050521]">No Unpaid Students</h4>
+              <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                All registered candidates have completed their ₹49 payment, or there are no pending drop-offs.
+              </p>
+            </div>
+          );
+        }
+        return (
+          <div className="bg-white border-2 border-dashed border-blue-300 rounded-3xl p-12 text-center my-6">
+            <span className="text-4xl block mb-2">🚀</span>
+            <h4 className="text-base font-black uppercase text-[#050521]">No AI Booster Program Registrations Yet</h4>
+            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+              Student form submissions from the "AI Booster Program" page will show up here.
+            </p>
+          </div>
+        );
       }
       return <p className="text-center py-10 text-[#050521]/50 font-bold uppercase tracking-widest">No registrations found.</p>;
     }
@@ -1938,16 +2496,361 @@ function AdminDashboard() {
     }
 
     if (activeTab === "ai_for_everyone") {
+      const paidItems = data.filter((item) => item.paymentStatus === "paid" || Boolean(item.paymentId));
+      const unpaidItems = data.filter((item) => item.paymentStatus !== "paid" && !item.paymentId);
+
+      if (aiPaymentTab === "paid") {
+        return (
+          <div className="space-y-6">
+            <div className="bg-emerald-500/10 border-2 border-emerald-500/30 rounded-3xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-black uppercase tracking-wider text-emerald-950 flex items-center gap-2">
+                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>🟢 Paid Students Section (₹99 Confirmed)</span>
+                </h3>
+                <p className="text-xs text-emerald-800 font-medium mt-1">Confirmed registrations who completed ₹99 payment.</p>
+              </div>
+              <span className="px-3.5 py-1.5 bg-emerald-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                {paidItems.length} Paid
+              </span>
+            </div>
+            {paidItems.length === 0 ? (
+              <div className="bg-white border-2 border-dashed border-emerald-300 rounded-3xl p-12 text-center">
+                <span className="text-4xl block mb-2">🟢</span>
+                <h4 className="text-base font-black uppercase text-[#050521]">No Paid Students Found</h4>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {paidItems.map((item) => (
+                  <AiForEveryoneCard
+                    key={item.id}
+                    item={item}
+                    onDelete={handleDeleteRecord}
+                    onUpdate={handleUpdateAiForEveryone}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      if (aiPaymentTab === "unpaid") {
+        return (
+          <div className="space-y-6">
+            <div className="bg-amber-500/10 border-2 border-amber-500/30 rounded-3xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-black uppercase tracking-wider text-amber-950 flex items-center gap-2">
+                  <span className="w-3.5 h-3.5 rounded-full bg-amber-500 animate-pulse" />
+                  <span>🟠 Unpaid / Pending Leads Section</span>
+                </h3>
+                <p className="text-xs text-amber-800 font-medium mt-1">Candidates who filled details but dropped off before paying.</p>
+              </div>
+              <span className="px-3.5 py-1.5 bg-amber-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                {unpaidItems.length} Unpaid
+              </span>
+            </div>
+            {unpaidItems.length === 0 ? (
+              <div className="bg-white border-2 border-dashed border-amber-300 rounded-3xl p-12 text-center">
+                <span className="text-4xl block mb-2">🎉</span>
+                <h4 className="text-base font-black uppercase text-[#050521]">No Unpaid Students</h4>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {unpaidItems.map((item) => (
+                  <AiForEveryoneCard
+                    key={item.id}
+                    item={item}
+                    onDelete={handleDeleteRecord}
+                    onUpdate={handleUpdateAiForEveryone}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      // Both sections separated
       return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-          {data.map((item) => (
-            <AiForEveryoneCard
-              key={item.id}
-              item={item}
-              onDelete={handleDeleteRecord}
-              onUpdate={handleUpdateAiForEveryone}
-            />
-          ))}
+        <div className="space-y-10">
+          <section className="bg-white border-2 border-emerald-400/40 rounded-[2.5rem] p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-emerald-100">
+              <h3 className="text-lg font-black uppercase tracking-wider text-emerald-950 flex items-center gap-2">
+                <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>🟢 Section 1: Paid Students (₹99 Confirmed)</span>
+              </h3>
+              <span className="px-3.5 py-1.5 bg-emerald-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                {paidItems.length} Paid
+              </span>
+            </div>
+            {paidItems.length === 0 ? (
+              <p className="text-sm text-slate-500 text-center py-6 font-medium">No paid students registered yet.</p>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {paidItems.map((item) => (
+                  <AiForEveryoneCard key={item.id} item={item} onDelete={handleDeleteRecord} onUpdate={handleUpdateAiForEveryone} />
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="bg-white border-2 border-amber-400/40 rounded-[2.5rem] p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-amber-100">
+              <h3 className="text-lg font-black uppercase tracking-wider text-amber-950 flex items-center gap-2">
+                <span className="w-3.5 h-3.5 rounded-full bg-amber-500 animate-pulse" />
+                <span>🟠 Section 2: Unpaid / Pending Leads</span>
+              </h3>
+              <span className="px-3.5 py-1.5 bg-amber-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                {unpaidItems.length} Unpaid
+              </span>
+            </div>
+            {unpaidItems.length === 0 ? (
+              <p className="text-sm text-slate-500 text-center py-6 font-medium">No unpaid leads pending.</p>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {unpaidItems.map((item) => (
+                  <AiForEveryoneCard key={item.id} item={item} onDelete={handleDeleteRecord} onUpdate={handleUpdateAiForEveryone} />
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+      );
+    }
+
+    if (activeTab === "ai_booster_program" || activeTab === "ai_for_students") {
+      const paidItems = data.filter((item) => isItemPaid(item));
+      const unpaidItems = data.filter((item) => !isItemPaid(item));
+
+      // 1. Paid Section Only View
+      if (boosterPaymentTab === "paid") {
+        return (
+          <div className="space-y-6">
+            <div className="bg-emerald-500/10 border-2 border-emerald-500/30 rounded-3xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981] animate-pulse" />
+                  <h3 className="text-lg font-black uppercase tracking-wider text-emerald-950">
+                    🟢 Paid Students Section (₹49 Confirmed)
+                  </h3>
+                </div>
+                <p className="text-xs text-emerald-800 font-medium mt-1">
+                  Candidates who completed the ₹49 Razorpay payment. Verified and confirmed for AI Booster Program.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="px-3.5 py-1.5 bg-emerald-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                  {paidItems.length} Confirmed
+                </span>
+                <span className="px-3.5 py-1.5 bg-white border border-emerald-300 text-emerald-900 text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                  ₹{paidItems.length * 49} Collected
+                </span>
+                <button
+                  type="button"
+                  onClick={() => exportBoosterSubsetCSV(paidItems, "paid_students")}
+                  className="px-3.5 py-1.5 bg-[#050521] hover:bg-slate-800 text-[#c6ff34] text-xs font-black uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>📥 Export Paid CSV</span>
+                </button>
+              </div>
+            </div>
+
+            {paidItems.length === 0 ? (
+              <div className="bg-white border-2 border-dashed border-emerald-300 rounded-3xl p-12 text-center">
+                <span className="text-4xl block mb-2">🟢</span>
+                <h4 className="text-base font-black uppercase text-[#050521]">No Paid Students Found</h4>
+                <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                  Registrations will appear in this section once candidates complete the ₹49 payment on Razorpay.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {paidItems.map((item) => (
+                  <AiBoosterProgramCard
+                    key={item.id}
+                    item={item}
+                    onDelete={handleDeleteRecord}
+                    onUpdate={handleUpdateAiBoosterProgram}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      // 2. Unpaid Section Only View
+      if (boosterPaymentTab === "unpaid") {
+        return (
+          <div className="space-y-6">
+            <div className="bg-amber-500/10 border-2 border-amber-500/30 rounded-3xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <span className="w-3.5 h-3.5 rounded-full bg-amber-500 shadow-[0_0_10px_#f59e0b] animate-pulse" />
+                  <h3 className="text-lg font-black uppercase tracking-wider text-amber-950">
+                    🟠 Unpaid / Pending Leads Section
+                  </h3>
+                </div>
+                <p className="text-xs text-amber-800 font-medium mt-1">
+                  Candidates who submitted registration details but dropped off before paying ₹49. Reach out via WhatsApp or call to recover.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="px-3.5 py-1.5 bg-amber-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                  {unpaidItems.length} Dropped Off
+                </span>
+                <button
+                  type="button"
+                  onClick={() => exportBoosterSubsetCSV(unpaidItems, "unpaid_leads")}
+                  className="px-3.5 py-1.5 bg-[#050521] hover:bg-slate-800 text-[#c6ff34] text-xs font-black uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>📥 Export Unpaid CSV</span>
+                </button>
+              </div>
+            </div>
+
+            {unpaidItems.length === 0 ? (
+              <div className="bg-white border-2 border-dashed border-amber-300 rounded-3xl p-12 text-center">
+                <span className="text-4xl block mb-2">🎉</span>
+                <h4 className="text-base font-black uppercase text-[#050521]">No Unpaid Students</h4>
+                <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                  All registered candidates have completed payment, or no pending leads match your search query.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {unpaidItems.map((item) => (
+                  <AiBoosterProgramCard
+                    key={item.id}
+                    item={item}
+                    onDelete={handleDeleteRecord}
+                    onUpdate={handleUpdateAiBoosterProgram}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      // 3. Both Sections View (NEVER MIXED! STRICTLY TWO SEPARATE SECTIONS)
+      return (
+        <div className="space-y-12">
+          {/* ================= SECTION 1: PAID STUDENTS ================= */}
+          <section className="bg-white border-2 border-emerald-400/50 rounded-[2.5rem] p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b border-emerald-100">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_12px_#10b981] animate-pulse" />
+                  <h3 className="text-xl font-black uppercase tracking-wider text-emerald-950">
+                    🟢 SECTION 1: PAID REGISTRATIONS (₹49 COMPLETED)
+                  </h3>
+                </div>
+                <p className="text-xs text-emerald-800 font-medium">
+                  Confirmed students who completed the ₹49 Razorpay payment. Guaranteed workshop seats.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="px-3.5 py-1.5 bg-emerald-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                  {paidItems.length} Paid Students
+                </span>
+                <span className="px-3.5 py-1.5 bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                  ₹{paidItems.length * 49} Revenue
+                </span>
+                <button
+                  type="button"
+                  onClick={() => exportBoosterSubsetCSV(paidItems, "paid_students")}
+                  className="px-3.5 py-1.5 bg-[#050521] hover:bg-slate-800 text-[#c6ff34] text-xs font-black uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>📥 Export Paid CSV</span>
+                </button>
+              </div>
+            </div>
+
+            {paidItems.length === 0 ? (
+              <div className="bg-emerald-50/50 border-2 border-dashed border-emerald-200 rounded-3xl p-10 text-center">
+                <span className="text-3xl block mb-2">🟢</span>
+                <h4 className="text-sm font-black uppercase text-emerald-950">No Paid Students Yet</h4>
+                <p className="text-xs text-emerald-700 mt-1 max-w-md mx-auto">
+                  When candidates complete the ₹49 payment on Razorpay, their cards will show up right here in Section 1.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {paidItems.map((item) => (
+                  <AiBoosterProgramCard
+                    key={item.id}
+                    item={item}
+                    onDelete={handleDeleteRecord}
+                    onUpdate={handleUpdateAiBoosterProgram}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* ================= DISTINCT SECTION DIVIDER ================= */}
+          <div className="relative flex items-center justify-center py-2">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t-2 border-dashed border-slate-300" />
+            </div>
+            <div className="relative bg-[#f4f6f8] px-6 py-2 rounded-full border border-slate-300 text-[11px] font-black uppercase tracking-widest text-slate-600 shadow-sm flex items-center gap-2">
+              <span>⬇️</span>
+              <span>SEPARATE SECTION: UNPAID LEADS BELOW</span>
+              <span>⬇️</span>
+            </div>
+          </div>
+
+          {/* ================= SECTION 2: UNPAID LEADS ================= */}
+          <section className="bg-white border-2 border-amber-400/50 rounded-[2.5rem] p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b border-amber-100">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-4 h-4 rounded-full bg-amber-500 shadow-[0_0_12px_#f59e0b] animate-pulse" />
+                  <h3 className="text-xl font-black uppercase tracking-wider text-amber-950">
+                    🟠 SECTION 2: UNPAID / PENDING LEADS (PAYMENT DROPPED OFF)
+                  </h3>
+                </div>
+                <p className="text-xs text-amber-800 font-medium">
+                  Students who filled their details in the AI Booster Program form but did not finish the ₹49 Razorpay payment.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="px-3.5 py-1.5 bg-amber-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                  {unpaidItems.length} Unpaid Leads
+                </span>
+                <button
+                  type="button"
+                  onClick={() => exportBoosterSubsetCSV(unpaidItems, "unpaid_leads")}
+                  className="px-3.5 py-1.5 bg-[#050521] hover:bg-slate-800 text-[#c6ff34] text-xs font-black uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>📥 Export Unpaid CSV</span>
+                </button>
+              </div>
+            </div>
+
+            {unpaidItems.length === 0 ? (
+              <div className="bg-amber-50/50 border-2 border-dashed border-amber-200 rounded-3xl p-10 text-center">
+                <span className="text-3xl block mb-2">🎉</span>
+                <h4 className="text-sm font-black uppercase text-amber-950">No Unpaid Leads</h4>
+                <p className="text-xs text-amber-700 mt-1 max-w-md mx-auto">
+                  All registered candidates have successfully completed payment, or there are no pending drop-offs.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {unpaidItems.map((item) => (
+                  <AiBoosterProgramCard
+                    key={item.id}
+                    item={item}
+                    onDelete={handleDeleteRecord}
+                    onUpdate={handleUpdateAiBoosterProgram}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
         </div>
       );
     }
@@ -2012,6 +2915,11 @@ function AdminDashboard() {
       if (aiPaymentTab === "unpaid") return unpaidAiStudents;
       return aiForEveryoneData;
     }
+    if (activeTab === "ai_booster_program" || activeTab === "ai_for_students") {
+      if (boosterPaymentTab === "paid") return paidBoosterStudents;
+      if (boosterPaymentTab === "unpaid") return unpaidBoosterStudents;
+      return aiBoosterProgramData;
+    }
 
     return scholarshipData;
   };
@@ -2055,9 +2963,14 @@ function AdminDashboard() {
       case "admission": return "Student Admissions";
       case "consultation": return "Free Consultations";
       case "ai_for_everyone":
-        if (aiPaymentTab === "paid") return "AI For Everyone — Paid Students (₹99)";
-        if (aiPaymentTab === "unpaid") return "AI For Everyone — Unpaid Leads";
-        return "AI For Everyone — All Registrations";
+        if (aiPaymentTab === "paid") return "AI easy Ayi — Paid Students (₹99)";
+        if (aiPaymentTab === "unpaid") return "AI easy Ayi — Unpaid Leads";
+        return "AI easy Ayi — All Registrations";
+      case "ai_booster_program":
+      case "ai_for_students":
+        if (boosterPaymentTab === "paid") return "AI Booster Program — 🟢 Paid Students Section (₹49)";
+        if (boosterPaymentTab === "unpaid") return "AI Booster Program — 🟠 Unpaid / Pending Leads Section";
+        return "AI Booster Program — Separate Paid & Unpaid Sections";
       default: return "Dashboard";
     }
   };
@@ -2111,7 +3024,7 @@ function AdminDashboard() {
           >
              <span className="flex items-center gap-2">
                <span>✨</span>
-               <span>AI For Everyone</span>
+               <span>AI easy Ayi</span>
              </span>
              <div className="flex items-center gap-1.5">
                {paidAiStudents.length > 0 && (
@@ -2122,6 +3035,68 @@ function AdminDashboard() {
                <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "ai_for_everyone" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{aiForEveryoneData.length}</span>
              </div>
           </button>
+
+          <div className="flex flex-col gap-1">
+            <button 
+               onClick={() => {
+                 setActiveTab("ai_booster_program");
+                 setBoosterPaymentTab("all");
+               }}
+               className={`flex-shrink-0 md:w-full text-left px-5 py-3.5 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 cursor-pointer ${(activeTab === "ai_booster_program" || activeTab === "ai_for_students") && boosterPaymentTab === "all" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
+            >
+               <span className="flex items-center gap-2">
+                 <span>🚀</span>
+                 <span>AI Booster Program</span>
+               </span>
+               <div className="flex items-center gap-1.5">
+                 {paidBoosterStudents.length > 0 && (
+                   <span className="px-2 py-0.5 rounded-md text-[9px] bg-emerald-500 text-white font-bold" title="Paid Students">
+                     {paidBoosterStudents.length} paid
+                   </span>
+                 )}
+                 <span className={`px-2.5 py-1 rounded-md text-[9px] ${(activeTab === "ai_booster_program" || activeTab === "ai_for_students") && boosterPaymentTab === "all" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>
+                   {aiBoosterProgramData.length}
+                 </span>
+               </div>
+            </button>
+
+            {/* Direct 1-Click Separate Section Navigation */}
+            <div className="hidden md:flex flex-col gap-1 pl-4 pr-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab("ai_booster_program");
+                  setBoosterPaymentTab("paid");
+                }}
+                className={`w-full text-left px-3.5 py-2 rounded-xl font-bold uppercase tracking-wider text-[9px] transition-all flex justify-between items-center gap-2 cursor-pointer ${(activeTab === "ai_booster_program" || activeTab === "ai_for_students") && boosterPaymentTab === "paid" ? "bg-emerald-500 text-white shadow-md ring-1 ring-emerald-300" : "text-emerald-300/80 hover:text-emerald-100 hover:bg-emerald-500/10"}`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>🟢 Paid Section (₹49)</span>
+                </span>
+                <span className={`px-2 py-0.5 rounded-md text-[8px] font-bold ${(activeTab === "ai_booster_program" || activeTab === "ai_for_students") && boosterPaymentTab === "paid" ? "bg-black/25 text-white" : "bg-emerald-950/60 text-emerald-300 border border-emerald-500/30"}`}>
+                  {paidBoosterStudents.length}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab("ai_booster_program");
+                  setBoosterPaymentTab("unpaid");
+                }}
+                className={`w-full text-left px-3.5 py-2 rounded-xl font-bold uppercase tracking-wider text-[9px] transition-all flex justify-between items-center gap-2 cursor-pointer ${(activeTab === "ai_booster_program" || activeTab === "ai_for_students") && boosterPaymentTab === "unpaid" ? "bg-amber-500 text-white shadow-md ring-1 ring-amber-300" : "text-amber-300/80 hover:text-amber-100 hover:bg-amber-500/10"}`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span>🟠 Unpaid Section</span>
+                </span>
+                <span className={`px-2 py-0.5 rounded-md text-[8px] font-bold ${(activeTab === "ai_booster_program" || activeTab === "ai_for_students") && boosterPaymentTab === "unpaid" ? "bg-black/25 text-white" : "bg-amber-950/60 text-amber-300 border border-amber-500/30"}`}>
+                  {unpaidBoosterStudents.length}
+                </span>
+              </button>
+            </div>
+          </div>
 
           <button 
              onClick={() => setActiveTab("scholarship")}
@@ -2246,17 +3221,39 @@ function AdminDashboard() {
               {searchQuery ? `Showing ${getFilteredData().length} of ${getActiveData().length} records` : `Currently viewing ${getActiveData().length} records`}
             </p>
           </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={fetchData}
+              disabled={loadingData}
+              className="py-2.5 px-4 bg-white hover:bg-slate-100 border border-slate-200 text-[#050521] rounded-xl text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              <span className={loadingData ? "animate-spin" : ""}>🔄</span>
+              <span>{loadingData ? "Refreshing..." : "Refresh Data"}</span>
+            </button>
+          </div>
         </header>
 
         {/* Content Scrollable Area */}
         <div className="flex-1 overflow-y-auto p-4 md:p-10 relative">
           
           {/* Mobile Title (Hidden on Desktop) */}
-          <div className="md:hidden mb-6 px-2">
-            <h2 className="text-2xl font-black tracking-tight text-[#050521]">{getTabTitle()}</h2>
-            <p className="text-[#050521]/40 font-bold uppercase tracking-widest text-[9px] mt-1">
-              {searchQuery ? `Showing ${getFilteredData().length} of ${getActiveData().length} records` : `${getActiveData().length} records found`}
-            </p>
+          <div className="md:hidden mb-6 px-2 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-black tracking-tight text-[#050521]">{getTabTitle()}</h2>
+              <p className="text-[#050521]/40 font-bold uppercase tracking-widest text-[9px] mt-1">
+                {searchQuery ? `Showing ${getFilteredData().length} of ${getActiveData().length} records` : `${getActiveData().length} records found`}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={fetchData}
+              disabled={loadingData}
+              className="p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black shadow-sm cursor-pointer"
+              title="Refresh data"
+            >
+              <span className={loadingData ? "inline-block animate-spin" : ""}>🔄</span>
+            </button>
           </div>
 
           {/* Quick Metrics Banner for Popup Leads */}
@@ -2397,6 +3394,129 @@ function AdminDashboard() {
                     aiPaymentTab === "unpaid" ? "bg-white/25 text-white" : "bg-amber-100 text-amber-800"
                   }`}>
                     {unpaidAiStudents.length}
+                  </span>
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Quick Metrics Banner for AI Booster Program */}
+          {(activeTab === "ai_booster_program" || activeTab === "ai_for_students") && !loadingData && (
+            <>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
+                <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">Total Registered</span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-2xl sm:text-3xl font-black text-[#050521]">{aiBoosterProgramData.length}</span>
+                    <span className="text-[10px] font-bold text-slate-400">students</span>
+                  </div>
+                </div>
+
+                <div 
+                  onClick={() => setBoosterPaymentTab("paid")}
+                  className={`p-4 sm:p-5 rounded-2xl border shadow-sm flex flex-col justify-between cursor-pointer transition-all ${
+                    boosterPaymentTab === "paid"
+                      ? "bg-emerald-100 border-emerald-400 ring-2 ring-emerald-500 shadow-md"
+                      : "bg-emerald-50/70 border-emerald-200/80 hover:bg-emerald-100/60"
+                  }`}
+                  title="Click to view Paid Section only"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-emerald-800">🟢 Paid Section</span>
+                    <span className="text-[9px] font-bold text-emerald-700 bg-emerald-200/60 px-1.5 py-0.5 rounded">View →</span>
+                  </div>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-2xl sm:text-3xl font-black text-emerald-900">
+                      {paidBoosterStudents.length}
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-700">₹{paidBoosterStudents.length * 49} collected</span>
+                  </div>
+                </div>
+
+                <div 
+                  onClick={() => setBoosterPaymentTab("unpaid")}
+                  className={`p-4 sm:p-5 rounded-2xl border shadow-sm flex flex-col justify-between cursor-pointer transition-all ${
+                    boosterPaymentTab === "unpaid"
+                      ? "bg-amber-100 border-amber-400 ring-2 ring-amber-500 shadow-md"
+                      : "bg-amber-50/70 border-amber-200/80 hover:bg-amber-100/60"
+                  }`}
+                  title="Click to view Unpaid Section only"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-amber-800">🟠 Unpaid Section</span>
+                    <span className="text-[9px] font-bold text-amber-700 bg-amber-200/60 px-1.5 py-0.5 rounded">View →</span>
+                  </div>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-2xl sm:text-3xl font-black text-amber-900">
+                      {unpaidBoosterStudents.length}
+                    </span>
+                    <span className="text-[10px] font-bold text-amber-700">dropped off</span>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50/70 p-4 sm:p-5 rounded-2xl border border-blue-200/80 shadow-sm flex flex-col justify-between">
+                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-blue-800">Payment Conversion</span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-2xl sm:text-3xl font-black text-blue-900">
+                      {aiBoosterProgramData.length > 0 ? Math.round((paidBoosterStudents.length / aiBoosterProgramData.length) * 100) : 0}%
+                    </span>
+                    <span className="text-[10px] font-bold text-blue-700">paid rate</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dedicated Paid vs Unpaid Sections Switcher */}
+              <div className="flex flex-wrap items-center gap-2 mb-6 p-1.5 bg-white rounded-2xl border border-slate-200 shadow-sm w-fit">
+                <button
+                  type="button"
+                  onClick={() => setBoosterPaymentTab("all")}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                    boosterPaymentTab === "all"
+                      ? "bg-[#050521] text-[#c6ff34] shadow-sm"
+                      : "text-slate-600 hover:text-[#050521] hover:bg-slate-100"
+                  }`}
+                >
+                  <span>All (2 Separate Sections)</span>
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                    boosterPaymentTab === "all" ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
+                  }`}>
+                    {aiBoosterProgramData.length}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBoosterPaymentTab("paid")}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                    boosterPaymentTab === "paid"
+                      ? "bg-emerald-600 text-white shadow-sm"
+                      : "text-emerald-800 hover:text-emerald-900 hover:bg-emerald-50"
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>🟢 Paid Section Only (₹49)</span>
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                    boosterPaymentTab === "paid" ? "bg-white/25 text-white" : "bg-emerald-100 text-emerald-800"
+                  }`}>
+                    {paidBoosterStudents.length}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBoosterPaymentTab("unpaid")}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                    boosterPaymentTab === "unpaid"
+                      ? "bg-amber-600 text-white shadow-sm"
+                      : "text-amber-800 hover:text-amber-900 hover:bg-amber-50"
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span>🟠 Unpaid Section Only</span>
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                    boosterPaymentTab === "unpaid" ? "bg-white/25 text-white" : "bg-amber-100 text-amber-800"
+                  }`}>
+                    {unpaidBoosterStudents.length}
                   </span>
                 </button>
               </div>

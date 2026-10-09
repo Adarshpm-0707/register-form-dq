@@ -127,6 +127,7 @@ function Navbar() {
   const navLinks = [
     { name: "HOME", path: "/" },
     { name: "COURSES", path: "/programs" },
+ 
     { name: "BLOG", path: "/blog", hasBlogDropdown: true },
     { name: "SCHOLARSHIP", path: "/scholarship" },
     { name: "ADMISSION", path: "/admission" },
