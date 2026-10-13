@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   saveAiEasyAyiRegistration,
   updateAiEasyAyiRegistration,
 } from "../services/dbService";
+import AdVideoSection from "../components/AdVideoSection";
+import logo from "../assets/Asset 1@4x.png";
 
-const EDUCATION_OPTIONS = [
-  "School / 10th / Plus Two (+2)",
-  "Diploma / Polytechnic",
-  "Undergraduate Degree (B.Tech / B.Sc / B.Com / BCA / BA / BBA)",
-  "Postgraduate Degree (M.Tech / M.Sc / MCA / MBA / MA)",
-  "Working Professional / Graduate",
+const QUALIFICATION_OPTIONS = [
+  "Working Professional",
+  "Student",
   "Other",
 ];
 
@@ -31,40 +30,56 @@ const loadRazorpayScript = (src = "https://checkout.razorpay.com/v1/checkout.js"
 };
 
 /**
- * Calculates the next occurrence of Saturday at 4:00 PM (16:00).
- * If today is Saturday and it is already 4:00 PM or later, rolls over to next Saturday 4:00 PM.
+ * Calculates the next occurrence of Saturday at 5:00 PM (17:00).
+ * If today is Saturday and it is already 5:00 PM or later, rolls over to next Saturday 5:00 PM.
  */
-const getNextSaturday4PM = () => {
+const getNextSaturday5PM = () => {
   const now = new Date();
   const target = new Date(now);
   const day = now.getDay(); // 0 is Sunday, 6 is Saturday
-  
+
   // Calculate days until Saturday (day 6)
   const daysUntilSaturday = (6 - day + 7) % 7;
   target.setDate(now.getDate() + daysUntilSaturday);
-  target.setHours(16, 0, 0, 0); // 4:00 PM
-  
-  // If target is in the past or right now, roll over to the next Saturday at 4 PM
+  target.setHours(17, 0, 0, 0); // 5:00 PM
+
+  // If target is in the past or right now, roll over to the next Saturday at 5 PM
   if (target.getTime() <= now.getTime()) {
     target.setDate(target.getDate() + 7);
   }
-  
+
   return target;
 };
 
+const getNextSaturdayFormatted = () => {
+  const nextSat = getNextSaturday5PM();
+  const day = nextSat.getDate();
+  const suffix =
+    day % 10 === 1 && day !== 11
+      ? "st"
+      : day % 10 === 2 && day !== 12
+      ? "nd"
+      : day % 10 === 3 && day !== 13
+      ? "rd"
+      : "th";
+  const month = nextSat.toLocaleString("en-IN", { month: "long" });
+  const year = nextSat.getFullYear();
+  return `${day}${suffix} ${month}, ${year}`;
+};
+
 const calculateTimeLeft = () => {
-  const target = getNextSaturday4PM();
+  const target = getNextSaturday5PM();
   const diff = target.getTime() - Date.now();
-  
+
   if (diff <= 0) {
     return { days: "00", hours: "00", minutes: "00", seconds: "00" };
   }
-  
+
   const d = Math.floor(diff / (1000 * 60 * 60 * 24));
   const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
   const m = Math.floor((diff / (1000 * 60)) % 60);
   const s = Math.floor((diff / 1000) % 60);
-  
+
   return {
     days: String(d).padStart(2, "0"),
     hours: String(h).padStart(2, "0"),
@@ -74,24 +89,28 @@ const calculateTimeLeft = () => {
 };
 
 export default function AiEasyAyi() {
+  const formRef = useRef(null);
+  const [showForm, setShowForm] = useState(false);
+
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
     place: "",
-    education: "",
-    customEducation: "",
+    qualification: "Working Professional",
+    customQualification: "",
   });
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [loadingStep, setLoadingStep] = useState("");
+  const [loadingStep, setLoadingStep] = useState(""); // "saving" | "gateway" | "verifying"
   const [submittedData, setSubmittedData] = useState(null);
   const [submitError, setSubmitError] = useState("");
   const [paymentNotice, setPaymentNotice] = useState(null);
   const [pendingRegId, setPendingRegId] = useState(null);
 
-  // Live countdown timer state (resets every Saturday at 4:00 PM)
+  // Live countdown timer state (resets dynamically every Saturday at 5:00 PM)
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft);
+  const eventDateFormatted = getNextSaturdayFormatted();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -100,6 +119,19 @@ export default function AiEasyAyi() {
 
     return () => clearInterval(timer);
   }, []);
+
+  const handleScrollToForm = () => {
+    setShowForm(true);
+    setTimeout(() => {
+      if (formRef.current) {
+        formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        const firstInput = formRef.current.querySelector('input[name="fullName"]');
+        if (firstInput) {
+          setTimeout(() => firstInput.focus(), 300);
+        }
+      }
+    }, 150);
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -118,7 +150,7 @@ export default function AiEasyAyi() {
   const validateForm = () => {
     const errs = {};
     if (!formData.fullName.trim()) {
-      errs.fullName = "Name is required";
+      errs.fullName = "Full name is required";
     } else if (formData.fullName.trim().length < 2) {
       errs.fullName = "Name must be at least 2 characters";
     }
@@ -127,17 +159,17 @@ export default function AiEasyAyi() {
     if (!formData.phone.trim()) {
       errs.phone = "Phone number is required";
     } else if (cleanPhone.length < 10) {
-      errs.phone = "Please enter a valid 10-digit phone number";
+      errs.phone = "Please enter a valid 10-digit mobile number";
     }
 
     if (!formData.place.trim()) {
-      errs.place = "Place is required";
+      errs.place = "Place / City is required";
     }
 
-    if (!formData.education) {
-      errs.education = "Education qualification is required";
-    } else if (formData.education === "Other" && !formData.customEducation.trim()) {
-      errs.customEducation = "Please specify your qualification";
+    if (!formData.qualification) {
+      errs.qualification = "Please select your qualification";
+    } else if (formData.qualification === "Other" && !formData.customQualification.trim()) {
+      errs.customQualification = "Please specify your qualification / profession";
     }
 
     return errs;
@@ -158,17 +190,21 @@ export default function AiEasyAyi() {
     setLoadingStep("saving");
 
     try {
-      const finalEducation =
-        formData.education === "Other"
-          ? `Other: ${formData.customEducation.trim()}`
-          : formData.education;
+      const finalQualification =
+        formData.qualification === "Other"
+          ? (formData.customQualification.trim() || "Other")
+          : formData.qualification;
+
+      const cleanPhone = formData.phone.replace(/\D/g, "").slice(-10);
 
       const payload = {
         fullName: formData.fullName.trim(),
         name: formData.fullName.trim(),
-        phone: formData.phone.trim(),
+        phone: cleanPhone,
         place: formData.place.trim(),
-        education: finalEducation,
+        city: formData.place.trim(),
+        qualification: finalQualification,
+        education: finalQualification,
         program: "AI easy Ayi",
         type: "AI_EASY_AYI",
         isAiEasyAyi: true,
@@ -192,65 +228,53 @@ export default function AiEasyAyi() {
       setLoadingStep("gateway");
       const isScriptLoaded = await loadRazorpayScript();
       if (!isScriptLoaded) {
-        setSubmitError("Failed to connect to Razorpay payment gateway. Please check your internet connection and try again.");
+        setSubmitError("Failed to connect to payment gateway. Please check your internet connection.");
         setLoading(false);
         return;
       }
 
-      // 3. Configure Razorpay Checkout for ₹99
-      const razorpayKey = process.env.REACT_APP_RAZORPAY_KEY_ID || "rzp_live_SnxCrKgLPqpHnz";
-      const cleanPhone = formData.phone.replace(/\D/g, "").slice(-10);
-
+      // 3. Launch Razorpay Checkout Modal
       const options = {
-        key: razorpayKey,
-        amount: 99 * 100, // 9900 paise = ₹99
+        key: process.env.REACT_APP_RAZORPAY_KEY_ID || "rzp_live_RQB88T04c3K3R5",
+        amount: 9900, // ₹99 in paise
         currency: "INR",
-        name: "DeepStaq",
-        description: "AI easy Ayi Registration Fee (Special Offer ₹99)",
-        image: "/favicon.ico",
+        name: "DeepStaq Academy",
+        description: "AI easy Ayi - 2 Hrs Online Class (5:00 PM - 7:00 PM IST)",
+        image: logo,
         prefill: {
           name: formData.fullName.trim(),
           contact: cleanPhone,
-        },
-        notes: {
-          registrationId: regId,
-          course: "AI easy Ayi",
-          offerPrice: "99",
-          originalPrice: "899",
         },
         theme: {
           color: "#050521",
         },
         modal: {
-          ondismiss: () => {
+          ondismiss: function () {
             setLoading(false);
             setPaymentNotice({
               type: "warning",
-              message: `Your registration details have been saved (Ref: ${regId.slice(0, 8)}). Payment was not completed. You can click "Pay ₹99 & Register" to complete payment anytime.`,
+              message: "Payment was not completed. Your registration details remain saved as an unpaid lead.",
               registrationId: regId,
             });
           },
         },
         handler: async function (response) {
+          setLoadingStep("verifying");
           try {
-            setLoading(true);
-            setLoadingStep("verifying");
-
-            const paymentId = response.razorpay_payment_id;
-
-            // 4. Update database record to "paid"
             await updateAiEasyAyiRegistration(regId, {
               paymentStatus: "paid",
-              paymentId: paymentId,
-              amountPaid: 99,
               status: "Paid & Confirmed",
+              paymentId: response.razorpay_payment_id,
+              amountPaid: 99,
+              qualification: finalQualification,
+              education: finalQualification,
             });
 
             setSubmittedData({
               ...payload,
               id: regId,
               paymentStatus: "paid",
-              paymentId: paymentId,
+              paymentId: response.razorpay_payment_id,
               amountPaid: 99,
               originalPrice: 899,
               registeredAt: new Date().toLocaleDateString("en-IN", {
@@ -263,7 +287,6 @@ export default function AiEasyAyi() {
             window.scrollTo({ top: 0, behavior: "smooth" });
           } catch (updateErr) {
             console.error("Payment status update error:", updateErr);
-            // Still display success card because payment was verified by Razorpay
             setSubmittedData({
               ...payload,
               id: regId,
@@ -289,7 +312,7 @@ export default function AiEasyAyi() {
         setLoading(false);
         setPaymentNotice({
           type: "error",
-          message: `Payment failed: ${failResponse.error?.description || "Transaction declined"}. Your details remain saved as pending.`,
+          message: `Payment failed: ${failResponse.error?.description || "Transaction declined"}. Your details remain saved as an unpaid lead.`,
           registrationId: regId,
         });
       });
@@ -307,254 +330,239 @@ export default function AiEasyAyi() {
       fullName: "",
       phone: "",
       place: "",
-      education: "",
-      customEducation: "",
+      qualification: "Working Professional",
+      customQualification: "",
     });
     setErrors({});
     setSubmitError("");
     setPaymentNotice(null);
     setPendingRegId(null);
     setSubmittedData(null);
+    setShowForm(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-[#050521] selection:bg-[#c6ff34] selection:text-[#050521] font-sans pt-24 sm:pt-28 pb-16 px-4 sm:px-6 md:px-8 relative overflow-hidden">
+    <div className="min-h-screen text-[#050521] selection:bg-[#c6ff34] selection:text-[#050521] font-sans relative overflow-x-hidden pt-28 sm:pt-36 lg:pt-40 pb-20 px-4 sm:px-6 lg:px-8">
       
       {/* Background Subtle Tech Grid & Ambience */}
-      <div className="absolute inset-0 bg-[radial-gradient(#050521_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.04] pointer-events-none" />
-      <div className="absolute top-1/4 right-0 w-[450px] h-[450px] bg-[#c6ff34]/15 rounded-full blur-[140px] pointer-events-none -translate-y-1/2 translate-x-1/3 -z-10" />
+      <div className="absolute inset-0 bg-[radial-gradient(#050521_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.04] pointer-events-none -z-10" />
+      <div className="absolute top-1/4 right-0 w-[450px] h-[450px] bg-[#c6ff34]/20 rounded-full blur-[140px] pointer-events-none -translate-y-1/2 translate-x-1/3 -z-10" />
       <div className="absolute bottom-1/4 left-0 w-[400px] h-[400px] bg-[#050521]/5 rounded-full blur-[130px] pointer-events-none translate-y-1/3 -translate-x-1/3 -z-10" />
 
-      <div className="max-w-[720px] mx-auto relative z-10">
-        
-        {/* Header Breadcrumbs / Title */}
-        <div className="text-center mb-8 sm:mb-10 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#c6ff34] border-2 border-[#050521] shadow-[2px_2px_0px_0px_#050521]">
-            <span className="w-2 h-2 rounded-full bg-[#050521] animate-pulse" />
-            <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-[#050521]">
-              DeepStaq Initiative
-            </span>
-          </div>
+      {/* MAIN CONTAINER */}
+      <div className="max-w-4xl mx-auto relative z-10">
 
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black uppercase tracking-tighter text-[#050521]">
-            AI EASY <span className="text-stroke-dark text-transparent">AYI</span>
-          </h1>
-
-          <p className="text-slate-600 font-medium text-xs sm:text-sm">
-            Registration Form
-          </p>
-        </div>
-
-        {/* Form Container */}
-        <AnimatePresence mode="wait">
-          {submittedData ? (
-            /* Success Card */
+        {/* 1. SUCCESS RECEIPT (Displays after payment) */}
+        <AnimatePresence>
+          {submittedData && (
             <motion.div
-              key="success-card"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              className="bg-white border-3 border-[#050521] rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 shadow-[8px_8px_0px_0px_#c6ff34] text-center space-y-6"
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="max-w-xl mx-auto bg-white border-3 border-[#050521] rounded-3xl p-6 sm:p-8 shadow-[8px_8px_0px_0px_#c6ff34] mb-12 text-center"
             >
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#c6ff34] border-2 border-[#050521] mx-auto flex items-center justify-center text-3xl sm:text-4xl shadow-[4px_4px_0px_0px_#050521]">
+              <div className="w-16 h-16 bg-[#c6ff34] border-2 border-[#050521] rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-black text-[#050521] shadow-[3px_3px_0px_0px_#050521]">
                 ✓
               </div>
+              
+              <span className="inline-block px-3.5 py-1 bg-[#c6ff34] text-[#050521] border border-[#050521] text-[10px] font-black uppercase tracking-widest rounded-full mb-3">
+                REGISTRATION CONFIRMED • PASS ACTIVE
+              </span>
 
-              <div className="space-y-2">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-300 rounded-full">
-                  <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-                  <span className="text-[10px] sm:text-[11px] font-mono font-black uppercase tracking-[0.2em] text-emerald-800">
-                    Payment & Registration Confirmed
-                  </span>
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[#050521]">
-                  Thank You, {submittedData.fullName}!
-                </h2>
-                <p className="text-slate-600 font-medium text-xs sm:text-sm max-w-md mx-auto">
-                  Your seat for <strong>AI easy Ayi</strong> has been successfully booked.
-                </p>
-              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-[#050521] uppercase tracking-tight">
+                Welcome to AI easy Ayi!
+              </h2>
+              
+              <p className="text-slate-600 text-sm mt-2 max-w-md mx-auto font-medium">
+                Thank you <strong className="text-[#050521]">{submittedData.fullName}</strong>. Your workshop seat has been reserved successfully.
+              </p>
 
-              {/* Summary */}
-              <div className="bg-slate-50 border-2 border-[#050521] rounded-2xl p-4 sm:p-5 text-left max-w-md mx-auto space-y-2.5 font-mono text-xs">
-                <div className="flex justify-between border-b pb-1.5">
-                  <span className="text-slate-500 uppercase text-[10px] font-bold">Reference ID:</span>
+              {/* Receipt Info Card */}
+              <div className="bg-slate-50 border-2 border-[#050521] rounded-2xl p-4 my-6 text-left space-y-2.5 text-xs font-mono">
+                <div className="flex justify-between border-b border-slate-200 pb-2">
+                  <span className="text-slate-500 font-bold uppercase">Reference ID:</span>
                   <span className="font-bold text-[#050521]">{submittedData.id}</span>
                 </div>
-                {submittedData.paymentId && (
-                  <div className="flex justify-between border-b pb-1.5">
-                    <span className="text-slate-500 uppercase text-[10px] font-bold">Payment ID:</span>
-                    <span className="font-bold text-emerald-700 truncate max-w-[200px]">{submittedData.paymentId}</span>
-                  </div>
-                )}
-                <div className="flex justify-between border-b pb-1.5 items-center">
-                  <span className="text-slate-500 uppercase text-[10px] font-bold">Amount Paid:</span>
-                  <span className="font-bold text-[#050521] flex items-center gap-1.5">
-                    <span className="line-through text-slate-400 text-[10px]">₹899</span>
-                    <span className="text-emerald-700 font-black text-sm">₹99</span>
-                    <span className="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded text-[9px]">PAID</span>
-                  </span>
+                <div className="flex justify-between border-b border-slate-200 pb-2">
+                  <span className="text-slate-500 font-bold uppercase">Payment ID:</span>
+                  <span className="font-bold text-emerald-700 truncate max-w-[200px]">{submittedData.paymentId || "Confirmed"}</span>
                 </div>
-                <div className="flex justify-between border-b pb-1.5">
-                  <span className="text-slate-500 uppercase text-[10px] font-bold">Phone Number:</span>
-                  <span className="font-bold text-[#050521]">{submittedData.phone}</span>
+                <div className="flex justify-between border-b border-slate-200 pb-2">
+                  <span className="text-slate-500 font-bold uppercase">Phone:</span>
+                  <span className="font-bold text-[#050521]">+91 {submittedData.phone}</span>
                 </div>
-                <div className="flex justify-between border-b pb-1.5">
-                  <span className="text-slate-500 uppercase text-[10px] font-bold">Place:</span>
+                <div className="flex justify-between border-b border-slate-200 pb-2">
+                  <span className="text-slate-500 font-bold uppercase">Place:</span>
                   <span className="font-bold text-[#050521]">{submittedData.place}</span>
                 </div>
+                <div className="flex justify-between border-b border-slate-200 pb-2">
+                  <span className="text-slate-500 font-bold uppercase">Qualification:</span>
+                  <span className="font-bold text-[#050521]">{submittedData.qualification}</span>
+                </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500 uppercase text-[10px] font-bold">Education:</span>
-                  <span className="font-bold text-[#050521] truncate max-w-[200px]">{submittedData.education}</span>
+                  <span className="text-slate-500 font-bold uppercase">Class Schedule:</span>
+                  <span className="font-bold text-emerald-700">{eventDateFormatted} • 5:00 PM – 7:00 PM IST (2 Hrs Online Class)</span>
                 </div>
               </div>
 
-              {/* WhatsApp Community Invitation Section */}
-              <div className="bg-gradient-to-br from-emerald-50 via-[#c6ff34]/15 to-emerald-100/50 border-2 sm:border-3 border-[#050521] rounded-2xl sm:rounded-3xl p-5 sm:p-6 text-center max-w-md mx-auto space-y-3.5 shadow-[4px_4px_0px_0px_#25D366]">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#25D366]/20 border border-[#25D366] rounded-full">
-                  <span className="w-2 h-2 rounded-full bg-[#25D366] animate-ping" />
-                  <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#050521]">
-                    Important Next Step
-                  </span>
-                </div>
-
-                <div className="space-y-1">
-                  <h3 className="text-lg sm:text-xl font-black uppercase tracking-tight text-[#050521]">
-                    Join WhatsApp Community
-                  </h3>
-                  <p className="text-slate-600 text-xs sm:text-sm font-medium leading-relaxed">
-                    Click the button below to join our official WhatsApp Community for live class links, schedule updates, and workshop materials.
-                  </p>
-                </div>
-
-                {/* Primary Button to Join WhatsApp Community */}
+              {/* WhatsApp Community CTA */}
+              <div className="bg-emerald-50 border-2 border-[#25D366] rounded-2xl p-4 mb-5 shadow-[4px_4px_0px_0px_#25D366]">
+                <p className="text-xs text-[#050521] font-bold mb-3">
+                  👉 Join the official candidate community for meeting links, session guides, and bonuses:
+                </p>
                 <a
                   href="https://chat.whatsapp.com/KxVV7ep74TV0GHy5SU2FXl"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-3.5 sm:py-4 px-6 bg-[#25D366] hover:bg-[#20bd5a] text-white font-black text-xs sm:text-sm uppercase tracking-wider rounded-xl border-2 border-[#050521] shadow-[4px_4px_0px_0px_#050521] hover:shadow-[4px_4px_0px_0px_#c6ff34] hover:-translate-y-0.5 active:translate-y-0.5 transition-all flex items-center justify-center gap-2.5 text-center group cursor-pointer"
+                  className="w-full py-3.5 px-5 bg-[#25D366] hover:bg-[#20ba59] text-white border-2 border-[#050521] rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-[3px_3px_0px_0px_#050521] transition-transform hover:-translate-y-0.5 active:translate-y-0.5"
                 >
-                  <svg className="w-5 h-5 shrink-0 fill-current group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
-                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
-                  </svg>
                   <span>Join WhatsApp Community</span>
-                  <span className="text-base font-black">→</span>
+                  <span>→</span>
                 </a>
               </div>
 
-              {/* Action Buttons */}
-              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
+              {/* Secondary Actions */}
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <a
                   href={`https://wa.me/918075727195?text=${encodeURIComponent(
-                    `Hi DeepStaq! I registered and paid ₹99 for AI easy Ayi. Name: ${submittedData.fullName} (Ref: ${submittedData.id}, Payment ID: ${submittedData.paymentId || "N/A"})`
+                    `Hi DeepStaq! I registered and paid ₹99 for AI easy Ayi (2 Hrs Online Class, 5:00 PM - 7:00 PM IST). Name: ${submittedData.fullName} (Ref: ${submittedData.id}, Payment ID: ${submittedData.paymentId || "N/A"})`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full sm:w-auto px-5 py-3 bg-white text-[#050521] hover:bg-slate-100 border-2 border-[#050521] rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-[3px_3px_0px_0px_#050521] flex items-center justify-center gap-2"
+                  className="px-5 py-2.5 bg-white hover:bg-slate-100 border-2 border-[#050521] rounded-xl text-xs font-bold text-[#050521] transition-all flex items-center justify-center gap-2 shadow-[2px_2px_0px_0px_#050521]"
                 >
-                  <span>Chat Support</span>
-                  <span>💬</span>
+                  <span>💬 Chat Support</span>
                 </a>
-
                 <button
+                  type="button"
                   onClick={resetForm}
-                  className="w-full sm:w-auto px-5 py-3 bg-white text-slate-700 hover:text-[#050521] hover:bg-slate-100 border-2 border-[#050521]/60 hover:border-[#050521] rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-[3px_3px_0px_0px_#050521]/30 cursor-pointer"
+                  className="px-5 py-2.5 bg-white hover:bg-slate-100 border-2 border-[#050521]/60 hover:border-[#050521] rounded-xl text-xs font-bold text-slate-700 hover:text-[#050521] transition-all shadow-[2px_2px_0px_0px_#050521]/20 cursor-pointer"
                 >
-                  Register Again
+                  Register Another Candidate
                 </button>
               </div>
             </motion.div>
-          ) : (
-            /* The Core Registration Form */
-            <div key="form-container" className="relative">
-              {/* Neo-brutalist Offset Accent Plate */}
-              <div className="absolute inset-0 bg-[#050521] rounded-[2rem] sm:rounded-[2.5rem] border-2 border-[#050521] translate-x-2.5 sm:translate-x-3.5 translate-y-2.5 sm:translate-y-3.5 -z-10" />
+          )}
+        </AnimatePresence>
 
-              <div className="bg-white border-2 sm:border-3 border-[#050521] rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-9 md:p-10 shadow-xl">
-                
-                <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6" noValidate>
-                  
-                  {/* Live Countdown Timer Banner (Resets every Saturday at 4:00 PM) */}
-                  <div className="p-3.5 sm:p-4 rounded-2xl bg-[#050521] text-white border-2 border-[#050521] shadow-md flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5 text-center sm:text-left">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#c6ff34] animate-pulse shrink-0" />
-                      <div>
-                        <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#c6ff34]">
-                          ⏳ Offer Ends In:
-                        </p>
+        {!submittedData && (
+          <div className="space-y-14">
+            
+            {/* ======================================================== */}
+            {/* SECTION 1: YOUTUBE SHORTS VIDEO SECTION                   */}
+            {/* ======================================================== */}
+            <section className="text-center">
+              {/* YouTube Shorts Embed Player */}
+              <AdVideoSection
+                videoId="r5Q_3yerIJs"
+                title="deepstack AD QR"
+                targetFormId="registration-form"
+                originalPrice={899}
+                offerPrice={99}
+                onGoToForm={handleScrollToForm}
+              />
+            </section>
+
+            {/* ======================================================== */}
+            {/* SECTION 2: REGISTRATION FORM SECTION (REVEALED ON CLICK)  */}
+            {/* ======================================================== */}
+            <AnimatePresence>
+              {showForm && (
+                <motion.section
+                  ref={formRef}
+                  id="registration-form"
+                  initial={{ opacity: 0, y: 35, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.98 }}
+                  transition={{ duration: 0.45, ease: "easeOut" }}
+                  className="max-w-2xl mx-auto relative pt-6 scroll-mt-28"
+                >
+                  {/* Neo-brutalist Offset Accent Plate */}
+                  <div className="absolute inset-0 bg-[#050521] rounded-[2rem] sm:rounded-[2.5rem] translate-x-2.5 sm:translate-x-3.5 translate-y-2.5 sm:translate-y-3.5 -z-10" />
+
+                  <div className="bg-white text-[#050521] border-3 border-[#050521] rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-9 md:p-10 shadow-2xl">
+                    
+                    {/* Form Header */}
+                    <div className="flex items-center justify-between pb-4 mb-5 border-b-2 border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full bg-[#c6ff34] border-2 border-[#050521]" />
+                        <span className="text-xs font-mono font-black uppercase text-[#050521] tracking-wider">
+                          AI easy Ayi • Official Registration
+                        </span>
                       </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowForm(false)}
+                        className="text-xs font-black uppercase text-slate-500 hover:text-[#050521] flex items-center gap-1 cursor-pointer transition-colors"
+                      >
+                        <span>▲ Close Form</span>
+                      </button>
                     </div>
 
-                    {/* Timer Blocks: Days, Hours, Minutes, Seconds */}
-                    <div className="flex items-center gap-1.5 font-mono">
-                      {/* Days */}
-                      <div className="flex flex-col items-center bg-white/10 border border-white/20 rounded-xl px-2.5 py-1 min-w-[46px]">
-                        <span className="text-xs sm:text-sm font-black text-[#c6ff34] leading-tight">
-                          {timeLeft.days}
-                        </span>
-                        <span className="text-[8px] font-bold uppercase tracking-wider text-slate-300">
-                          Day{timeLeft.days === "01" ? "" : "s"}
-                        </span>
-                      </div>
-                      <span className="text-[#c6ff34] font-bold text-xs">:</span>
-
-                      {/* Hours */}
-                      <div className="flex flex-col items-center bg-white/10 border border-white/20 rounded-xl px-2.5 py-1 min-w-[46px]">
-                        <span className="text-xs sm:text-sm font-black text-[#c6ff34] leading-tight">
-                          {timeLeft.hours}
-                        </span>
-                        <span className="text-[8px] font-bold uppercase tracking-wider text-slate-300">
-                          Hours
-                        </span>
-                      </div>
-                      <span className="text-[#c6ff34] font-bold text-xs">:</span>
-
-                      {/* Minutes */}
-                      <div className="flex flex-col items-center bg-white/10 border border-white/20 rounded-xl px-2.5 py-1 min-w-[46px]">
-                        <span className="text-xs sm:text-sm font-black text-[#c6ff34] leading-tight">
-                          {timeLeft.minutes}
-                        </span>
-                        <span className="text-[8px] font-bold uppercase tracking-wider text-slate-300">
-                          Mins
-                        </span>
-                      </div>
-                      <span className="text-[#c6ff34] font-bold text-xs">:</span>
-
-                      {/* Seconds */}
-                      <div className="flex flex-col items-center bg-white/10 border border-[#c6ff34]/40 rounded-xl px-2.5 py-1 min-w-[46px] shadow-[0_0_8px_rgba(198,255,52,0.2)]">
-                        <span className="text-xs sm:text-sm font-black text-[#c6ff34] leading-tight animate-pulse">
-                          {timeLeft.seconds}
-                        </span>
-                        <span className="text-[8px] font-bold uppercase tracking-wider text-[#c6ff34]">
-                          Sec
-                        </span>
-                      </div>
+                {/* Form Live Countdown Banner */}
+                <div className="bg-[#050521] text-white p-3.5 rounded-2xl mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">⚡</span>
+                    <div>
+                      <p className="text-[11px] font-black uppercase tracking-wider text-[#00e575]">
+                        2 Hrs Online Class • Special ₹99 Pass
+                      </p>
+                      <p className="text-[10px] text-slate-300 font-mono">
+                        Session: {eventDateFormatted} • 5:00 PM – 7:00 PM IST
+                      </p>
                     </div>
                   </div>
 
-                  {submitError && (
-                    <div className="p-4 rounded-xl bg-red-50 border-2 border-red-500 text-red-700 text-xs font-bold font-mono">
-                      ⚠ {submitError}
-                    </div>
-                  )}
+                  <div className="flex items-center gap-1.5 font-mono font-bold text-xs">
+                    <span className="bg-white/10 px-2 py-1 rounded-md text-[#00e575]">{timeLeft.days}d</span>
+                    <span>:</span>
+                    <span className="bg-white/10 px-2 py-1 rounded-md text-white">{timeLeft.hours}h</span>
+                    <span>:</span>
+                    <span className="bg-white/10 px-2 py-1 rounded-md text-white">{timeLeft.minutes}m</span>
+                    <span>:</span>
+                    <span className="bg-white/10 px-2 py-1 rounded-md text-amber-300">{timeLeft.seconds}s</span>
+                  </div>
+                </div>
 
-                  {paymentNotice && (
-                    <div className="p-4 rounded-xl bg-amber-50 border-2 border-amber-500 text-amber-900 text-xs font-bold font-mono">
-                      ⏳ {paymentNotice.message}
-                    </div>
-                  )}
+                {/* Error Banner */}
+                {submitError && (
+                  <div className="p-4 bg-red-50 border-2 border-red-500 rounded-2xl mb-6 text-red-700 text-xs font-bold">
+                    ⚠️ {submitError}
+                  </div>
+                )}
 
-                  {/* 1. Name */}
+                {/* Payment Notice / Warning */}
+                {paymentNotice && (
+                  <div className={`p-4 rounded-2xl mb-6 text-xs font-bold border-2 ${
+                    paymentNotice.type === "warning"
+                      ? "bg-amber-50 border-amber-500 text-amber-900"
+                      : "bg-red-50 border-red-500 text-red-900"
+                  }`}>
+                    <p>{paymentNotice.message}</p>
+                    {paymentNotice.registrationId && (
+                      <p className="mt-1 font-mono text-[10px] text-slate-600">
+                        Saved Lead Reference: {paymentNotice.registrationId}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* FORM FIELDS */}
+                <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+                  
+                  {/* 1. Full Name */}
                   <div className="space-y-1.5">
                     <label className="block text-xs font-black uppercase tracking-wider text-[#050521]">
-                      Name <span className="text-red-500">*</span>
+                      Full Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       name="fullName"
                       value={formData.fullName}
                       onChange={handleInputChange}
-                      placeholder="Enter your name"
+                      placeholder="e.g. Rahul Sharma"
                       className={`w-full px-4 py-3 sm:py-3.5 rounded-xl border-2 font-medium text-sm text-[#050521] placeholder-slate-400 focus:outline-none transition-all ${
                         errors.fullName
                           ? "border-red-500 bg-red-50/40"
@@ -601,14 +609,14 @@ export default function AiEasyAyi() {
                   {/* 3. Place */}
                   <div className="space-y-1.5">
                     <label className="block text-xs font-black uppercase tracking-wider text-[#050521]">
-                      Place <span className="text-red-500">*</span>
+                      Place / City <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       name="place"
                       value={formData.place}
                       onChange={handleInputChange}
-                      placeholder="e.g. Kannur, Taliparamba, Calicut, Kochi"
+                      placeholder="e.g. Kannur, Calicut, Kochi, Bangalore"
                       className={`w-full px-4 py-3 sm:py-3.5 rounded-xl border-2 font-medium text-sm text-[#050521] placeholder-slate-400 focus:outline-none transition-all ${
                         errors.place
                           ? "border-red-500 bg-red-50/40"
@@ -622,89 +630,97 @@ export default function AiEasyAyi() {
                     )}
                   </div>
 
-                  {/* 4. Education */}
+                  {/* 4. Qualification */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <label className="block text-xs font-black uppercase tracking-wider text-[#050521]">
-                        Education <span className="text-red-500">*</span>
+                        Qualification <span className="text-red-500">*</span>
                       </label>
                       <span className="text-[10px] font-mono text-slate-500">
-                        Select qualification
+                        Select one option
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {EDUCATION_OPTIONS.map((opt, i) => {
-                        const isSelected = formData.education === opt;
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {QUALIFICATION_OPTIONS.map((opt, i) => {
+                        const isSelected = formData.qualification === opt;
                         return (
                           <button
                             type="button"
                             key={i}
                             onClick={() => {
-                              setFormData((prev) => ({ ...prev, education: opt }));
-                              if (errors.education) {
-                                setErrors((prev) => ({ ...prev, education: "" }));
+                              setFormData((prev) => ({
+                                ...prev,
+                                qualification: opt,
+                              }));
+                              if (errors.qualification) {
+                                setErrors((prev) => ({
+                                  ...prev,
+                                  qualification: "",
+                                }));
                               }
                             }}
-                            className={`p-3 rounded-xl text-left border-2 font-bold text-xs transition-all cursor-pointer flex items-center justify-between ${
+                            className={`p-3.5 rounded-xl text-left border-2 font-bold text-xs transition-all cursor-pointer flex items-center justify-between ${
                               isSelected
                                 ? "bg-[#050521] text-[#c6ff34] border-[#050521] shadow-[2px_2px_0px_0px_#c6ff34]"
                                 : "bg-slate-50 hover:bg-slate-100 text-[#050521] border-[#050521]/30 hover:border-[#050521]"
                             }`}
                           >
-                            <span className="truncate pr-2">{opt}</span>
+                            <span>{opt}</span>
                             <span
-                              className={`w-3.5 h-3.5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
+                              className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${
                                 isSelected
                                   ? "border-[#c6ff34] bg-[#c6ff34]"
                                   : "border-[#050521]/30 bg-white"
                               }`}
                             >
-                              {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-[#050521]" />}
+                              {isSelected && (
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#050521]" />
+                              )}
                             </span>
                           </button>
                         );
                       })}
                     </div>
 
-                    {formData.education === "Other" && (
+                    {formData.qualification === "Other" && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
-                        className="pt-1.5"
+                        className="pt-2"
                       >
                         <input
                           type="text"
-                          name="customEducation"
-                          value={formData.customEducation}
+                          name="customQualification"
+                          value={formData.customQualification}
                           onChange={handleInputChange}
-                          placeholder="Please specify your education / qualification"
-                          className="w-full px-4 py-2.5 rounded-xl border-2 border-[#050521] font-medium text-xs sm:text-sm text-[#050521] placeholder-slate-400 focus:outline-none focus:bg-slate-50"
+                          placeholder="Please specify your qualification or profession"
+                          className="w-full px-4 py-3 rounded-xl border-2 border-[#050521] font-medium text-xs sm:text-sm text-[#050521] placeholder-slate-400 focus:outline-none focus:bg-slate-50"
                         />
-                        {errors.customEducation && (
+                        {errors.customQualification && (
                           <p className="text-xs font-bold text-red-600 mt-1 font-mono">
-                            ⚠ {errors.customEducation}
+                            ⚠ {errors.customQualification}
                           </p>
                         )}
                       </motion.div>
                     )}
 
-                    {errors.education && (
+                    {errors.qualification && (
                       <p className="text-xs font-bold text-red-600 font-mono mt-1">
-                        ⚠ {errors.education}
+                        ⚠ {errors.qualification}
                       </p>
                     )}
                   </div>
 
-                  {/* Submit Button with ₹899 strikethrough to ₹99 */}
-                  <div className="pt-3 space-y-2.5">
+                  {/* Submission & Payment Button */}
+                  <div className="pt-3">
                     <button
                       type="submit"
                       disabled={loading}
-                      className={`w-full py-4 sm:py-4.5 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider border-2 border-[#050521] transition-all cursor-pointer flex items-center justify-center gap-2.5 ${
+                      className={`w-full py-4 px-6 rounded-2xl font-black text-sm uppercase tracking-wider border-2 border-[#050521] transition-all cursor-pointer flex items-center justify-center gap-3 ${
                         loading
                           ? "bg-slate-300 text-slate-600 cursor-not-allowed border-slate-400"
-                          : "bg-[#c6ff34] text-[#050521] hover:bg-[#050521] hover:text-[#c6ff34] shadow-[4px_4px_0px_0px_#050521] hover:shadow-[4px_4px_0px_0px_#c6ff34] active:translate-y-1 duration-150"
+                          : "bg-[#c6ff34] hover:bg-[#050521] text-[#050521] hover:text-[#c6ff34] shadow-[4px_4px_0px_0px_#050521] hover:shadow-[4px_4px_0px_0px_#c6ff34] active:translate-y-1 duration-150"
                       }`}
                     >
                       {loading ? (
@@ -731,16 +747,23 @@ export default function AiEasyAyi() {
                         </>
                       )}
                     </button>
+                    <p className="text-center text-[11px] font-mono font-bold text-slate-500 mt-2.5">
+                      🎟 Pass includes full access to 2 Hrs Online Class • 5:00 PM – 7:00 PM IST
+                    </p>
                   </div>
 
                 </form>
 
-              </div>
-            </div>
-          )}
-        </AnimatePresence>
+                  </div>
+                </motion.section>
+              )}
+            </AnimatePresence>
+
+          </div>
+        )}
 
       </div>
+
     </div>
   );
 }

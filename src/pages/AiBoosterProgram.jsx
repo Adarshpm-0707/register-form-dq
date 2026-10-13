@@ -451,10 +451,11 @@ export default function AiBoosterProgram() {
           ) : (
             /* Main Form Card */
             <motion.div
+              id="registration-form"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="bg-white border-2 border-[#050521] rounded-[2rem] p-6 sm:p-10 shadow-[8px_8px_0px_0px_#050521] relative"
+              className="bg-white border-2 border-[#050521] rounded-[2rem] p-6 sm:p-10 shadow-[8px_8px_0px_0px_#050521] relative scroll-mt-28"
             >
               <div className="flex items-center justify-between pb-6 mb-6 border-b border-slate-100">
                 <div>

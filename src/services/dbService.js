@@ -1216,8 +1216,8 @@ export const saveAiEasyAyiRegistration = async (formData) => {
     address: sanitize(formData.address, 250),
     place: sanitize(formData.place || formData.city || formData.location, 100),
     city: sanitize(formData.place || formData.city || formData.location, 100),
-    location: sanitize(formData.place || formData.city || formData.location, 100),
-    education: sanitize(formData.education, 100),
+    qualification: sanitize(formData.qualification || formData.education, 100),
+    education: sanitize(formData.qualification || formData.education, 100),
     program: "AI easy Ayi",
     type: "AI_EASY_AYI",
     isAiEasyAyi: true,
@@ -1258,8 +1258,8 @@ export const saveAiEasyAyiRegistration = async (formData) => {
           fullName: payload.fullName,
           phone: payload.phone,
           address: payload.address,
-          place: payload.place,
-          education: payload.education,
+          qualification: payload.qualification || payload.education,
+          education: payload.qualification || payload.education,
           program: "AI easy Ayi",
           type: "EVENT_ENTRY",
           isAiEasyAyi: true,
@@ -1300,8 +1300,9 @@ export const saveAiForEveryoneRegistration = saveAiEasyAyiRegistration;
 export const getAiEasyAyiRegistrations = async () => {
   let data = [];
   try {
-    const [mainSnapshot, popupSnapshot, leadsSnapshot, eventSnapshot] = await Promise.allSettled([
+    const [mainSnapshot, easyAyiSnapshot, popupSnapshot, leadsSnapshot, eventSnapshot] = await Promise.allSettled([
       getDocs(collection(db, "ai_for_everyone_registrations")),
+      getDocs(collection(db, "ai_easy_ayi_registrations")),
       getDocs(collection(db, "popup_leads")),
       getDocs(collection(db, "aptitude_test_leads")),
       getDocs(collection(db, "event_registrations")),
@@ -1314,6 +1315,15 @@ export const getAiEasyAyiRegistrations = async () => {
         _collection: "ai_for_everyone_registrations",
       }));
       data = data.concat(mainList);
+    }
+
+    if (easyAyiSnapshot.status === "fulfilled" && easyAyiSnapshot.value) {
+      const easyAyiList = easyAyiSnapshot.value.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+        _collection: "ai_easy_ayi_registrations",
+      }));
+      data = data.concat(easyAyiList);
     }
 
     if (popupSnapshot.status === "fulfilled" && popupSnapshot.value) {
@@ -1421,9 +1431,15 @@ export const updateAiEasyAyiRegistration = async (id, updateData) => {
   if (updateData.paymentId !== undefined) payload.paymentId = sanitize(updateData.paymentId, 100);
   if (updateData.amountPaid !== undefined) payload.amountPaid = Number(updateData.amountPaid);
   if (updateData.adminNotes !== undefined) payload.adminNotes = sanitize(updateData.adminNotes, 500);
+  if (updateData.qualification !== undefined || updateData.education !== undefined) {
+    const qVal = sanitize(updateData.qualification || updateData.education, 100);
+    payload.qualification = qVal;
+    payload.education = qVal;
+  }
 
   if (!id.startsWith("offline_")) {
     const candidateCollections = [
+      "ai_easy_ayi_registrations",
       "ai_for_everyone_registrations",
       "popup_leads",
       "aptitude_test_leads",
@@ -1465,6 +1481,7 @@ export const updateAiForEveryoneRegistration = updateAiEasyAyiRegistration;
 export const deleteAiEasyAyiRegistration = async (id) => {
   if (!id.startsWith("offline_")) {
     const candidateCollections = [
+      "ai_easy_ayi_registrations",
       "ai_for_everyone_registrations",
       "popup_leads",
       "aptitude_test_leads",

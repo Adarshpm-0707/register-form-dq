@@ -120,8 +120,13 @@ service cloud.firestore {
       allow read, delete: if isAdmin();
     }
 
-    // Security for AI For Everyone Registrations
+    // Security for AI For Everyone / AI Easy Ayi Registrations
     match /ai_for_everyone_registrations/{document} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
+    }
+
+    match /ai_easy_ayi_registrations/{document} {
       allow create, update: if true;
       allow read, delete: if isAdmin();
     }

@@ -31,7 +31,7 @@ import {
 const DataCard = ({ item, headers, onDelete }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const mainKeywords = ["name", "email", "phone", "place", "city", "location", "course", "institution", "year"];
+  const mainKeywords = ["name", "email", "phone", "place", "city", "location", "course", "institution", "year", "qualification", "education"];
   
   const mainHeaders = headers.filter(h => mainKeywords.some(kw => h.toLowerCase().includes(kw)));
   let topHeaders = mainHeaders.length > 0 ? mainHeaders : headers.slice(0, 4);
@@ -590,8 +590,8 @@ const ConsultationCard = ({ item, onDelete }) => {
           </a>
         </div>
         <div className="min-w-0">
-          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/50 block">Education</span>
-          <span className="text-xs font-bold text-[#050521] mt-0.5 block truncate">{item.education || "-"}</span>
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/50 block">Qualification</span>
+          <span className="text-xs font-bold text-[#050521] mt-0.5 block truncate">{item.qualification || item.education || "-"}</span>
         </div>
         <div className="min-w-0">
           <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/50 block">Email</span>
@@ -1189,6 +1189,7 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
   const [status, setStatus] = useState(item.status || (isInitiallyPaid ? "Paid & Confirmed" : "New"));
   const [paymentStatus, setPaymentStatus] = useState(item.paymentStatus || (item.paymentId ? "paid" : "unpaid"));
   const [paymentId, setPaymentId] = useState(item.paymentId || "");
+  const [qualification, setQualification] = useState(item.qualification || item.education || "Student");
   const [notes, setNotes] = useState(item.adminNotes || "");
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -1233,6 +1234,8 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
           paymentId: paymentId.trim(),
           amountPaid: paymentStatus === "paid" ? (item.amountPaid || 99) : 0,
           adminNotes: notes,
+          qualification,
+          education: qualification,
         });
         setSavedSuccess(true);
         setTimeout(() => setSavedSuccess(false), 3000);
@@ -1360,10 +1363,10 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
 
         <div className="sm:col-span-2 pt-2 border-t border-slate-200/60">
           <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1">
-            Education / Qualification
+            Qualification
           </span>
           <span className="inline-block px-3 py-1 bg-[#050521] text-[#c6ff34] rounded-xl text-xs font-bold">
-            🎓 {item.education || "Not specified"}
+            🎓 {item.qualification || item.education || "Not specified"}
           </span>
         </div>
 
@@ -1450,7 +1453,7 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
           {/* Status selector */}
           <div>
             <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
@@ -1491,6 +1494,22 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
             </select>
           </div>
 
+          {/* Qualification selector */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Qualification
+            </label>
+            <select
+              value={qualification}
+              onChange={(e) => setQualification(e.target.value)}
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
+            >
+              <option value="Working Professional">Working Professional</option>
+              <option value="Student">Student</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
           {/* Razorpay Payment ID */}
           <div>
             <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
@@ -1506,7 +1525,7 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
           </div>
 
           {/* Remarks/Notes */}
-          <div className="sm:col-span-3">
+          <div className="sm:col-span-2 lg:col-span-4">
             <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
               Internal Remarks / Follow-up Notes
             </label>
@@ -2094,7 +2113,7 @@ function AdminDashboard() {
         "Full Name",
         "Phone",
         "Place",
-        "Education",
+        "Qualification",
         "Payment Status",
         "Payment ID (Razorpay)",
         "Amount (INR)",
@@ -2119,7 +2138,7 @@ function AdminDashboard() {
           clean(item.fullName || item.name),
           clean(item.phone),
           clean(item.place || item.city || item.location),
-          clean(item.education),
+          clean(item.qualification || item.education),
           clean(isPaid ? "PAID" : "UNPAID"),
           clean(item.paymentId || ""),
           clean(isPaid ? (item.amountPaid || 99) : 0),

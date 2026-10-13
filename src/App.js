@@ -32,6 +32,7 @@ const Scholarship = lazy(() => import("./pages/Scholarship"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Consultation = lazy(() => import("./pages/Consultation"));
 const AiEasyAyi = lazy(() => import("./pages/AiEasyAyi"));
+const AiEasyAyiForm = lazy(() => import("./pages/AiEasyAyiForm"));
 const AiBoosterProgram = lazy(() => import("./pages/AiBoosterProgram"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
@@ -93,6 +94,8 @@ function App() {
             <Route path="/ai-easy-ayi" element={<AiEasyAyi />} />
             <Route path="/aieasyayi" element={<AiEasyAyi />} />
             <Route path="/ai-for-everyone" element={<AiEasyAyi />} />
+            <Route path="/ai-easy-ayi-form" element={<AiEasyAyiForm />} />
+            <Route path="/ai-easy-ayi/form" element={<AiEasyAyiForm />} />
             <Route path="/ai-booster-program" element={<AiBoosterProgram />} />
             <Route path="/aiboosterprogram" element={<AiBoosterProgram />} />
             <Route path="/ai-booster" element={<AiBoosterProgram />} />
