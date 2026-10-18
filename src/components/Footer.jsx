@@ -1,331 +1,195 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import logo from "../assets/Asset 1@4x.png";
-
-const Icons = {
-  Instagram: ({ className }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-    </svg>
-  ),
-  Facebook: ({ className }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-    </svg>
-  ),
-  LinkedIn: ({ className }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-      <rect x="2" y="9" width="4" height="12" />
-      <circle cx="4" cy="4" r="2" />
-    </svg>
-  ),
-  Phone: ({ className }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-    </svg>
-  ),
-  Mail: ({ className }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-      <polyline points="22,6 12,13 2,6" />
-    </svg>
-  )
-};
 
 export default function Footer() {
+  const [openFaq, setOpenFaq] = useState(null);
   const currentYear = new Date().getFullYear();
 
-  const socialLinks = [
-    { icon: Icons.Instagram, href: "https://www.instagram.com/deepstaq/", label: "Instagram" },
-    { icon: Icons.Facebook, href: "https://www.facebook.com/profile.php?id=61588950842506", label: "Facebook" },
-    { icon: Icons.LinkedIn, href: "https://www.linkedin.com/company/deepstaq/", label: "LinkedIn" }
-  ];
-
-  const navItems = [
-    { name: "Home", path: "/", icon: "⚡" },
-    { name: "Programs", path: "/programs", icon: "🚀" },
-    { name: "Blog Hub", path: "/blog", icon: "📚" },
-    { name: "Aptitude Test", path: "/aptitude", icon: "🧠" },
-    { name: "Scholarship", path: "/scholarship", icon: "🎓" },
-    { name: "Admission", path: "/admission", icon: "📝" },
-    { name: "Consultation", path: "/consultation", icon: "💬" },
-    { name: "Contact Us", path: "/contact", icon: "📍" },
+  const faqItems = [
+    {
+      q: "What are the eligibility criteria?",
+      a: "No coding background is strictly required. We begin with Python fundamentals, algorithmic thinking, and math essentials.",
+    },
+    {
+      q: "Is there placement assistance provided?",
+      a: "Yes. 100% placement support including mock technical interviews, resume polishing, and portfolio showcases to hiring partners.",
+    },
+    {
+      q: "Can I work on my own projects?",
+      a: "Absolutely. Students frequently build domain-specific capstones (healthcare, finance, robotics) under 1-on-1 mentor guidance.",
+    },
   ];
 
   return (
-    <footer className="w-full bg-[#050521] border-t-2 border-[#c6ff34]/30 py-10 md:py-14 px-4 sm:px-6 md:px-12 text-slate-400">
-      
-      {/* ─────────────────────────────────────────────────────────────
-          MOBILE VIEW: Ultra-Modern Cyber-Bento Footer
-         ───────────────────────────────────────────────────────────── */}
-      <div className="block md:hidden space-y-8">
+    <footer className="border-t border-white/10 bg-[#070B0E] pt-16 sm:pt-20 pb-12 px-4 sm:px-6 md:px-10 lg:px-16 text-white font-sans">
+      <div className="max-w-[1440px] mx-auto space-y-16">
         
-        {/* 1. Mobile Brand Card */}
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 text-center space-y-4 shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
-          <div className="flex justify-center">
-            <Link to="/">
-              <img
-                src={logo}
-                alt="DeepStaq Logo"
-                className="h-8 w-auto object-contain filter brightness-110"
-              />
-            </Link>
-          </div>
-          <span className="inline-flex items-center gap-1.5 bg-[#c6ff34]/15 text-[#c6ff34] text-[10px] font-mono font-black uppercase tracking-widest px-3 py-1 rounded-full border border-[#c6ff34]/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff34] animate-pulse" />
-            AI & Machine Learning Academy
-          </span>
-          <p className="text-slate-400 font-mono text-xs leading-relaxed max-w-sm mx-auto">
-            Practical AI training institute in Kerala. Building the next generation of AI engineers and practitioners.
-          </p>
-
-          {/* Social Icons Row */}
-          <div className="flex items-center justify-center gap-3 pt-2">
-            {socialLinks.map((soc, i) => (
-              <a
-                key={i}
-                href={soc.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={soc.label}
-                className="w-10 h-10 border border-white/15 bg-white/5 text-slate-300 hover:text-[#050521] hover:bg-[#c6ff34] rounded-xl flex items-center justify-center transition-all duration-200"
-              >
-                <soc.icon className="w-4 h-4" />
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* 2. Mobile Quick Navigation Grid (Bento Buttons) */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <span className="text-[11px] font-mono font-black uppercase tracking-widest text-[#c6ff34]">
-              Quick Navigation
-            </span>
-            <span className="text-[10px] font-mono text-slate-500">8 Sections</span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className="p-3 rounded-2xl border transition-all flex items-center justify-between font-mono text-xs bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
-              >
-                <span className="flex items-center gap-2 truncate">
-                  <span>{item.icon}</span>
-                  <span className="truncate">{item.name}</span>
-                </span>
-                <span className="text-[10px] text-slate-500 font-bold">→</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* 3. Mobile Fast Connect & Direct Action Buttons */}
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-3.5">
-          <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[#c6ff34] block">
-            Admissions & Assistance
-          </span>
-
-          <div className="grid grid-cols-2 gap-2">
-            <a
-              href="tel:+919495957011"
-              className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-2 text-slate-200 font-mono text-xs font-bold active:bg-[#c6ff34] active:text-[#050521] transition-all"
-            >
-              <Icons.Phone className="w-3.5 h-3.5 text-[#c6ff34]" />
-              <span>Call Us</span>
-            </a>
-
-            <a
-              href="mailto:deepstackbyaleef@gmail.com"
-              className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-2 text-slate-200 font-mono text-xs font-bold active:bg-[#c6ff34] active:text-[#050521] transition-all"
-            >
-              <Icons.Mail className="w-3.5 h-3.5 text-[#c6ff34]" />
-              <span>Email</span>
-            </a>
-          </div>
-
-          <Link
-            to="/admission"
-            className="w-full bg-[#c6ff34] text-[#050521] py-3.5 px-4 rounded-2xl font-black uppercase text-xs tracking-wider flex items-center justify-center gap-2 shadow-[3px_3px_0px_0px_white] active:translate-y-0.5 transition-all"
-          >
-            <span>Apply for Admission</span>
-            <span>→</span>
-          </Link>
-        </div>
-
-        {/* 4. Mobile Bottom Live Status & Copyright */}
-        <div className="pt-4 border-t border-white/10 text-center space-y-2 font-mono text-[10px]">
-          <div className="flex items-center justify-center gap-2 text-[#c6ff34]">
-            <span className="w-2 h-2 rounded-full bg-[#c6ff34] animate-pulse" />
-            <span className="font-bold uppercase tracking-wider">Admissions Open 2026</span>
-          </div>
-          <p className="text-slate-500 uppercase tracking-widest">
-            &copy; {currentYear} DeepStaq // All Rights Reserved
-          </p>
-        </div>
-
-      </div>
-
-      {/* ─────────────────────────────────────────────────────────────
-          DESKTOP / LAPTOP VIEW: High-Tech Cyber-Bento Grid
-         ───────────────────────────────────────────────────────────── */}
-      <div className="hidden md:block max-w-[1300px] mx-auto space-y-12">
-        
-        {/* Top Interactive CTA Banner */}
-        <div className="bg-gradient-to-r from-white/[0.07] via-white/[0.03] to-white/[0.07] border border-white/15 rounded-3xl p-8 flex items-center justify-between shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
-          <div className="space-y-1.5">
-            <span className="inline-flex items-center gap-2 text-[11px] font-mono font-black uppercase tracking-widest text-[#c6ff34]">
-              <span className="w-2 h-2 rounded-full bg-[#c6ff34] animate-pulse" />
-              Next Cohort Starting Soon
-            </span>
-            <h3 className="text-2xl lg:text-3xl font-black uppercase tracking-tight text-white">
-              Ready to Become an AI Builder?
-            </h3>
-            <p className="text-slate-400 font-mono text-xs">
-              Go from zero coding to shipping real-world AI/ML capstone projects in 6 months.
+        {/* Top Banner: READY TO START? Your AI journey starts here. */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 pb-12 border-b border-white/10">
+          <div className="space-y-3 max-w-2xl">
+            <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#c6ff34]">
+              READY TO START?
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
+              Your AI journey <span className="text-[#c6ff34]">starts here.</span>
+            </h2>
+            <p className="text-sm text-slate-400 font-normal leading-relaxed">
+              Talk to our team, understand the right program for you and take the first step towards a future in AI.
             </p>
           </div>
 
-          <div className="flex items-center gap-4 flex-shrink-0">
-            <Link
-              to="/aptitude"
-              className="bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-bold uppercase tracking-wider px-6 py-3.5 rounded-xl border border-white/20 hover:border-[#c6ff34] transition-all"
-            >
-              Take Aptitude Test
-            </Link>
+          <div className="flex flex-wrap items-center gap-4 shrink-0">
             <Link
               to="/admission"
-              className="bg-[#c6ff34] hover:bg-[#b5f024] text-[#050521] font-black text-xs uppercase tracking-widest px-7 py-3.5 rounded-xl border border-[#050521] shadow-[4px_4px_0px_0px_white] hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
+              className="btn-slide-wrap px-8 py-4 rounded-full bg-[#c6ff34] hover:bg-[#bbf029] text-[#090D11] font-bold text-sm tracking-wide shadow-[0_4px_20px_rgba(198,255,52,0.35)] flex items-center gap-2"
             >
-              Apply for Admission →
+              <span>Apply Now</span>
+              <span className="font-bold">→</span>
+            </Link>
+            <Link
+              to="/consultation"
+              className="px-7 py-4 rounded-full bg-white/5 hover:bg-white/10 text-white border border-white/15 text-sm font-semibold transition-colors"
+            >
+              Book a Consultation
             </Link>
           </div>
         </div>
 
-        {/* Main Bento Grid */}
-        <div className="grid grid-cols-12 gap-8 pb-10 border-b border-white/10">
-
-          {/* Col 1 (5 Cols): Brand, Vision & Socials */}
-          <div className="col-span-5 space-y-5 pr-6">
-            <Link to="/" className="inline-block">
-              <img
-                src={logo}
-                alt="DeepStaq Logo"
-                className="h-9 w-auto object-contain filter brightness-110"
-              />
-            </Link>
-            <p className="text-slate-400 font-mono text-xs leading-relaxed">
-              Kerala's leading practical Artificial Intelligence & Machine Learning institute. We bridge the gap between AI consumers and AI engineers through rigorous hands-on projects and industry mentorship.
-            </p>
-            
-            <div className="flex items-center gap-2 text-slate-400 font-mono text-[11px]">
-              <span className="w-2 h-2 rounded-full bg-[#c6ff34]" />
-              <span>Campus: Kannur, Kerala · Global Online</span>
+        {/* Bottom 4-Column Grid: FAQ / Quick Links / Contact / Socials */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
+          
+          {/* Col 1: FAQ Section (5 cols) */}
+          <div className="lg:col-span-5 space-y-4">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
+              FAQ
             </div>
-
+            <h3 className="text-xl font-bold text-white tracking-tight">
+              Frequently Asked Questions.
+            </h3>
+            
+            {/* Social icons row */}
             <div className="flex items-center gap-3 pt-2">
-              {socialLinks.map((soc, i) => (
+              {[
+                { label: "Instagram", href: "https://www.instagram.com/deepstaq/", icon: "📸" },
+                { label: "LinkedIn", href: "https://www.linkedin.com/company/deepstaq/", icon: "💼" },
+                { label: "YouTube", href: "https://youtube.com/@deepstaq", icon: "▶️" },
+              ].map((soc, sIdx) => (
                 <a
-                  key={i}
+                  key={sIdx}
                   href={soc.href}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={soc.label}
-                  className="w-10 h-10 border border-white/15 hover:border-[#c6ff34] bg-white/5 hover:bg-[#c6ff34] text-slate-300 hover:text-[#050521] rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm"
+                  className="w-9 h-9 rounded-xl bg-white/5 hover:bg-[#c6ff34] text-slate-300 hover:text-[#090D11] border border-white/10 flex items-center justify-center text-sm transition-all"
                 >
-                  <soc.icon className="w-4 h-4" />
+                  {soc.icon}
                 </a>
               ))}
             </div>
+
+            {/* Quick Expandable FAQs */}
+            <div className="space-y-2 pt-2 text-xs">
+              {faqItems.map((faq, fIdx) => (
+                <div key={fIdx} className="border-b border-white/10 pb-2">
+                  <button
+                    onClick={() => setOpenFaq(openFaq === fIdx ? null : fIdx)}
+                    className="w-full text-left py-1 text-slate-300 hover:text-[#c6ff34] font-medium flex items-center justify-between gap-2 cursor-pointer"
+                  >
+                    <span>&gt; {faq.q}</span>
+                    <span className="text-slate-500 font-bold">{openFaq === fIdx ? "−" : "+"}</span>
+                  </button>
+                  {openFaq === fIdx && (
+                    <p className="text-slate-400 text-[11px] pt-1 pl-3 leading-relaxed">
+                      {faq.a}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Col 2 (3 Cols): Quick Navigation */}
-          <div className="col-span-3 space-y-4 font-mono text-xs">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#c6ff34]" />
-              <h4 className="font-black uppercase tracking-wider text-[#c6ff34]">Navigation</h4>
+          {/* Col 2: Quick Links (3 cols) */}
+          <div className="lg:col-span-3 space-y-4">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
+              Quick Links
             </div>
-            <ul className="space-y-2.5 text-slate-300">
-              {navItems.map((item, idx) => (
-                <li key={item.path}>
-                  <Link
-                    to={item.path}
-                    className="group flex items-center gap-2 hover:text-[#c6ff34] transition-colors"
-                  >
-                    <span className="text-[10px] text-slate-500 font-bold group-hover:text-[#c6ff34]">
-                      0{idx + 1}.
-                    </span>
-                    <span>{item.name}</span>
-                  </Link>
-                </li>
-              ))}
+            <ul className="space-y-2.5 text-xs text-slate-300 font-medium">
+              <li>
+                <Link to="/programs" className="hover:text-[#c6ff34] transition-colors">Programs</Link>
+              </li>
+              <li>
+                <Link to="/#experience" className="hover:text-[#c6ff34] transition-colors">Learning Experience</Link>
+              </li>
+              <li>
+                <Link to="/#projects" className="hover:text-[#c6ff34] transition-colors">Projects</Link>
+              </li>
+              <li>
+                <Link to="/#events" className="hover:text-[#c6ff34] transition-colors">Events</Link>
+              </li>
+              <li>
+                <Link to="/blog" className="hover:text-[#c6ff34] transition-colors">AI Learning Guides</Link>
+              </li>
+              <li>
+                <Link to="/scholarship" className="hover:text-[#c6ff34] transition-colors">Scholarship</Link>
+              </li>
+              <li>
+                <Link to="/aptitude" className="hover:text-[#c6ff34] transition-colors">Aptitude Test</Link>
+              </li>
+              <li>
+                <Link to="/contact" className="hover:text-[#c6ff34] transition-colors">Contact</Link>
+              </li>
             </ul>
           </div>
 
-          {/* Col 3 (4 Cols): Direct Admissions Helpdesk */}
-          <div className="col-span-4 space-y-4 font-mono text-xs">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#c6ff34]" />
-              <h4 className="font-black uppercase tracking-wider text-[#c6ff34]">Admissions Desk</h4>
+          {/* Col 3: Contact & Direct Actions (4 cols) */}
+          <div id="contact" className="lg:col-span-4 space-y-4">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
+              Contact
+            </div>
+            
+            <div className="space-y-2.5 text-xs text-slate-300 leading-relaxed">
+              <div className="flex items-center gap-2">
+                <span>📍</span>
+                <span>Kannur, Kerala, India</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span>✉️</span>
+                <a href="mailto:info@deepstaq.in" className="hover:text-[#c6ff34] transition-colors">
+                  info@deepstaq.in
+                </a>
+              </div>
+              <div className="flex items-center gap-2">
+                <span>📞</span>
+                <a href="tel:+919495957011" className="hover:text-[#c6ff34] transition-colors font-bold text-white">
+                  +91 94959 57011
+                </a>
+              </div>
             </div>
 
-            <div className="space-y-3">
-              <a
-                href="tel:+919495957011"
-                className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#c6ff34] flex items-center gap-3.5 transition-all text-slate-200 group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-[#c6ff34]/20 text-[#c6ff34] group-hover:bg-[#c6ff34] group-hover:text-[#050521] flex items-center justify-center transition-colors">
-                  <Icons.Phone className="w-4 h-4" />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] text-slate-400 block font-bold uppercase">Direct Hotline</span>
-                  <span className="font-bold text-sm text-white">+91 94959 57011</span>
-                </div>
-              </a>
-
-              <a
-                href="mailto:deepstackbyaleef@gmail.com"
-                className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#c6ff34] flex items-center gap-3.5 transition-all text-slate-200 group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-[#c6ff34]/20 text-[#c6ff34] group-hover:bg-[#c6ff34] group-hover:text-[#050521] flex items-center justify-center transition-colors">
-                  <Icons.Mail className="w-4 h-4" />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] text-slate-400 block font-bold uppercase">Email Enquiries</span>
-                  <span className="font-bold text-xs text-white truncate block">deepstackbyaleef@gmail.com</span>
-                </div>
-              </a>
-
+            <div className="pt-3">
               <Link
-                to="/consultation"
-                className="block text-center bg-[#c6ff34] text-[#050521] font-black uppercase text-xs tracking-wider py-3.5 px-4 rounded-2xl shadow-[4px_4px_0px_0px_white] hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
+                to="/admission"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#c6ff34] hover:bg-[#bbf029] text-[#090D11] text-xs font-bold tracking-wide transition-all shadow-md"
               >
-                Book Free Consultation →
+                <span>Apply Now</span>
+                <span>→</span>
               </Link>
             </div>
           </div>
 
         </div>
 
-        {/* Bottom System Bar */}
-        <div className="flex items-center justify-between text-slate-500 font-mono text-[11px] uppercase tracking-wider">
+        {/* Copyright & Legal Bar */}
+        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div>
-            &copy; {currentYear} DeepStaq AI Systems // All Rights Reserved
+            © {currentYear} Deepstaq. All rights reserved.
           </div>
           <div className="flex items-center gap-6">
-            <span className="flex items-center gap-1.5 text-slate-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff34]" />
-              Zero to AI Builder
-            </span>
+            <Link to="/contact" className="hover:text-slate-300 transition-colors">Privacy Policy</Link>
             <span>•</span>
-            <Link to="/programs" className="hover:text-white transition-colors">Curriculum</Link>
+            <Link to="/contact" className="hover:text-slate-300 transition-colors">Terms of Service</Link>
             <span>•</span>
-            <Link to="/contact" className="hover:text-white transition-colors">Support</Link>
+            <Link to="/contact" className="hover:text-slate-300 transition-colors">Sitemap</Link>
           </div>
         </div>
 

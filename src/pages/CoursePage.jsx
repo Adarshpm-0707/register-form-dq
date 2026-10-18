@@ -28,41 +28,41 @@ export default function CoursePage({ slugOverride }) {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#050521] font-sans pb-24 selection:bg-[#c6ff34] selection:text-[#050521]">
-      
-      {/* HERO SECTION */}
-      <section className="relative pt-28 pb-16 md:pt-36 md:pb-24 px-6 md:px-12 bg-gradient-to-b from-slate-50 to-white border-b-2 border-[#050521] overflow-hidden">
-        {/* Background Grid Accent */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#050521_1px,transparent_1px)] [background-size:16px_16px]" />
+    <div className="min-h-screen bg-[#090D11] text-white font-sans pb-24 selection:bg-[#c6ff34] selection:text-[#090D11] relative overflow-hidden">
+      {/* AMBIENT GLOWS */}
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#c6ff34]/10 rounded-full blur-[150px] pointer-events-none -z-0" />
+      <div className="absolute top-[800px] right-0 w-[500px] h-[350px] bg-cyan-500/10 rounded-full blur-[150px] pointer-events-none -z-0" />
 
+      {/* HERO SECTION */}
+      <section className="relative pt-28 pb-16 md:pt-36 md:pb-24 px-6 md:px-12 border-b border-white/10 overflow-hidden">
         <div className="max-w-[1200px] mx-auto space-y-6 relative z-10">
           {/* Badges / Pill row */}
           <div className="flex flex-wrap items-center gap-3">
-            <span className="bg-[#c6ff34] text-[#050521] text-xs font-black px-3.5 py-1.5 rounded-lg border-2 border-[#050521] uppercase tracking-wider font-mono shadow-[3px_3px_0px_0px_#050521]">
+            <span className="bg-[#c6ff34] text-[#090D11] text-xs font-black px-3.5 py-1.5 rounded-lg uppercase tracking-wider font-mono shadow-[0_0_20px_rgba(198,255,52,0.35)]">
               {pageData.badge || "DeepStaq Programme"}
             </span>
             {pageData.locationBadge && (
-              <span className="bg-[#050521] text-[#c6ff34] text-xs font-mono font-bold px-3 py-1.5 rounded-lg">
+              <span className="bg-white/10 text-[#c6ff34] border border-[#c6ff34]/30 text-xs font-mono font-bold px-3 py-1.5 rounded-lg">
                 {pageData.locationBadge}
               </span>
             )}
-            <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-md border border-slate-200">
+            <span className="text-xs font-mono font-bold text-slate-300 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-md border border-white/10">
               6 Months · 160+ Hrs
             </span>
           </div>
 
           {/* Main Title */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-[#050521] leading-[1.08] max-w-5xl">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white leading-[1.08] max-w-5xl">
             {pageData.title}
           </h1>
 
           {/* Subtitle / Intro */}
-          <p className="text-slate-700 text-base md:text-lg max-w-4xl leading-relaxed font-sans font-medium">
+          <p className="text-slate-300 text-base md:text-lg max-w-4xl leading-relaxed font-sans font-medium">
             {pageData.subtitle}
           </p>
 
           {pageData.tagline && (
-            <p className="text-slate-600 font-mono text-sm md:text-base max-w-3xl leading-relaxed pt-1">
+            <p className="text-slate-400 font-mono text-sm md:text-base max-w-3xl leading-relaxed pt-1">
               {pageData.tagline}
             </p>
           )}
@@ -71,7 +71,7 @@ export default function CoursePage({ slugOverride }) {
           <div className="pt-4 flex flex-wrap items-center gap-4">
             <Link
               to="/admission"
-              className="bg-[#c6ff34] hover:bg-[#b5f024] text-[#050521] font-black uppercase text-sm md:text-base px-8 py-4 rounded-2xl border-2 border-[#050521] shadow-[5px_5px_0px_0px_#050521] hover:translate-x-0.5 hover:translate-y-0.5 transition-all flex items-center gap-2"
+              className="bg-[#c6ff34] hover:bg-[#b5f024] text-[#090D11] font-black uppercase text-sm md:text-base px-8 py-4 rounded-2xl shadow-[0_0_25px_rgba(198,255,52,0.4)] hover:scale-[1.02] transition-all flex items-center gap-2"
             >
               <span>Enroll Now</span>
               <span>→</span>
@@ -79,14 +79,14 @@ export default function CoursePage({ slugOverride }) {
 
             <a
               href="tel:+919495957011"
-              className="bg-white hover:bg-slate-50 text-[#050521] font-mono font-bold text-xs md:text-sm px-6 py-4 rounded-2xl border-2 border-[#050521] shadow-[4px_4px_0px_0px_#050521] hover:translate-x-0.5 hover:translate-y-0.5 transition-all flex items-center gap-2"
+              className="bg-white/5 hover:bg-white/10 text-white font-mono font-bold text-xs md:text-sm px-6 py-4 rounded-2xl border border-white/15 hover:border-white/30 transition-all flex items-center gap-2"
             >
               <span>📞 Talk to Us: +91 949 595 7011</span>
             </a>
 
             <Link
               to="/consultation"
-              className="text-xs md:text-sm font-mono font-bold uppercase tracking-wider text-slate-700 hover:text-[#050521] underline px-2 py-2"
+              className="text-xs md:text-sm font-mono font-bold uppercase tracking-wider text-slate-300 hover:text-[#c6ff34] underline px-2 py-2 transition-colors"
             >
               Book Free 1:1 Consultation
             </Link>
@@ -95,43 +95,43 @@ export default function CoursePage({ slugOverride }) {
       </section>
 
       {/* QUICK JUMP NAVIGATION BAR (If Guide or Course) */}
-      <div className="sticky top-20 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 py-3 px-6 shadow-sm hidden md:block">
+      <div className="sticky top-20 z-40 bg-[#090D11]/90 backdrop-blur-md border-b border-white/10 py-3 px-6 shadow-xl hidden md:block">
         <div className="max-w-[1200px] mx-auto flex items-center justify-between text-xs font-mono font-bold uppercase">
           <span className="text-slate-400">Quick Navigation:</span>
           <div className="flex items-center gap-6">
             {!pageData.isGuide && (
               <>
-                <button onClick={() => handleScrollTo("overview")} className="hover:text-emerald-700">
+                <button onClick={() => handleScrollTo("overview")} className="text-slate-300 hover:text-[#c6ff34] transition-colors">
                   Overview
                 </button>
-                <button onClick={() => handleScrollTo("format")} className="hover:text-emerald-700">
+                <button onClick={() => handleScrollTo("format")} className="text-slate-300 hover:text-[#c6ff34] transition-colors">
                   Format
                 </button>
-                <button onClick={() => handleScrollTo("syllabus")} className="hover:text-emerald-700">
+                <button onClick={() => handleScrollTo("syllabus")} className="text-slate-300 hover:text-[#c6ff34] transition-colors">
                   Syllabus
                 </button>
-                <button onClick={() => handleScrollTo("capstone")} className="hover:text-emerald-700">
+                <button onClick={() => handleScrollTo("capstone")} className="text-slate-300 hover:text-[#c6ff34] transition-colors">
                   Capstone
                 </button>
-                <button onClick={() => handleScrollTo("careers")} className="hover:text-emerald-700">
+                <button onClick={() => handleScrollTo("careers")} className="text-slate-300 hover:text-[#c6ff34] transition-colors">
                   Careers
                 </button>
               </>
             )}
             {pageData.isGuide && (
               <>
-                <button onClick={() => handleScrollTo("guide-content")} className="hover:text-emerald-700">
+                <button onClick={() => handleScrollTo("guide-content")} className="text-slate-300 hover:text-[#c6ff34] transition-colors">
                   Full Guide
                 </button>
               </>
             )}
-            <button onClick={() => handleScrollTo("faqs")} className="hover:text-emerald-700">
+            <button onClick={() => handleScrollTo("faqs")} className="text-slate-300 hover:text-[#c6ff34] transition-colors">
               FAQs
             </button>
           </div>
           <Link
             to="/admission"
-            className="bg-[#050521] text-[#c6ff34] px-3.5 py-1 rounded-md text-[11px] font-black uppercase tracking-wider"
+            className="bg-[#c6ff34] text-[#090D11] px-3.5 py-1 rounded-md text-[11px] font-black uppercase tracking-wider shadow-[0_0_15px_rgba(198,255,52,0.3)] hover:scale-105 transition-all"
           >
             Apply Now
           </Link>
@@ -139,37 +139,38 @@ export default function CoursePage({ slugOverride }) {
       </div>
 
       {/* MAIN CONTENT CONTAINER */}
-      <div className="max-w-[1200px] mx-auto px-6 md:px-12 py-12 space-y-16">
+      <div className="max-w-[1200px] mx-auto px-6 md:px-12 py-12 space-y-16 relative z-10">
 
         {/* 1. WHY DEEPSTAQ / OVERVIEW SECTION */}
         {pageData.whyDeepStaq && (
           <section id="overview" className="scroll-mt-36 space-y-6">
-            <div className="border-2 border-[#050521] rounded-3xl p-6 md:p-10 bg-slate-50 shadow-[6px_6px_0px_0px_#050521] space-y-6">
+            <div className="border border-white/10 rounded-3xl p-6 md:p-10 bg-[#0D1318]/90 backdrop-blur-xl shadow-2xl space-y-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-72 h-72 bg-[#c6ff34]/5 rounded-full blur-3xl pointer-events-none" />
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#c6ff34] border border-[#050521]" />
-                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#050521]">
+                <span className="w-3 h-3 rounded-full bg-[#c6ff34] shadow-[0_0_8px_#c6ff34]" />
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
                   {pageData.whyDeepStaq.title}
                 </h2>
               </div>
-              <p className="text-slate-700 text-sm md:text-base leading-relaxed">
+              <p className="text-slate-300 text-sm md:text-base leading-relaxed">
                 {pageData.whyDeepStaq.description}
               </p>
               {pageData.whyDeepStaq.mission && (
-                <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-2">
-                  <h4 className="text-xs font-mono font-black uppercase text-emerald-800 tracking-wider">
+                <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-2">
+                  <h4 className="text-xs font-mono font-black uppercase text-[#c6ff34] tracking-wider">
                     Our Mission
                   </h4>
-                  <p className="text-slate-600 text-sm leading-relaxed">
+                  <p className="text-slate-300 text-sm leading-relaxed">
                     {pageData.whyDeepStaq.mission}
                   </p>
                 </div>
               )}
               {pageData.whyDeepStaq.vision && (
-                <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-2">
-                  <h4 className="text-xs font-mono font-black uppercase text-emerald-800 tracking-wider">
+                <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-2">
+                  <h4 className="text-xs font-mono font-black uppercase text-[#c6ff34] tracking-wider">
                     Our Vision
                   </h4>
-                  <p className="text-slate-600 text-sm leading-relaxed">
+                  <p className="text-slate-300 text-sm leading-relaxed">
                     {pageData.whyDeepStaq.vision}
                   </p>
                 </div>
@@ -181,24 +182,27 @@ export default function CoursePage({ slugOverride }) {
         {/* OFFLINE / LOCAL SPECIFIC ADVANTAGES (IF PRESENT) */}
         {pageData.offlineAdvantages && (
           <section className="space-y-6">
-            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#050521]">
-              Why Choose This Format
-            </h2>
+            <div className="space-y-1">
+              <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Format Benefits</div>
+              <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
+                Why Choose This Format
+              </h2>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {pageData.offlineAdvantages.map((adv, idx) => (
                 <div
                   key={idx}
-                  className="p-6 rounded-2xl border-2 border-[#050521] bg-white shadow-[4px_4px_0px_0px_#050521] space-y-2"
+                  className="p-6 rounded-2xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl shadow-xl space-y-2 hover:border-[#c6ff34]/30 transition-colors"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#c6ff34] text-[#050521] font-mono text-xs font-black flex items-center justify-center border border-[#050521]">
+                  <div className="flex items-center gap-3">
+                    <span className="w-7 h-7 rounded-full bg-[#c6ff34]/15 text-[#c6ff34] font-mono text-xs font-black flex items-center justify-center border border-[#c6ff34]/30">
                       ✓
                     </span>
-                    <h3 className="text-base font-black uppercase text-[#050521]">
+                    <h3 className="text-base font-black uppercase text-white">
                       {adv.title}
                     </h3>
                   </div>
-                  <p className="text-slate-600 text-sm leading-relaxed pl-8">
+                  <p className="text-slate-400 text-sm leading-relaxed pl-10">
                     {adv.desc}
                   </p>
                 </div>
@@ -210,25 +214,28 @@ export default function CoursePage({ slugOverride }) {
         {/* 2. COURSE FORMAT & STRUCTURE TABLE */}
         {pageData.formatStructure && (
           <section id="format" className="scroll-mt-36 space-y-6">
-            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#050521]">
-              Course Format & Structure
-            </h2>
+            <div className="space-y-1">
+              <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Structure</div>
+              <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
+                Course Format & Structure
+              </h2>
+            </div>
 
-            <div className="overflow-x-auto border-2 border-[#050521] rounded-3xl shadow-[6px_6px_0px_0px_#050521] bg-white">
+            <div className="overflow-x-auto border border-white/10 rounded-3xl shadow-2xl bg-[#0D1318]/90 backdrop-blur-xl">
               <table className="w-full text-left border-collapse text-xs md:text-sm">
                 <thead>
-                  <tr className="bg-[#050521] text-white font-mono uppercase tracking-wider">
-                    <th className="p-4 md:p-5 border-b-2 border-[#050521] w-1/3">Detail</th>
-                    <th className="p-4 md:p-5 border-b-2 border-[#050521]">Info</th>
+                  <tr className="bg-white/5 text-white font-mono uppercase tracking-wider border-b border-white/10">
+                    <th className="p-4 md:p-5 w-1/3">Detail</th>
+                    <th className="p-4 md:p-5">Info</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200 font-mono">
+                <tbody className="divide-y divide-white/10 font-mono">
                   {pageData.formatStructure.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-4 md:p-5 font-bold text-[#050521] bg-slate-50/50">
+                    <tr key={idx} className="hover:bg-white/[0.03] transition-colors">
+                      <td className="p-4 md:p-5 font-bold text-[#c6ff34]">
                         {row.detail}
                       </td>
-                      <td className="p-4 md:p-5 text-slate-700">
+                      <td className="p-4 md:p-5 text-slate-300">
                         {row.info}
                       </td>
                     </tr>
@@ -238,8 +245,8 @@ export default function CoursePage({ slugOverride }) {
             </div>
 
             {pageData.guestSessionNote && (
-              <div className="p-5 rounded-2xl bg-[#c6ff34]/20 border-2 border-[#050521] shadow-[3px_3px_0px_0px_#050521] text-xs md:text-sm font-mono text-[#050521] leading-relaxed">
-                💡 <strong>Monthly Industry Masterclasses:</strong> {pageData.guestSessionNote}
+              <div className="p-5 rounded-2xl bg-[#c6ff34]/10 border border-[#c6ff34]/30 text-xs md:text-sm font-mono text-white leading-relaxed">
+                💡 <strong className="text-[#c6ff34]">Monthly Industry Masterclasses:</strong> {pageData.guestSessionNote}
               </div>
             )}
           </section>
@@ -248,16 +255,19 @@ export default function CoursePage({ slugOverride }) {
         {/* OUTCOMES LIST (IF PRESENT) */}
         {pageData.outcomesList && (
           <section className="space-y-6">
-            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#050521]">
-              What You'll Be Able to Do By the End
-            </h2>
+            <div className="space-y-1">
+              <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Learning Outcomes</div>
+              <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
+                What You'll Be Able to Do By the End
+              </h2>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {pageData.outcomesList.map((item, idx) => (
                 <div
                   key={idx}
-                  className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-start gap-3 text-sm font-mono text-slate-800"
+                  className="p-4 rounded-xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl flex items-start gap-3 text-sm font-mono text-slate-300"
                 >
-                  <span className="text-emerald-700 font-black">✔</span>
+                  <span className="text-[#c6ff34] font-black">✔</span>
                   <span>{item}</span>
                 </div>
               ))}
@@ -270,14 +280,14 @@ export default function CoursePage({ slugOverride }) {
           <section id="syllabus" className="scroll-mt-36 space-y-6">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-2">
               <div>
-                <span className="text-xs font-mono font-bold uppercase tracking-widest text-emerald-700">
+                <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">
                   Curriculum Breakdown
                 </span>
-                <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-[#050521]">
+                <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-white">
                   What You'll Learn: Month by Month
                 </h2>
               </div>
-              <span className="text-xs font-mono text-slate-500">
+              <span className="text-xs font-mono text-slate-400">
                 6 Months Structured Progression
               </span>
             </div>
@@ -288,13 +298,13 @@ export default function CoursePage({ slugOverride }) {
                 <button
                   key={idx}
                   onClick={() => setActiveSyllabusMonth(idx)}
-                  className={`p-3 rounded-xl border-2 text-left font-mono transition-all ${
+                  className={`p-3 rounded-xl border text-left font-mono transition-all ${
                     activeSyllabusMonth === idx
-                      ? "bg-[#050521] text-[#c6ff34] border-[#050521] shadow-[3px_3px_0px_0px_#c6ff34]"
-                      : "bg-white text-[#050521] border-slate-200 hover:border-[#050521]"
+                      ? "bg-[#c6ff34] text-[#090D11] border-[#c6ff34] shadow-[0_0_15px_rgba(198,255,52,0.35)]"
+                      : "bg-[#0D1318]/90 text-slate-300 border-white/10 hover:border-[#c6ff34]/40"
                   }`}
                 >
-                  <div className="text-[10px] font-black uppercase opacity-70">
+                  <div className="text-[10px] font-black uppercase opacity-75">
                     {s.month}
                   </div>
                   <div className="text-xs font-bold line-clamp-1">
@@ -305,21 +315,21 @@ export default function CoursePage({ slugOverride }) {
             </div>
 
             {/* Active Month Card Detail */}
-            <div className="border-2 border-[#050521] rounded-3xl p-6 md:p-8 bg-white shadow-[6px_6px_0px_0px_#050521] space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+            <div className="border border-white/10 rounded-3xl p-6 md:p-8 bg-[#0D1318]/90 backdrop-blur-xl shadow-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div>
-                  <span className="text-xs font-mono font-black text-emerald-800 uppercase tracking-widest">
+                  <span className="text-xs font-mono font-black text-[#c6ff34] uppercase tracking-widest">
                     {pageData.syllabus[activeSyllabusMonth].month} Focus
                   </span>
-                  <h3 className="text-xl md:text-2xl font-black uppercase text-[#050521]">
+                  <h3 className="text-xl md:text-2xl font-black uppercase text-white">
                     {pageData.syllabus[activeSyllabusMonth].title}
                   </h3>
                 </div>
-                <span className="hidden sm:inline-block px-3 py-1 rounded-full bg-slate-100 font-mono text-xs font-bold text-[#050521]">
+                <span className="hidden sm:inline-block px-3 py-1 rounded-full bg-white/5 border border-white/10 font-mono text-xs font-bold text-[#c6ff34]">
                   Hands-On Module
                 </span>
               </div>
-              <p className="text-slate-700 font-sans text-sm md:text-base leading-relaxed">
+              <p className="text-slate-300 font-sans text-sm md:text-base leading-relaxed">
                 {pageData.syllabus[activeSyllabusMonth].description}
               </p>
             </div>
@@ -329,20 +339,20 @@ export default function CoursePage({ slugOverride }) {
               {pageData.syllabus.map((m, idx) => (
                 <div
                   key={idx}
-                  className="p-5 rounded-2xl border-2 border-slate-200 hover:border-[#050521] bg-slate-50 transition-all space-y-2"
+                  className="p-5 rounded-2xl border border-white/10 hover:border-[#c6ff34]/40 bg-[#0D1318]/90 backdrop-blur-xl transition-all space-y-2"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-mono font-black text-[#050521] bg-white px-2.5 py-1 rounded border border-slate-300">
+                    <span className="text-[11px] font-mono font-black text-[#c6ff34] bg-[#c6ff34]/10 px-2.5 py-1 rounded border border-[#c6ff34]/30">
                       {m.month}
                     </span>
                     <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">
                       Module 0{idx + 1}
                     </span>
                   </div>
-                  <h4 className="text-sm font-black uppercase text-[#050521]">
+                  <h4 className="text-sm font-black uppercase text-white">
                     {m.title}
                   </h4>
-                  <p className="text-xs text-slate-600 font-mono leading-relaxed">
+                  <p className="text-xs text-slate-400 font-sans leading-relaxed">
                     {m.description}
                   </p>
                 </div>
@@ -354,19 +364,22 @@ export default function CoursePage({ slugOverride }) {
         {/* 4. TOOLS & TECHNOLOGIES SECTION */}
         {pageData.tools && (
           <section className="space-y-6">
-            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#050521]">
-              Tools & Technologies You'll Use
-            </h2>
+            <div className="space-y-1">
+              <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Toolchain</div>
+              <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
+                Tools & Technologies You'll Use
+              </h2>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {pageData.tools.map((t, idx) => (
                 <div
                   key={idx}
-                  className="p-5 rounded-2xl border-2 border-[#050521] bg-white shadow-[4px_4px_0px_0px_#050521] space-y-2 hover:bg-[#c6ff34]/10 transition-colors"
+                  className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl shadow-xl space-y-2 hover:border-[#c6ff34]/40 transition-colors"
                 >
-                  <h4 className="text-sm font-black uppercase text-[#050521]">
+                  <h4 className="text-sm font-black uppercase text-white">
                     {t.name}
                   </h4>
-                  <p className="text-xs font-mono text-slate-600 leading-tight">
+                  <p className="text-xs font-sans text-slate-400 leading-tight">
                     {t.desc}
                   </p>
                 </div>
@@ -378,31 +391,32 @@ export default function CoursePage({ slugOverride }) {
         {/* 5. CAPSTONE PROJECT SECTION */}
         {pageData.capstone && (
           <section id="capstone" className="scroll-mt-36 space-y-6">
-            <div className="border-2 border-[#050521] rounded-3xl p-6 md:p-10 bg-[#050521] text-white shadow-[8px_8px_0px_0px_#c6ff34] space-y-6">
-              <span className="bg-[#c6ff34] text-[#050521] text-xs font-black px-3 py-1 rounded-md uppercase font-mono tracking-wider">
+            <div className="border border-white/10 rounded-3xl p-6 md:p-10 bg-[#0D1318] text-white shadow-[0_0_50px_rgba(198,255,52,0.15)] space-y-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-80 h-80 bg-[#c6ff34]/10 rounded-full blur-3xl pointer-events-none" />
+              <span className="bg-[#c6ff34] text-[#090D11] text-xs font-black px-3 py-1 rounded-md uppercase font-mono tracking-wider shadow-[0_0_15px_rgba(198,255,52,0.35)]">
                 Capstone Build
               </span>
               <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-white">
                 {pageData.capstone.title}
               </h2>
-              <p className="text-slate-300 font-mono text-sm md:text-base leading-relaxed">
+              <p className="text-slate-300 font-sans text-sm md:text-base leading-relaxed">
                 {pageData.capstone.description}
               </p>
-              <div className="p-4 rounded-xl bg-white/10 text-white font-mono text-xs md:text-sm font-bold border border-white/20">
+              <div className="p-4 rounded-xl bg-white/5 text-white font-mono text-xs md:text-sm font-bold border border-white/10">
                 ✨ {pageData.capstone.outcome}
               </div>
 
               {pageData.capstone.breakdown && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/10">
                   {pageData.capstone.breakdown.map((b, idx) => (
-                    <div key={idx} className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                    <div key={idx} className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-2">
                       <span className="text-3xl md:text-4xl font-black text-[#c6ff34] font-mono">
                         {b.percentage}
                       </span>
                       <h4 className="text-base font-bold uppercase text-white">
                         {b.title}
                       </h4>
-                      <p className="text-xs text-slate-300 font-mono leading-relaxed">
+                      <p className="text-xs text-slate-400 font-sans leading-relaxed">
                         {b.desc}
                       </p>
                     </div>
@@ -416,10 +430,13 @@ export default function CoursePage({ slugOverride }) {
         {/* 6. CAREERS & OUTCOMES */}
         {pageData.careers && (
           <section id="careers" className="scroll-mt-36 space-y-6">
-            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#050521]">
-              {pageData.careers.title}
-            </h2>
-            <p className="text-slate-600 font-mono text-sm">
+            <div className="space-y-1">
+              <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Future Proof</div>
+              <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
+                {pageData.careers.title}
+              </h2>
+            </div>
+            <p className="text-slate-400 font-sans text-sm">
               {pageData.careers.description}
             </p>
 
@@ -428,7 +445,7 @@ export default function CoursePage({ slugOverride }) {
               {pageData.careers.pathways.map((role, idx) => (
                 <span
                   key={idx}
-                  className="bg-slate-100 hover:bg-[#c6ff34] text-[#050521] text-xs font-mono font-bold px-4 py-2 rounded-xl border border-slate-300 transition-colors"
+                  className="bg-white/5 hover:bg-[#c6ff34]/20 hover:text-[#c6ff34] text-slate-300 text-xs font-mono font-bold px-4 py-2 rounded-xl border border-white/10 transition-colors"
                 >
                   💼 {role}
                 </span>
@@ -438,19 +455,19 @@ export default function CoursePage({ slugOverride }) {
             {/* Beyond Traditional Jobs */}
             {pageData.careers.beyondJobs && (
               <div className="pt-4 space-y-3">
-                <h3 className="text-lg font-black uppercase text-[#050521]">
+                <h3 className="text-lg font-black uppercase text-white">
                   Beyond a Traditional Job
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {pageData.careers.beyondJobs.map((item, idx) => (
                     <div
                       key={idx}
-                      className="p-5 rounded-2xl border-2 border-[#050521] bg-white shadow-[4px_4px_0px_0px_#050521] space-y-2"
+                      className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl shadow-xl space-y-2"
                     >
-                      <h4 className="text-sm font-black uppercase text-[#050521]">
+                      <h4 className="text-sm font-black uppercase text-[#c6ff34]">
                         🚀 {item.title}
                       </h4>
-                      <p className="text-xs font-mono text-slate-600 leading-relaxed">
+                      <p className="text-xs font-sans text-slate-400 leading-relaxed">
                         {item.desc}
                       </p>
                     </div>
@@ -464,19 +481,22 @@ export default function CoursePage({ slugOverride }) {
         {/* 7. TARGET AUDIENCE */}
         {pageData.targetAudience && (
           <section className="space-y-6">
-            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#050521]">
-              Who This Course Is For
-            </h2>
+            <div className="space-y-1">
+              <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Eligibility</div>
+              <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
+                Who This Course Is For
+              </h2>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {pageData.targetAudience.map((aud, idx) => (
                 <div
                   key={idx}
-                  className="p-5 rounded-2xl border-2 border-slate-200 bg-slate-50 flex items-start gap-3"
+                  className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl flex items-start gap-3 shadow-xl"
                 >
-                  <span className="w-6 h-6 rounded-full bg-[#050521] text-[#c6ff34] font-mono text-xs font-black flex items-center justify-center flex-shrink-0">
+                  <span className="w-6 h-6 rounded-full bg-[#c6ff34]/15 text-[#c6ff34] border border-[#c6ff34]/30 font-mono text-xs font-black flex items-center justify-center flex-shrink-0">
                     {idx + 1}
                   </span>
-                  <p className="text-xs md:text-sm font-mono text-slate-700 leading-relaxed">
+                  <p className="text-xs md:text-sm font-sans text-slate-300 leading-relaxed">
                     {aud}
                   </p>
                 </div>
@@ -490,33 +510,33 @@ export default function CoursePage({ slugOverride }) {
           <section id="guide-content" className="scroll-mt-36 space-y-12">
             {pageData.guideSections.map((sec, idx) => (
               <article key={idx} id={sec.id} className="scroll-mt-36 space-y-4">
-                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#050521] pt-6 border-t-2 border-slate-200">
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white pt-6 border-t border-white/10">
                   {sec.heading}
                 </h2>
-                <div className="prose prose-slate max-w-none text-slate-700 text-sm md:text-base leading-relaxed space-y-4 font-sans whitespace-pre-line">
+                <div className="prose prose-invert max-w-none text-slate-300 text-sm md:text-base leading-relaxed space-y-4 font-sans whitespace-pre-line">
                   {sec.content}
                 </div>
 
                 {sec.table && (
-                  <div className="overflow-x-auto border-2 border-[#050521] rounded-2xl shadow-[4px_4px_0px_0px_#050521] my-6 bg-white">
+                  <div className="overflow-x-auto border border-white/10 rounded-2xl shadow-2xl my-6 bg-[#0D1318]/90 backdrop-blur-xl">
                     <table className="w-full text-left border-collapse text-xs md:text-sm">
                       <thead>
-                        <tr className="bg-[#050521] text-white font-mono uppercase tracking-wider">
+                        <tr className="bg-white/5 text-white font-mono uppercase tracking-wider border-b border-white/10">
                           {sec.table.headers.map((h, hi) => (
-                            <th key={hi} className="p-4 border-b-2 border-[#050521]">
+                            <th key={hi} className="p-4">
                               {h}
                             </th>
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-200 font-mono">
+                      <tbody className="divide-y divide-white/10 font-mono">
                         {sec.table.rows.map((row, ri) => (
-                          <tr key={ri} className="hover:bg-slate-50">
+                          <tr key={ri} className="hover:bg-white/[0.03]">
                             {row.map((cell, ci) => (
                               <td
                                 key={ci}
                                 className={`p-4 ${
-                                  ci === 0 ? "font-bold text-[#050521]" : "text-slate-600"
+                                  ci === 0 ? "font-bold text-[#c6ff34]" : "text-slate-300"
                                 }`}
                               >
                                 {cell}
@@ -530,7 +550,7 @@ export default function CoursePage({ slugOverride }) {
                 )}
 
                 {sec.extraContent && (
-                  <div className="prose prose-slate max-w-none text-slate-700 text-sm md:text-base leading-relaxed space-y-4 font-sans whitespace-pre-line">
+                  <div className="prose prose-invert max-w-none text-slate-300 text-sm md:text-base leading-relaxed space-y-4 font-sans whitespace-pre-line">
                     {sec.extraContent}
                   </div>
                 )}
@@ -541,11 +561,14 @@ export default function CoursePage({ slugOverride }) {
 
         {/* 9. INTERACTIVE FAQS SECTION */}
         {pageData.faqs && pageData.faqs.length > 0 && (
-          <section id="faqs" className="scroll-mt-36 space-y-6 pt-6 border-t-2 border-[#050521]">
+          <section id="faqs" className="scroll-mt-36 space-y-6 pt-6 border-t border-white/10">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#050521]">
-                Frequently Asked Questions
-              </h2>
+              <div>
+                <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Questions Answered</div>
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
+                  Frequently Asked Questions
+                </h2>
+              </div>
               <span className="text-xs font-mono text-slate-400">
                 {pageData.faqs.length} Answers
               </span>
@@ -555,14 +578,14 @@ export default function CoursePage({ slugOverride }) {
               {pageData.faqs.map((faq, index) => (
                 <div
                   key={index}
-                  className="border-2 border-[#050521] rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_#050521] bg-white transition-all"
+                  className="border border-white/10 rounded-2xl overflow-hidden bg-[#0D1318]/90 backdrop-blur-xl transition-all"
                 >
                   <button
                     onClick={() => toggleFAQ(index)}
-                    className="w-full text-left p-5 font-black uppercase tracking-tight text-sm md:text-base flex justify-between items-center gap-4 bg-slate-50 hover:bg-[#c6ff34]/20 transition-colors"
+                    className="w-full text-left p-5 font-black uppercase tracking-tight text-sm md:text-base flex justify-between items-center gap-4 bg-white/[0.02] hover:bg-white/[0.05] transition-colors"
                   >
-                    <span>{faq.q}</span>
-                    <span className="w-7 h-7 rounded-full bg-[#050521] text-[#c6ff34] flex items-center justify-center font-mono text-xs flex-shrink-0">
+                    <span className="text-white">{faq.q}</span>
+                    <span className="w-7 h-7 rounded-full bg-[#c6ff34]/15 text-[#c6ff34] border border-[#c6ff34]/30 flex items-center justify-center font-mono text-xs flex-shrink-0">
                       {openFAQs[index] ? "−" : "+"}
                     </span>
                   </button>
@@ -573,7 +596,7 @@ export default function CoursePage({ slugOverride }) {
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.25 }}
-                        className="p-5 text-xs md:text-sm font-mono text-slate-600 border-t border-[#050521]/10 bg-white leading-relaxed whitespace-pre-line"
+                        className="p-5 text-xs md:text-sm font-sans text-slate-300 border-t border-white/10 bg-white/[0.01] leading-relaxed whitespace-pre-line"
                       >
                         {faq.a}
                       </motion.div>
@@ -587,27 +610,28 @@ export default function CoursePage({ slugOverride }) {
 
         {/* 10. FINAL CALL TO ACTION */}
         <section className="pt-8">
-          <div className="bg-[#050521] text-white rounded-3xl p-8 md:p-12 border-2 border-[#050521] shadow-[8px_8px_0px_0px_#c6ff34] space-y-6 text-center md:text-left">
-            <span className="bg-[#c6ff34] text-[#050521] text-xs font-black px-3.5 py-1.5 rounded-md uppercase font-mono tracking-wider inline-block">
+          <div className="bg-[#0D1318] text-white rounded-3xl p-8 md:p-12 border border-white/10 shadow-[0_0_50px_rgba(198,255,52,0.15)] space-y-6 text-center md:text-left relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-[#c6ff34]/10 rounded-full blur-3xl pointer-events-none" />
+            <span className="bg-[#c6ff34] text-[#090D11] text-xs font-black px-3.5 py-1.5 rounded-md uppercase font-mono tracking-wider inline-block shadow-[0_0_15px_rgba(198,255,52,0.35)]">
               Admissions Open
             </span>
             <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-white max-w-3xl">
               {pageData.ctaSection?.heading || "Future Won't Wait. Why Should You?"}
             </h3>
-            <p className="text-slate-300 font-mono text-sm md:text-base max-w-2xl leading-relaxed">
+            <p className="text-slate-300 font-sans text-sm md:text-base max-w-2xl leading-relaxed">
               {pageData.ctaSection?.subheading || "AI/ML talent is in short supply and rising demand. Enroll now to build real intelligent systems."}
             </p>
 
             <div className="pt-4 flex flex-col sm:flex-row items-center gap-4 justify-center md:justify-start">
               <Link
                 to="/admission"
-                className="w-full sm:w-auto bg-[#c6ff34] hover:bg-[#b5f024] text-[#050521] font-black uppercase text-sm md:text-base px-8 py-4 rounded-xl border-2 border-[#050521] shadow-[4px_4px_0px_0px_white] hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-center"
+                className="w-full sm:w-auto bg-[#c6ff34] hover:bg-[#b5f024] text-[#090D11] font-black uppercase text-sm md:text-base px-8 py-4 rounded-xl shadow-[0_0_25px_rgba(198,255,52,0.4)] hover:scale-[1.02] transition-all text-center"
               >
                 {pageData.ctaSection?.btnText || "Enroll in DeepStaq's Course →"}
               </Link>
               <Link
                 to="/consultation"
-                className="w-full sm:w-auto bg-transparent text-white border-2 border-white font-black uppercase text-sm px-6 py-4 rounded-xl hover:bg-white/10 transition-all text-center"
+                className="w-full sm:w-auto bg-white/5 text-white border border-white/20 font-black uppercase text-sm px-6 py-4 rounded-xl hover:bg-white/10 transition-all text-center"
               >
                 Book Free Consultation
               </Link>

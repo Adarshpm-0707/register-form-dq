@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   saveAiEasyAyiRegistration,
@@ -88,13 +87,135 @@ const calculateTimeLeft = () => {
   };
 };
 
-export default function AiEasyAyiForm({ onlyForm = false }) {
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const isDirectForm = searchParams.get("direct") === "true";
+const PERSPECTIVE_SHIFTS = [
+  {
+    myth: "“Working 12–14 hours every day is proof of dedication.”",
+    truth: "It's a structural bottleneck. 80% of routine office chores can be automated in seconds with modern AI tools.",
+  },
+  {
+    myth: "“AI will replace human jobs, so I should be worried.”",
+    truth: "AI won't replace you. But a professional who leverages AI effectively will inevitably replace someone who ignores it.",
+  },
+  {
+    myth: "“I need a technical or programming background to use AI.”",
+    truth: "Modern generative AI requires zero coding. If you can type a message on WhatsApp, you have all the technical skill required.",
+  },
+  {
+    myth: "“I tested ChatGPT before and the responses felt too generic.”",
+    truth: "Generic inputs produce generic outputs. Once you learn structured prompt frameworks, you get boardroom-ready results every time.",
+  },
+];
 
+const ROADMAP_STEPS = [
+  {
+    step: "Step 1",
+    icon: "🎟️",
+    title: "Secure Your ₹99 Pass",
+    desc: "Complete registration in 30 seconds. Instant pass confirmation and bonus access delivered straight to your inbox.",
+    highlight: "Instant Confirmation",
+  },
+  {
+    step: "Step 2",
+    icon: "💻",
+    title: "Attend Live Masterclass",
+    desc: "Join live this Saturday on Zoom (5:00 PM – 7:00 PM IST). 2 hours of direct screen-share walkthroughs in Malayalam & English.",
+    highlight: "Live Demonstrations",
+  },
+  {
+    step: "Step 3",
+    icon: "⚡",
+    title: "Save 15+ Hours Weekly",
+    desc: "Walk away with ready-to-use prompt templates, workflow automations, and immediate 10x speed in your daily routine.",
+    highlight: "Permanent Action Plan",
+  },
+];
+
+const WORKSHOP_OUTCOMES = [
+  {
+    badge: "OUTCOME 1",
+    title: "Master Structured Prompt Engineering",
+    description: "Stop getting generic, robotic answers. Learn role-task-context frameworks (RTF & CoT) that produce boardroom-ready documents, emails, and client proposals in seconds.",
+    tag: "Prompting Mastery",
+  },
+  {
+    badge: "OUTCOME 2",
+    title: "10x Daily Workplace & Office Productivity",
+    description: "Summarize 60-page PDF reports in under 30 seconds, draft executive correspondence, generate meeting minutes, and eliminate hours of mundane typing.",
+    tag: "Save 15+ Hrs/Week",
+  },
+  {
+    badge: "OUTCOME 3",
+    title: "Smart Spreadsheets & Data Analysis Without Formulas",
+    description: "Analyze complex Excel/CSV files, generate complex formulas automatically, find hidden trends, and build visual dashboards without learning advanced formulas.",
+    tag: "Excel & Data AI",
+  },
+  {
+    badge: "OUTCOME 4",
+    title: "High-Converting Content Creation & Design",
+    description: "Create compelling marketing copy, social media posts, visual banners, video scripts, and professional presentation decks in minutes using generative tools.",
+    tag: "Creative Workflows",
+  },
+  {
+    badge: "OUTCOME 5",
+    title: "Automate Repetitive Daily Tasks on Autopilot",
+    description: "Connect AI tools with your daily apps (WhatsApp, Gmail, Google Sheets) using simple no-code workflows that run quietly in the background.",
+    tag: "No-Code Automations",
+  },
+];
+
+
+const AUDIENCE_LIST = [
+  {
+    icon: "💼",
+    role: "Working Professionals & Corporate Employees",
+    benefit: "Eliminate repetitive tasks, draft complex emails in seconds, and prepare executive presentations faster.",
+  },
+  {
+    icon: "🎓",
+    role: "College Students & Fresh Graduates",
+    benefit: "Build a massive competitive edge for job interviews, placements, resume optimization, and academic research.",
+  },
+  {
+    icon: "🚀",
+    role: "Freelancers, Creators & Solopreneurs",
+    benefit: "Deliver client projects in half the time, create marketing assets, and scale your personal service offerings.",
+  },
+  {
+    icon: "🏢",
+    role: "Business Owners & Founders",
+    benefit: "Automate daily inquiries, analyze sales trends, and standardize team SOPs without costly software subscriptions.",
+  },
+];
+
+const FAQ_ITEMS = [
+  {
+    q: "Do I need any coding, programming, or technical background?",
+    a: "None at all! AI easy Ayi is engineered from the ground up for 100% beginners. If you can type a message on WhatsApp or search on Google, you have all the technical skills needed to master modern generative AI tools.",
+  },
+  {
+    q: "In which language will the masterclass be delivered?",
+    a: "The class is conducted in simple, clear Malayalam with English terminology. All instructions, tool walkthroughs, and prompt explanations are presented in conversational language so everyone can follow along effortlessly.",
+  },
+  {
+    q: "Why is the masterclass priced at only ₹99/-?",
+    a: "Our mission at DeepStaq Academy is democratizing AI literacy across Kerala. The ₹99 is not about revenue—it serves as a commitment token so registered seats are occupied by dedicated learners who will show up live and implement.",
+  },
+  {
+    q: "Which specific AI tools and platforms will be taught?",
+    a: "We cover the industry's most impactful productivity tools: ChatGPT 4o, Claude 3.5 Sonnet, Google Gemini, Perplexity AI for rapid research, Gamma / Canva AI for instant presentations, and Make.com for automated workflows.",
+  },
+  {
+    q: "What if I am unable to attend live on Saturday from 5:00 PM to 7:00 PM?",
+    a: "We strongly recommend attending live to participate in interactive Q&As. However, all registered candidates receive our detailed session summary, prompt templates, and step-by-step implementation blueprint in their inbox.",
+  },
+  {
+    q: "What is your refund policy?",
+    a: "We offer a 100% no-questions-asked refund guarantee. If you attend the 2-hour masterclass and feel it didn't give you practical clarity to save hours each week, simply email support@deepstaq.com and your ₹99 will be refunded promptly.",
+  },
+];
+
+export default function AiEasyAyiForm() {
   const formRef = useRef(null);
-  const [showForm, setShowForm] = useState(isDirectForm);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -111,6 +232,10 @@ export default function AiEasyAyiForm({ onlyForm = false }) {
   const [submitError, setSubmitError] = useState("");
   const [paymentNotice, setPaymentNotice] = useState(null);
   const [pendingRegId, setPendingRegId] = useState(null);
+  const [isFormHighlighted, setIsFormHighlighted] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [openFaq, setOpenFaq] = useState(null);
+  const [showStickyBar, setShowStickyBar] = useState(false);
 
   // Live countdown timer state (resets dynamically every Saturday at 5:00 PM)
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft);
@@ -124,15 +249,39 @@ export default function AiEasyAyiForm({ onlyForm = false }) {
     return () => clearInterval(timer);
   }, []);
 
-  const handleOpenForm = () => {
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 480) {
+        setShowStickyBar(true);
+      } else {
+        setShowStickyBar(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const toggleFaq = (index) => {
+    setOpenFaq((prev) => (prev === index ? null : index));
+  };
+
+  const handleScrollToForm = () => {
     setShowForm(true);
+    setIsFormHighlighted(true);
     setTimeout(() => {
       if (formRef.current) {
         formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-        const firstInput = formRef.current.querySelector('input[name="fullName"]');
-        if (firstInput) firstInput.focus();
+        const input = formRef.current.querySelector('input[name="fullName"]');
+        if (input) {
+          setTimeout(() => {
+            input.focus();
+          }, 300);
+        }
       }
-    }, 150);
+    }, 100);
+    setTimeout(() => {
+      setIsFormHighlighted(false);
+    }, 2200);
   };
 
   const handleInputChange = (e) => {
@@ -340,19 +489,17 @@ export default function AiEasyAyiForm({ onlyForm = false }) {
     setPaymentNotice(null);
     setPendingRegId(null);
     setSubmittedData(null);
-    if (!isDirectForm) {
-      setShowForm(false);
-    }
+    setShowForm(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
-    <div className="min-h-screen text-[#050521] selection:bg-[#c6ff34] selection:text-[#050521] font-sans relative overflow-x-hidden pt-28 sm:pt-36 lg:pt-40 pb-20 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#090D11] text-white selection:bg-[#c6ff34] selection:text-[#090D11] font-sans relative overflow-x-hidden pt-32 sm:pt-36 md:pt-40 lg:pt-44 pb-16 sm:pb-20 px-3 sm:px-6 lg:px-8">
       
-      {/* Background Subtle Tech Grid & Ambience (Matches Home Page) */}
-      <div className="absolute inset-0 bg-[radial-gradient(#050521_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.04] pointer-events-none -z-10" />
-      <div className="absolute top-1/4 right-0 w-[450px] h-[450px] bg-[#c6ff34]/20 rounded-full blur-[140px] pointer-events-none -translate-y-1/2 translate-x-1/3 -z-10" />
-      <div className="absolute bottom-1/4 left-0 w-[400px] h-[400px] bg-[#050521]/5 rounded-full blur-[130px] pointer-events-none translate-y-1/3 -translate-x-1/3 -z-10" />
+      {/* Background Subtle Tech Grid & Ambient Glows */}
+      <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none -z-10" />
+      <div className="absolute top-1/4 right-0 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-[#c6ff34]/10 rounded-full blur-[140px] pointer-events-none -translate-y-1/2 translate-x-1/4 -z-10" />
+      <div className="absolute bottom-1/4 left-0 w-[260px] sm:w-[420px] h-[260px] sm:h-[420px] bg-emerald-500/10 rounded-full blur-[160px] pointer-events-none translate-y-1/3 -translate-x-1/4 -z-10" />
 
       {/* MAIN CONTAINER */}
       <div className="max-w-6xl mx-auto relative z-10">
@@ -362,64 +509,66 @@ export default function AiEasyAyiForm({ onlyForm = false }) {
           {submittedData && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
               exit={{ opacity: 0, scale: 0.95 }}
-              className="max-w-xl mx-auto bg-white border-3 border-[#050521] rounded-3xl p-6 sm:p-8 shadow-[8px_8px_0px_0px_#c6ff34] mb-12 text-center"
+              className="max-w-xl mx-auto bg-[#0D1318]/90 border border-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-2xl mb-12 text-center relative overflow-hidden"
             >
-              <div className="w-16 h-16 bg-[#c6ff34] border-2 border-[#050521] rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-black text-[#050521] shadow-[3px_3px_0px_0px_#050521]">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#c6ff34] to-transparent" />
+              
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#c6ff34] rounded-full flex items-center justify-center mx-auto mb-4 text-2xl sm:text-3xl font-black text-[#090D11] shadow-[0_0_25px_rgba(198,255,52,0.5)]">
                 ✓
               </div>
               
-              <span className="inline-block px-3.5 py-1 bg-[#c6ff34] text-[#050521] border border-[#050521] text-[10px] font-black uppercase tracking-widest rounded-full mb-3">
+              <span className="inline-block px-3 py-1 bg-[#c6ff34]/15 text-[#c6ff34] border border-[#c6ff34]/30 text-[10px] font-mono font-black uppercase tracking-wider rounded-full mb-3">
                 REGISTRATION CONFIRMED • PASS ACTIVE
               </span>
 
-              <h2 className="text-2xl sm:text-3xl font-black text-[#050521] uppercase tracking-tight">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white uppercase tracking-tight">
                 Welcome to AI easy Ayi!
               </h2>
               
-              <p className="text-slate-600 text-sm mt-2 max-w-md mx-auto font-medium">
-                Thank you <strong className="text-[#050521]">{submittedData.fullName}</strong>. Your workshop seat has been reserved successfully.
+              <p className="text-slate-300 text-xs sm:text-sm mt-2 max-w-md mx-auto font-medium">
+                Thank you <strong className="text-white">{submittedData.fullName}</strong>. Your workshop seat has been reserved successfully.
               </p>
 
               {/* Receipt Info Card */}
-              <div className="bg-slate-50 border-2 border-[#050521] rounded-2xl p-4 my-6 text-left space-y-2.5 text-xs font-mono">
-                <div className="flex justify-between border-b border-slate-200 pb-2">
-                  <span className="text-slate-500 font-bold uppercase">Reference ID:</span>
-                  <span className="font-bold text-[#050521]">{submittedData.id}</span>
+              <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 my-5 sm:my-6 text-left space-y-2 text-xs font-mono">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 border-b border-white/10 pb-2">
+                  <span className="text-slate-400 font-bold uppercase text-[10px] sm:text-xs">Reference ID:</span>
+                  <span className="font-bold text-[#c6ff34]">{submittedData.id}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-200 pb-2">
-                  <span className="text-slate-500 font-bold uppercase">Payment ID:</span>
-                  <span className="font-bold text-emerald-700 truncate max-w-[200px]">{submittedData.paymentId || "Confirmed"}</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 border-b border-white/10 pb-2">
+                  <span className="text-slate-400 font-bold uppercase text-[10px] sm:text-xs">Payment ID:</span>
+                  <span className="font-bold text-emerald-400 truncate max-w-full sm:max-w-[200px]">{submittedData.paymentId || "Confirmed"}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-200 pb-2">
-                  <span className="text-slate-500 font-bold uppercase">Phone:</span>
-                  <span className="font-bold text-[#050521]">+91 {submittedData.phone}</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 border-b border-white/10 pb-2">
+                  <span className="text-slate-400 font-bold uppercase text-[10px] sm:text-xs">Phone:</span>
+                  <span className="font-bold text-white">+91 {submittedData.phone}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-200 pb-2">
-                  <span className="text-slate-500 font-bold uppercase">Place:</span>
-                  <span className="font-bold text-[#050521]">{submittedData.place}</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 border-b border-white/10 pb-2">
+                  <span className="text-slate-400 font-bold uppercase text-[10px] sm:text-xs">Place:</span>
+                  <span className="font-bold text-white">{submittedData.place}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-200 pb-2">
-                  <span className="text-slate-500 font-bold uppercase">Qualification:</span>
-                  <span className="font-bold text-[#050521]">{submittedData.qualification}</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 border-b border-white/10 pb-2">
+                  <span className="text-slate-400 font-bold uppercase text-[10px] sm:text-xs">Qualification:</span>
+                  <span className="font-bold text-white">{submittedData.qualification}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-bold uppercase">Class Schedule:</span>
-                  <span className="font-bold text-emerald-700">{eventDateFormatted} • 5:00 PM – 7:00 PM IST (2 Hrs Online Class)</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-0.5 pt-0.5">
+                  <span className="text-slate-400 font-bold uppercase text-[10px] sm:text-xs flex-shrink-0">Class Schedule:</span>
+                  <span className="font-bold text-[#c6ff34] sm:text-right break-words">{eventDateFormatted} • 5:00 PM – 7:00 PM IST (2 Hrs Online Class)</span>
                 </div>
               </div>
 
               {/* WhatsApp Community CTA */}
-              <div className="bg-emerald-50 border-2 border-[#25D366] rounded-2xl p-4 mb-5 shadow-[4px_4px_0px_0px_#25D366]">
-                <p className="text-xs text-[#050521] font-bold mb-3">
+              <div className="bg-[#25D366]/10 border border-[#25D366]/40 rounded-2xl p-4 mb-5">
+                <p className="text-xs text-white font-bold mb-3">
                   👉 Join the official candidate community for meeting links, session guides, and bonuses:
                 </p>
                 <a
                   href="https://chat.whatsapp.com/KxVV7ep74TV0GHy5SU2FXl"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-3.5 px-5 bg-[#25D366] hover:bg-[#20ba59] text-white border-2 border-[#050521] rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-[3px_3px_0px_0px_#050521] transition-transform hover:-translate-y-0.5 active:translate-y-0.5"
+                  className="w-full py-3 sm:py-3.5 px-4 sm:px-5 bg-[#25D366] hover:bg-[#20ba59] text-white rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(37,211,102,0.4)] transition-all"
                 >
                   <span>Join WhatsApp Community</span>
                   <span>→</span>
@@ -427,21 +576,21 @@ export default function AiEasyAyiForm({ onlyForm = false }) {
               </div>
 
               {/* Secondary Actions */}
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 justify-center">
                 <a
                   href={`https://wa.me/918075727195?text=${encodeURIComponent(
                     `Hi DeepStaq! I registered and paid ₹99 for AI easy Ayi (2 Hrs Online Class, 5:00 PM - 7:00 PM IST). Name: ${submittedData.fullName} (Ref: ${submittedData.id}, Payment ID: ${submittedData.paymentId || "N/A"})`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-5 py-2.5 bg-white hover:bg-slate-100 border-2 border-[#050521] rounded-xl text-xs font-bold text-[#050521] transition-all flex items-center justify-center gap-2 shadow-[2px_2px_0px_0px_#050521]"
+                  className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/20 rounded-xl text-xs font-bold text-white transition-all flex items-center justify-center gap-2"
                 >
                   <span>💬 Chat Support</span>
                 </a>
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-5 py-2.5 bg-white hover:bg-slate-100 border-2 border-[#050521]/60 hover:border-[#050521] rounded-xl text-xs font-bold text-slate-700 hover:text-[#050521] transition-all shadow-[2px_2px_0px_0px_#050521]/20"
+                  className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/15 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition-all cursor-pointer"
                 >
                   Register Another Candidate
                 </button>
@@ -450,40 +599,29 @@ export default function AiEasyAyiForm({ onlyForm = false }) {
           )}
         </AnimatePresence>
 
-        {/* 2. THE HERO INTERFACE (Matching layout with Home page style & AI Easy Ayi content) */}
+        {/* 2. THE MAIN RESPONSIVE INTERFACE */}
         {!submittedData && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start mb-16">
+          <>
+            <div className="max-w-3xl mx-auto space-y-8 mb-16 pt-3 sm:pt-6">
             
-            {/* LEFT COLUMN: Headline & Program Narrative */}
-            <div className="lg:col-span-7 space-y-6 lg:pr-6">
-              
-              {/* Top Pill - DeepStaq AI Program Badge */}
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#c6ff34] border-2 border-[#050521] shadow-[2px_2px_0px_0px_#050521] text-[#050521] text-xs sm:text-sm font-mono font-black uppercase tracking-wider"
-              >
-                <span className="w-2 h-2 rounded-full bg-[#050521] animate-pulse" />
-                <span>AI easy Ayi • 2 Hrs Online Class • 5:00 PM – 7:00 PM IST</span>
-              </motion.div>
-
-              {/* Massive Bold Headline */}
+            {/* Headline, Program Narrative & Live Schedule Card */}
+            <div className="space-y-6">
+              {/* Bold Fluid Headline */}
               <motion.h1
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#050521] leading-[1.08] tracking-tight uppercase"
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-4xl xl:text-5xl font-black text-white leading-[1.12] tracking-tight uppercase break-words"
               >
                 The Way You Work Without AI Is Holding You Back.
               </motion.h1>
 
-              {/* Body narrative with Home page styling */}
+              {/* Body narrative with fluid scaling */}
               <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="space-y-4 text-base sm:text-lg text-slate-700 font-medium leading-relaxed max-w-xl"
+                className="space-y-4 text-sm sm:text-base lg:text-base xl:text-lg text-slate-300 font-medium leading-relaxed"
               >
                 <p>
                   Spending hours on repetitive tasks? Struggling with emails, research, spreadsheets, content creation, and daily office workflows? That’s not a lack of effort; that’s working without modern AI tools.
@@ -491,449 +629,909 @@ export default function AiEasyAyiForm({ onlyForm = false }) {
                 <p>
                   In this live 2-hour online class (5:00 PM – 7:00 PM IST), discover how tools like ChatGPT, Claude, Gemini, and intelligent automation can save you 15+ hours every week.
                 </p>
-                <div className="p-4 rounded-2xl bg-white border-2 border-[#050521] shadow-[3px_3px_0px_0px_#050521] flex items-center gap-3">
-                  <span className="text-2xl">⚡</span>
-                  <p className="text-[#050521] font-bold text-sm sm:text-base">
-                    100% beginner friendly. Hands-on practical guidance in simple Malayalam & English. No coding required.
-                  </p>
-                </div>
               </motion.div>
 
-            </div>
-
-            {/* RIGHT COLUMN: The Floating Workshop Registration Card */}
-            <div className="lg:col-span-5 relative">
-              {/* Neo-brutalist Offset Accent Plate */}
-              <div className="absolute inset-0 bg-[#050521] rounded-3xl translate-x-2.5 sm:translate-x-3 translate-y-2.5 sm:translate-y-3 -z-10" />
-
+              {/* Live Event Specs & Countdown Card */}
               <motion.div
-                initial={{ opacity: 0, y: 25 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.25 }}
-                className="bg-white border-3 border-[#050521] rounded-3xl p-6 sm:p-8 shadow-xl relative"
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="bg-[#0D1318]/90 border border-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-2xl space-y-5 relative overflow-hidden"
               >
-                {/* Top Card Meta: Workshop Brand & Date */}
-                <div className="flex items-start justify-between gap-4 pb-5 border-b-2 border-slate-100">
-                  
-                  {/* Workshop Logo Badge */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#c6ff34] to-transparent" />
+
+                {/* Header & Date Badge */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-white/10">
                   <div>
-                    <span className="text-[10px] font-mono font-black tracking-widest uppercase text-slate-500 block">
-                      DEEPSTAQ PRESENTS
+                    <span className="text-[10px] font-mono font-black tracking-widest uppercase text-slate-400 block">
+                      UPCOMING LIVE CLASS
                     </span>
-                    <h3 className="text-2xl font-black text-[#050521] uppercase tracking-tight leading-none mt-1">
-                      AI easy Ayi
+                    <h3 className="text-lg sm:text-xl font-black text-white uppercase tracking-tight mt-0.5">
+                      Saturday Masterclass
                     </h3>
-                    <div className="flex items-center gap-1.5 mt-1.5">
-                      <span className="text-[11px] font-black uppercase tracking-wider text-[#050521] bg-[#c6ff34] px-2.5 py-0.5 rounded-full border border-[#050521]">
-                        2 HRS ONLINE CLASS
-                      </span>
-                    </div>
                   </div>
-
-                  {/* Date & Time Column */}
-                  <div className="text-right">
-                    <p className="text-sm font-black text-[#050521] tracking-wide">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
+                    <span className="px-2.5 py-1 rounded-lg bg-[#c6ff34]/15 text-[#c6ff34] border border-[#c6ff34]/30 font-mono font-bold text-xs">
                       {eventDateFormatted}
-                    </p>
-                    <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full bg-[#050521] text-[10px] font-mono font-bold text-[#c6ff34] uppercase tracking-wider">
-                      Live Online Class
                     </span>
-                    <p className="text-xs font-mono font-black text-[#050521] mt-1 bg-slate-100 border border-slate-300 px-2 py-0.5 rounded inline-block">
+                    <span className="px-2.5 py-1 rounded-lg bg-white/5 text-slate-200 border border-white/10 font-mono font-bold text-xs">
                       5:00 PM – 7:00 PM IST
-                    </p>
-                  </div>
-
-                </div>
-
-                {/* Schedule Quick Specs Box */}
-                <div className="grid grid-cols-2 gap-2 pt-4 pb-2 border-b-2 border-slate-100">
-                  <div className="bg-slate-50 border-2 border-[#050521] rounded-xl p-2.5 text-center shadow-[2px_2px_0px_0px_#050521]">
-                    <span className="text-[9px] uppercase font-mono font-bold text-slate-500 block">Class Duration</span>
-                    <span className="text-xs font-black text-[#050521] uppercase">2 Hrs Online Class</span>
-                  </div>
-                  <div className="bg-[#c6ff34]/25 border-2 border-[#050521] rounded-xl p-2.5 text-center shadow-[2px_2px_0px_0px_#050521]">
-                    <span className="text-[9px] uppercase font-mono font-bold text-[#050521]/70 block">Time</span>
-                    <span className="text-xs font-black text-[#050521] uppercase">5:00 PM – 7:00 PM</span>
+                    </span>
                   </div>
                 </div>
 
-                {/* Live Countdown Timer inside Hero Card */}
-                <div className="pt-4 pb-2">
-                  <div className="flex items-center justify-between text-[10px] font-mono uppercase text-slate-500 font-bold tracking-wider mb-2">
+                {/* Live Countdown Timer */}
+                <div>
+                  <div className="flex items-center justify-between text-[10px] font-mono uppercase text-slate-400 font-bold tracking-wider mb-2">
                     <span className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                      <span className="w-2 h-2 rounded-full bg-[#c6ff34] animate-ping" />
                       Class Starts In:
                     </span>
-                    <span className="text-emerald-700 font-black">Limited Passes</span>
+                    <span className="text-[#c6ff34] font-black">Limited ₹99 Passes</span>
                   </div>
-                  <div className="grid grid-cols-4 gap-2 text-center font-mono">
-                    <div className="bg-slate-50 border-2 border-[#050521] py-2 rounded-xl">
-                      <span className="text-lg sm:text-xl font-black text-[#050521] block leading-none">
+                  <div className="grid grid-cols-4 gap-1.5 sm:gap-2 text-center font-mono">
+                    <div className="bg-white/[0.04] border border-white/10 py-2 px-1 rounded-xl">
+                      <span className="text-base sm:text-lg md:text-xl font-black text-white block leading-none">
                         {timeLeft.days}
                       </span>
-                      <span className="text-[8px] uppercase tracking-wider text-slate-500 font-bold block mt-1">
+                      <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-slate-400 font-bold block mt-1">
                         Days
                       </span>
                     </div>
-                    <div className="bg-slate-50 border-2 border-[#050521] py-2 rounded-xl">
-                      <span className="text-lg sm:text-xl font-black text-[#050521] block leading-none">
+                    <div className="bg-white/[0.04] border border-white/10 py-2 px-1 rounded-xl">
+                      <span className="text-base sm:text-lg md:text-xl font-black text-white block leading-none">
                         {timeLeft.hours}
                       </span>
-                      <span className="text-[8px] uppercase tracking-wider text-slate-500 font-bold block mt-1">
+                      <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-slate-400 font-bold block mt-1">
                         Hours
                       </span>
                     </div>
-                    <div className="bg-slate-50 border-2 border-[#050521] py-2 rounded-xl">
-                      <span className="text-lg sm:text-xl font-black text-[#050521] block leading-none">
+                    <div className="bg-white/[0.04] border border-white/10 py-2 px-1 rounded-xl">
+                      <span className="text-base sm:text-lg md:text-xl font-black text-white block leading-none">
                         {timeLeft.minutes}
                       </span>
-                      <span className="text-[8px] uppercase tracking-wider text-slate-500 font-bold block mt-1">
+                      <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-slate-400 font-bold block mt-1">
                         Mins
                       </span>
                     </div>
-                    <div className="bg-slate-50 border-2 border-[#050521] py-2 rounded-xl">
-                      <span className="text-lg sm:text-xl font-black text-emerald-600 block leading-none">
+                    <div className="bg-white/[0.04] border border-white/10 py-2 px-1 rounded-xl">
+                      <span className="text-base sm:text-lg md:text-xl font-black text-[#c6ff34] block leading-none">
                         {timeLeft.seconds}
                       </span>
-                      <span className="text-[8px] uppercase tracking-wider text-slate-500 font-bold block mt-1">
+                      <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-slate-400 font-bold block mt-1">
                         Secs
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Main Action Button (Home Page Neo-Brutalist Style) */}
-                <div className="pt-3 pb-3">
+                {/* Price specs row */}
+                <div className="flex items-center justify-between text-xs font-mono pt-1">
+                  <span className="text-slate-400">Regular: <del className="text-red-400">₹899</del></span>
+                  <span className="text-[#090D11] font-black bg-[#c6ff34] px-3 py-1 rounded-full shadow-[0_0_15px_rgba(198,255,52,0.4)]">
+                    Special: ₹99/- Only
+                  </span>
+                </div>
+
+                {/* Register CTA Button */}
+                <div className="pt-2 border-t border-white/10">
                   <button
                     type="button"
-                    onClick={handleOpenForm}
-                    id="hero-register-btn"
-                    className="w-full py-4 px-6 bg-[#c6ff34] hover:bg-[#050521] text-[#050521] hover:text-[#c6ff34] rounded-2xl border-2 border-[#050521] font-black text-sm sm:text-base uppercase tracking-wider transition-all duration-150 shadow-[4px_4px_0px_0px_#050521] hover:shadow-[4px_4px_0px_0px_#c6ff34] active:translate-y-1 cursor-pointer flex items-center justify-center gap-2 group"
+                    onClick={handleScrollToForm}
+                    className="w-full py-3.5 sm:py-4 px-4 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider bg-[#c6ff34] hover:bg-[#b8f526] text-[#090D11] shadow-[0_0_25px_rgba(198,255,52,0.4)] active:translate-y-0.5 transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer group"
                   >
-                    <span>Register Now for ₹99/-</span>
-                    <span className="text-base group-hover:translate-x-1 transition-transform">→</span>
+                    <span>{showForm ? "Proceed to Registration Form Below ↓" : "Register Now for ₹99/- →"}</span>
                   </button>
-                </div>
-
-                {/* Bullets under button */}
-                <div className="space-y-1.5 text-center text-xs text-slate-600 pt-1 font-medium">
-                  <div className="flex items-center justify-center gap-3">
-                    <span>● No coding required.</span>
-                    <span>● No boring theory.</span>
-                  </div>
-                  <p className="text-[#050521] font-bold">
-                    ● Just the clearest 2 hours (5:00 PM – 7:00 PM IST) of practical AI you'll ever have.
+                  <p className="text-[10px] sm:text-[11px] text-center text-slate-400 font-mono mt-2 flex items-center justify-center gap-1.5 font-bold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff34] animate-ping inline-block" />
+                    <span>
+                      {showForm
+                        ? "Form is open below • Fill details to reserve seat"
+                        : "Instant Confirmation • Click to Open Registration Form"}
+                    </span>
                   </p>
                 </div>
-
-                {/* Pricing Guarantee Badge */}
-                <div className="mt-5 pt-4 border-t-2 border-slate-100 flex items-center justify-between text-xs font-mono">
-                  <span className="text-slate-500">Standard Pass: <del className="text-red-500">₹899</del></span>
-                  <span className="text-emerald-700 font-black">Special Offer: ₹99/-</span>
-                </div>
-
               </motion.div>
+
             </div>
 
-          </div>
-        )}
-
-        {/* 3. THE CORE REGISTRATION FORM (Revealed on Button Click) */}
-        <AnimatePresence>
-          {showForm && !submittedData && (
-            <motion.div
-              ref={formRef}
-              id="registration-form"
-              initial={{ opacity: 0, y: 35, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.98 }}
-              transition={{ duration: 0.45, ease: "easeOut" }}
-              className="max-w-2xl mx-auto relative my-8"
-            >
-              {/* Neo-brutalist Offset Accent Plate */}
-              <div className="absolute inset-0 bg-[#050521] rounded-[2rem] sm:rounded-[2.5rem] translate-x-2.5 sm:translate-x-3.5 translate-y-2.5 sm:translate-y-3.5 -z-10" />
-
-              <div className="bg-white text-[#050521] border-3 border-[#050521] rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-9 md:p-10 shadow-2xl">
-                
-                {/* Form Header */}
-                <div className="flex items-center justify-between pb-4 mb-5 border-b-2 border-slate-100">
-                  <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-[#c6ff34] border-2 border-[#050521]" />
-                    <span className="text-xs font-mono font-black uppercase text-[#050521] tracking-wider">
-                      AI easy Ayi • Official Registration
-                    </span>
-                  </div>
-
-                  {!isDirectForm && (
-                    <button
-                      type="button"
-                      onClick={() => setShowForm(false)}
-                      className="text-xs font-black uppercase text-slate-500 hover:text-[#050521] flex items-center gap-1 cursor-pointer"
-                    >
-                      <span>▲ Close Form</span>
-                    </button>
-                  )}
-                </div>
-
-                {/* Form Live Countdown Banner */}
-                <div className="bg-[#050521] text-white p-3.5 rounded-2xl mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">⚡</span>
-                    <div>
-                      <p className="text-[11px] font-black uppercase tracking-wider text-[#00e575]">
-                        2 Hrs Online Class • Special ₹99 Pass
-                      </p>
-                      <p className="text-[10px] text-slate-300 font-mono">
-                        Session: {eventDateFormatted} • 5:00 PM – 7:00 PM IST
-                      </p>
+            {/* THE REGISTRATION FORM SECTION */}
+            <AnimatePresence>
+              {showForm && (
+                <div className="relative scroll-mt-6 sm:scroll-mt-10 pt-4" ref={formRef} id="registration-form">
+                  <motion.div
+                    initial={{ opacity: 0, y: 30, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 20, scale: 0.98 }}
+                    transition={{ duration: 0.35 }}
+                    className={`bg-[#0D1318]/95 border border-white/15 backdrop-blur-2xl rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-2xl relative transition-all duration-300 ${
+                      isFormHighlighted
+                        ? "ring-2 ring-[#c6ff34] shadow-[0_0_35px_rgba(198,255,52,0.4)] scale-[1.01]"
+                        : ""
+                    }`}
+                  >
+                    {/* Form Header with Close Button */}
+                    <div className="flex items-center justify-between pb-3 sm:pb-4 mb-4 border-b border-white/10">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#c6ff34] flex-shrink-0 animate-pulse shadow-[0_0_8px_#c6ff34]" />
+                        <span className="text-[11px] sm:text-xs font-mono font-black uppercase text-white tracking-wider truncate">
+                          AI easy Ayi • Registration Form
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono font-black uppercase px-2 py-0.5 rounded bg-[#c6ff34]/20 text-[#c6ff34] border border-[#c6ff34]/40 flex-shrink-0">
+                          ₹99 PASS
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowForm(false)}
+                          title="Hide form"
+                          className="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 border border-white/15 text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+                        >
+                          <span>✕</span>
+                          <span className="hidden sm:inline text-[10px]">Close</span>
+                        </button>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-center gap-1.5 font-mono font-bold text-xs">
-                    <span className="bg-white/10 px-2 py-1 rounded-md text-[#00e575]">{timeLeft.days}d</span>
-                    <span>:</span>
-                    <span className="bg-white/10 px-2 py-1 rounded-md text-white">{timeLeft.hours}h</span>
-                    <span>:</span>
-                    <span className="bg-white/10 px-2 py-1 rounded-md text-white">{timeLeft.minutes}m</span>
-                    <span>:</span>
-                    <span className="bg-white/10 px-2 py-1 rounded-md text-amber-300">{timeLeft.seconds}s</span>
-                  </div>
-                </div>
-
-                {/* Error Banner */}
-                {submitError && (
-                  <div className="p-4 bg-red-50 border-2 border-red-500 rounded-2xl mb-6 text-red-700 text-xs font-bold">
-                    ⚠️ {submitError}
-                  </div>
-                )}
-
-                {/* Payment Notice / Warning */}
-                {paymentNotice && (
-                  <div className={`p-4 rounded-2xl mb-6 text-xs font-bold border-2 ${
-                    paymentNotice.type === "warning"
-                      ? "bg-amber-50 border-amber-500 text-amber-900"
-                      : "bg-red-50 border-red-500 text-red-900"
-                  }`}>
-                    <p>{paymentNotice.message}</p>
-                    {paymentNotice.registrationId && (
-                      <p className="mt-1 font-mono text-[10px] text-slate-600">
-                        Saved Lead Reference: {paymentNotice.registrationId}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* FORM FIELDS */}
-                <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-                  
-                  {/* 1. Full Name */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-black uppercase tracking-wider text-[#050521]">
-                      Full Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      placeholder="e.g. Rahul Sharma"
-                      className={`w-full px-4 py-3 sm:py-3.5 rounded-xl border-2 font-medium text-sm text-[#050521] placeholder-slate-400 focus:outline-none transition-all ${
-                        errors.fullName
-                          ? "border-red-500 bg-red-50/40"
-                          : "border-[#050521] bg-white focus:bg-slate-50 focus:shadow-[3px_3px_0px_0px_#050521]"
-                      }`}
-                    />
-                    {errors.fullName && (
-                      <p className="text-xs font-bold text-red-600 font-mono mt-1">
-                        ⚠ {errors.fullName}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 2. Phone Number */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-black uppercase tracking-wider text-[#050521]">
-                      Phone Number <span className="text-red-500">*</span>
-                    </label>
-                    <div className="flex">
-                      <span className="inline-flex items-center px-3.5 rounded-l-xl border-2 border-r-0 border-[#050521] bg-[#c6ff34] text-[#050521] font-mono font-black text-xs sm:text-sm select-none">
-                        +91
-                      </span>
-                      <input
-                        type="tel"
-                        name="phone"
-                        maxLength={10}
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        placeholder="10-digit mobile number"
-                        className={`w-full px-4 py-3 sm:py-3.5 rounded-r-xl border-2 font-mono font-medium text-sm text-[#050521] placeholder-slate-400 focus:outline-none transition-all ${
-                          errors.phone
-                            ? "border-red-500 bg-red-50/40"
-                            : "border-[#050521] bg-white focus:bg-slate-50 focus:shadow-[3px_3px_0px_0px_#050521]"
-                        }`}
-                      />
-                    </div>
-                    {errors.phone && (
-                      <p className="text-xs font-bold text-red-600 font-mono mt-1">
-                        ⚠ {errors.phone}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 3. Place */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-black uppercase tracking-wider text-[#050521]">
-                      Place / City <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="place"
-                      value={formData.place}
-                      onChange={handleInputChange}
-                      placeholder="e.g. Kannur, Calicut, Kochi, Bangalore"
-                      className={`w-full px-4 py-3 sm:py-3.5 rounded-xl border-2 font-medium text-sm text-[#050521] placeholder-slate-400 focus:outline-none transition-all ${
-                        errors.place
-                          ? "border-red-500 bg-red-50/40"
-                          : "border-[#050521] bg-white focus:bg-slate-50 focus:shadow-[3px_3px_0px_0px_#050521]"
-                      }`}
-                    />
-                    {errors.place && (
-                      <p className="text-xs font-bold text-red-600 font-mono mt-1">
-                        ⚠ {errors.place}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 4. Qualification */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="block text-xs font-black uppercase tracking-wider text-[#050521]">
-                        Qualification <span className="text-red-500">*</span>
-                      </label>
-                      <span className="text-[10px] font-mono text-slate-500">
-                        Select one option
+                    {/* Session Reminder Pill Banner */}
+                    <div className="bg-white/[0.04] border border-white/10 text-white p-3 rounded-xl mb-4 sm:mb-5 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-base flex-shrink-0">⚡</span>
+                        <div className="min-w-0">
+                          <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#c6ff34] truncate">
+                            2 Hrs Online Class • Live Interactive
+                          </p>
+                          <p className="text-[9px] sm:text-[10px] text-slate-400 font-mono truncate">
+                            {eventDateFormatted} • 5:00 PM – 7:00 PM IST
+                          </p>
+                        </div>
+                      </div>
+                      <span className="bg-[#c6ff34] text-[#090D11] text-[10px] font-mono font-black px-2 py-0.5 rounded-md flex-shrink-0">
+                        LIVE
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                      {QUALIFICATION_OPTIONS.map((opt, i) => {
-                        const isSelected = formData.qualification === opt;
-                        return (
-                          <button
-                            type="button"
-                            key={i}
-                            onClick={() => {
-                              setFormData((prev) => ({
-                                ...prev,
-                                qualification: opt,
-                              }));
-                              if (errors.qualification) {
-                                setErrors((prev) => ({
-                                  ...prev,
-                                  qualification: "",
-                                }));
-                              }
-                            }}
-                            className={`p-3.5 rounded-xl text-left border-2 font-bold text-xs transition-all cursor-pointer flex items-center justify-between ${
-                              isSelected
-                                ? "bg-[#050521] text-[#c6ff34] border-[#050521] shadow-[2px_2px_0px_0px_#c6ff34]"
-                                : "bg-slate-50 hover:bg-slate-100 text-[#050521] border-[#050521]/30 hover:border-[#050521]"
-                            }`}
-                          >
-                            <span>{opt}</span>
-                            <span
-                              className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${
-                                isSelected
-                                  ? "border-[#c6ff34] bg-[#c6ff34]"
-                                  : "border-[#050521]/30 bg-white"
-                              }`}
-                            >
-                              {isSelected && (
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#050521]" />
-                              )}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
+                    {/* Error Banner */}
+                    {submitError && (
+                      <div className="p-3 bg-red-950/40 border border-red-500/50 rounded-xl mb-4 text-red-300 text-xs font-bold">
+                        ⚠️ {submitError}
+                      </div>
+                    )}
 
-                    {formData.qualification === "Other" && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        className="pt-2"
-                      >
-                        <input
-                          type="text"
-                          name="customQualification"
-                          value={formData.customQualification}
-                          onChange={handleInputChange}
-                          placeholder="Please specify your qualification or profession"
-                          className="w-full px-4 py-3 rounded-xl border-2 border-[#050521] font-medium text-xs sm:text-sm text-[#050521] placeholder-slate-400 focus:outline-none focus:bg-slate-50"
-                        />
-                        {errors.customQualification && (
-                          <p className="text-xs font-bold text-red-600 mt-1 font-mono">
-                            ⚠ {errors.customQualification}
+                    {/* Payment Notice / Warning */}
+                    {paymentNotice && (
+                      <div className={`p-3 rounded-xl mb-4 text-xs font-bold border ${
+                        paymentNotice.type === "warning"
+                          ? "bg-amber-950/40 border-amber-500/50 text-amber-200"
+                          : "bg-red-950/40 border-red-500/50 text-red-200"
+                      }`}>
+                        <p>{paymentNotice.message}</p>
+                        {paymentNotice.registrationId && (
+                          <p className="mt-1 font-mono text-[10px] text-slate-400">
+                            Saved Lead Reference: {paymentNotice.registrationId}
                           </p>
                         )}
-                      </motion.div>
+                      </div>
                     )}
 
-                    {errors.qualification && (
-                      <p className="text-xs font-bold text-red-600 font-mono mt-1">
-                        ⚠ {errors.qualification}
+                    {/* FORM FIELDS */}
+                    <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4" noValidate>
+                      
+                      {/* 1. Full Name */}
+                      <div className="space-y-1">
+                        <label className="block text-[11px] sm:text-xs font-black uppercase tracking-wider text-white">
+                          Full Name <span className="text-[#c6ff34]">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="fullName"
+                          value={formData.fullName}
+                          onChange={handleInputChange}
+                          placeholder="e.g. Rahul Sharma"
+                          className={`w-full px-3.5 py-2.5 sm:py-3 rounded-xl border font-medium text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all ${
+                            errors.fullName
+                              ? "border-red-500 bg-red-950/30"
+                              : "border-white/15 bg-white/[0.04] focus:border-[#c6ff34] focus:ring-2 focus:ring-[#c6ff34]/20"
+                          }`}
+                        />
+                        {errors.fullName && (
+                          <p className="text-[11px] font-bold text-red-400 font-mono mt-0.5">
+                            ⚠ {errors.fullName}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* 2. Phone Number */}
+                      <div className="space-y-1">
+                        <label className="block text-[11px] sm:text-xs font-black uppercase tracking-wider text-white">
+                          Phone Number <span className="text-[#c6ff34]">*</span>
+                        </label>
+                        <div className="flex">
+                          <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-white/15 bg-white/10 text-[#c6ff34] font-mono font-black text-xs sm:text-sm select-none flex-shrink-0">
+                            +91
+                          </span>
+                          <input
+                            type="tel"
+                            name="phone"
+                            maxLength={10}
+                            value={formData.phone}
+                            onChange={handleInputChange}
+                            placeholder="10-digit mobile number"
+                            className={`w-full px-3.5 py-2.5 sm:py-3 rounded-r-xl border font-mono font-medium text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all ${
+                              errors.phone
+                                ? "border-red-500 bg-red-950/30"
+                                : "border-white/15 bg-white/[0.04] focus:border-[#c6ff34] focus:ring-2 focus:ring-[#c6ff34]/20"
+                            }`}
+                          />
+                        </div>
+                        {errors.phone && (
+                          <p className="text-[11px] font-bold text-red-400 font-mono mt-0.5">
+                            ⚠ {errors.phone}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* 3. Place */}
+                      <div className="space-y-1">
+                        <label className="block text-[11px] sm:text-xs font-black uppercase tracking-wider text-white">
+                          Place / City <span className="text-[#c6ff34]">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="place"
+                          value={formData.place}
+                          onChange={handleInputChange}
+                          placeholder="e.g. Kannur, Calicut, Kochi, Bangalore"
+                          className={`w-full px-3.5 py-2.5 sm:py-3 rounded-xl border font-medium text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all ${
+                            errors.place
+                              ? "border-red-500 bg-red-950/30"
+                              : "border-white/15 bg-white/[0.04] focus:border-[#c6ff34] focus:ring-2 focus:ring-[#c6ff34]/20"
+                          }`}
+                        />
+                        {errors.place && (
+                          <p className="text-[11px] font-bold text-red-400 font-mono mt-0.5">
+                            ⚠ {errors.place}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* 4. Qualification */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <label className="block text-[11px] sm:text-xs font-black uppercase tracking-wider text-white">
+                            Qualification <span className="text-[#c6ff34]">*</span>
+                          </label>
+                          <span className="text-[10px] font-mono text-slate-400">
+                            Select one
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          {QUALIFICATION_OPTIONS.map((opt, i) => {
+                            const isSelected = formData.qualification === opt;
+                            return (
+                              <button
+                                type="button"
+                                key={i}
+                                onClick={() => {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    qualification: opt,
+                                  }));
+                                  if (errors.qualification) {
+                                    setErrors((prev) => ({
+                                      ...prev,
+                                      qualification: "",
+                                    }));
+                                  }
+                                }}
+                                className={`p-2.5 sm:p-3 rounded-xl text-left border font-bold text-[11px] sm:text-xs transition-all cursor-pointer flex items-center justify-between gap-1 ${
+                                  isSelected
+                                    ? "bg-[#c6ff34] text-[#090D11] border-[#c6ff34] shadow-[0_0_15px_rgba(198,255,52,0.3)]"
+                                    : "bg-white/[0.03] hover:bg-white/[0.07] text-slate-300 border-white/10 hover:border-white/20"
+                                }`}
+                              >
+                                <span className="truncate">{opt}</span>
+                                <span
+                                  className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center flex-shrink-0 ${
+                                    isSelected
+                                      ? "border-[#090D11] bg-[#090D11]"
+                                      : "border-white/30 bg-transparent"
+                                  }`}
+                                >
+                                  {isSelected && (
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff34]" />
+                                  )}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {formData.qualification === "Other" && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            className="pt-1"
+                          >
+                            <input
+                              type="text"
+                              name="customQualification"
+                              value={formData.customQualification}
+                              onChange={handleInputChange}
+                              placeholder="Please specify your qualification or profession"
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-white/[0.04] text-white font-medium text-xs sm:text-sm placeholder-slate-500 focus:outline-none focus:border-[#c6ff34]"
+                            />
+                            {errors.customQualification && (
+                              <p className="text-[11px] font-bold text-red-400 mt-1 font-mono">
+                                ⚠ {errors.customQualification}
+                              </p>
+                            )}
+                          </motion.div>
+                        )}
+
+                        {errors.qualification && (
+                          <p className="text-[11px] font-bold text-red-400 font-mono mt-0.5">
+                            ⚠ {errors.qualification}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Submission & Payment Button */}
+                      <div className="pt-2">
+                        <button
+                          type="submit"
+                          disabled={loading}
+                          className={`w-full py-3.5 px-4 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all cursor-pointer flex items-center justify-between sm:justify-center gap-2 sm:gap-3 ${
+                            loading
+                              ? "bg-slate-700 text-slate-400 cursor-not-allowed"
+                              : "bg-[#c6ff34] hover:bg-[#b8f526] text-[#090D11] shadow-[0_0_25px_rgba(198,255,52,0.4)] active:translate-y-0.5 duration-150"
+                          }`}
+                        >
+                          {loading ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-[#090D11] border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                              <span className="truncate">
+                                {loadingStep === "saving"
+                                  ? "Saving..."
+                                  : loadingStep === "gateway"
+                                  ? "Razorpay..."
+                                  : loadingStep === "verifying"
+                                  ? "Verifying..."
+                                  : "Processing ₹99..."}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="tracking-wide sm:tracking-widest truncate">Pay & Register</span>
+                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-[#090D11] text-white flex-shrink-0">
+                                <span className="line-through text-slate-400 text-[10px] sm:text-xs font-bold font-mono">₹899</span>
+                                <span className="text-[#c6ff34] font-black text-xs sm:text-sm font-mono">₹99</span>
+                              </span>
+                              <span className="font-black text-sm sm:text-base flex-shrink-0">→</span>
+                            </>
+                          )}
+                        </button>
+                        <p className="text-center text-[10px] sm:text-[11px] font-mono font-bold text-slate-400 mt-2">
+                          🎟 Pass includes full access to 2 Hrs Online Class • 5:00 PM – 7:00 PM IST
+                        </p>
+                      </div>
+
+                    </form>
+
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>
+
+          </div>
+
+            {/* ========================================================= */}
+            {/* 1. SOCIAL PROOF & KEY METRICS BAR */}
+            {/* ========================================================= */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="max-w-5xl mx-auto mb-16 sm:mb-20"
+            >
+              <div className="bg-[#0D1318]/90 border border-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                <div className="space-y-1 border-r-0 sm:border-r border-white/10 last:border-r-0">
+                  <span className="text-2xl sm:text-3xl md:text-4xl font-black text-white block tracking-tight">
+                    12,500+
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-300 block">
+                    Learners Trained
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400 block uppercase">
+                    Across Kerala & Beyond
+                  </span>
+                </div>
+
+                <div className="space-y-1 border-r-0 lg:border-r border-white/10">
+                  <span className="text-2xl sm:text-3xl md:text-4xl font-black text-[#c6ff34] block tracking-tight">
+                    15+ Hours
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-300 block">
+                    Saved Per Week
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400 block uppercase">
+                    Average Productivity Boost
+                  </span>
+                </div>
+
+                <div className="space-y-1 border-r-0 sm:border-r border-white/10">
+                  <div className="flex items-center justify-center gap-1.5">
+                    <span className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight">
+                      4.98
+                    </span>
+                    <span className="text-amber-400 text-lg sm:text-xl">★</span>
+                  </div>
+                  <span className="text-xs sm:text-sm font-bold text-slate-300 block">
+                    Live Workshop Rating
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400 block uppercase">
+                    2,800+ Verified Reviews
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-2xl sm:text-3xl md:text-4xl font-black text-emerald-400 block tracking-tight">
+                    100%
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-300 block">
+                    No-Code Pedagogy
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400 block uppercase">
+                    Malayalam & English
+                  </span>
+                </div>
+              </div>
+
+              {/* Tools Ticker Banner */}
+              <div className="mt-4 p-3 sm:p-4 bg-white/[0.03] border border-white/10 rounded-xl sm:rounded-2xl flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm font-mono font-bold text-slate-300">
+                <span className="text-[#c6ff34] uppercase tracking-wider text-[11px] sm:text-xs">
+                  ⚡ Tools Mastered:
+                </span>
+                <span className="flex items-center gap-1">✦ ChatGPT 4o</span>
+                <span className="flex items-center gap-1">✦ Claude 3.5 Sonnet</span>
+                <span className="flex items-center gap-1">✦ Google Gemini</span>
+                <span className="flex items-center gap-1">✦ Perplexity AI</span>
+                <span className="flex items-center gap-1">✦ Make.com</span>
+                <span className="flex items-center gap-1">✦ Midjourney</span>
+              </div>
+            </motion.section>
+
+            {/* ========================================================= */}
+            {/* 2. PERSPECTIVE SHIFTS / HARD TRUTHS */}
+            {/* ========================================================= */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="max-w-5xl mx-auto mb-16 sm:mb-20 space-y-6"
+            >
+              <div className="text-center max-w-2xl mx-auto space-y-2">
+                <span className="inline-block px-3 py-1 rounded-full bg-[#c6ff34]/10 text-[#c6ff34] border border-[#c6ff34]/30 text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest">
+                  HONEST PERSPECTIVE SHIFTS
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white uppercase tracking-tight">
+                  Nobody Is Going to Tell You This. <br className="hidden sm:inline" />
+                  So We Will.
+                </h2>
+                <p className="text-slate-400 text-xs sm:text-sm md:text-base font-medium">
+                  The old manual habits are holding you back. Here is the modern reality.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                {PERSPECTIVE_SHIFTS.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-[#0D1318]/90 border border-white/10 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between space-y-4"
+                  >
+                    <div>
+                      <div className="inline-block px-2.5 py-1 rounded-lg bg-red-950/40 border border-red-800/40 text-red-300 font-mono text-[10px] font-black uppercase tracking-wider mb-2">
+                        Common Misconception
+                      </div>
+                      <h4 className="text-sm sm:text-base font-black text-slate-200 italic">
+                        {item.myth}
+                      </h4>
+                    </div>
+
+                    <div className="pt-3 border-t border-white/10 space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs font-mono font-black text-[#c6ff34] uppercase">
+                        <span>→ The Reality</span>
+                      </div>
+                      <p className="text-xs sm:text-sm font-semibold text-slate-300 leading-relaxed">
+                        {item.truth}
                       </p>
-                    )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Fixable Box */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#c6ff34]/15 border border-[#c6ff34]/40 text-center space-y-1">
+                <p className="text-xs sm:text-sm md:text-base font-black uppercase text-[#c6ff34] tracking-wide">
+                  ⚡ The Good News: Every Single One of These Bottlenecks Is 100% Solvable in 2 Hours.
+                </p>
+              </div>
+            </motion.section>
+
+            {/* ========================================================= */}
+            {/* 3. HOW IT WORKS (3-STEP ROADMAP) */}
+            {/* ========================================================= */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="max-w-5xl mx-auto mb-16 sm:mb-20 space-y-8"
+            >
+              <div className="text-center max-w-2xl mx-auto space-y-2">
+                <span className="inline-block px-3 py-1 rounded-full bg-[#c6ff34]/10 text-[#c6ff34] border border-[#c6ff34]/30 text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest">
+                  SIMPLE 3-STEP JOURNEY
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white uppercase tracking-tight">
+                  How The Masterclass Works
+                </h2>
+                <p className="text-slate-400 text-xs sm:text-sm md:text-base font-medium">
+                  Register, attend live, and start saving hours immediately. No pre-work or complex setup required.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {ROADMAP_STEPS.map((step, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-[#0D1318]/90 border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col justify-between space-y-4 relative"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="px-3 py-1 rounded-lg bg-[#c6ff34]/15 text-[#c6ff34] border border-[#c6ff34]/30 font-mono font-black text-xs uppercase tracking-wider">
+                          {step.step}
+                        </span>
+                        <span className="text-2xl">{step.icon}</span>
+                      </div>
+                      <h3 className="text-base sm:text-lg font-black text-white leading-snug">
+                        {step.title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-slate-400 font-medium leading-relaxed">
+                        {step.desc}
+                      </p>
+                    </div>
+
+                    <div className="pt-3 border-t border-white/10 flex items-center gap-1.5 text-[11px] font-mono font-bold text-[#c6ff34]">
+                      <span>✓ {step.highlight}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Inline Action Callout */}
+              <div className="bg-[#0D1318]/90 border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-7 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+                <div className="space-y-1 text-center sm:text-left">
+                  <h4 className="text-base sm:text-lg font-black uppercase text-[#c6ff34] tracking-tight">
+                    Ready to Save 15+ Hours Every Week?
+                  </h4>
+                  <p className="text-xs sm:text-sm text-slate-400 font-medium">
+                    Limited seats available for this Saturday's live cohort (5:00 PM – 7:00 PM IST).
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleScrollToForm}
+                  className="px-6 py-3.5 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider bg-[#c6ff34] hover:bg-[#b8f526] text-[#090D11] shadow-[0_0_20px_rgba(198,255,52,0.4)] active:translate-y-0.5 transition-all duration-150 flex-shrink-0 cursor-pointer"
+                >
+                  Register Now for ₹99/- →
+                </button>
+              </div>
+            </motion.section>
+
+            {/* ========================================================= */}
+            {/* 4. WORKSHOP OUTCOMES (5 CORE OUTCOMES) */}
+            {/* ========================================================= */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="max-w-5xl mx-auto mb-16 sm:mb-20 space-y-8"
+            >
+              <div className="text-center max-w-2xl mx-auto space-y-2">
+                <span className="inline-block px-3 py-1 rounded-full bg-[#c6ff34]/10 text-[#c6ff34] border border-[#c6ff34]/30 text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest">
+                  PRACTICAL LEARNING OUTCOMES
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white uppercase tracking-tight">
+                  2 Hours of High-Impact Clarity
+                </h2>
+                <p className="text-slate-400 text-xs sm:text-sm md:text-base font-medium">
+                  What to learn, what to automate, and in what exact order. No boring academic theory.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+                {WORKSHOP_OUTCOMES.map((outcome, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-[#0D1318]/90 border border-white/10 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between space-y-3"
+                  >
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2.5 py-0.5 rounded bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-[10px] font-mono font-black uppercase tracking-wider">
+                          {outcome.badge}
+                        </span>
+                        <span className="text-[10px] font-mono font-bold text-slate-400">
+                          {outcome.tag}
+                        </span>
+                      </div>
+                      <h4 className="text-base font-black text-white leading-snug">
+                        {outcome.title}
+                      </h4>
+                      <p className="text-xs sm:text-sm text-slate-400 font-medium leading-relaxed">
+                        {outcome.description}
+                      </p>
+                    </div>
+
+                    <div className="pt-3 border-t border-white/10 flex items-center gap-1.5 text-[11px] font-mono font-bold text-[#c6ff34]">
+                      <span>✓ Practical screen-share demo</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.section>
+
+            {/* ========================================================= */}
+            {/* 6. WHO THIS WORKSHOP IS FOR & WHO IT'S NOT FOR */}
+            {/* ========================================================= */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="max-w-5xl mx-auto mb-16 sm:mb-20 space-y-6"
+            >
+              <div className="text-center max-w-2xl mx-auto space-y-2">
+                <span className="inline-block px-3 py-1 rounded-full bg-[#c6ff34]/10 text-[#c6ff34] border border-[#c6ff34]/30 text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest">
+                  AUDIENCE PROFILE
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white uppercase tracking-tight">
+                  This Masterclass Is For You If...
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                {AUDIENCE_LIST.map((aud, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-[#0D1318]/90 border border-white/10 rounded-2xl p-4 sm:p-5 shadow-xl flex items-start gap-3.5"
+                  >
+                    <span className="text-2xl flex-shrink-0 mt-0.5">{aud.icon}</span>
+                    <div className="space-y-1">
+                      <h4 className="text-sm sm:text-base font-black text-white">
+                        {aud.role}
+                      </h4>
+                      <p className="text-xs sm:text-sm text-slate-400 font-medium leading-relaxed">
+                        {aud.benefit}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Warning Notice: NOT for you if */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-amber-950/30 border border-amber-500/30 flex items-start gap-3">
+                <span className="text-xl flex-shrink-0">⚠️</span>
+                <p className="text-xs sm:text-sm text-amber-200 font-bold leading-relaxed">
+                  <strong>Not For You If:</strong> You are seeking get-rich-quick hacks or passive income illusions. This is 2 hours of direct, practical, workplace-tested workflows to save real time and 10x output.
+                </p>
+              </div>
+            </motion.section>
+
+            {/* ========================================================= */}
+            {/* 7. ABOUT DEEPSTAQ ACADEMY & PERSONAL PROMISE */}
+            {/* ========================================================= */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="max-w-5xl mx-auto mb-16 sm:mb-20"
+            >
+              <div className="bg-[#0D1318]/90 border border-white/10 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#c6ff34] to-transparent" />
+                
+                <div className="relative z-10 space-y-4 max-w-3xl">
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-full bg-[#c6ff34]/15 text-[#c6ff34] border border-[#c6ff34]/30 text-[10px] font-mono font-black uppercase tracking-wider">
+                      OUR COMMITMENT
+                    </span>
+                    <span className="text-slate-400 font-mono text-xs">• DeepStaq Academy</span>
                   </div>
 
-                  {/* Submission & Payment Button */}
-                  <div className="pt-3">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className={`w-full py-4 px-6 rounded-2xl font-black text-sm uppercase tracking-wider border-2 border-[#050521] transition-all cursor-pointer flex items-center justify-center gap-3 ${
-                        loading
-                          ? "bg-slate-300 text-slate-600 cursor-not-allowed border-slate-400"
-                          : "bg-[#c6ff34] hover:bg-[#050521] text-[#050521] hover:text-[#c6ff34] shadow-[4px_4px_0px_0px_#050521] hover:shadow-[4px_4px_0px_0px_#c6ff34] active:translate-y-1 duration-150"
-                      }`}
-                    >
-                      {loading ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-[#050521] border-t-transparent rounded-full animate-spin" />
-                          <span>
-                            {loadingStep === "saving"
-                              ? "Saving Registration..."
-                              : loadingStep === "gateway"
-                              ? "Connecting to Razorpay..."
-                              : loadingStep === "verifying"
-                              ? "Confirming Payment..."
-                              : "Processing ₹99 Payment..."}
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="tracking-widest">Pay & Register</span>
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#050521] text-white">
-                            <span className="line-through text-slate-400 text-xs font-bold font-mono">₹899</span>
-                            <span className="text-[#c6ff34] font-black text-sm font-mono">₹99</span>
-                          </span>
-                          <span className="font-black text-base">→</span>
-                        </>
-                      )}
-                    </button>
-                    <p className="text-center text-[11px] font-mono font-bold text-slate-500 mt-2.5">
-                      🎟 Pass includes full access to 2 Hrs Online Class • 5:00 PM – 7:00 PM IST
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-black uppercase text-white tracking-tight leading-snug">
+                    AI Is Not Just for Techies. <br />
+                    It’s The New Universal Literacy.
+                  </h3>
+
+                  <div className="space-y-3 text-xs sm:text-sm md:text-base text-slate-300 font-normal leading-relaxed">
+                    <p>
+                      DeepStaq Academy was founded with a singular conviction: cutting-edge emerging technologies should be accessible to every ambitious professional, student, and business owner across Kerala, without gatekeeping or technical barriers.
+                    </p>
+                    <p>
+                      We don’t do pre-recorded monologues. Our Saturday live masterclass is interactive, screen-shared, practical, and taught in friendly Malayalam and English.
                     </p>
                   </div>
 
-                </form>
+                  <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs sm:text-sm font-black text-[#c6ff34] uppercase tracking-wider">
+                        100% No-Risk Money-Back Guarantee
+                      </p>
+                      <p className="text-[11px] sm:text-xs text-slate-400">
+                        Attend the 2 hours. If you feel it wasn't worth 10x the ₹99 fee, email us for an instant refund.
+                      </p>
+                    </div>
 
+                    <button
+                      type="button"
+                      onClick={handleScrollToForm}
+                      className="px-5 py-3 rounded-xl bg-[#c6ff34] hover:bg-[#b8f526] text-[#090D11] font-black text-xs uppercase tracking-wider transition-all flex-shrink-0 cursor-pointer shadow-[0_0_20px_rgba(198,255,52,0.4)]"
+                    >
+                      Reserve My Seat for ₹99 →
+                    </button>
+                  </div>
+                </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </motion.section>
+
+            {/* ========================================================= */}
+            {/* 8. FAQ ACCORDION */}
+            {/* ========================================================= */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="max-w-4xl mx-auto mb-16 sm:mb-20 space-y-6"
+            >
+              <div className="text-center max-w-2xl mx-auto space-y-2">
+                <span className="inline-block px-3 py-1 rounded-full bg-[#c6ff34]/10 text-[#c6ff34] border border-[#c6ff34]/30 text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest">
+                  GOT QUESTIONS?
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white uppercase tracking-tight">
+                  Honest Answers to Real Questions
+                </h2>
+              </div>
+
+              <div className="space-y-3">
+                {FAQ_ITEMS.map((item, idx) => {
+                  const isOpen = openFaq === idx;
+                  return (
+                    <div
+                      key={idx}
+                      className="bg-[#0D1318]/90 border border-white/10 rounded-xl sm:rounded-2xl shadow-xl overflow-hidden transition-all"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => toggleFaq(idx)}
+                        className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-3 font-black text-xs sm:text-sm md:text-base text-white cursor-pointer hover:bg-white/[0.04]"
+                      >
+                        <span>{item.q}</span>
+                        <span className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs text-[#c6ff34] flex-shrink-0">
+                          {isOpen ? "−" : "+"}
+                        </span>
+                      </button>
+
+                      <AnimatePresence>
+                        {isOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.25 }}
+                            className="px-4 pb-4 sm:px-5 sm:pb-5 pt-1 text-xs sm:text-sm text-slate-300 font-medium border-t border-white/10 leading-relaxed bg-white/[0.02]"
+                          >
+                            <p>{item.a}</p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.section>
+
+            {/* ========================================================= */}
+            {/* 9. FINAL DECISION & URGENCY BANNER */}
+            {/* ========================================================= */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="max-w-4xl mx-auto mb-16 sm:mb-20 text-center bg-[#0D1318]/90 border border-white/10 rounded-2xl sm:rounded-3xl p-6 sm:p-10 shadow-2xl space-y-5 relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#c6ff34] to-transparent" />
+
+              <span className="inline-block px-3 py-1 rounded-full bg-[#c6ff34]/15 text-[#c6ff34] border border-[#c6ff34]/30 text-[10px] sm:text-xs font-mono font-black uppercase tracking-wider">
+                SATURDAY LIVE MASTERCLASS • 5:00 PM – 7:00 PM IST
+              </span>
+
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white uppercase tracking-tight leading-tight">
+                You Can Keep Doing Things The Hard Way. <br />
+                Or Spend 2 Hours Mastering AI.
+              </h2>
+
+              <p className="text-xs sm:text-sm md:text-base text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
+                No boring theory. No fluff. Just the most practical, actionable 2 hours you’ll ever invest into your career and workflow.
+              </p>
+
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={handleScrollToForm}
+                  className="w-full sm:w-auto px-8 py-4 rounded-xl sm:rounded-2xl font-black text-sm sm:text-base uppercase tracking-wider bg-[#c6ff34] hover:bg-[#b8f526] text-[#090D11] shadow-[0_0_25px_rgba(198,255,52,0.4)] active:translate-y-0.5 transition-all duration-150 cursor-pointer"
+                >
+                  Register Now for ₹99/- Only →
+                </button>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-mono font-bold text-slate-400 pt-3 border-t border-white/10">
+                <span>🔒 100% Secure Payment</span>
+                <span>⚡ Instant Bonus Access</span>
+                <span>🤝 100% Money-Back Guarantee</span>
+              </div>
+            </motion.section>
+          </>
+        )}
 
       </div>
+
+      {/* ========================================================= */}
+      {/* 10. STICKY BOTTOM QUICK REGISTER BAR (Reveals on scroll) */}
+      {/* ========================================================= */}
+      <AnimatePresence>
+        {!submittedData && showStickyBar && (
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-0 left-0 w-full z-40 bg-[#090D11]/95 backdrop-blur-xl border-t border-white/10 py-2.5 sm:py-3 px-3 sm:px-6 shadow-2xl flex items-center justify-between gap-3"
+          >
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#c6ff34] animate-ping flex-shrink-0" />
+              <div className="min-w-0">
+                <span className="font-mono text-[11px] sm:text-xs text-white font-bold block truncate">
+                  AI easy Ayi • Saturday (5:00 PM - 7:00 PM IST)
+                </span>
+                <span className="text-[10px] text-slate-400 font-mono hidden sm:block">
+                  Limited ₹99 Passes Available
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              <div className="text-right hidden xs:block font-mono">
+                <del className="text-slate-400 text-[10px] block leading-none">₹899</del>
+                <span className="text-[#c6ff34] font-black text-xs sm:text-sm leading-none">₹99</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleScrollToForm}
+                className="py-2 px-3.5 sm:px-4 rounded-lg sm:rounded-xl font-black text-xs uppercase tracking-wider bg-[#c6ff34] hover:bg-[#b8f526] text-[#090D11] shadow-[0_0_15px_rgba(198,255,52,0.4)] transition-all cursor-pointer active:translate-y-0.5"
+              >
+                Register for ₹99 →
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

@@ -49,9 +49,7 @@ const AppLayout = ({ children }) => {
   const isHome = location.pathname === "/";
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-white text-[#050521]">
-      {!isAdmin && <Background3D />}
-      {!isAdmin && <WaterBubbles />}
+    <div className="relative min-h-screen flex flex-col bg-[#090D11] text-white font-sans selection:bg-[#c6ff34] selection:text-[#090D11]">
       {!isAdmin && <Navbar />}
       {isHome && <LeadPopupModal />}
       <div className="flex-grow">

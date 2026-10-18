@@ -343,12 +343,11 @@ export default function AiEasyAyi() {
   };
 
   return (
-    <div className="min-h-screen text-[#050521] selection:bg-[#c6ff34] selection:text-[#050521] font-sans relative overflow-x-hidden pt-28 sm:pt-36 lg:pt-40 pb-20 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#090D11] text-white selection:bg-[#c6ff34] selection:text-[#090D11] font-sans relative overflow-x-hidden pt-20 sm:pt-24 lg:pt-28 pb-16 sm:pb-20 px-3 sm:px-6 lg:px-8">
       
       {/* Background Subtle Tech Grid & Ambience */}
-      <div className="absolute inset-0 bg-[radial-gradient(#050521_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.04] pointer-events-none -z-10" />
-      <div className="absolute top-1/4 right-0 w-[450px] h-[450px] bg-[#c6ff34]/20 rounded-full blur-[140px] pointer-events-none -translate-y-1/2 translate-x-1/3 -z-10" />
-      <div className="absolute bottom-1/4 left-0 w-[400px] h-[400px] bg-[#050521]/5 rounded-full blur-[130px] pointer-events-none translate-y-1/3 -translate-x-1/3 -z-10" />
+      <div className="absolute top-1/4 right-0 w-[260px] sm:w-[500px] h-[260px] sm:h-[500px] bg-[#c6ff34]/10 rounded-full blur-[140px] pointer-events-none -translate-y-1/2 translate-x-1/4 -z-10" />
+      <div className="absolute bottom-1/4 left-0 w-[240px] sm:w-[450px] h-[240px] sm:h-[450px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none translate-y-1/3 -translate-x-1/4 -z-10" />
 
       {/* MAIN CONTAINER */}
       <div className="max-w-4xl mx-auto relative z-10">
@@ -360,62 +359,62 @@ export default function AiEasyAyi() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="max-w-xl mx-auto bg-white border-3 border-[#050521] rounded-3xl p-6 sm:p-8 shadow-[8px_8px_0px_0px_#c6ff34] mb-12 text-center"
+              className="max-w-xl mx-auto bg-[#0D1318]/90 border border-white/15 rounded-2xl sm:rounded-3xl p-5 sm:p-8 backdrop-blur-xl shadow-2xl mb-12 text-center"
             >
-              <div className="w-16 h-16 bg-[#c6ff34] border-2 border-[#050521] rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-black text-[#050521] shadow-[3px_3px_0px_0px_#050521]">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#c6ff34]/15 border border-[#c6ff34]/40 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl sm:text-3xl font-black text-[#c6ff34] shadow-[0_0_25px_rgba(198,255,52,0.3)]">
                 ✓
               </div>
               
-              <span className="inline-block px-3.5 py-1 bg-[#c6ff34] text-[#050521] border border-[#050521] text-[10px] font-black uppercase tracking-widest rounded-full mb-3">
+              <span className="inline-block px-3 py-1 bg-[#c6ff34]/10 text-[#c6ff34] border border-[#c6ff34]/30 text-[10px] font-mono font-bold uppercase tracking-wider rounded-full mb-3">
                 REGISTRATION CONFIRMED • PASS ACTIVE
               </span>
 
-              <h2 className="text-2xl sm:text-3xl font-black text-[#050521] uppercase tracking-tight">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white uppercase tracking-tight">
                 Welcome to AI easy Ayi!
               </h2>
               
-              <p className="text-slate-600 text-sm mt-2 max-w-md mx-auto font-medium">
-                Thank you <strong className="text-[#050521]">{submittedData.fullName}</strong>. Your workshop seat has been reserved successfully.
+              <p className="text-slate-300 text-xs sm:text-sm mt-2 max-w-md mx-auto font-medium">
+                Thank you <strong className="text-white">{submittedData.fullName}</strong>. Your workshop seat has been reserved successfully.
               </p>
 
-              {/* Receipt Info Card */}
-              <div className="bg-slate-50 border-2 border-[#050521] rounded-2xl p-4 my-6 text-left space-y-2.5 text-xs font-mono">
-                <div className="flex justify-between border-b border-slate-200 pb-2">
-                  <span className="text-slate-500 font-bold uppercase">Reference ID:</span>
-                  <span className="font-bold text-[#050521]">{submittedData.id}</span>
+              {/* Receipt Info Card (Responsive Rows) */}
+              <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3.5 sm:p-4 my-5 sm:my-6 text-left space-y-2 text-xs font-mono">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 border-b border-white/10 pb-2">
+                  <span className="text-slate-400 font-bold uppercase text-[10px] sm:text-xs">Reference ID:</span>
+                  <span className="font-bold text-white">{submittedData.id}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-200 pb-2">
-                  <span className="text-slate-500 font-bold uppercase">Payment ID:</span>
-                  <span className="font-bold text-emerald-700 truncate max-w-[200px]">{submittedData.paymentId || "Confirmed"}</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 border-b border-white/10 pb-2">
+                  <span className="text-slate-400 font-bold uppercase text-[10px] sm:text-xs">Payment ID:</span>
+                  <span className="font-bold text-[#c6ff34] truncate max-w-full sm:max-w-[200px]">{submittedData.paymentId || "Confirmed"}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-200 pb-2">
-                  <span className="text-slate-500 font-bold uppercase">Phone:</span>
-                  <span className="font-bold text-[#050521]">+91 {submittedData.phone}</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 border-b border-white/10 pb-2">
+                  <span className="text-slate-400 font-bold uppercase text-[10px] sm:text-xs">Phone:</span>
+                  <span className="font-bold text-white">+91 {submittedData.phone}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-200 pb-2">
-                  <span className="text-slate-500 font-bold uppercase">Place:</span>
-                  <span className="font-bold text-[#050521]">{submittedData.place}</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 border-b border-white/10 pb-2">
+                  <span className="text-slate-400 font-bold uppercase text-[10px] sm:text-xs">Place:</span>
+                  <span className="font-bold text-white">{submittedData.place}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-200 pb-2">
-                  <span className="text-slate-500 font-bold uppercase">Qualification:</span>
-                  <span className="font-bold text-[#050521]">{submittedData.qualification}</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 border-b border-white/10 pb-2">
+                  <span className="text-slate-400 font-bold uppercase text-[10px] sm:text-xs">Qualification:</span>
+                  <span className="font-bold text-white">{submittedData.qualification}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-bold uppercase">Class Schedule:</span>
-                  <span className="font-bold text-emerald-700">{eventDateFormatted} • 5:00 PM – 7:00 PM IST (2 Hrs Online Class)</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-0.5 pt-0.5">
+                  <span className="text-slate-400 font-bold uppercase text-[10px] sm:text-xs flex-shrink-0">Class Schedule:</span>
+                  <span className="font-bold text-emerald-400 sm:text-right break-words">{eventDateFormatted} • 5:00 PM – 7:00 PM IST (2 Hrs Online Class)</span>
                 </div>
               </div>
 
               {/* WhatsApp Community CTA */}
-              <div className="bg-emerald-50 border-2 border-[#25D366] rounded-2xl p-4 mb-5 shadow-[4px_4px_0px_0px_#25D366]">
-                <p className="text-xs text-[#050521] font-bold mb-3">
+              <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3.5 sm:p-4 mb-5">
+                <p className="text-xs text-emerald-300 font-bold mb-3">
                   👉 Join the official candidate community for meeting links, session guides, and bonuses:
                 </p>
                 <a
                   href="https://chat.whatsapp.com/KxVV7ep74TV0GHy5SU2FXl"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-3.5 px-5 bg-[#25D366] hover:bg-[#20ba59] text-white border-2 border-[#050521] rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-[3px_3px_0px_0px_#050521] transition-transform hover:-translate-y-0.5 active:translate-y-0.5"
+                  className="w-full py-3 sm:py-3.5 px-4 sm:px-5 bg-[#25D366] hover:bg-[#20ba59] text-white rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-transform hover:-translate-y-0.5"
                 >
                   <span>Join WhatsApp Community</span>
                   <span>→</span>
@@ -423,21 +422,21 @@ export default function AiEasyAyi() {
               </div>
 
               {/* Secondary Actions */}
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 justify-center">
                 <a
                   href={`https://wa.me/918075727195?text=${encodeURIComponent(
                     `Hi DeepStaq! I registered and paid ₹99 for AI easy Ayi (2 Hrs Online Class, 5:00 PM - 7:00 PM IST). Name: ${submittedData.fullName} (Ref: ${submittedData.id}, Payment ID: ${submittedData.paymentId || "N/A"})`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-5 py-2.5 bg-white hover:bg-slate-100 border-2 border-[#050521] rounded-xl text-xs font-bold text-[#050521] transition-all flex items-center justify-center gap-2 shadow-[2px_2px_0px_0px_#050521]"
+                  className="px-4 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs font-bold text-white transition-all flex items-center justify-center gap-2"
                 >
                   <span>💬 Chat Support</span>
                 </a>
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-5 py-2.5 bg-white hover:bg-slate-100 border-2 border-[#050521]/60 hover:border-[#050521] rounded-xl text-xs font-bold text-slate-700 hover:text-[#050521] transition-all shadow-[2px_2px_0px_0px_#050521]/20 cursor-pointer"
+                  className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition-all cursor-pointer"
                 >
                   Register Another Candidate
                 </button>
@@ -453,7 +452,6 @@ export default function AiEasyAyi() {
             {/* SECTION 1: YOUTUBE SHORTS VIDEO SECTION                   */}
             {/* ======================================================== */}
             <section className="text-center">
-              {/* YouTube Shorts Embed Player */}
               <AdVideoSection
                 videoId="r5Q_3yerIJs"
                 title="deepstack AD QR"
@@ -478,16 +476,13 @@ export default function AiEasyAyi() {
                   transition={{ duration: 0.45, ease: "easeOut" }}
                   className="max-w-2xl mx-auto relative pt-6 scroll-mt-28"
                 >
-                  {/* Neo-brutalist Offset Accent Plate */}
-                  <div className="absolute inset-0 bg-[#050521] rounded-[2rem] sm:rounded-[2.5rem] translate-x-2.5 sm:translate-x-3.5 translate-y-2.5 sm:translate-y-3.5 -z-10" />
-
-                  <div className="bg-white text-[#050521] border-3 border-[#050521] rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-9 md:p-10 shadow-2xl">
+                  <div className="bg-[#0D1318]/95 text-white border border-white/15 rounded-2xl sm:rounded-3xl p-4 sm:p-7 md:p-8 backdrop-blur-2xl shadow-2xl">
                     
                     {/* Form Header */}
-                    <div className="flex items-center justify-between pb-4 mb-5 border-b-2 border-slate-100">
+                    <div className="flex items-center justify-between pb-3 sm:pb-4 mb-4 border-b border-white/10">
                       <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full bg-[#c6ff34] border-2 border-[#050521]" />
-                        <span className="text-xs font-mono font-black uppercase text-[#050521] tracking-wider">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#c6ff34] animate-ping" />
+                        <span className="text-[11px] sm:text-xs font-mono font-bold uppercase text-white tracking-wider truncate">
                           AI easy Ayi • Official Registration
                         </span>
                       </div>
@@ -495,264 +490,264 @@ export default function AiEasyAyi() {
                       <button
                         type="button"
                         onClick={() => setShowForm(false)}
-                        className="text-xs font-black uppercase text-slate-500 hover:text-[#050521] flex items-center gap-1 cursor-pointer transition-colors"
+                        className="text-[11px] sm:text-xs font-mono font-bold uppercase text-slate-400 hover:text-white flex items-center gap-1 cursor-pointer transition-colors flex-shrink-0"
                       >
-                        <span>▲ Close Form</span>
+                        <span>▲ Close</span>
                       </button>
                     </div>
 
-                {/* Form Live Countdown Banner */}
-                <div className="bg-[#050521] text-white p-3.5 rounded-2xl mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">⚡</span>
-                    <div>
-                      <p className="text-[11px] font-black uppercase tracking-wider text-[#00e575]">
-                        2 Hrs Online Class • Special ₹99 Pass
-                      </p>
-                      <p className="text-[10px] text-slate-300 font-mono">
-                        Session: {eventDateFormatted} • 5:00 PM – 7:00 PM IST
-                      </p>
-                    </div>
-                  </div>
+                    {/* Form Live Countdown Banner */}
+                    <div className="bg-white/[0.04] border border-white/10 text-white p-3 rounded-xl mb-4 sm:mb-5 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-center sm:text-left">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-base flex-shrink-0">⚡</span>
+                        <div className="min-w-0">
+                          <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#c6ff34] truncate">
+                            2 Hrs Online Class • Special ₹99 Pass
+                          </p>
+                          <p className="text-[9px] sm:text-[10px] text-slate-400 font-mono truncate">
+                            Session: {eventDateFormatted} • 5:00 PM – 7:00 PM IST
+                          </p>
+                        </div>
+                      </div>
 
-                  <div className="flex items-center gap-1.5 font-mono font-bold text-xs">
-                    <span className="bg-white/10 px-2 py-1 rounded-md text-[#00e575]">{timeLeft.days}d</span>
-                    <span>:</span>
-                    <span className="bg-white/10 px-2 py-1 rounded-md text-white">{timeLeft.hours}h</span>
-                    <span>:</span>
-                    <span className="bg-white/10 px-2 py-1 rounded-md text-white">{timeLeft.minutes}m</span>
-                    <span>:</span>
-                    <span className="bg-white/10 px-2 py-1 rounded-md text-amber-300">{timeLeft.seconds}s</span>
-                  </div>
-                </div>
-
-                {/* Error Banner */}
-                {submitError && (
-                  <div className="p-4 bg-red-50 border-2 border-red-500 rounded-2xl mb-6 text-red-700 text-xs font-bold">
-                    ⚠️ {submitError}
-                  </div>
-                )}
-
-                {/* Payment Notice / Warning */}
-                {paymentNotice && (
-                  <div className={`p-4 rounded-2xl mb-6 text-xs font-bold border-2 ${
-                    paymentNotice.type === "warning"
-                      ? "bg-amber-50 border-amber-500 text-amber-900"
-                      : "bg-red-50 border-red-500 text-red-900"
-                  }`}>
-                    <p>{paymentNotice.message}</p>
-                    {paymentNotice.registrationId && (
-                      <p className="mt-1 font-mono text-[10px] text-slate-600">
-                        Saved Lead Reference: {paymentNotice.registrationId}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* FORM FIELDS */}
-                <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-                  
-                  {/* 1. Full Name */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-black uppercase tracking-wider text-[#050521]">
-                      Full Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      placeholder="e.g. Rahul Sharma"
-                      className={`w-full px-4 py-3 sm:py-3.5 rounded-xl border-2 font-medium text-sm text-[#050521] placeholder-slate-400 focus:outline-none transition-all ${
-                        errors.fullName
-                          ? "border-red-500 bg-red-50/40"
-                          : "border-[#050521] bg-white focus:bg-slate-50 focus:shadow-[3px_3px_0px_0px_#050521]"
-                      }`}
-                    />
-                    {errors.fullName && (
-                      <p className="text-xs font-bold text-red-600 font-mono mt-1">
-                        ⚠ {errors.fullName}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 2. Phone Number */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-black uppercase tracking-wider text-[#050521]">
-                      Phone Number <span className="text-red-500">*</span>
-                    </label>
-                    <div className="flex">
-                      <span className="inline-flex items-center px-3.5 rounded-l-xl border-2 border-r-0 border-[#050521] bg-[#c6ff34] text-[#050521] font-mono font-black text-xs sm:text-sm select-none">
-                        +91
-                      </span>
-                      <input
-                        type="tel"
-                        name="phone"
-                        maxLength={10}
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        placeholder="10-digit mobile number"
-                        className={`w-full px-4 py-3 sm:py-3.5 rounded-r-xl border-2 font-mono font-medium text-sm text-[#050521] placeholder-slate-400 focus:outline-none transition-all ${
-                          errors.phone
-                            ? "border-red-500 bg-red-50/40"
-                            : "border-[#050521] bg-white focus:bg-slate-50 focus:shadow-[3px_3px_0px_0px_#050521]"
-                        }`}
-                      />
-                    </div>
-                    {errors.phone && (
-                      <p className="text-xs font-bold text-red-600 font-mono mt-1">
-                        ⚠ {errors.phone}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 3. Place */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-black uppercase tracking-wider text-[#050521]">
-                      Place / City <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="place"
-                      value={formData.place}
-                      onChange={handleInputChange}
-                      placeholder="e.g. Kannur, Calicut, Kochi, Bangalore"
-                      className={`w-full px-4 py-3 sm:py-3.5 rounded-xl border-2 font-medium text-sm text-[#050521] placeholder-slate-400 focus:outline-none transition-all ${
-                        errors.place
-                          ? "border-red-500 bg-red-50/40"
-                          : "border-[#050521] bg-white focus:bg-slate-50 focus:shadow-[3px_3px_0px_0px_#050521]"
-                      }`}
-                    />
-                    {errors.place && (
-                      <p className="text-xs font-bold text-red-600 font-mono mt-1">
-                        ⚠ {errors.place}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 4. Qualification */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="block text-xs font-black uppercase tracking-wider text-[#050521]">
-                        Qualification <span className="text-red-500">*</span>
-                      </label>
-                      <span className="text-[10px] font-mono text-slate-500">
-                        Select one option
-                      </span>
+                      <div className="flex items-center gap-1 font-mono font-bold text-xs flex-shrink-0">
+                        <span className="bg-white/10 px-1.5 py-0.5 rounded text-[#c6ff34]">{timeLeft.days}d</span>
+                        <span>:</span>
+                        <span className="bg-white/10 px-1.5 py-0.5 rounded text-white">{timeLeft.hours}h</span>
+                        <span>:</span>
+                        <span className="bg-white/10 px-1.5 py-0.5 rounded text-white">{timeLeft.minutes}m</span>
+                        <span>:</span>
+                        <span className="bg-white/10 px-1.5 py-0.5 rounded text-amber-300">{timeLeft.seconds}s</span>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                      {QUALIFICATION_OPTIONS.map((opt, i) => {
-                        const isSelected = formData.qualification === opt;
-                        return (
-                          <button
-                            type="button"
-                            key={i}
-                            onClick={() => {
-                              setFormData((prev) => ({
-                                ...prev,
-                                qualification: opt,
-                              }));
-                              if (errors.qualification) {
-                                setErrors((prev) => ({
-                                  ...prev,
-                                  qualification: "",
-                                }));
-                              }
-                            }}
-                            className={`p-3.5 rounded-xl text-left border-2 font-bold text-xs transition-all cursor-pointer flex items-center justify-between ${
-                              isSelected
-                                ? "bg-[#050521] text-[#c6ff34] border-[#050521] shadow-[2px_2px_0px_0px_#c6ff34]"
-                                : "bg-slate-50 hover:bg-slate-100 text-[#050521] border-[#050521]/30 hover:border-[#050521]"
-                            }`}
-                          >
-                            <span>{opt}</span>
-                            <span
-                              className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${
-                                isSelected
-                                  ? "border-[#c6ff34] bg-[#c6ff34]"
-                                  : "border-[#050521]/30 bg-white"
-                              }`}
-                            >
-                              {isSelected && (
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#050521]" />
-                              )}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
+                    {/* Error Banner */}
+                    {submitError && (
+                      <div className="p-3 bg-red-500/15 border border-red-500/40 rounded-xl mb-4 text-red-300 text-xs font-bold">
+                        ⚠️ {submitError}
+                      </div>
+                    )}
 
-                    {formData.qualification === "Other" && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        className="pt-2"
-                      >
-                        <input
-                          type="text"
-                          name="customQualification"
-                          value={formData.customQualification}
-                          onChange={handleInputChange}
-                          placeholder="Please specify your qualification or profession"
-                          className="w-full px-4 py-3 rounded-xl border-2 border-[#050521] font-medium text-xs sm:text-sm text-[#050521] placeholder-slate-400 focus:outline-none focus:bg-slate-50"
-                        />
-                        {errors.customQualification && (
-                          <p className="text-xs font-bold text-red-600 mt-1 font-mono">
-                            ⚠ {errors.customQualification}
+                    {/* Payment Notice / Warning */}
+                    {paymentNotice && (
+                      <div className={`p-3 rounded-xl mb-4 text-xs font-bold border ${
+                        paymentNotice.type === "warning"
+                          ? "bg-amber-500/15 border-amber-500/40 text-amber-300"
+                          : "bg-red-500/15 border-red-500/40 text-red-300"
+                      }`}>
+                        <p>{paymentNotice.message}</p>
+                        {paymentNotice.registrationId && (
+                          <p className="mt-1 font-mono text-[10px] text-slate-400">
+                            Saved Lead Reference: {paymentNotice.registrationId}
                           </p>
                         )}
-                      </motion.div>
+                      </div>
                     )}
 
-                    {errors.qualification && (
-                      <p className="text-xs font-bold text-red-600 font-mono mt-1">
-                        ⚠ {errors.qualification}
-                      </p>
-                    )}
-                  </div>
+                    {/* FORM FIELDS */}
+                    <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4" noValidate>
+                      
+                      {/* 1. Full Name */}
+                      <div className="space-y-1">
+                        <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-300">
+                          Full Name <span className="text-[#c6ff34]">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="fullName"
+                          value={formData.fullName}
+                          onChange={handleInputChange}
+                          placeholder="e.g. Rahul Sharma"
+                          className={`w-full px-3.5 py-2.5 sm:py-3 rounded-xl border font-medium text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all ${
+                            errors.fullName
+                              ? "border-red-500 bg-red-500/10"
+                              : "border-white/15 bg-white/[0.04] focus:border-[#c6ff34] focus:ring-2 focus:ring-[#c6ff34]/20"
+                          }`}
+                        />
+                        {errors.fullName && (
+                          <p className="text-[11px] font-bold text-red-400 font-mono mt-0.5">
+                            ⚠ {errors.fullName}
+                          </p>
+                        )}
+                      </div>
 
-                  {/* Submission & Payment Button */}
-                  <div className="pt-3">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className={`w-full py-4 px-6 rounded-2xl font-black text-sm uppercase tracking-wider border-2 border-[#050521] transition-all cursor-pointer flex items-center justify-center gap-3 ${
-                        loading
-                          ? "bg-slate-300 text-slate-600 cursor-not-allowed border-slate-400"
-                          : "bg-[#c6ff34] hover:bg-[#050521] text-[#050521] hover:text-[#c6ff34] shadow-[4px_4px_0px_0px_#050521] hover:shadow-[4px_4px_0px_0px_#c6ff34] active:translate-y-1 duration-150"
-                      }`}
-                    >
-                      {loading ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-[#050521] border-t-transparent rounded-full animate-spin" />
-                          <span>
-                            {loadingStep === "saving"
-                              ? "Saving Registration..."
-                              : loadingStep === "gateway"
-                              ? "Connecting to Razorpay..."
-                              : loadingStep === "verifying"
-                              ? "Confirming Payment..."
-                              : "Processing ₹99 Payment..."}
+                      {/* 2. Phone Number */}
+                      <div className="space-y-1">
+                        <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-300">
+                          Phone Number <span className="text-[#c6ff34]">*</span>
+                        </label>
+                        <div className="flex">
+                          <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-white/15 bg-white/10 text-white font-mono font-bold text-xs sm:text-sm select-none flex-shrink-0">
+                            +91
                           </span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="tracking-widest">Pay & Register</span>
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#050521] text-white">
-                            <span className="line-through text-slate-400 text-xs font-bold font-mono">₹899</span>
-                            <span className="text-[#c6ff34] font-black text-sm font-mono">₹99</span>
-                          </span>
-                          <span className="font-black text-base">→</span>
-                        </>
-                      )}
-                    </button>
-                    <p className="text-center text-[11px] font-mono font-bold text-slate-500 mt-2.5">
-                      🎟 Pass includes full access to 2 Hrs Online Class • 5:00 PM – 7:00 PM IST
-                    </p>
-                  </div>
+                          <input
+                            type="tel"
+                            name="phone"
+                            maxLength={10}
+                            value={formData.phone}
+                            onChange={handleInputChange}
+                            placeholder="10-digit mobile number"
+                            className={`w-full px-3.5 py-2.5 sm:py-3 rounded-r-xl border font-mono font-medium text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all ${
+                              errors.phone
+                                ? "border-red-500 bg-red-500/10"
+                                : "border-white/15 bg-white/[0.04] focus:border-[#c6ff34] focus:ring-2 focus:ring-[#c6ff34]/20"
+                            }`}
+                          />
+                        </div>
+                        {errors.phone && (
+                          <p className="text-[11px] font-bold text-red-400 font-mono mt-0.5">
+                            ⚠ {errors.phone}
+                          </p>
+                        )}
+                      </div>
 
-                </form>
+                      {/* 3. Place */}
+                      <div className="space-y-1">
+                        <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-300">
+                          Place / City <span className="text-[#c6ff34]">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="place"
+                          value={formData.place}
+                          onChange={handleInputChange}
+                          placeholder="e.g. Kannur, Calicut, Kochi, Bangalore"
+                          className={`w-full px-3.5 py-2.5 sm:py-3 rounded-xl border font-medium text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all ${
+                            errors.place
+                              ? "border-red-500 bg-red-500/10"
+                              : "border-white/15 bg-white/[0.04] focus:border-[#c6ff34] focus:ring-2 focus:ring-[#c6ff34]/20"
+                          }`}
+                        />
+                        {errors.place && (
+                          <p className="text-[11px] font-bold text-red-400 font-mono mt-0.5">
+                            ⚠ {errors.place}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* 4. Qualification */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-300">
+                            Qualification <span className="text-[#c6ff34]">*</span>
+                          </label>
+                          <span className="text-[10px] font-mono text-slate-400">
+                            Select one
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          {QUALIFICATION_OPTIONS.map((opt, i) => {
+                            const isSelected = formData.qualification === opt;
+                            return (
+                              <button
+                                type="button"
+                                key={i}
+                                onClick={() => {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    qualification: opt,
+                                  }));
+                                  if (errors.qualification) {
+                                    setErrors((prev) => ({
+                                      ...prev,
+                                      qualification: "",
+                                    }));
+                                  }
+                                }}
+                                className={`p-2.5 sm:p-3 rounded-xl text-left border font-bold text-[11px] sm:text-xs transition-all cursor-pointer flex items-center justify-between gap-1 ${
+                                  isSelected
+                                    ? "bg-[#c6ff34] text-[#090D11] border-[#c6ff34] shadow-[0_0_15px_rgba(198,255,52,0.3)]"
+                                    : "bg-white/[0.03] hover:bg-white/[0.06] text-slate-300 border-white/10 hover:border-white/25"
+                                }`}
+                              >
+                                <span className="truncate">{opt}</span>
+                                <span
+                                  className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center flex-shrink-0 ${
+                                    isSelected
+                                      ? "border-[#090D11] bg-[#090D11]"
+                                      : "border-white/30 bg-transparent"
+                                  }`}
+                                >
+                                  {isSelected && (
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff34]" />
+                                  )}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {formData.qualification === "Other" && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            className="pt-1"
+                          >
+                            <input
+                              type="text"
+                              name="customQualification"
+                              value={formData.customQualification}
+                              onChange={handleInputChange}
+                              placeholder="Please specify your qualification or profession"
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-white/[0.04] font-medium text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#c6ff34]"
+                            />
+                            {errors.customQualification && (
+                              <p className="text-[11px] font-bold text-red-400 mt-1 font-mono">
+                                ⚠ {errors.customQualification}
+                              </p>
+                            )}
+                          </motion.div>
+                        )}
+
+                        {errors.qualification && (
+                          <p className="text-[11px] font-bold text-red-400 font-mono mt-0.5">
+                            ⚠ {errors.qualification}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Submission & Payment Button */}
+                      <div className="pt-2">
+                        <button
+                          type="submit"
+                          disabled={loading}
+                          className={`w-full py-3.5 px-4 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all cursor-pointer flex items-center justify-between sm:justify-center gap-2 sm:gap-3 ${
+                            loading
+                              ? "bg-white/10 text-slate-500 cursor-not-allowed border border-white/10"
+                              : "bg-[#c6ff34] text-[#090D11] hover:shadow-[0_0_25px_rgba(198,255,52,0.4)] hover:scale-[1.01] active:scale-[0.99] duration-150"
+                          }`}
+                        >
+                          {loading ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-[#090D11] border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                              <span className="truncate">
+                                {loadingStep === "saving"
+                                  ? "Saving Registration..."
+                                  : loadingStep === "gateway"
+                                  ? "Connecting to Razorpay..."
+                                  : loadingStep === "verifying"
+                                  ? "Confirming Payment..."
+                                  : "Processing ₹99 Payment..."}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="tracking-wide sm:tracking-widest truncate">Pay & Register</span>
+                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-[#090D11] text-white flex-shrink-0">
+                                <span className="line-through text-slate-400 text-[10px] sm:text-xs font-bold font-mono">₹899</span>
+                                <span className="text-[#c6ff34] font-black text-xs sm:text-sm font-mono">₹99</span>
+                              </span>
+                              <span className="font-black text-sm sm:text-base flex-shrink-0">→</span>
+                            </>
+                          )}
+                        </button>
+                        <p className="text-center text-[10px] sm:text-[11px] font-mono font-medium text-slate-400 mt-2">
+                          🎟 Pass includes full access to 2 Hrs Online Class • 5:00 PM – 7:00 PM IST
+                        </p>
+                      </div>
+
+                    </form>
 
                   </div>
                 </motion.section>

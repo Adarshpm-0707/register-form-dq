@@ -4,7 +4,20 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
+        sans: ["Outfit", "Plus Jakarta Sans", "Inter", "sans-serif"],
+        outfit: ["Outfit", "sans-serif"],
+        jakarta: ["Plus Jakarta Sans", "sans-serif"],
+        mono: ["Space Mono", "monospace"],
         inter: ["Inter", "sans-serif"],
+      },
+      colors: {
+        neon: {
+          lime: "#c6ff34",
+          emerald: "#10b981",
+          dark: "#090D11",
+          surface: "#0e151c",
+          border: "rgba(255, 255, 255, 0.08)",
+        },
       },
       animation: {
         "fade-in": "fadeIn 0.5s ease-in-out",

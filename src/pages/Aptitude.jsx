@@ -360,19 +360,23 @@ export default function Aptitude() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#050521] pt-28 pb-20 px-4 sm:px-8 font-sans relative">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-[#090D11] text-white pt-28 pb-20 px-4 sm:px-8 font-sans relative overflow-hidden">
+      {/* Background glow highlights */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-[#c6ff34]/10 rounded-full blur-[140px] pointer-events-none"></div>
+
+      <div className="max-w-4xl mx-auto relative z-10">
 
         {/* Header Title */}
         <div className="text-center mb-10 space-y-4">
-          <span className="inline-block bg-[#c6ff34] text-[#050521] border-2 border-[#050521] px-5 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-[3px_3px_0px_0px_#050521]">
-            DeepStaq Assessment
+          <span className="inline-flex items-center gap-2 bg-[#c6ff34]/10 text-[#c6ff34] border border-[#c6ff34]/30 px-5 py-1.5 rounded-full text-xs font-mono font-bold tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff34] animate-ping" />
+            DEEPSTAQ ASSESSMENT
           </span>
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black uppercase tracking-tighter leading-none">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black uppercase tracking-tight text-white leading-tight">
             AI Interest & Aptitude<br />
-            <span className="text-stroke-dark">Assessment.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#c6ff34] to-emerald-400">Assessment.</span>
           </h1>
-          <p className="text-slate-600 font-mono text-sm max-w-xl mx-auto">
+          <p className="text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
             Evaluate your analytical reasoning, logical series, and core AI concepts in 15 questions (20-Minute Timer).
           </p>
         </div>
@@ -385,21 +389,21 @@ export default function Aptitude() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="bg-slate-50 border-2 border-[#050521] rounded-3xl p-6 sm:p-10 shadow-[8px_8px_0px_0px_#050521]"
+              className="bg-[#0D1318]/90 border border-white/10 rounded-3xl p-6 sm:p-10 backdrop-blur-xl shadow-2xl relative"
             >
-              <div className="mb-8 border-b-2 border-[#050521]/10 pb-4">
-                <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-[#050521]">
+              <div className="mb-8 border-b border-white/10 pb-4">
+                <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white">
                   Step 1: Enter Your Details
                 </h2>
-                <p className="text-xs text-slate-500 font-mono mt-1">
+                <p className="text-xs text-slate-400 font-mono mt-1">
                   Please provide your contact info before starting the test.
                 </p>
               </div>
 
               <form onSubmit={handleStartTest} className="space-y-6">
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-wider mb-2 text-[#050521]">
-                    Full Name <span className="text-red-500">*</span>
+                  <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-slate-300">
+                    Full Name <span className="text-[#c6ff34]">*</span>
                   </label>
                   <input
                     type="text"
@@ -407,19 +411,19 @@ export default function Aptitude() {
                     value={formData.fullName}
                     onChange={handleInputChange}
                     placeholder="Name"
-                    className={`w-full bg-white border-2 ${
-                      formErrors.fullName ? "border-red-500" : "border-[#050521]"
-                    } rounded-xl px-4 py-3.5 text-sm font-bold outline-none focus:bg-[#c6ff34]/10 transition-all`}
+                    className={`w-full bg-white/[0.04] border ${
+                      formErrors.fullName ? "border-red-500" : "border-white/15 focus:border-[#c6ff34]"
+                    } rounded-xl px-4 py-3.5 text-sm font-semibold text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-[#c6ff34]/20 transition-all`}
                   />
                   {formErrors.fullName && (
-                    <p className="text-xs text-red-500 font-bold mt-1.5">{formErrors.fullName}</p>
+                    <p className="text-xs text-red-400 font-medium mt-1.5">{formErrors.fullName}</p>
                   )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-wider mb-2 text-[#050521]">
-                      Email Address <span className="text-red-500">*</span>
+                    <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-slate-300">
+                      Email Address <span className="text-[#c6ff34]">*</span>
                     </label>
                     <input
                       type="email"
@@ -427,18 +431,18 @@ export default function Aptitude() {
                       value={formData.email}
                       onChange={handleInputChange}
                       placeholder="E mail"
-                      className={`w-full bg-white border-2 ${
-                        formErrors.email ? "border-red-500" : "border-[#050521]"
-                      } rounded-xl px-4 py-3.5 text-sm font-bold outline-none focus:bg-[#c6ff34]/10 transition-all`}
+                      className={`w-full bg-white/[0.04] border ${
+                        formErrors.email ? "border-red-500" : "border-white/15 focus:border-[#c6ff34]"
+                      } rounded-xl px-4 py-3.5 text-sm font-semibold text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-[#c6ff34]/20 transition-all`}
                     />
                     {formErrors.email && (
-                      <p className="text-xs text-red-500 font-bold mt-1.5">{formErrors.email}</p>
+                      <p className="text-xs text-red-400 font-medium mt-1.5">{formErrors.email}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-wider mb-2 text-[#050521]">
-                      Phone Number (WhatsApp) <span className="text-red-500">*</span>
+                    <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-slate-300">
+                      Phone Number (WhatsApp) <span className="text-[#c6ff34]">*</span>
                     </label>
                     <input
                       type="tel"
@@ -446,20 +450,20 @@ export default function Aptitude() {
                       value={formData.phone}
                       onChange={handleInputChange}
                       placeholder="Phone Number"
-                      className={`w-full bg-white border-2 ${
-                        formErrors.phone ? "border-red-500" : "border-[#050521]"
-                      } rounded-xl px-4 py-3.5 text-sm font-bold outline-none focus:bg-[#c6ff34]/10 transition-all`}
+                      className={`w-full bg-white/[0.04] border ${
+                        formErrors.phone ? "border-red-500" : "border-white/15 focus:border-[#c6ff34]"
+                      } rounded-xl px-4 py-3.5 text-sm font-semibold text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-[#c6ff34]/20 transition-all`}
                     />
                     {formErrors.phone && (
-                      <p className="text-xs text-red-500 font-bold mt-1.5">{formErrors.phone}</p>
+                      <p className="text-xs text-red-400 font-medium mt-1.5">{formErrors.phone}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-wider mb-2 text-[#050521]">
-                      Place / Location <span className="text-red-500">*</span>
+                    <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-slate-300">
+                      Place / Location <span className="text-[#c6ff34]">*</span>
                     </label>
                     <input
                       type="text"
@@ -467,17 +471,17 @@ export default function Aptitude() {
                       value={formData.place}
                       onChange={handleInputChange}
                       placeholder="Place / Location"
-                      className={`w-full bg-white border-2 ${
-                        formErrors.place ? "border-red-500" : "border-[#050521]"
-                      } rounded-xl px-4 py-3.5 text-sm font-bold outline-none focus:bg-[#c6ff34]/10 transition-all`}
+                      className={`w-full bg-white/[0.04] border ${
+                        formErrors.place ? "border-red-500" : "border-white/15 focus:border-[#c6ff34]"
+                      } rounded-xl px-4 py-3.5 text-sm font-semibold text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-[#c6ff34]/20 transition-all`}
                     />
                     {formErrors.place && (
-                      <p className="text-xs text-red-500 font-bold mt-1.5">{formErrors.place}</p>
+                      <p className="text-xs text-red-400 font-medium mt-1.5">{formErrors.place}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-wider mb-2 text-[#050521]">
+                    <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-slate-300">
                       College / Institution / Organization (Optional)
                     </label>
                     <input
@@ -486,7 +490,7 @@ export default function Aptitude() {
                       value={formData.institution}
                       onChange={handleInputChange}
                       placeholder="e.g. NIT Calicut / Working Professional"
-                      className="w-full bg-white border-2 border-[#050521] rounded-xl px-4 py-3.5 text-sm font-bold outline-none focus:bg-[#c6ff34]/10 transition-all"
+                      className="w-full bg-white/[0.04] border border-white/15 focus:border-[#c6ff34] rounded-xl px-4 py-3.5 text-sm font-semibold text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-[#c6ff34]/20 transition-all"
                     />
                   </div>
                 </div>
@@ -494,7 +498,7 @@ export default function Aptitude() {
                 <div className="pt-4">
                   <button
                     type="submit"
-                    className="w-full py-4 bg-[#050521] text-[#c6ff34] font-black text-sm uppercase tracking-widest rounded-xl shadow-[5px_5px_0px_0px_#c6ff34] active:translate-y-1 active:shadow-none hover:bg-[#c6ff34] hover:text-[#050521] hover:border-2 hover:border-[#050521] transition-all duration-200"
+                    className="w-full py-4 bg-[#c6ff34] text-[#090D11] font-black text-sm uppercase tracking-widest rounded-xl hover:shadow-[0_0_30px_rgba(198,255,52,0.4)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
                   >
                     Start Assessment (15 Questions · 20 Mins) →
                   </button>
@@ -513,20 +517,20 @@ export default function Aptitude() {
               className="space-y-6"
             >
               {/* Progress & 20-Minute Timer Bar */}
-              <div className="bg-[#050521] text-white border-2 border-[#050521] rounded-2xl p-4 sm:p-6 shadow-[6px_6px_0px_0px_#c6ff34]">
+              <div className="bg-[#0D1318]/90 text-white border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-xl">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                   <div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-[#c6ff34] block">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[#c6ff34] block font-mono">
                       Candidate: {formData.fullName}
                     </span>
-                    <span className="text-xs font-mono text-slate-300">
+                    <span className="text-xs font-mono text-slate-400">
                       Answered: {answeredCount} / {aptitudeQuestions.length} Questions
                     </span>
                   </div>
 
                   {/* 20-Minute Countdown Timer */}
-                  <div className={`flex items-center gap-2 font-mono font-black text-sm px-4 py-2 rounded-xl border-2 transition-all ${
-                    timeLeft <= 180 ? "bg-red-500 text-white border-white animate-pulse" : "bg-[#c6ff34] text-[#050521] border-[#050521]"
+                  <div className={`flex items-center gap-2 font-mono font-black text-sm px-4 py-2 rounded-xl transition-all ${
+                    timeLeft <= 180 ? "bg-red-500/20 text-red-400 border border-red-500/50 animate-pulse" : "bg-[#c6ff34] text-[#090D11]"
                   }`}>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -536,7 +540,7 @@ export default function Aptitude() {
                 </div>
 
                 {/* Progress Bar */}
-                <div className="w-full bg-white/20 h-2.5 rounded-full overflow-hidden mb-5">
+                <div className="w-full bg-white/10 h-2.5 rounded-full overflow-hidden mb-5">
                   <div
                     className="bg-[#c6ff34] h-full transition-all duration-300 rounded-full"
                     style={{ width: `${progressPct}%` }}
@@ -554,10 +558,10 @@ export default function Aptitude() {
                         onClick={() => setCurrentQIndex(idx)}
                         className={`w-8 h-8 rounded-lg text-xs font-black transition-all border ${
                           isCurrent
-                            ? "bg-[#c6ff34] text-[#050521] border-[#c6ff34] scale-110 shadow-md"
+                            ? "bg-[#c6ff34] text-[#090D11] border-[#c6ff34] scale-110 shadow-md"
                             : isSelected
-                            ? "bg-white text-[#050521] border-white"
-                            : "bg-white/10 text-white/60 border-white/10 hover:bg-white/20"
+                            ? "bg-white/20 text-white border-white/30"
+                            : "bg-white/5 text-white/50 border-white/10 hover:bg-white/10"
                         }`}
                       >
                         {idx + 1}
@@ -568,9 +572,9 @@ export default function Aptitude() {
               </div>
 
               {/* Active Question Box */}
-              <div className="bg-white border-2 border-[#050521] rounded-3xl p-6 sm:p-10 shadow-[8px_8px_0px_0px_#050521]">
-                <div className="flex justify-between items-center mb-6 pb-4 border-b-2 border-[#050521]/10">
-                  <span className="text-xs font-black uppercase tracking-widest text-[#050521] bg-[#c6ff34] px-3 py-1 rounded-md border border-[#050521]">
+              <div className="bg-[#0D1318]/90 border border-white/10 rounded-3xl p-6 sm:p-10 backdrop-blur-xl shadow-2xl">
+                <div className="flex justify-between items-center mb-6 pb-4 border-b border-white/10">
+                  <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34] bg-[#c6ff34]/10 px-3 py-1 rounded-md border border-[#c6ff34]/30">
                     Question {currentQIndex + 1} of {aptitudeQuestions.length}
                   </span>
                   <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
@@ -578,11 +582,11 @@ export default function Aptitude() {
                   </span>
                 </div>
 
-                <h3 className="text-lg sm:text-2xl font-black text-[#050521] leading-tight mb-8">
+                <h3 className="text-lg sm:text-2xl font-black text-white leading-tight mb-8">
                   {currentQ.question}
                 </h3>
 
-                {/* Options List - Locked once selected ("select the ans lock it do not chnage it") */}
+                {/* Options List */}
                 <div className="space-y-4 mb-8">
                   {currentQ.options.map((opt) => {
                     const isChecked = userAnswers[currentQ.id] === opt.key;
@@ -593,20 +597,20 @@ export default function Aptitude() {
                         type="button"
                         disabled={isLocked}
                         onClick={() => handleSelectOption(currentQ.id, opt.key)}
-                        className={`w-full text-left p-4 sm:p-5 rounded-2xl border-2 transition-all flex items-center justify-between gap-4 ${
+                        className={`w-full text-left p-4 sm:p-5 rounded-2xl border transition-all flex items-center justify-between gap-4 ${
                           isChecked
-                            ? "bg-[#050521] text-white border-[#050521] shadow-[4px_4px_0px_0px_#c6ff34] translate-x-1"
+                            ? "bg-[#c6ff34]/15 text-white border-[#c6ff34] shadow-[0_0_20px_rgba(198,255,52,0.15)] translate-x-1"
                             : isLocked
-                            ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
-                            : "bg-slate-50 text-[#050521] border-[#050521]/20 hover:border-[#050521] hover:bg-slate-100"
+                            ? "bg-white/[0.02] text-slate-500 border-white/5 cursor-not-allowed"
+                            : "bg-white/[0.03] text-slate-200 border-white/10 hover:border-white/30 hover:bg-white/[0.06]"
                         }`}
                       >
                         <div className="flex items-start gap-4">
                           <span
                             className={`w-8 h-8 rounded-xl font-black text-xs flex items-center justify-center shrink-0 transition-colors border ${
                               isChecked
-                                ? "bg-[#c6ff34] text-[#050521] border-[#c6ff34]"
-                                : "bg-white text-[#050521] border-[#050521]/20"
+                                ? "bg-[#c6ff34] text-[#090D11] border-[#c6ff34]"
+                                : "bg-white/10 text-slate-300 border-white/10"
                             }`}
                           >
                             {opt.key}
@@ -616,7 +620,7 @@ export default function Aptitude() {
                           </span>
                         </div>
                         {isChecked && isLocked && (
-                          <span className="text-[10px] font-black uppercase tracking-wider text-[#c6ff34] bg-white/10 px-2.5 py-1 rounded-md border border-[#c6ff34]/30 shrink-0">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-[#c6ff34] bg-[#c6ff34]/10 px-2.5 py-1 rounded-md border border-[#c6ff34]/30 shrink-0">
                             🔒 Answer Locked
                           </span>
                         )}
@@ -626,33 +630,31 @@ export default function Aptitude() {
                 </div>
 
                 {/* Question Navigation Footer */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t-2 border-[#050521]/10">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-white/10">
                   <button
                     type="button"
                     disabled={currentQIndex === 0}
                     onClick={() => setCurrentQIndex((prev) => Math.max(0, prev - 1))}
-                    className="w-full sm:w-auto px-6 py-3 border-2 border-[#050521] rounded-xl text-xs font-black uppercase tracking-wider disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 transition-colors"
+                    className="w-full sm:w-auto px-6 py-3 border border-white/15 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-colors"
                   >
                     ← Previous
                   </button>
 
                   <div className="flex items-center gap-3 w-full sm:w-auto">
-                    {/* Next button shown on Questions 1 to 14 */}
                     {currentQIndex < aptitudeQuestions.length - 1 ? (
                       <button
                         type="button"
                         onClick={handleNextQuestion}
-                        className="w-full sm:w-auto px-8 py-3.5 bg-[#050521] text-[#c6ff34] rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#c6ff34] hover:text-[#050521] hover:border-2 hover:border-[#050521] transition-all"
+                        className="w-full sm:w-auto px-8 py-3.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
                       >
                         Next Question →
                       </button>
                     ) : (
-                      /* Submit button shown ONLY on 15th Question ("15 th quetion only show the submit button not it showinn all questions") */
                       <button
                         type="button"
                         disabled={submitting}
                         onClick={() => handleSubmitTest(false)}
-                        className="w-full sm:w-auto px-8 py-3.5 bg-[#c6ff34] text-[#050521] border-2 border-[#050521] rounded-xl text-xs font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_#050521] hover:scale-105 active:translate-y-1 transition-all disabled:opacity-50"
+                        className="w-full sm:w-auto px-8 py-3.5 bg-[#c6ff34] text-[#090D11] rounded-xl text-xs font-black uppercase tracking-widest hover:shadow-[0_0_25px_rgba(198,255,52,0.4)] hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
                       >
                         {submitting ? "Submitting..." : "Submit Test Now ✓"}
                       </button>
@@ -669,38 +671,38 @@ export default function Aptitude() {
               key="step3"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-white border-2 border-[#050521] rounded-3xl p-6 sm:p-12 shadow-[10px_10px_0px_0px_#c6ff34] text-center space-y-8"
+              className="bg-[#0D1318]/90 border border-white/10 rounded-3xl p-6 sm:p-12 backdrop-blur-xl shadow-2xl text-center space-y-8"
             >
-              <div className="w-20 h-20 bg-[#c6ff34] border-2 border-[#050521] rounded-full flex items-center justify-center mx-auto shadow-[4px_4px_0px_0px_#050521]">
-                <svg className="w-10 h-10 text-[#050521]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-20 h-20 bg-[#c6ff34]/10 border border-[#c6ff34]/30 rounded-full flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(198,255,52,0.2)]">
+                <svg className="w-10 h-10 text-[#c6ff34]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
 
               <div>
-                <span className="text-xs font-black uppercase tracking-widest text-[#050521] bg-slate-100 px-4 py-1.5 rounded-full border border-[#050521]">
+                <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34] bg-[#c6ff34]/10 px-4 py-1.5 rounded-full border border-[#c6ff34]/30">
                   {result.isAutoSubmit ? "Time Expired - Assessment Auto-Saved" : "Assessment Submitted Successfully"}
                 </span>
-                <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tighter mt-4 text-[#050521]">
+                <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight mt-4 text-white">
                   Congratulations, {formData.fullName}!
                 </h2>
-                <p className="text-slate-500 font-mono text-xs sm:text-sm mt-2">
+                <p className="text-slate-400 font-mono text-xs sm:text-sm mt-2">
                   Your response has been recorded and submitted to DeepStaq admissions.
                 </p>
               </div>
 
               {/* Score Display Card */}
-              <div className="bg-[#050521] text-white p-8 rounded-3xl border-2 border-[#050521] max-w-md mx-auto shadow-[6px_6px_0px_0px_#c6ff34]">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#c6ff34] mb-2">
+              <div className="bg-white/[0.03] text-white p-8 rounded-3xl border border-white/15 max-w-md mx-auto backdrop-blur-md shadow-xl">
+                <p className="text-[10px] font-mono font-bold uppercase tracking-[0.3em] text-[#c6ff34] mb-2">
                   Your Aptitude Score
                 </p>
                 <div className="text-5xl sm:text-6xl font-black text-white tracking-tighter mb-2">
-                  {result.score} <span className="text-2xl text-white/50">/ {result.total}</span>
+                  {result.score} <span className="text-2xl text-white/40">/ {result.total}</span>
                 </div>
-                <div className="inline-block bg-[#c6ff34] text-[#050521] font-black text-sm px-4 py-1 rounded-full uppercase tracking-wider mb-4">
+                <div className="inline-block bg-[#c6ff34] text-[#090D11] font-black text-sm px-4 py-1 rounded-full uppercase tracking-wider mb-4">
                   {result.percentage}% Score
                 </div>
-                <p className="text-xs text-slate-300 font-mono leading-relaxed">
+                <p className="text-xs text-slate-300 font-sans leading-relaxed">
                   {result.percentage >= 70
                     ? "🌟 Excellent Aptitude! You possess strong analytical and AI problem-solving fundamentals."
                     : result.percentage >= 50
@@ -719,7 +721,7 @@ export default function Aptitude() {
                     )}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-6 py-4 bg-[#050521] text-[#c6ff34] border-2 border-[#050521] rounded-2xl font-black text-xs uppercase tracking-widest shadow-[4px_4px_0px_0px_#c6ff34] hover:bg-[#c6ff34] hover:text-[#050521] hover:scale-105 transition-all flex items-center justify-center gap-2.5 text-center"
+                    className="px-6 py-4 bg-[#c6ff34] text-[#090D11] rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-[0_0_25px_rgba(198,255,52,0.4)] hover:scale-105 transition-all flex items-center justify-center gap-2.5 text-center"
                   >
                     <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -734,7 +736,7 @@ export default function Aptitude() {
                     )}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-6 py-4 bg-[#25D366] text-white border-2 border-[#050521] rounded-2xl font-black text-xs uppercase tracking-widest shadow-[4px_4px_0px_0px_#050521] hover:bg-[#20bd5a] hover:scale-105 transition-all flex items-center justify-center gap-2.5 text-center"
+                    className="px-6 py-4 bg-[#25D366] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#20bd5a] hover:scale-105 transition-all flex items-center justify-center gap-2.5 text-center shadow-lg"
                   >
                     <svg className="w-4 h-4 shrink-0 fill-current" viewBox="0 0 24 24">
                       <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
@@ -745,12 +747,12 @@ export default function Aptitude() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Link to="/admission" className="w-full">
-                    <button className="w-full px-6 py-4 bg-[#c6ff34] text-[#050521] border-2 border-[#050521] font-black text-xs uppercase tracking-widest rounded-2xl shadow-[4px_4px_0px_0px_#050521] hover:scale-105 transition-all">
+                    <button className="w-full px-6 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-black text-xs uppercase tracking-widest rounded-2xl transition-all">
                       Proceed to Admission Application →
                     </button>
                   </Link>
                   <Link to="/" className="w-full">
-                    <button className="w-full px-6 py-4 border-2 border-[#050521] text-[#050521] font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-slate-100 transition-all">
+                    <button className="w-full px-6 py-4 border border-white/10 text-slate-400 hover:text-white font-bold text-xs uppercase tracking-widest rounded-2xl hover:bg-white/5 transition-all">
                       Back to Home
                     </button>
                   </Link>
@@ -763,3 +765,4 @@ export default function Aptitude() {
     </div>
   );
 }
+

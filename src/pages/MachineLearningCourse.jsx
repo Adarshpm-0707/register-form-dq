@@ -87,36 +87,40 @@ export default function MachineLearningCourse() {
   ];
 
   return (
-    <div className="min-h-screen bg-white text-[#050521] font-sans pb-24 selection:bg-[#c6ff34] selection:text-[#050521]">
+    <div className="min-h-screen bg-[#090D11] text-white font-sans pb-24 selection:bg-[#c6ff34] selection:text-[#090D11] relative overflow-hidden">
       
+      {/* Background Ambient Glows */}
+      <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-[#c6ff34]/10 rounded-full blur-[160px] pointer-events-none -z-0" />
+      <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[160px] pointer-events-none -z-0" />
+
       {/* HERO SECTION */}
-      <section className="relative pt-28 pb-16 md:pt-36 md:pb-24 px-6 md:px-12 bg-gradient-to-b from-slate-50 to-white border-b-2 border-[#050521] overflow-hidden">
+      <section className="relative pt-28 pb-16 md:pt-36 md:pb-24 px-6 md:px-12 border-b border-white/10 overflow-hidden">
         <div className="max-w-[1200px] mx-auto space-y-6 relative z-10">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="bg-[#c6ff34] text-[#050521] text-xs font-black px-3.5 py-1.5 rounded-lg border-2 border-[#050521] uppercase tracking-wider font-mono shadow-[3px_3px_0px_0px_#050521]">
+            <span className="bg-[#c6ff34]/15 text-[#c6ff34] text-xs font-black px-3.5 py-1.5 rounded-lg border border-[#c6ff34]/30 uppercase tracking-wider font-mono shadow-[0_0_15px_rgba(198,255,52,0.2)]">
               Machine Learning Specialization
             </span>
-            <span className="bg-slate-100 text-slate-700 text-xs font-mono font-bold px-3 py-1 rounded-md border border-slate-200 uppercase">
+            <span className="bg-white/5 text-slate-300 text-xs font-mono font-bold px-3 py-1 rounded-md border border-white/10 uppercase">
               Core ML + GenAI Track
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-[#050521] leading-[1.08] max-w-5xl">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white leading-[1.08] max-w-5xl">
             A 6-Month, Hands-On Machine Learning & AI Diploma Programme
           </h1>
 
-          <p className="text-slate-700 text-base md:text-lg max-w-4xl leading-relaxed font-sans font-medium">
+          <p className="text-slate-300 text-base md:text-lg max-w-4xl leading-relaxed font-sans font-medium">
             Most machine learning courses teach you regression, classification, and a handful of algorithms — then leave you wondering how any of it connects to the AI tools actually shipping in the real world today. DeepStaq's programme is built differently: it takes you through rigorous ML fundamentals first, then carries that foundation forward into deep learning, generative AI, and agentic systems — so what you learn in Month 3 is still relevant in Month 6, not obsolete by it.
           </p>
 
-          <p className="text-slate-600 font-mono text-sm md:text-base max-w-3xl leading-relaxed">
+          <p className="text-slate-400 font-mono text-sm md:text-base max-w-3xl leading-relaxed">
             No prior coding experience required. If you're serious about becoming a Machine Learning Engineer or Data Scientist — not just someone who can name a few algorithms — this is that path.
           </p>
 
           <div className="pt-4 flex flex-wrap items-center gap-4">
             <Link
               to="/admission"
-              className="bg-[#c6ff34] hover:bg-[#b5f024] text-[#050521] font-black uppercase text-sm md:text-base px-8 py-4 rounded-2xl border-2 border-[#050521] shadow-[5px_5px_0px_0px_#050521] hover:translate-x-0.5 hover:translate-y-0.5 transition-all flex items-center gap-2"
+              className="bg-[#c6ff34] hover:bg-[#b8f526] text-[#090D11] font-black uppercase text-sm md:text-base px-8 py-4 rounded-2xl shadow-[0_0_25px_rgba(198,255,52,0.4)] hover:translate-x-0.5 hover:translate-y-0.5 transition-all flex items-center gap-2"
             >
               <span>Enroll Now</span>
               <span>→</span>
@@ -124,7 +128,7 @@ export default function MachineLearningCourse() {
 
             <a
               href="tel:+919495957011"
-              className="bg-white hover:bg-slate-50 text-[#050521] font-mono font-bold text-xs md:text-sm px-6 py-4 rounded-2xl border-2 border-[#050521] shadow-[4px_4px_0px_0px_#050521] hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
+              className="bg-white/5 hover:bg-white/10 text-white font-mono font-bold text-xs md:text-sm px-6 py-4 rounded-2xl border border-white/15 hover:border-white/30 transition-all flex items-center gap-2"
             >
               📞 Talk to Us: +91 949 595 7011
             </a>
@@ -133,21 +137,22 @@ export default function MachineLearningCourse() {
       </section>
 
       {/* MAIN CONTENT */}
-      <div className="max-w-[1200px] mx-auto px-6 md:px-12 py-12 space-y-16">
+      <div className="max-w-[1200px] mx-auto px-6 md:px-12 py-12 space-y-16 relative z-10">
         
         {/* WHY LEARN ML WITH DEEPSTAQ */}
         <section className="space-y-6">
-          <div className="border-2 border-[#050521] rounded-3xl p-6 md:p-10 bg-slate-50 shadow-[6px_6px_0px_0px_#050521] space-y-6">
+          <div className="border border-white/10 rounded-3xl p-6 md:p-10 bg-[#0D1318]/90 shadow-2xl backdrop-blur-xl space-y-6 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#c6ff34] to-transparent" />
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-[#c6ff34] border border-[#050521]" />
-              <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#050521]">
+              <span className="w-3 h-3 rounded-full bg-[#c6ff34] shadow-[0_0_10px_#c6ff34]" />
+              <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
                 Why Learn Machine Learning With DeepStaq
               </h2>
             </div>
-            <p className="text-slate-700 text-sm md:text-base leading-relaxed">
+            <p className="text-slate-300 text-sm md:text-base leading-relaxed">
               DeepStaq is an institute built for the next generation of AI practitioners, sitting at the intersection of rigorous technical education and real-world application. Our mission is to make deep ML/AI knowledge accessible, structured, and actionable — through a comprehensive, hands-on curriculum that takes learners from programming fundamentals all the way through to generative AI and agentic systems.
             </p>
-            <p className="text-slate-700 text-sm md:text-base leading-relaxed">
+            <p className="text-slate-400 text-sm md:text-base leading-relaxed">
               Every month builds on the last, with projects, industry-relevant tooling, and a final capstone that you take into the world as proof of what you can actually build — not just a certificate saying you sat through a course.
             </p>
           </div>
@@ -155,10 +160,10 @@ export default function MachineLearningCourse() {
 
         {/* SYLLABUS / CORE OF CURRICULUM */}
         <section className="space-y-6">
-          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#050521]">
+          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
             Machine Learning: The Core of the Curriculum
           </h2>
-          <p className="text-slate-600 font-mono text-sm">
+          <p className="text-slate-400 font-mono text-sm">
             Machine learning isn't a single module here — it's the foundation the entire six months is built on. Here's exactly how it's taught, month by month:
           </p>
 
@@ -167,10 +172,10 @@ export default function MachineLearningCourse() {
               <button
                 key={idx}
                 onClick={() => setActiveMonth(idx)}
-                className={`p-3 rounded-xl border-2 text-left font-mono transition-all ${
+                className={`p-3 rounded-xl border text-left font-mono transition-all cursor-pointer ${
                   activeMonth === idx
-                    ? "bg-[#050521] text-[#c6ff34] border-[#050521] shadow-[3px_3px_0px_0px_#c6ff34]"
-                    : "bg-white text-[#050521] border-slate-200 hover:border-[#050521]"
+                    ? "bg-[#c6ff34] text-[#090D11] border-[#c6ff34] shadow-[0_0_20px_rgba(198,255,52,0.4)]"
+                    : "bg-white/[0.03] text-slate-300 border-white/10 hover:border-white/20 hover:text-white"
                 }`}
               >
                 <div className="text-[10px] font-black uppercase opacity-70">{s.month}</div>
@@ -179,26 +184,27 @@ export default function MachineLearningCourse() {
             ))}
           </div>
 
-          <div className="border-2 border-[#050521] rounded-3xl p-6 md:p-8 bg-white shadow-[6px_6px_0px_0px_#050521] space-y-3">
-            <span className="text-xs font-mono font-black text-emerald-800 uppercase tracking-widest">
+          <div className="border border-white/10 rounded-3xl p-6 md:p-8 bg-[#0D1318]/90 shadow-2xl backdrop-blur-xl space-y-3 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#c6ff34] to-transparent" />
+            <span className="text-xs font-mono font-black text-[#c6ff34] uppercase tracking-widest">
               {syllabus[activeMonth].month}
             </span>
-            <h3 className="text-xl md:text-2xl font-black uppercase text-[#050521]">
+            <h3 className="text-xl md:text-2xl font-black uppercase text-white">
               {syllabus[activeMonth].title}
             </h3>
-            <p className="text-slate-700 font-mono text-sm leading-relaxed">
+            <p className="text-slate-300 font-mono text-sm leading-relaxed">
               {syllabus[activeMonth].desc}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {syllabus.map((m, idx) => (
-              <div key={idx} className="p-5 rounded-2xl border-2 border-slate-200 bg-slate-50 space-y-2">
-                <span className="text-[11px] font-mono font-black text-[#050521] bg-white px-2.5 py-1 rounded border border-slate-300">
+              <div key={idx} className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/70 space-y-2">
+                <span className="text-[11px] font-mono font-black text-[#c6ff34] bg-[#c6ff34]/15 px-2.5 py-1 rounded border border-[#c6ff34]/30 inline-block">
                   {m.month}
                 </span>
-                <h4 className="text-sm font-black uppercase text-[#050521]">{m.title}</h4>
-                <p className="text-xs text-slate-600 font-mono leading-relaxed">{m.desc}</p>
+                <h4 className="text-sm font-black uppercase text-white">{m.title}</h4>
+                <p className="text-xs text-slate-400 font-mono leading-relaxed">{m.desc}</p>
               </div>
             ))}
           </div>
@@ -206,45 +212,45 @@ export default function MachineLearningCourse() {
 
         {/* FORMAT & STRUCTURE */}
         <section className="space-y-6">
-          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#050521]">
+          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
             Course Format & Structure
           </h2>
-          <div className="overflow-x-auto border-2 border-[#050521] rounded-3xl shadow-[6px_6px_0px_0px_#050521] bg-white">
+          <div className="overflow-x-auto border border-white/10 rounded-3xl shadow-2xl bg-[#0D1318]/90 backdrop-blur-xl">
             <table className="w-full text-left border-collapse text-xs md:text-sm font-mono">
               <thead>
-                <tr className="bg-[#050521] text-white uppercase tracking-wider">
-                  <th className="p-4 md:p-5 border-b-2 border-[#050521] w-1/3">Detail</th>
-                  <th className="p-4 md:p-5 border-b-2 border-[#050521]">Info</th>
+                <tr className="bg-white/[0.05] text-[#c6ff34] uppercase tracking-wider border-b border-white/10">
+                  <th className="p-4 md:p-5 w-1/3">Detail</th>
+                  <th className="p-4 md:p-5">Info</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
-                <tr className="hover:bg-slate-50"><td className="p-4 md:p-5 font-bold bg-slate-50/50">Duration</td><td className="p-4 md:p-5 text-slate-700">6 months core curriculum + ~2 weeks capstone</td></tr>
-                <tr className="hover:bg-slate-50"><td className="p-4 md:p-5 font-bold bg-slate-50/50">Schedule</td><td className="p-4 md:p-5 text-slate-700">3 sessions/week, 2 hours/session (6 hrs/week)</td></tr>
-                <tr className="hover:bg-slate-50"><td className="p-4 md:p-5 font-bold bg-slate-50/50">Total Instruction Time</td><td className="p-4 md:p-5 text-slate-700">~160 hours</td></tr>
-                <tr className="hover:bg-slate-50"><td className="p-4 md:p-5 font-bold bg-slate-50/50">Format</td><td className="p-4 md:p-5 text-slate-700">Instructor-led, with a monthly guest session from an industry professional</td></tr>
-                <tr className="hover:bg-slate-50"><td className="p-4 md:p-5 font-bold bg-slate-50/50">Prerequisites</td><td className="p-4 md:p-5 text-slate-700">None — designed for complete beginners</td></tr>
-                <tr className="hover:bg-slate-50"><td className="p-4 md:p-5 font-bold bg-slate-50/50">Final Assessment</td><td className="p-4 md:p-5 text-slate-700">60% Capstone Project + 40% Theory</td></tr>
+              <tbody className="divide-y divide-white/10">
+                <tr className="hover:bg-white/[0.02]"><td className="p-4 md:p-5 font-bold text-white bg-white/[0.02]">Duration</td><td className="p-4 md:p-5 text-slate-300">6 months core curriculum + ~2 weeks capstone</td></tr>
+                <tr className="hover:bg-white/[0.02]"><td className="p-4 md:p-5 font-bold text-white bg-white/[0.02]">Schedule</td><td className="p-4 md:p-5 text-slate-300">3 sessions/week, 2 hours/session (6 hrs/week)</td></tr>
+                <tr className="hover:bg-white/[0.02]"><td className="p-4 md:p-5 font-bold text-white bg-white/[0.02]">Total Instruction Time</td><td className="p-4 md:p-5 text-slate-300">~160 hours</td></tr>
+                <tr className="hover:bg-white/[0.02]"><td className="p-4 md:p-5 font-bold text-white bg-white/[0.02]">Format</td><td className="p-4 md:p-5 text-slate-300">Instructor-led, with a monthly guest session from an industry professional</td></tr>
+                <tr className="hover:bg-white/[0.02]"><td className="p-4 md:p-5 font-bold text-white bg-white/[0.02]">Prerequisites</td><td className="p-4 md:p-5 text-slate-300">None — designed for complete beginners</td></tr>
+                <tr className="hover:bg-white/[0.02]"><td className="p-4 md:p-5 font-bold text-white bg-white/[0.02]">Final Assessment</td><td className="p-4 md:p-5 text-slate-300">60% Capstone Project + 40% Theory</td></tr>
               </tbody>
             </table>
           </div>
-          <div className="p-5 rounded-2xl bg-[#c6ff34]/20 border-2 border-[#050521] shadow-[3px_3px_0px_0px_#050521] text-xs md:text-sm font-mono text-[#050521] leading-relaxed">
+          <div className="p-5 rounded-2xl bg-[#c6ff34]/10 border border-[#c6ff34]/30 text-xs md:text-sm font-mono text-slate-200 leading-relaxed">
             Every month includes a dedicated session led by an industry professional working in that month's area — bringing real-world context and direct interaction with people actively building in the field, alongside the core instructor-led curriculum.
           </div>
         </section>
 
         {/* TOOLS */}
         <section className="space-y-6">
-          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#050521]">
+          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
             Tools You'll Actually Use
           </h2>
-          <p className="text-slate-600 font-mono text-sm">
+          <p className="text-slate-400 font-mono text-sm">
             You won't just learn ML theory on slides — you'll build with the same stack practitioners use:
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {tools.map((t, idx) => (
-              <div key={idx} className="p-5 rounded-2xl border-2 border-[#050521] bg-white shadow-[4px_4px_0px_0px_#050521] space-y-2 hover:bg-[#c6ff34]/10 transition-colors">
-                <h4 className="text-sm font-black uppercase text-[#050521]">{t.name}</h4>
-                <p className="text-xs font-mono text-slate-600">{t.desc}</p>
+              <div key={idx} className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/80 shadow-xl space-y-2 hover:border-[#c6ff34]/40 hover:bg-[#c6ff34]/5 transition-all">
+                <h4 className="text-sm font-black uppercase text-white">{t.name}</h4>
+                <p className="text-xs font-mono text-slate-400">{t.desc}</p>
               </div>
             ))}
           </div>
@@ -252,8 +258,9 @@ export default function MachineLearningCourse() {
 
         {/* CAPSTONE */}
         <section className="space-y-6">
-          <div className="border-2 border-[#050521] rounded-3xl p-6 md:p-10 bg-[#050521] text-white shadow-[8px_8px_0px_0px_#c6ff34] space-y-6">
-            <span className="bg-[#c6ff34] text-[#050521] text-xs font-black px-3 py-1 rounded-md uppercase font-mono tracking-wider">
+          <div className="border border-white/10 rounded-3xl p-6 md:p-10 bg-[#0D1318]/90 text-white shadow-2xl space-y-6 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#c6ff34] to-transparent" />
+            <span className="bg-[#c6ff34]/15 text-[#c6ff34] text-xs font-black px-3 py-1 rounded-md uppercase font-mono tracking-wider border border-[#c6ff34]/30 inline-block">
               Real Portfolio Project
             </span>
             <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-white">
@@ -262,18 +269,18 @@ export default function MachineLearningCourse() {
             <p className="text-slate-300 font-mono text-sm md:text-base leading-relaxed">
               The programme culminates in an end-to-end capstone project of your choosing — including a classical ML pipeline built entirely on the skills from Month 3, if that's the direction you want to specialize in. Other options include an NLP/deep learning model or a domain-specific RAG application or fine-tuned LLM.
             </p>
-            <div className="p-4 rounded-xl bg-white/10 text-white font-mono text-xs md:text-sm font-bold border border-white/20">
+            <div className="p-4 rounded-xl bg-white/[0.04] text-white font-mono text-xs md:text-sm font-bold border border-white/10">
               ✨ You leave with a real, working project — evaluated on data handling, model implementation, and evaluation, not a multiple-choice quiz.
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/10">
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+              <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
                 <span className="text-3xl md:text-4xl font-black text-[#c6ff34] font-mono">60%</span>
                 <h4 className="text-base font-bold uppercase text-white">Capstone Project</h4>
-                <p className="text-xs text-slate-300 font-mono leading-relaxed">
+                <p className="text-xs text-slate-400 font-mono leading-relaxed">
                   Evaluated on data ingestion, pipeline engineering, model performance tuning, and serving.
                 </p>
               </div>
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+              <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
                 <span className="text-3xl md:text-4xl font-black text-[#c6ff34] font-mono">40%</span>
                 <h4 className="text-base font-bold uppercase text-white">Theory</h4>
                 <p className="text-xs text-slate-300 font-mono leading-relaxed">
@@ -286,15 +293,15 @@ export default function MachineLearningCourse() {
 
         {/* CAREER PATHS */}
         <section className="space-y-6">
-          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#050521]">
+          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
             Career Paths This Machine Learning Course Opens Up
           </h2>
-          <p className="text-slate-600 font-mono text-sm">
+          <p className="text-slate-400 font-mono text-sm">
             Because the curriculum doesn't stop at classical ML, graduates aren't limited to entry-level ML roles — the deep learning, GenAI, and MLOps months make you competitive for broader AI/ML Engineer and Applied AI positions too, not just narrow "data cleaning" work.
           </p>
           <div className="flex flex-wrap gap-2.5">
             {careerRoles.map((role, idx) => (
-              <span key={idx} className="bg-slate-100 hover:bg-[#c6ff34] text-[#050521] text-xs font-mono font-bold px-4 py-2 rounded-xl border border-slate-300 transition-colors">
+              <span key={idx} className="bg-white/[0.04] hover:bg-[#c6ff34]/15 hover:text-[#c6ff34] text-slate-300 text-xs font-mono font-bold px-4 py-2 rounded-xl border border-white/10 transition-colors">
                 💼 {role}
               </span>
             ))}
@@ -303,43 +310,43 @@ export default function MachineLearningCourse() {
 
         {/* WHO SHOULD TAKE THIS COURSE */}
         <section className="space-y-6">
-          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#050521]">
+          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
             Who Should Take This Machine Learning Course
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-5 rounded-2xl border-2 border-slate-200 bg-slate-50 flex items-start gap-3">
-              <span className="w-6 h-6 rounded-full bg-[#050521] text-[#c6ff34] font-mono text-xs font-black flex items-center justify-center flex-shrink-0">1</span>
-              <p className="text-xs md:text-sm font-mono text-slate-700 leading-relaxed">Beginners with zero coding background who want a structured, guided path into ML</p>
+            <div className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/70 flex items-start gap-3">
+              <span className="w-6 h-6 rounded-full bg-[#c6ff34] text-[#090D11] font-mono text-xs font-black flex items-center justify-center flex-shrink-0">1</span>
+              <p className="text-xs md:text-sm font-mono text-slate-300 leading-relaxed">Beginners with zero coding background who want a structured, guided path into ML</p>
             </div>
-            <div className="p-5 rounded-2xl border-2 border-slate-200 bg-slate-50 flex items-start gap-3">
-              <span className="w-6 h-6 rounded-full bg-[#050521] text-[#c6ff34] font-mono text-xs font-black flex items-center justify-center flex-shrink-0">2</span>
-              <p className="text-xs md:text-sm font-mono text-slate-700 leading-relaxed">Developers or engineers wanting to formally specialize in machine learning</p>
+            <div className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/70 flex items-start gap-3">
+              <span className="w-6 h-6 rounded-full bg-[#c6ff34] text-[#090D11] font-mono text-xs font-black flex items-center justify-center flex-shrink-0">2</span>
+              <p className="text-xs md:text-sm font-mono text-slate-300 leading-relaxed">Developers or engineers wanting to formally specialize in machine learning</p>
             </div>
-            <div className="p-5 rounded-2xl border-2 border-slate-200 bg-slate-50 flex items-start gap-3">
-              <span className="w-6 h-6 rounded-full bg-[#050521] text-[#c6ff34] font-mono text-xs font-black flex items-center justify-center flex-shrink-0">3</span>
-              <p className="text-xs md:text-sm font-mono text-slate-700 leading-relaxed">Data analysts looking to move into a full Data Scientist or ML Engineer role</p>
+            <div className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/70 flex items-start gap-3">
+              <span className="w-6 h-6 rounded-full bg-[#c6ff34] text-[#090D11] font-mono text-xs font-black flex items-center justify-center flex-shrink-0">3</span>
+              <p className="text-xs md:text-sm font-mono text-slate-300 leading-relaxed">Data analysts looking to move into a full Data Scientist or ML Engineer role</p>
             </div>
-            <div className="p-5 rounded-2xl border-2 border-slate-200 bg-slate-50 flex items-start gap-3">
-              <span className="w-6 h-6 rounded-full bg-[#050521] text-[#c6ff34] font-mono text-xs font-black flex items-center justify-center flex-shrink-0">4</span>
-              <p className="text-xs md:text-sm font-mono text-slate-700 leading-relaxed">Anyone who's tried scattered free ML tutorials and wants a structured, hands-on program instead</p>
+            <div className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/70 flex items-start gap-3">
+              <span className="w-6 h-6 rounded-full bg-[#c6ff34] text-[#090D11] font-mono text-xs font-black flex items-center justify-center flex-shrink-0">4</span>
+              <p className="text-xs md:text-sm font-mono text-slate-300 leading-relaxed">Anyone who's tried scattered free ML tutorials and wants a structured, hands-on program instead</p>
             </div>
           </div>
         </section>
 
         {/* FAQS */}
-        <section className="space-y-6 pt-6 border-t-2 border-[#050521]">
-          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#050521]">
+        <section className="space-y-6 pt-6 border-t border-white/10">
+          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
             Frequently Asked Questions
           </h2>
           <div className="space-y-3">
             {faqs.map((faq, index) => (
-              <div key={index} className="border-2 border-[#050521] rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_#050521] bg-white">
+              <div key={index} className="border border-white/10 rounded-2xl overflow-hidden shadow-xl bg-[#0D1318]/80">
                 <button
                   onClick={() => toggleFAQ(index)}
-                  className="w-full text-left p-5 font-black uppercase tracking-tight text-sm md:text-base flex justify-between items-center gap-4 bg-slate-50 hover:bg-[#c6ff34]/20 transition-colors"
+                  className="w-full text-left p-5 font-black uppercase tracking-tight text-sm md:text-base flex justify-between items-center gap-4 bg-white/[0.02] hover:bg-white/[0.05] text-white transition-colors cursor-pointer"
                 >
                   <span>{faq.q}</span>
-                  <span className="w-7 h-7 rounded-full bg-[#050521] text-[#c6ff34] flex items-center justify-center font-mono text-xs flex-shrink-0">
+                  <span className="w-7 h-7 rounded-full bg-[#c6ff34]/20 border border-[#c6ff34]/30 text-[#c6ff34] flex items-center justify-center font-mono text-xs flex-shrink-0">
                     {openFAQs[index] ? "−" : "+"}
                   </span>
                 </button>
@@ -350,7 +357,7 @@ export default function MachineLearningCourse() {
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.25 }}
-                      className="p-5 text-xs md:text-sm font-mono text-slate-600 border-t border-[#050521]/10 bg-white leading-relaxed"
+                      className="p-5 text-xs md:text-sm font-mono text-slate-300 border-t border-white/10 bg-white/[0.01] leading-relaxed"
                     >
                       {faq.a}
                     </motion.div>
@@ -363,8 +370,9 @@ export default function MachineLearningCourse() {
 
         {/* CTA */}
         <section className="pt-8">
-          <div className="bg-[#050521] text-white rounded-3xl p-8 md:p-12 border-2 border-[#050521] shadow-[8px_8px_0px_0px_#c6ff34] space-y-6 text-center md:text-left">
-            <span className="bg-[#c6ff34] text-[#050521] text-xs font-black px-3.5 py-1.5 rounded-md uppercase font-mono tracking-wider inline-block">
+          <div className="bg-[#0D1318]/95 text-white rounded-3xl p-8 md:p-12 border border-white/15 shadow-2xl space-y-6 text-center md:text-left relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#c6ff34] to-transparent" />
+            <span className="bg-[#c6ff34]/15 text-[#c6ff34] text-xs font-black px-3.5 py-1.5 rounded-md uppercase font-mono tracking-wider inline-block border border-[#c6ff34]/30">
               Machine Learning Track
             </span>
             <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-white max-w-3xl">
@@ -376,13 +384,13 @@ export default function MachineLearningCourse() {
             <div className="pt-4 flex flex-col sm:flex-row items-center gap-4 justify-center md:justify-start">
               <Link
                 to="/admission"
-                className="w-full sm:w-auto bg-[#c6ff34] hover:bg-[#b5f024] text-[#050521] font-black uppercase text-sm md:text-base px-8 py-4 rounded-xl border-2 border-[#050521] shadow-[4px_4px_0px_0px_white] hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-center"
+                className="w-full sm:w-auto bg-[#c6ff34] hover:bg-[#b8f526] text-[#090D11] font-black uppercase text-sm md:text-base px-8 py-4 rounded-xl shadow-[0_0_25px_rgba(198,255,52,0.4)] hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-center"
               >
                 Enroll in DeepStaq's Machine Learning Course →
               </Link>
               <Link
                 to="/consultation"
-                className="w-full sm:w-auto bg-transparent text-white border-2 border-white font-black uppercase text-sm px-6 py-4 rounded-xl hover:bg-white/10 transition-all text-center"
+                className="w-full sm:w-auto bg-white/5 text-white border border-white/20 font-black uppercase text-sm px-6 py-4 rounded-xl hover:bg-white/10 transition-all text-center"
               >
                 Book Free Consultation
               </Link>

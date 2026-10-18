@@ -1,54 +1,222 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import HeroVRSection from "../components/HeroVRSection";
-import CircularGallery from "../components/CircularGallery";
-import OurEventsSection from "../components/OurEventsSection";
 
+// Hero AI Stack 3D Visual
+import aiStackHero from "../assets/ai_stack_hero.jpg";
 
-// Career image imports
-import aiMlEngineerImg from "../assets/careers/ai_ml_engineer.png";
-import generativeAiDevImg from "../assets/careers/generative_ai_dev.png";
-import dataScientistImg from "../assets/careers/data_scientist.png";
-import llmopsEngineerImg from "../assets/careers/llmops_engineer.png";
-import aiProductManagerImg from "../assets/careers/ai_product_manager.png";
-import nlpEngineerImg from "../assets/careers/nlp_engineer.png";
+// Learning Experience Photos
+import offlineClassroomImg from "../assets/learning/offline_classroom.jpg";
+import handsOnCodingImg from "../assets/learning/hands_on_coding.jpg";
+import mentorGuidanceImg from "../assets/learning/mentor_guidance.jpg";
+import realWorldProjectsImg from "../assets/learning/real_world_projects.jpg";
 
+// Real Event Photos from Deepstaq Archive
+import event1Img from "../assets/events/event (1).webp";
+import event8Img from "../assets/events/event (8).webp";
+import event10Img from "../assets/events/event (10).webp";
+import event12Img from "../assets/events/event (12).webp";
 
 /* ─────────────────────────────────────────────
-   TICKER TAPE
+   TECH ECOSYSTEM LOGOS & TOOLS
 ───────────────────────────────────────────── */
-const tickerItems = [
-  "PYTHON CORE", "FASTAPI APIS", "DOCKER CONTAINERS",
-  "LLM FINE-TUNING", "RAG PIPELINES", "AGENTIC AI",
-  "PYTORCH & MODEL DEPLOYMENT", "ENROLLMENT OPEN NOW",
+const techStack = [
+  { name: "Python", category: "Core Language", tag: "3.12" },
+  { name: "PyTorch", category: "Deep Learning", tag: "v2.5" },
+  { name: "TensorFlow", category: "ML Engine", tag: "v2.16" },
+  { name: "Hugging Face", category: "Model Hub", tag: "Transformers" },
+  { name: "OpenAI", category: "LLM APIs", tag: "GPT-4o" },
+  { name: "LangChain", category: "Agent Framework", tag: "v0.3" },
+  { name: "LlamaIndex", category: "Data Ingestion", tag: "RAG" },
+  { name: "FastAPI", category: "Backend Microservices", tag: "REST" },
+  { name: "Docker", category: "Containerization", tag: "DevOps" },
+  { name: "Ollama", category: "Local LLM Serving", tag: "Llama 3" },
+  { name: "Pinecone", category: "Vector Database", tag: "Embeddings" },
+  { name: "Claude / Anthropic", category: "Reasoning Models", tag: "Sonnet" },
 ];
 
-function Ticker() {
-  return (
-    <div className="overflow-hidden border-y-2 border-[#050521] bg-[#c6ff34] py-3 select-none">
-      <motion.div
-        animate={{ x: ["0%", "-50%"] }}
-        transition={{ repeat: Infinity, duration: 22, ease: "linear" }}
-        className="flex whitespace-nowrap"
-      >
-        {[...tickerItems, ...tickerItems].map((item, i) => (
-          <span key={i} className="text-[#050521] font-black text-[10px] md:text-[11px] tracking-[0.25em] uppercase mr-12 flex items-center gap-2">
-            <span className="w-2 h-2 rotate-45 bg-[#050521] inline-block" />
-            {item}
-          </span>
-        ))}
-      </motion.div>
-    </div>
-  );
-}
-
-
+/* ─────────────────────────────────────────────
+   PROGRAMS DATA
+───────────────────────────────────────────── */
+const programsData = [
+  {
+    id: "flagship",
+    flagship: true,
+    title: "Professional Diploma in AI & Machine Learning",
+    desc: "A complete, hands-on program to master AI and Machine Learning from foundations to real-world applications.",
+    duration: "6 Months",
+    mode: "Offline - Kannur",
+    tags: ["Python", "Machine Learning", "Deep Learning", "Generative AI", "PyTorch"],
+    features: ["160+ Total Learning Hours", "10+ Production AI Projects", "1:1 Industry Mentorship", "Placement Guarantee Support"],
+    badge: "FLAGSHIP",
+    link: "/programs",
+  },
+  {
+    id: "genai",
+    flagship: false,
+    title: "Generative AI & LLM Engineering",
+    desc: "Learn to build with modern LLMs, RAG pipelines, fine-tune models and create real-world generative AI applications.",
+    duration: "6 Months",
+    mode: "Offline - Kannur",
+    tags: ["LLMs", "RAG", "Prompt Engineering", "Fine-tuning", "Model Deployment"],
+    features: ["Vector Search Architecture", "Custom LoRA Fine-Tuning", "Multi-Modal Generative Models", "Enterprise RAG Systems"],
+    badge: "POPULAR",
+    link: "/programs",
+  },
+  {
+    id: "agents",
+    flagship: false,
+    title: "AI Agents & Automation",
+    desc: "Design and build intelligent agents to automate tasks, workflows and real business processes.",
+    duration: "6 Months",
+    mode: "Offline - Kannur",
+    tags: ["AI Agents", "Automation", "APIs & Tools", "Multi-agent Systems", "CrewAI"],
+    features: ["ReAct & Planning Loops", "Tool Calling & API Execution", "Autonomous Task Automation", "LangGraph Architectures"],
+    badge: "NEW COHORT",
+    link: "/programs",
+  },
+  {
+    id: "data-science",
+    flagship: false,
+    title: "Data Science & Predictive ML",
+    desc: "Master data analytics, exploratory modeling, statistical inference and production-ready machine learning algorithms.",
+    duration: "4 Months",
+    mode: "Offline / Hybrid",
+    tags: ["Pandas", "Scikit-Learn", "Feature Engineering", "Data Viz", "Power BI"],
+    features: ["End-to-End ML Pipelines", "Exploratory Data Analysis", "Model Evaluation & Tuning", "Interactive Dashboards"],
+    badge: "FOUNDATIONS",
+    link: "/programs",
+  },
+];
 
 /* ─────────────────────────────────────────────
-   COUNT UP
+   LEARNING EXPERIENCE CARDS
 ───────────────────────────────────────────── */
-function CountUp({ end, suffix = "" }) {
+const experienceCards = [
+  {
+    id: 1,
+    title: "Offline Classes at Kannur",
+    desc: "Daily live classes at our institute with a focused learning environment.",
+    img: offlineClassroomImg,
+    badge: "Campus Immersion",
+  },
+  {
+    id: 2,
+    title: "Hands-on Practice",
+    desc: "Learn by doing with real tools, datasets and projects.",
+    img: handsOnCodingImg,
+    badge: "100% Practical",
+  },
+  {
+    id: 3,
+    title: "Mentor Guidance",
+    desc: "Get guidance from experienced mentors throughout your journey.",
+    img: mentorGuidanceImg,
+    badge: "1:1 Support",
+  },
+  {
+    id: 4,
+    title: "Real-world Projects",
+    desc: "Build practical projects to strengthen your portfolio.",
+    img: realWorldProjectsImg,
+    badge: "Portfolio Ready",
+  },
+];
+
+/* ─────────────────────────────────────────────
+   EVENT HIGHLIGHTS CARDS
+───────────────────────────────────────────── */
+const eventHighlights = [
+  {
+    id: 1,
+    title: "Aiwakening",
+    subtitle: "Free AI Workshop",
+    desc: "A high-energy offline immersion introducing foundational AI concepts, modern generative capabilities, and live tool demonstrations.",
+    img: event12Img,
+    date: "Special Workshop",
+    badge: "Free AI Workshop",
+  },
+  {
+    id: 2,
+    title: "AI Aptitude Test",
+    subtitle: "Assessment & Consultation",
+    desc: "Comprehensive diagnostic assessment to evaluate logical aptitude, algorithmic thinking, and customized career guidance.",
+    img: event8Img,
+    date: "Weekly Cohort",
+    badge: "Assessment & Consultation",
+  },
+  {
+    id: 3,
+    title: "Easy AI",
+    subtitle: "2-Hour Hands-on Session",
+    desc: "Fast-track masterclass demystifying prompting, conversational tools, and automated business workflows for complete beginners.",
+    img: event1Img,
+    date: "Weekend Masterclass",
+    badge: "2-Hour Session",
+  },
+  {
+    id: 4,
+    title: "Prompt Engineering",
+    subtitle: "1-Month Intensive Workshop",
+    desc: "Deep-dive workshop on system prompting, chain-of-thought heuristics, few-shot tuning, and robust structured LLM outputs.",
+    img: event10Img,
+    date: "1-Month Track",
+    badge: "1-Month Workshop",
+  },
+];
+
+/* ─────────────────────────────────────────────
+   WHAT YOU'LL LEARN MODULES
+───────────────────────────────────────────── */
+const curriculumModules = [
+  {
+    id: 1,
+    title: "Programming Foundations",
+    icon: "💻",
+    topics: ["Python 3.12 Core & OOP", "Data Structures & Algorithms", "Git, GitHub & Version Control", "Linux & Virtual Environments"],
+    desc: "Build rock-solid software engineering fundamentals from zero.",
+  },
+  {
+    id: 2,
+    title: "Math & Data Visualization",
+    icon: "📊",
+    topics: ["Linear Algebra & Matrix Math", "Calculus & Optimization", "NumPy & Pandas Manipulation", "Matplotlib & Seaborn Dashboards"],
+    desc: "Understand the mathematical intuition driving machine intelligence.",
+  },
+  {
+    id: 3,
+    title: "Machine Learning",
+    icon: "🧠",
+    topics: ["Regression & Classification", "Random Forests & XGBoost", "Unsupervised Clustering & PCA", "Scikit-Learn Pipeline Engineering"],
+    desc: "Train, evaluate and optimize classical machine learning models.",
+  },
+  {
+    id: 4,
+    title: "Deep Learning & NLP",
+    icon: "⚡",
+    topics: ["Neural Networks & Backprop", "PyTorch Tensors & Architectures", "Word2Vec, RNNs & Transformers", "Attention Mechanism & Encoders"],
+    desc: "Master modern deep learning and sequence processing pipelines.",
+  },
+  {
+    id: 5,
+    title: "Generative AI & LLMs",
+    icon: "🤖",
+    topics: ["Prompt Engineering & System Personas", "Retrieval-Augmented Gen (RAG)", "Vector DBs (Pinecone, Chroma)", "LangChain & LlamaIndex Pipelines"],
+    desc: "Create enterprise knowledge assistants and generative solutions.",
+  },
+  {
+    id: 6,
+    title: "Advanced AI & MLOps",
+    icon: "🚀",
+    topics: ["Autonomous AI Agents & Tool Calling", "Multi-Agent Collaboration", "LoRA / QLoRA Model Fine-Tuning", "FastAPI, Docker & Cloud Deployment"],
+    desc: "Deploy, containerize, and orchestrate production-grade AI agents.",
+  },
+];
+
+/* ─────────────────────────────────────────────
+   COUNT UP COMPONENT
+───────────────────────────────────────────── */
+function CountUpNumber({ end, suffix = "" }) {
   const [count, setCount] = useState(0);
   const ref = useRef(null);
   const started = useRef(false);
@@ -59,15 +227,19 @@ function CountUp({ end, suffix = "" }) {
         if (entry.isIntersecting && !started.current) {
           started.current = true;
           let start = 0;
-          const step = end / 60;
+          const step = Math.max(1, Math.floor(end / 40));
           const timer = setInterval(() => {
             start += step;
-            if (start >= end) { setCount(end); clearInterval(timer); }
-            else setCount(Math.floor(start));
-          }, 20);
+            if (start >= end) {
+              setCount(end);
+              clearInterval(timer);
+            } else {
+              setCount(start);
+            }
+          }, 30);
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.3 }
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
@@ -77,462 +249,1260 @@ function CountUp({ end, suffix = "" }) {
 }
 
 /* ─────────────────────────────────────────────
-   FAQ
+   MAIN COMPONENT
 ───────────────────────────────────────────── */
-const faqItems = [
-  { q: "Do I need prior experience?", a: "No. We start from absolute zero — our Python & Math Essentials modules ensure every student builds a solid foundation." },
-  { q: "How long is the programme?", a: "The full diploma runs 6 months part-time with 160+ total learning hours." },
-  { q: "Is it industry-recognised?", a: "Yes. DeepStaq certificates are co-validated with our hiring partners." },
-  { q: "What is the fee structure?", a: "We offer monthly instalments, upfront discounts, and income share agreements." },
-];
-
-function InlineFAQ() {
-  const [open, setOpen] = useState(null);
-  return (
-    <div className="space-y-4">
-      {faqItems.map((item, i) => (
-        <div key={i} className="border-b-2 border-[#050521]/10 last:border-0">
-          <button onClick={() => setOpen(open === i ? null : i)} className="w-full flex items-center justify-between py-8 text-left group">
-            <span className="font-black text-[#050521] text-lg md:text-xl uppercase tracking-tighter pr-6 leading-tight">{item.q}</span>
-            <span className={`w-12 h-12 rounded-xl border-2 border-[#050521] flex-shrink-0 flex items-center justify-center transition-all ${open === i ? "bg-[#c6ff34] rotate-45" : "bg-white"}`}>
-              <span className="text-2xl font-bold">+</span>
-            </span>
-          </button>
-          <motion.div initial={false} animate={{ height: open === i ? "auto" : 0, opacity: open === i ? 1 : 0 }} className="overflow-hidden">
-            <p className="text-slate-500 text-sm md:text-base font-mono leading-relaxed pb-8 pr-12">{item.a}</p>
-          </motion.div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-
-/* ─────────────────────────────────────────────
-   CAPSTONE ANIMATED GRID
-───────────────────────────────────────────── */
-const capstoneTracks = [
-  { id: "01", name: "AI Chatbot Systems", desc: "Stateful multi-turn agents with custom system prompts and persistent memory.", featured: true },
-  { id: "02", name: "RAG Solutions", desc: "Enterprise-grade semantic search using vector stores, chunking, and metadata filtering." },
-  { id: "03", name: "Autonomous AI Assistants", desc: "Agentic workflows with tool-calling capabilities and complex decision loops." },
-  { id: "04", name: "Production ML Pipelines", desc: "End-to-end pipelines covering training, testing, artifact logging, and containerization." },
-  { id: "05", name: "Advanced NLP Apps", desc: "Custom sequence tagging, translation, summarization, and text classification engines." },
-  { id: "06", name: "Fine-tuned LLMs", desc: "Parameter-efficient tuning via LoRA and QLoRA on custom domain datasets." },
-  { id: "07", name: "AI Automation Platforms", desc: "Low-latency API integration triggering background AI workers and task orchestrations.", featured: true },
-];
-
-function CapstoneCard({ proj }) {
-  return (
-    <div
-      className="relative flex-shrink-0 w-[280px] sm:w-[320px] border-2 border-[#c6ff34] rounded-2xl p-6 flex flex-col justify-between cursor-default overflow-hidden group transition-colors duration-300 bg-[#c6ff34]/5 hover:bg-[#c6ff34]/10"
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(198,255,52,0.1),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-      <div className="relative space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="font-mono text-[9px] font-black text-slate-500 uppercase tracking-[0.3em]">Project_{proj.id}</span>
-          <div className={`w-2 h-2 rounded-full ${proj.featured ? "bg-[#c6ff34]" : "bg-white/20 group-hover:bg-[#c6ff34] transition-colors duration-300"}`} />
-        </div>
-        <h3 className={`text-sm font-black uppercase tracking-tight leading-tight group-hover:text-[#c6ff34] transition-colors duration-200 ${proj.featured ? "text-[#c6ff34]" : "text-white"}`}>
-          {proj.name}
-        </h3>
-        <p className="text-[10px] text-slate-400 font-mono leading-relaxed">{proj.desc}</p>
-      </div>
-      <div className={`mt-5 h-[2px] rounded-full transition-all duration-500 ${proj.featured ? "bg-[#c6ff34]/40 group-hover:bg-[#c6ff34]" : "bg-white/10 group-hover:bg-[#c6ff34]/50"}`} />
-    </div>
-  );
-}
-
-function CapstoneGrid() {
-  const doubled = [...capstoneTracks, ...capstoneTracks];
-  return (
-    <div className="mb-12 overflow-hidden relative">
-      {/* Edge fades */}
-      <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-[#050521] to-transparent z-10 pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[#050521] to-transparent z-10 pointer-events-none" />
-      <motion.div
-        className="flex gap-4 py-2"
-        animate={{ x: ["0%", "-50%"] }}
-        transition={{ duration: 24, repeat: Infinity, ease: "linear", repeatType: "loop" }}
-        style={{ width: "max-content" }}
-      >
-        {doubled.map((proj, idx) => (
-          <CapstoneCard key={`${proj.id}-${idx}`} proj={proj} />
-        ))}
-      </motion.div>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   MAIN HOME
-───────────────────────────────────────────── */
-const careerRolesData = [
-  {
-    title: "AI/ML Engineer",
-    desc: "Design and implement machine learning models, neural networks, and scalable pipelines.",
-    img: aiMlEngineerImg,
-    track: "Track 01"
-  },
-  {
-    title: "Generative AI Developer",
-    desc: "Develop advanced LLM applications, custom RAG pipelines, fine-tuned foundational models, and agentic workflows.",
-    img: generativeAiDevImg,
-    track: "Track 02"
-  },
-  {
-    title: "Data Scientist",
-    desc: "Analyze complex datasets, extract business-critical insights, and build predictive statistical models.",
-    img: dataScientistImg,
-    track: "Track 03"
-  },
-  {
-    title: "LLMOps Engineer",
-    desc: "Deploy, monitor, scale, and optimize large language models in containerized cloud environments.",
-    img: llmopsEngineerImg,
-    track: "Track 04"
-  },
-  {
-    title: "AI Product Manager",
-    desc: "Drive product lifecycle from inception to deployment, blending AI technical capabilities with user experience.",
-    img: aiProductManagerImg,
-    track: "Track 05"
-  },
-  {
-    title: "NLP Engineer",
-    desc: "Build language processing pipelines, speech recognition algorithms, translation systems, and sentiment analyzers.",
-    img: nlpEngineerImg,
-    track: "Track 06"
-  }
-];
-
 export default function Home() {
+  const [activeProgramIndex, setActiveProgramIndex] = useState(0);
+  const [activeCurriculumIndex, setActiveCurriculumIndex] = useState(0);
+  const [openFaq, setOpenFaq] = useState(0);
+  const [activeEventLightbox, setActiveEventLightbox] = useState(null);
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+
+  // Keyboard navigation for image lightbox
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setActiveEventLightbox(null);
+        setVideoModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-white text-[#050521] overflow-x-clip font-sans">
+    <div className="min-h-screen bg-[#090D11] text-white selection:bg-[#c6ff34] selection:text-[#090D11] font-sans overflow-x-hidden relative">
+      
+      {/* Subtle Ambient Background Gradients & Grid */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        {/* Top-right emerald/lime radial glow */}
+        <div className="absolute -top-[10%] -right-[10%] w-[800px] h-[800px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(198,255,52,0.07)_0%,rgba(16,185,129,0.04)_40%,transparent_70%)] blur-[120px]" />
+        {/* Center-left purple/emerald subtle glow */}
+        <div className="absolute top-[40%] -left-[15%] w-[900px] h-[900px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(105,74,255,0.04)_0%,rgba(198,255,52,0.03)_50%,transparent_75%)] blur-[140px]" />
+        {/* Bottom cyan/lime glow */}
+        <div className="absolute bottom-[5%] right-[10%] w-[700px] h-[700px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.05)_0%,transparent_70%)] blur-[120px]" />
+        {/* Micro Tech Grid Overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.035]"
+          style={{
+            backgroundImage: "radial-gradient(#ffffff 1px, transparent 1px)",
+            backgroundSize: "32px 32px",
+          }}
+        />
+      </div>
 
-      {/* Hero Section */}
-      <section className="relative min-h-[100svh] flex flex-col justify-center px-6 sm:px-12 lg:px-20 py-20 overflow-hidden">
-        <div className="max-w-[1400px] mx-auto w-full z-10 flex flex-col lg:grid lg:grid-cols-12 gap-10 lg:gap-8 items-center pt-2 sm:pt-10 lg:pt-0">
+      <div className="relative z-10">
 
-          <div className="lg:col-span-6 flex flex-col justify-center items-center text-center lg:items-start lg:text-left w-full">
-            <div className="space-y-3">
+        {/* ══════════════════════════════════════════════════════════
+            1. HERO SECTION (Matching Attached Design with High Fidelity)
+           ══════════════════════════════════════════════════════════ */}
+        <section className="relative pt-28 sm:pt-32 md:pt-36 lg:pt-40 pb-16 sm:pb-24 px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1440px] mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+            
+            {/* Left Content Column */}
+            <div className="lg:col-span-7 flex flex-col items-start space-y-6 sm:space-y-7">
               
-              <motion.h1
-                initial={{ y: 60, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 70, damping: 12 }}
-                className="text-[10vw] sm:text-[clamp(2.5rem,5vw,5.5rem)] font-black uppercase leading-[0.85] tracking-tighter"
-              >
-                From Zero to
-              </motion.h1>
-              <motion.h1
-                initial={{ y: 60, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 70, damping: 12, delay: 0.1 }}
-                className="text-[10vw] sm:text-[clamp(2.5rem,5vw,5.5rem)] text-stroke-dark-lg font-black uppercase leading-[0.85] tracking-tighter"
-              >
-                AI Builder
-              </motion.h1>
+              {/* Top Category Badge */}
               <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 90, damping: 12, delay: 0.2 }}
-                className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mt-3"
+                initial={{ opacity: 0, y: -16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
               >
-                <span className="bg-[#050521] text-[#c6ff34] px-5 py-2.5 rounded-2xl text-[9vw] sm:text-[clamp(2rem,4.5vw,5rem)] font-black uppercase leading-none shadow-[4px_4px_0px_0px_#c6ff34] border border-[#c6ff34]/20">in 6 Months</span>
+                <span className="w-2 h-2 rounded-full bg-[#c6ff34] animate-pulse shadow-[0_0_8px_#c6ff34]" />
+                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#E0E7EC]">
+                  AI & MACHINE LEARNING INSTITUTE
+                </span>
+              </motion.div>
+
+              {/* Huge Headline: Learn AI. Build Real Skills. Create What's Next. */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="space-y-1 sm:space-y-2"
+              >
+                <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[76px] xl:text-[84px] font-extrabold tracking-[-0.03em] leading-[0.98] text-white">
+                  Learn AI.<br />
+                  Build <span className="text-[#c6ff34] drop-shadow-[0_0_30px_rgba(198,255,52,0.35)]">Real Skills.</span><br />
+                  Create What's Next.
+                </h1>
+              </motion.div>
+
+              {/* Subtitle Description */}
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-base sm:text-lg md:text-xl text-slate-300 max-w-xl font-normal leading-relaxed"
+              >
+                A 6-month, hands-on program to master AI, Machine Learning, Generative AI and intelligent agents — with real projects and expert mentorship.
+              </motion.p>
+
+              {/* Dual Action CTAs */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="flex flex-wrap items-center gap-4 pt-2 w-full sm:w-auto"
+              >
+                {/* Explore Programs Pill (Primary Lime Button) */}
+                <a
+                  href="#programs"
+                  className="btn-slide-wrap group px-7 py-3.5 sm:py-4 rounded-full bg-[#c6ff34] hover:bg-[#bbf029] text-[#090D11] font-bold text-sm sm:text-base tracking-wide shadow-[0_4px_24px_rgba(198,255,52,0.35)] flex items-center gap-2 cursor-pointer"
+                >
+                  <span>Explore Programs</span>
+                  <span className="font-bold transition-transform duration-200 group-hover:translate-x-1">→</span>
+                </a>
+
+                {/* Book a Consultation Pill (Dark Glassmorphic Button) */}
+                <Link
+                  to="/consultation"
+                  className="px-6 py-3.5 sm:py-4 rounded-full bg-white/[0.04] hover:bg-white/[0.09] text-white border border-white/15 hover:border-white/35 font-semibold text-sm sm:text-base tracking-wide transition-all duration-200 backdrop-blur-md flex items-center gap-2.5 shadow-sm"
+                >
+                  <span className="text-base">📅</span>
+                  <span>Book a Consultation</span>
+                </Link>
+              </motion.div>
+
+              {/* 4 Feature Pills in a Row (Offline Classes, Hands-on, Expert Mentorship, Career Skills) */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="pt-6 sm:pt-8 w-full border-t border-white/10"
+              >
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                  {[
+                    { icon: "🏛️", label: "Offline Classes", sub: "at Kannur" },
+                    { icon: "💻", label: "Hands-on", sub: "Learning" },
+                    { icon: "👥", label: "Expert", sub: "Mentorship" },
+                    { icon: "📈", label: "Career-focused", sub: "Skills" },
+                  ].map((feat, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 sm:p-3.5 rounded-2xl bg-white/[0.03] border border-white/8 hover:border-white/20 transition-all duration-200 flex items-center gap-3 group"
+                    >
+                      <div className="w-9 h-9 rounded-xl bg-white/5 group-hover:bg-[#c6ff34]/20 text-[#c6ff34] flex items-center justify-center text-lg shrink-0 transition-colors">
+                        {feat.icon}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs sm:text-sm font-semibold text-white leading-tight truncate">
+                          {feat.label}
+                        </div>
+                        <div className="text-[11px] text-slate-400 font-normal leading-tight">
+                          {feat.sub}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+
+            </div>
+
+            {/* Right Hero Graphic: 3D Stack Visualization + Floating Badge Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="lg:col-span-5 relative flex items-center justify-center mt-6 lg:mt-0"
+            >
+              {/* Outer Glow Halo */}
+              <div className="absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_center,rgba(198,255,52,0.18)_0%,transparent_70%)] blur-2xl pointer-events-none -z-10" />
+
+              {/* Main 3D AI Stack Visual Frame */}
+              <div className="relative w-full max-w-[480px] lg:max-w-none aspect-square rounded-3xl overflow-hidden border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)] bg-[#0C1218] group">
+                <img
+                  src={aiStackHero}
+                  alt="Deepstaq AI Layered Neural Stack Architecture"
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                />
+
+                {/* Cyber Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#090D11] via-transparent to-transparent opacity-60 pointer-events-none" />
+
+                {/* Floating Glassmorphism Badge Card (As in Screenshot) */}
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                  className="absolute top-4 sm:top-6 right-4 sm:right-6 p-4 sm:p-5 rounded-2xl bg-[#090D11]/80 backdrop-blur-xl border border-white/15 shadow-[0_12px_32px_rgba(0,0,0,0.6)] max-w-[210px] space-y-2.5 z-20"
+                >
+                  <div className="text-xs font-semibold text-white leading-snug tracking-tight">
+                    From ideas to intelligent solutions.
+                  </div>
+                  <div className="space-y-1.5 pt-1 text-[11px] text-slate-300 font-medium">
+                    {["AI", "Machine Learning", "Generative AI", "LLMs", "AI Agents"].map((item, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff34] shrink-0" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Bottom Left Live Status Pill */}
+                <div className="absolute bottom-4 left-4 z-20">
+                  <div className="px-3.5 py-1.5 rounded-full bg-[#090D11]/85 backdrop-blur-md border border-[#c6ff34]/30 text-[#c6ff34] text-[11px] font-semibold flex items-center gap-2 shadow-lg">
+                    <span className="w-2 h-2 rounded-full bg-[#c6ff34] animate-ping" />
+                    <span>Next Batch Starting at Kannur</span>
+                  </div>
+                </div>
+
+              </div>
+            </motion.div>
+
+          </div>
+        </section>
+
+
+        {/* ══════════════════════════════════════════════════════════
+            HARIS & CO COMBINED: FLOATING STATS STRIP & TECH ECOSYSTEM
+           ══════════════════════════════════════════════════════════ */}
+        <section className="px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1440px] mx-auto mb-20 sm:mb-28">
+          
+          {/* Glassmorphic Stats Strip with Gradient Border */}
+          <div className="relative rounded-3xl p-6 sm:p-8 md:p-10 bg-white/[0.03] backdrop-blur-2xl border border-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.4)]">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-white/10">
+              
+              <div className="flex flex-col items-center pt-3 sm:pt-0">
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-[#c6ff34] tracking-tight">
+                  <CountUpNumber end={100} suffix="%" />
+                </div>
+                <div className="text-xs sm:text-sm font-semibold text-white mt-1.5">Placement Assistance</div>
+                <div className="text-[11px] text-slate-400 mt-0.5">Dedicated career roadmap</div>
+              </div>
+
+              <div className="flex flex-col items-center pt-3 md:pt-0">
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-[#c6ff34] tracking-tight">
+                  <CountUpNumber end={50} suffix="+" />
+                </div>
+                <div className="text-xs sm:text-sm font-semibold text-white mt-1.5">Real AI Projects</div>
+                <div className="text-[11px] text-slate-400 mt-0.5">Production capstones built</div>
+              </div>
+
+              <div className="flex flex-col items-center pt-3 md:pt-0">
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-[#c6ff34] tracking-tight">
+                  <span>6</span><span className="text-xl sm:text-2xl font-bold ml-1 text-[#c6ff34]">Months</span>
+                </div>
+                <div className="text-xs sm:text-sm font-semibold text-white mt-1.5">Intensive Training</div>
+                <div className="text-[11px] text-slate-400 mt-0.5">160+ live learning hours</div>
+              </div>
+
+              <div className="flex flex-col items-center pt-3 md:pt-0">
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-[#c6ff34] tracking-tight">
+                  <span>Kannur</span>
+                </div>
+                <div className="text-xs sm:text-sm font-semibold text-white mt-1.5">Offline Tech Campus</div>
+                <div className="text-[11px] text-slate-400 mt-0.5">In-person mentorship</div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* High-Tech Tools & Frameworks Marquee */}
+          <div className="mt-8 pt-6 border-t border-white/5 overflow-hidden relative">
+            <div className="flex items-center justify-between pb-3 px-2">
+              <span className="text-[11px] uppercase font-semibold tracking-widest text-slate-400">
+                Production AI Tech Stack You Master
+              </span>
+              <span className="text-[11px] text-[#c6ff34] font-medium hidden sm:inline">
+                Industry-Grade Frameworks
+              </span>
+            </div>
+
+            <div className="flex overflow-hidden relative mask-radial">
+              <motion.div
+                animate={{ x: ["0%", "-50%"] }}
+                transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+                className="flex items-center gap-3 shrink-0 py-2"
+                style={{ width: "max-content" }}
+              >
+                {[...techStack, ...techStack].map((tech, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white/[0.03] border border-white/8 hover:border-[#c6ff34]/40 transition-colors shrink-0 group cursor-default"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff34] group-hover:scale-125 transition-transform" />
+                    <span className="text-xs font-semibold text-slate-200 group-hover:text-white">
+                      {tech.name}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-mono">
+                      {tech.tag}
+                    </span>
+                  </div>
+                ))}
               </motion.div>
             </div>
-
-            <p className="mt-6 sm:mt-8 text-slate-700 text-sm sm:text-base md:text-lg max-w-xl font-medium leading-relaxed text-center lg:text-left mx-auto lg:mx-0">
-              Master Artificial Intelligence, Machine Learning, Generative AI, Agentic AI, and modern AI development through an intensive 6-month professional diploma designed for beginners and professionals alike.
-            </p>
-
-            <motion.div
-              initial={{ y: 30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 100, damping: 15, delay: 0.45 }}
-              className="mt-8 sm:mt-12 flex flex-col sm:flex-row flex-wrap gap-4 w-full sm:w-auto items-center justify-center lg:justify-start"
-            >
-              <Link to="/aptitude" className="w-full sm:w-auto">
-                <button className="w-full px-12 py-5 bg-[#050521] text-[#c6ff34] font-black text-sm md:text-base uppercase tracking-widest rounded-xl shadow-[6px_6px_0px_0px_#c6ff34] active:translate-y-1 active:shadow-none transition-all hover:scale-105 duration-200">
-                  Take Aptitude Test
-                </button>
-              </Link>
-              <Link to="/consultation" className="w-full sm:w-auto">
-                <button className="w-full sm:w-auto px-12 py-5 border-2 border-[#050521] text-[#050521] font-black text-sm md:text-base uppercase tracking-widest rounded-xl hover:bg-[#050521] hover:text-[#c6ff34] transition-all hover:scale-105 duration-200">
-                  Book Your Consultation
-                </button>
-              </Link>
-            </motion.div>
           </div>
 
-          <div className="lg:col-span-6 flex justify-center items-center w-full mt-6 lg:mt-0">
-            <HeroVRSection />
+        </section>
+
+
+        {/* ══════════════════════════════════════════════════════════
+            2. OUR PROGRAMS / CHOOSE YOUR AI PATH (Matching Screenshot)
+           ══════════════════════════════════════════════════════════ */}
+        <section id="programs" className="py-16 sm:py-24 px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1440px] mx-auto">
+          
+          {/* Section Header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
+            <div className="space-y-2">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c6ff34]">
+                OUR PROGRAMS
+              </div>
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+                Choose Your AI Path
+              </h2>
+            </div>
+
+            <div className="flex items-center gap-4 md:max-w-md">
+              <p className="text-sm text-slate-400 font-normal leading-relaxed">
+                Industry-relevant programs designed to take you from curiosity to real-world skills. Learn, build and grow with practical guidance.
+              </p>
+
+              {/* Slider / Nav Controls */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  aria-label="Previous program"
+                  onClick={() => setActiveProgramIndex((prev) => (prev > 0 ? prev - 1 : programsData.length - 1))}
+                  className="w-10 h-10 rounded-full border border-white/15 bg-white/5 hover:bg-white/15 text-white flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  ←
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next program"
+                  onClick={() => setActiveProgramIndex((prev) => (prev < programsData.length - 1 ? prev + 1 : 0))}
+                  className="w-10 h-10 rounded-full border border-white/15 bg-white/5 hover:bg-white/15 text-white flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  →
+                </button>
+              </div>
+            </div>
           </div>
 
-        </div>
-      </section>
-
-      {/* Our Events Section */}
-      <OurEventsSection />
-
-      {/* Ticker & Core Statistics */}
-      <section className="bg-[#c6ff34] border-y-2 border-[#050521]">
-        <Ticker />
-        <div className="py-16 px-6 sm:px-12 max-w-[1400px] mx-auto">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-12 gap-x-8 text-center">
+          {/* Program Cards Grid (Matching the Screenshot: Flagship + GenAI + Agents) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {[
-              { val: 100, suffix: "%", label: "Placement Assistance" },
-              { val: 10, suffix: "+", label: "Live Projects" },
-              { val: 6, suffix: " Months", label: "Duration" },
-              { val: 20, suffix: "+", label: "AI Tools" },
-            ].map((s, i) => (
-              <div key={i} className="flex flex-col items-center">
-                <div className="text-4xl md:text-6xl font-black text-[#050521] leading-none mb-3 tracking-tighter">
-                  <CountUp end={s.val} suffix={s.suffix} />
+              ...programsData.slice(activeProgramIndex),
+              ...programsData.slice(0, activeProgramIndex),
+            ].slice(0, 3).map((prog) => (
+              <div
+                key={prog.id}
+                className={`relative rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 group ${
+                  prog.flagship
+                    ? "bg-gradient-to-b from-[#0F1C18] to-[#0A1115] border-2 border-[#10b981]/60 shadow-[0_12px_40px_rgba(16,185,129,0.15)]"
+                    : "bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.3)]"
+                }`}
+              >
+                {/* Top Row: Icon + Badge */}
+                <div>
+                  <div className="flex items-start justify-between gap-4 mb-6">
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl ${
+                      prog.flagship ? "bg-[#10b981]/20 text-[#c6ff34] border border-[#10b981]/40" : "bg-white/5 text-white border border-white/10"
+                    }`}>
+                      {prog.flagship ? "🏛️" : prog.id === "genai" ? "🤖" : "⚙️"}
+                    </div>
+
+                    <span className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+                      prog.flagship
+                        ? "bg-[#c6ff34] text-[#090D11] shadow-[0_0_12px_rgba(198,255,52,0.4)]"
+                        : "bg-white/10 text-slate-300 border border-white/10"
+                    }`}>
+                      {prog.badge}
+                    </span>
+                  </div>
+
+                  <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug mb-3">
+                    {prog.title}
+                  </h3>
+
+                  <p className="text-sm text-slate-300 font-normal leading-relaxed mb-6">
+                    {prog.desc}
+                  </p>
+
+                  {/* Metadata Row: Duration & Mode */}
+                  <div className="flex items-center gap-4 text-xs text-slate-400 font-medium pb-6 mb-6 border-b border-white/10">
+                    <span className="flex items-center gap-1.5">
+                      <span>⏱</span>
+                      <span>{prog.duration}</span>
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1.5">
+                      <span>📍</span>
+                      <span>{prog.mode}</span>
+                    </span>
+                  </div>
                 </div>
-                <div className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.25em] text-[#050521]/60">{s.label}</div>
+
+                {/* Bottom Row: Tags + Arrow Button */}
+                <div className="space-y-6 pt-2">
+                  <div className="flex flex-wrap gap-2">
+                    {prog.tags.map((tag, tIdx) => (
+                      <span
+                        key={tIdx}
+                        className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/10 text-[11px] font-medium text-slate-300"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2">
+                    <Link
+                      to={prog.link}
+                      className="text-xs font-semibold text-[#c6ff34] hover:underline flex items-center gap-1"
+                    >
+                      <span>Explore Syllabus</span>
+                      <span>→</span>
+                    </Link>
+
+                    <Link
+                      to={prog.link}
+                      aria-label={`View ${prog.title} details`}
+                      className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 ${
+                        prog.flagship
+                          ? "bg-white text-[#090D11] group-hover:bg-[#c6ff34]"
+                          : "bg-white/10 text-white group-hover:bg-white group-hover:text-[#090D11]"
+                      }`}
+                    >
+                      <span className="text-base font-bold">→</span>
+                    </Link>
+                  </div>
+                </div>
+
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* About, Vision & Mission Sections */}
-      <section className="py-24 px-5 border-b-2 border-[#050521] bg-slate-50/50">
-        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          <div className="lg:col-span-6 space-y-6">
-            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">
-              About Us<br /><span className="text-stroke-dark">Deepstaq.</span>
+        </section>
+
+
+        {/* ══════════════════════════════════════════════════════════
+            3. REAL-WORLD LEARNING / LEARN BY BUILDING (Matching Screenshot)
+           ══════════════════════════════════════════════════════════ */}
+        <section id="projects" className="py-16 sm:py-24 px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1440px] mx-auto">
+          
+          {/* Header */}
+          <div className="space-y-2 mb-12 sm:mb-16">
+            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c6ff34]">
+              REAL-WORLD LEARNING
+            </div>
+            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+              Learn by Building, <br className="hidden sm:block" />Not Just Watching.
             </h2>
-            <p className="text-slate-600 font-medium leading-relaxed text-base md:text-lg">
-              Deepstaq is an institute built for the next generation of AI practitioners. Our mission is to make Artificial Intelligence education practical, industry-focused, and accessible to everyone.
-            </p>
-            <p className="text-slate-600 font-medium leading-relaxed text-base md:text-lg">
-              Whether you come from engineering, business, education, or a completely different background, Deepstaq provides the right foundation to become an AI Builder through hands-on learning and real-world projects.
+            <p className="text-sm sm:text-base text-slate-400 font-normal max-w-xl pt-2">
+              Work on real projects, solve practical problems and build a portfolio that shows what you actually do.
             </p>
           </div>
-          <div className="lg:col-span-6 space-y-6">
-            <div className="bg-white border-2 border-[#050521] p-6 md:p-8 rounded-[1.8rem] shadow-[6px_6px_0px_0px_#050521]">
-              <span className="text-xs font-black uppercase tracking-widest text-[#050521] bg-[#c6ff34] border border-[#050521] px-3 py-1 rounded-full inline-block mb-4">
-                Our Vision
-              </span>
-              <p className="text-sm font-semibold leading-relaxed text-slate-600">
-                To become the leading institute for practical AI education by producing professionals who don't just understand Artificial Intelligence—but build intelligent systems that solve real-world problems.
-              </p>
-            </div>
-            <div className="bg-white border-2 border-[#050521] p-6 md:p-8 rounded-[1.8rem] shadow-[6px_6px_0px_0px_#c6ff34]">
-              <span className="text-xs font-black uppercase tracking-widest text-[#050521] bg-[#c6ff34] border border-[#050521] px-3 py-1 rounded-full inline-block mb-4">
-                Our Mission
-              </span>
-              <p className="text-sm font-semibold leading-relaxed text-slate-600">
-                Our mission is to make AI and Machine Learning education structured, practical, and accessible. Through project-based learning, expert mentorship, industry tools, and continuous practice, students progress from fundamentals to advanced Agentic and Generative AI systems.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Program Details: Highlights & Duration */}
-      <section className="py-24 px-5 border-b-2 border-[#050521]">
-        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-6 space-y-8">
-            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">
-              Programme<br /><span className="text-stroke-dark">Overview.</span>
-            </h2>
-            <p className="text-slate-500 font-mono text-sm">Every month of the programme includes live industry sessions led by experienced AI professionals.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                "Live Classes",
-                "Practical Projects",
-                "Industry Mentorship",
-                "Weekly Assignments",
-                "Real AI Applications",
-                "Portfolio Development",
-                "Career Guidance",
-              ].map((label, idx) => (
-                <div key={idx} className="flex items-center gap-3">
-                  <span className="w-2 h-2 rotate-45 bg-[#c6ff34] border border-[#050521] shrink-0 inline-block" />
-                  <span className="text-xs font-black uppercase tracking-wider text-[#050521]">{label}</span>
+          {/* 3 Interactive Mock Project Cards (RAG Chatbot, AI Dashboard, Autonomous Agents) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            
+            {/* Card 1: RAG-based Knowledge Chatbot */}
+            <div className="rounded-3xl p-6 bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between group shadow-lg">
+              <div>
+                {/* Mock UI: Chatbot Window */}
+                <div className="rounded-2xl bg-[#070B0E] border border-white/10 p-4 mb-5 shadow-inner space-y-3 font-mono text-xs">
+                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                    <span className="text-[10px] text-slate-400 font-sans font-bold flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-[#c6ff34]" />
+                      RAG Chatbot
+                    </span>
+                    <span className="text-[9px] text-[#c6ff34] bg-[#c6ff34]/10 px-1.5 py-0.5 rounded">
+                      Cosine: 0.94
+                    </span>
+                  </div>
+
+                  <div className="bg-white/[0.04] p-2.5 rounded-xl text-slate-300 text-[11px] leading-relaxed">
+                    <span className="text-slate-500 block text-[9px] mb-1">User Query:</span>
+                    "Summarize the Q3 report and top 3 risk factors."
+                  </div>
+
+                  <div className="bg-[#10b981]/10 border border-[#10b981]/30 p-2.5 rounded-xl text-emerald-200 text-[11px] leading-relaxed">
+                    <span className="text-[#c6ff34] font-bold block text-[9px] mb-1">Retrieved from docs.pdf:</span>
+                    "1. Market volatility (+12%)<br />2. GPU compute allocation<br />3. Model latency constraint"
+                  </div>
                 </div>
-              ))}
+
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
+                  RAG-based Knowledge Chatbot
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                  Build a chatbot that can understand and answer from your own documents.
+                </p>
+              </div>
+
+              <div className="pt-6 flex justify-end">
+                <Link
+                  to="/programs"
+                  aria-label="View RAG project details"
+                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-[#090D11] flex items-center justify-center transition-all group-hover:translate-x-1"
+                >
+                  →
+                </Link>
+              </div>
             </div>
+
+            {/* Card 2: AI Model Analysis Dashboard */}
+            <div className="rounded-3xl p-6 bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between group shadow-lg">
+              <div>
+                {/* Mock UI: Model Metrics & ROC Curve Graph */}
+                <div className="rounded-2xl bg-[#070B0E] border border-white/10 p-4 mb-5 shadow-inner space-y-3 font-mono text-xs">
+                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                    <span className="text-[10px] text-slate-400 font-sans font-bold flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                      Model Analytics
+                    </span>
+                    <span className="text-[9px] text-cyan-400 bg-cyan-400/10 px-1.5 py-0.5 rounded">
+                      Epoch 48/50
+                    </span>
+                  </div>
+
+                  {/* Metrics Pill Grid */}
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="p-2 rounded-lg bg-white/[0.04]">
+                      <div className="text-[9px] text-slate-400">ACCURACY</div>
+                      <div className="text-sm font-bold text-white">0.89</div>
+                    </div>
+                    <div className="p-2 rounded-lg bg-white/[0.04]">
+                      <div className="text-[9px] text-slate-400">PRECISION</div>
+                      <div className="text-sm font-bold text-[#c6ff34]">0.87</div>
+                    </div>
+                    <div className="p-2 rounded-lg bg-white/[0.04]">
+                      <div className="text-[9px] text-slate-400">F1-SCORE</div>
+                      <div className="text-sm font-bold text-white">0.88</div>
+                    </div>
+                  </div>
+
+                  {/* Mini Trend Line */}
+                  <div className="h-10 w-full bg-white/[0.02] rounded-lg p-2 flex items-end gap-1">
+                    {[20, 35, 45, 40, 60, 55, 75, 80, 89].map((val, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 bg-gradient-to-t from-cyan-500 to-[#c6ff34] rounded-t-sm"
+                        style={{ height: `${val}%` }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
+                  AI Model Analysis Dashboard
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                  Train, evaluate and visualize machine learning models with real data.
+                </p>
+              </div>
+
+              <div className="pt-6 flex justify-end">
+                <Link
+                  to="/programs"
+                  aria-label="View Model Dashboard project details"
+                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-[#090D11] flex items-center justify-center transition-all group-hover:translate-x-1"
+                >
+                  →
+                </Link>
+              </div>
+            </div>
+
+            {/* Card 3: Autonomous AI Agent Workflow */}
+            <div className="rounded-3xl p-6 bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between group shadow-lg">
+              <div>
+                {/* Mock UI: Node Graph / Agent Flowchart */}
+                <div className="rounded-2xl bg-[#070B0E] border border-white/10 p-4 mb-5 shadow-inner space-y-2.5 font-mono text-[11px]">
+                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                    <span className="text-[10px] text-slate-400 font-sans font-bold flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-purple-400" />
+                      Agent Execution Loop
+                    </span>
+                    <span className="text-[9px] text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded">
+                      ReAct Active
+                    </span>
+                  </div>
+
+                  {/* Flow Steps */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2 text-slate-300">
+                      <span className="px-2 py-0.5 rounded bg-white/10 text-[9px]">STEP 1</span>
+                      <span className="truncate">Plan: Search & verify records</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[#c6ff34]">
+                      <span className="px-2 py-0.5 rounded bg-[#c6ff34]/20 text-[9px] text-[#c6ff34]">STEP 2</span>
+                      <span className="truncate">Tool: WebSearch(q="AI Kannur")</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-emerald-400">
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-[9px] text-emerald-300">STEP 3</span>
+                      <span className="truncate">Output: Formatted brief created</span>
+                    </div>
+                  </div>
+                </div>
+
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
+                  Autonomous AI Agent Workflow
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                  Create AI agents that can plan, use tools and complete complex tasks.
+                </p>
+              </div>
+
+              <div className="pt-6 flex justify-end">
+                <Link
+                  to="/programs"
+                  aria-label="View Agent Workflow project details"
+                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-[#090D11] flex items-center justify-center transition-all group-hover:translate-x-1"
+                >
+                  →
+                </Link>
+              </div>
+            </div>
+
           </div>
 
-          <div className="lg:col-span-6 bg-white border-2 border-[#050521] p-6 md:p-10 rounded-[2rem] shadow-[8px_8px_0px_0px_#050521]">
-            <h3 className="text-xl font-black uppercase tracking-tight mb-6">
-              Instruction Hours
-            </h3>
-            <div className="space-y-4 font-mono text-sm text-slate-600">
-              <div className="flex justify-between border-b pb-2"><span className="uppercase text-xs font-black text-slate-400">Duration</span><span className="font-bold text-[#050521]">6 Months</span></div>
-              <div className="flex justify-between border-b pb-2"><span className="uppercase text-xs font-black text-slate-400">Classes Per Week</span><span className="font-bold text-[#050521]">3 Classes</span></div>
-              <div className="flex justify-between border-b pb-2"><span className="uppercase text-xs font-black text-slate-400">Hours Per Session</span><span className="font-bold text-[#050521]">2 Hours</span></div>
-              <div className="flex justify-between border-b pb-2"><span className="uppercase text-xs font-black text-slate-400">Total Weekly Hours</span><span className="font-bold text-[#050521]">6 Hours</span></div>
-              <div className="flex justify-between border-b pb-2"><span className="uppercase text-xs font-black text-slate-400">Capstone Project</span><span className="font-bold text-[#050521]">2 Additional Weeks</span></div>
-              <div className="flex justify-between"><span className="uppercase text-xs font-black text-slate-400">Total Learning Hours</span><span className="font-bold text-[#050521] bg-[#c6ff34] px-3 py-1 border border-[#050521] rounded-md">160+ Hours</span></div>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Capstone Project & Evaluation section */}
-      <section className="py-24 px-5 border-b-2 border-[#050521] bg-[#050521] text-white relative overflow-x-clip">
-        {/* Ambient glow */}
-        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-[#c6ff34]/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#c6ff34]/4 rounded-full blur-[100px] translate-x-1/3 translate-y-1/3 pointer-events-none" />
 
-        <div className="max-w-[1200px] mx-auto relative z-10">
-
-          {/* ── Header row ── */}
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between items-center text-center lg:text-left gap-8 mb-16 pb-10 border-b border-white/10">
-            <div className="space-y-4 max-w-2xl flex flex-col items-center lg:items-start">
-              <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-[#c6ff34] border border-[#c6ff34]/30 bg-[#c6ff34]/5 px-4 py-1.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff34] animate-pulse" />
-                Portfolio Building
-              </span>
-              <h2 className="text-4xl sm:text-5xl md:text-[clamp(3.5rem,7vw,6.5rem)] font-black uppercase tracking-tighter leading-none">
-                Capstone<br />
-                <span className="text-stroke-light text-transparent">Projects.</span>
+        {/* ══════════════════════════════════════════════════════════
+            4. OUR LEARNING EXPERIENCE (Matching Screenshot)
+           ══════════════════════════════════════════════════════════ */}
+        <section id="experience" className="py-16 sm:py-24 px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1440px] mx-auto">
+          
+          {/* Header with Navigation Arrows */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
+            <div className="space-y-2">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c6ff34]">
+                OUR LEARNING EXPERIENCE
+              </div>
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+                More Than Just Classes. <br />A Complete Learning Journey.
               </h2>
-              <p className="text-slate-400 text-sm md:text-base font-medium leading-relaxed max-w-xl">
-                Students ship a production-ready AI application under direct industry mentorship — graduating with a verified portfolio that proves real engineering competence.
-              </p>
             </div>
-            {/* Evaluation Summary Pill */}
-            <div className="flex gap-4 sm:gap-6 justify-center lg:justify-start flex-wrap w-full lg:w-auto">
-              {[{ label: "Capstone Project", pct: "60%", active: true }, { label: "Theory Exam", pct: "40%", active: false }].map((item, i) => (
-                <div key={i} className={`flex-1 min-w-[140px] sm:min-w-[160px] flex flex-col items-center justify-center border-2 rounded-2xl px-6 sm:px-8 py-5 sm:py-6 gap-1 ${item.active ? "border-[#c6ff34] bg-[#c6ff34]/5" : "border-white/10 bg-white/3"}`}>
-                  <span className={`text-4xl sm:text-5xl font-black leading-none ${item.active ? "text-[#c6ff34]" : "text-white/40"}`}>{item.pct}</span>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1 text-center">{item.label}</span>
-                </div>
-              ))}
+
+            <div className="flex items-center gap-4 md:max-w-md">
+              <p className="text-sm text-slate-400 font-normal leading-relaxed">
+                A practical, mentor-led experience designed to help you build skills, confidence and a career in AI.
+              </p>
             </div>
           </div>
 
-          {/* ── Bento grid of project tracks ── */}
-          <CapstoneGrid />
+          {/* 4 Cards with Real Photo Thumbnails */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {experienceCards.map((exp) => (
+              <div
+                key={exp.id}
+                className="group rounded-3xl overflow-hidden bg-white/[0.03] border border-white/10 hover:border-white/25 transition-all duration-300 flex flex-col justify-between shadow-lg"
+              >
+                {/* Photo Frame */}
+                <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-900">
+                  <img
+                    src={exp.img}
+                    alt={exp.title}
+                    className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                  />
+                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#090D11]/80 backdrop-blur-md border border-white/15 text-[10px] font-semibold text-white">
+                    {exp.badge}
+                  </div>
+                </div>
 
-          {/* ── Evaluation detail bar ── */}
-          <div className="border border-white/10 rounded-2xl p-6 md:p-8 bg-white/3 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                {/* Content */}
+                <div className="p-5 flex flex-col justify-between flex-1">
+                  <div>
+                    <h3 className="text-base sm:text-lg font-bold text-white mb-1.5 group-hover:text-[#c6ff34] transition-colors">
+                      {exp.title}
+                    </h3>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      {exp.desc}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 flex justify-end">
+                    <span className="w-8 h-8 rounded-full bg-white/10 group-hover:bg-[#c6ff34] text-white group-hover:text-[#090D11] flex items-center justify-center text-xs font-bold transition-all">
+                      →
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </section>
+
+
+        {/* ══════════════════════════════════════════════════════════
+            HARIS & CO COMBINED: STEP INSIDE THE AI SCHOOL / VIDEO TOUR
+           ══════════════════════════════════════════════════════════ */}
+        <section className="py-12 sm:py-20 px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1440px] mx-auto">
+          <div className="relative rounded-3xl overflow-hidden border border-white/15 p-6 sm:p-12 bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-white/[0.05] shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+            
+            {/* Ambient Background Blur Highlights */}
+            <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full bg-[#FF5600]/15 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-[#c6ff34]/15 blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 max-w-3xl mx-auto text-center space-y-6">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-semibold text-[#c6ff34]">
+                <span className="w-2 h-2 rounded-full bg-[#c6ff34] animate-pulse" />
+                Campus Immersion
+              </span>
+
+              <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                Step Inside the Deepstaq AI Institute
+              </h2>
+
+              <p className="text-sm sm:text-base text-slate-300 font-normal leading-relaxed">
+                Take a virtual walkthrough of our daily classroom atmosphere in Kannur. High-spec GPU workstations, collaborative project pods, and dedicated mentor roundtables.
+              </p>
+
+              {/* Video Preview Card with Central Play Button */}
+              <div
+                onClick={() => setVideoModalOpen(true)}
+                className="relative aspect-video max-w-2xl mx-auto rounded-2xl overflow-hidden border-2 border-white/20 cursor-pointer group shadow-2xl mt-8"
+              >
+                <img
+                  src={offlineClassroomImg}
+                  alt="Deepstaq Campus Tour Video"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300" />
+                
+                {/* Central Glowing Play Button */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#c6ff34] text-[#090D11] flex items-center justify-center shadow-[0_0_30px_rgba(198,255,52,0.6)] group-hover:scale-110 transition-transform duration-200">
+                    <span className="text-2xl sm:text-3xl ml-1">▶</span>
+                  </div>
+                </div>
+
+                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs text-white bg-black/60 backdrop-blur-md px-4 py-2 rounded-xl">
+                  <span>Watch Institute & Student Experience Tour</span>
+                  <span className="text-[#c6ff34] font-semibold">2:45 Min</span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+
+        {/* ══════════════════════════════════════════════════════════
+            5. PREVIOUS EVENTS / EVENT HIGHLIGHTS (Matching Screenshot)
+           ══════════════════════════════════════════════════════════ */}
+        <section id="events" className="py-16 sm:py-24 px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1440px] mx-auto">
+          
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
+            <div className="space-y-2">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c6ff34]">
+                PREVIOUS EVENTS
+              </div>
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+                Event Highlights
+              </h2>
+            </div>
+
+            <div className="flex items-center gap-4 md:max-w-md">
+              <p className="text-sm text-slate-400 font-normal leading-relaxed">
+                Workshops, masterclasses and community sessions to spread AI knowledge and build a stronger learning community in Kannur.
+              </p>
+            </div>
+          </div>
+
+          {/* 4 Event Cards from Deepstaq Archive */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {eventHighlights.map((evt) => (
+              <div
+                key={evt.id}
+                onClick={() => setActiveEventLightbox(evt)}
+                className="group rounded-3xl overflow-hidden bg-white/[0.03] border border-white/10 hover:border-[#c6ff34]/40 transition-all duration-300 flex flex-col justify-between shadow-lg cursor-pointer"
+              >
+                {/* Photo Frame */}
+                <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-900">
+                  <img
+                    src={evt.img}
+                    alt={evt.title}
+                    className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                  />
+                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#090D11]/85 backdrop-blur-md border border-white/15 text-[10px] font-semibold text-[#c6ff34]">
+                    {evt.badge}
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-5 flex flex-col justify-between flex-1">
+                  <div>
+                    <h3 className="text-lg font-bold text-white mb-1 group-hover:text-[#c6ff34] transition-colors">
+                      {evt.title}
+                    </h3>
+                    <div className="text-xs font-medium text-slate-300 mb-2">
+                      {evt.subtitle}
+                    </div>
+                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                      {evt.desc}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 flex items-center justify-between">
+                    <span className="text-[11px] text-slate-500 font-mono">
+                      {evt.date}
+                    </span>
+                    <span className="w-8 h-8 rounded-full bg-white/10 group-hover:bg-[#c6ff34] text-white group-hover:text-[#090D11] flex items-center justify-center text-xs font-bold transition-all">
+                      →
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </section>
+
+
+        {/* ══════════════════════════════════════════════════════════
+            6. WHAT YOU'LL LEARN / STRUCTURED CURRICULUM (Matching Screenshot)
+           ══════════════════════════════════════════════════════════ */}
+        <section id="curriculum" className="py-16 sm:py-24 px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1440px] mx-auto">
+          
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
+            <div className="space-y-2">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c6ff34]">
+                WHAT YOU'LL LEARN
+              </div>
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+                From Fundamentals to <br />Real-World AI Skills.
+              </h2>
+            </div>
+
+            <div className="flex items-center gap-4 md:max-w-md">
+              <p className="text-sm text-slate-400 font-normal leading-relaxed">
+                A structured curriculum that takes you from the basics to advanced, industry-relevant skills.
+              </p>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  aria-label="Previous module"
+                  onClick={() => setActiveCurriculumIndex((prev) => (prev > 0 ? prev - 1 : curriculumModules.length - 1))}
+                  className="w-10 h-10 rounded-full border border-white/15 bg-white/5 hover:bg-white/15 text-white flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  ←
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next module"
+                  onClick={() => setActiveCurriculumIndex((prev) => (prev < curriculumModules.length - 1 ? prev + 1 : 0))}
+                  className="w-10 h-10 rounded-full border border-white/15 bg-white/5 hover:bg-white/15 text-white flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* 6 Step Cards Progression */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {curriculumModules.map((mod, idx) => (
+              <div
+                key={mod.id}
+                onClick={() => setActiveCurriculumIndex(idx)}
+                className={`p-6 rounded-3xl transition-all duration-300 space-y-4 group cursor-pointer ${
+                  activeCurriculumIndex === idx
+                    ? "bg-white/[0.07] border-2 border-[#c6ff34] shadow-[0_0_25px_rgba(198,255,52,0.15)]"
+                    : "bg-white/[0.03] border border-white/10 hover:border-white/20 hover:bg-white/[0.05]"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl group-hover:bg-[#c6ff34]/20 transition-colors">
+                    {mod.icon}
+                  </div>
+                  <span className="text-xs font-mono font-bold text-slate-500">
+                    STAGE 0{idx + 1}
+                  </span>
+                </div>
+
+                <h3 className="text-lg font-bold text-white group-hover:text-[#c6ff34] transition-colors">
+                  {mod.title}
+                </h3>
+
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  {mod.desc}
+                </p>
+
+                <div className="pt-2 border-t border-white/5 space-y-1.5">
+                  {mod.topics.map((top, tIdx) => (
+                    <div key={tIdx} className="flex items-center gap-2 text-xs text-slate-300">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff34] shrink-0" />
+                      <span>{top}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </section>
+
+
+        {/* ══════════════════════════════════════════════════════════
+            HARIS & CO COMBINED: WHY CHOOSE SMARTER LEARNING WITH US?
+           ══════════════════════════════════════════════════════════ */}
+        <section className="py-16 sm:py-24 px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1440px] mx-auto border-t border-white/10">
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c6ff34]">
+              DEEPSTAQ PEDAGOGY
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+              Why Choose Smarter Learning with Us?
+            </h2>
+            <p className="text-sm sm:text-base text-slate-400">
+              Beginner-friendly, industry-aligned tech learning designed to help students and professionals build strong foundations and launch high-impact careers.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
-                badge: "PRACTICAL", badgeColor: "text-[#c6ff34] bg-[#c6ff34]/10 border-[#c6ff34]/20",
-                title: "Capstone Project", pct: 60, barColor: "bg-[#c6ff34]", pctColor: "text-[#c6ff34]",
-                desc: "Assessed on system design, modular codebase, model alignment, API latency, Docker setup, and documentation quality."
+                icon: "⚡",
+                title: "AI-Integrated Learning",
+                desc: "Every module uses real AI tools to solve real problems. You don't just learn about AI; you use it daily.",
               },
               {
-                badge: "THEORY", badgeColor: "text-slate-400 bg-white/5 border-white/10",
-                title: "Theory Examination", pct: 40, barColor: "bg-white/30", pctColor: "text-white/50",
-                desc: "Covers ML mathematics, neural architectures, tuning trade-offs, vector lookup mechanics, and pipeline engineering."
-              }
-            ].map((crit, i) => (
-              <div key={i} className="space-y-3.5 p-4 sm:p-0 bg-white/[0.02] sm:bg-transparent rounded-xl sm:rounded-none border border-white/5 sm:border-none">
-                <div className="flex flex-row items-center justify-between gap-2">
-                  <div className="flex flex-col items-start text-left">
-                    <span className={`text-[9px] font-black uppercase tracking-widest border px-2 py-0.5 rounded ${crit.badgeColor}`}>{crit.badge}</span>
-                    <h4 className="text-sm font-black uppercase tracking-wider text-white mt-1.5">{crit.title}</h4>
-                  </div>
-                  <span className={`text-3xl sm:text-4xl font-black leading-none ${crit.pctColor}`}>{crit.pct}%</span>
+                icon: "📁",
+                title: "Project-First Approach",
+                desc: "10+ portfolio projects to prove real engineering competence to hiring managers from day one.",
+              },
+              {
+                icon: "👥",
+                title: "Cohort-Based Mentorship",
+                desc: "Small focused groups with live discussions, code reviews, and personal architectural feedback.",
+              },
+              {
+                icon: "🎯",
+                title: "Career & Placement Launch",
+                desc: "Technical mock interviews, LinkedIn & resume optimization, and direct corporate recruitment pipelines.",
+              },
+            ].map((adv, i) => (
+              <div
+                key={i}
+                className="p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-[#c6ff34]/30 transition-all duration-300 space-y-3"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-[#c6ff34]/15 border border-[#c6ff34]/30 text-2xl flex items-center justify-center">
+                  {adv.icon}
                 </div>
-                <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full ${crit.barColor}`} style={{ width: `${crit.pct}%` }} />
-                </div>
-                <p className="text-[11px] text-slate-400 font-mono leading-relaxed text-left sm:text-left">{crit.desc}</p>
+                <h3 className="text-lg font-bold text-white">
+                  {adv.title}
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                  {adv.desc}
+                </p>
               </div>
             ))}
           </div>
+        </section>
 
-        </div>
-      </section>
 
-      {/* ── Career Opportunities ─────────────────────── */}
-      <section className="py-16 md:py-24 border-b-2 border-[#050521] bg-[#050521] overflow-hidden">
-        {/* Centered Header */}
-        <div className="max-w-[900px] mx-auto text-center mb-12 md:mb-16 px-5 space-y-4">
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="inline-block font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#c6ff34] bg-[#c6ff34]/10 border border-[#c6ff34]/30 px-4 py-2 rounded-full"
-          >
-            Programme Outcomes
-          </motion.span>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tighter leading-[0.88] text-white"
-          >
-            Career<br />
-            <span style={{ WebkitTextStroke: "2px #c6ff34", color: "transparent" }}>
-              Opportunities.
-            </span>
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="text-slate-400 text-sm md:text-base font-medium leading-relaxed max-w-[550px] mx-auto"
-          >
-            After completing the programme, students possess the technical portfolio required to pursue multiple high-demand roles in AI.
-          </motion.p>
-          <p className="text-[#c6ff34]/50 font-mono text-[10px] uppercase tracking-widest animate-pulse">
-            ← Drag or swipe to explore →
-          </p>
-        </div>
+        {/* ══════════════════════════════════════════════════════════
+            7. READY TO START & SCREENSHOT-PERFECT FOOTER (Matching Screenshot)
+           ══════════════════════════════════════════════════════════ */}
+        <footer id="about" className="border-t border-white/10 bg-[#070B0E] pt-16 sm:pt-20 pb-12 px-4 sm:px-6 md:px-10 lg:px-16">
+          <div className="max-w-[1440px] mx-auto space-y-16">
+            
+            {/* Top Banner: READY TO START? Your AI journey starts here. */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 pb-12 border-b border-white/10">
+              <div className="space-y-3 max-w-2xl">
+                <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#c6ff34]">
+                  READY TO START?
+                </div>
+                <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                  Your AI journey <span className="text-[#c6ff34]">starts here.</span>
+                </h2>
+                <p className="text-sm text-slate-400 font-normal leading-relaxed">
+                  Talk to our team, understand the right program for you and take the first step towards a future in AI.
+                </p>
+              </div>
 
-        {/* CircularGallery — WebGL curved carousel, responsive on mobile/tablet/desktop */}
-        <div className="w-full h-[360px] sm:h-[450px] lg:h-[500px] relative">
-          <CircularGallery
-            items={careerRolesData.map(role => ({ image: role.img, text: role.title }))}
-            bend={3}
-            textColor="#c6ff34"
-            borderRadius={0.05}
-            scrollSpeed={2.5}
-            scrollEase={0.04}
-            fontUrl="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap"
-            font="bold 22px Orbitron"
-          />
-        </div>
-      </section>
+              <div className="flex flex-wrap items-center gap-4 shrink-0">
+                <Link
+                  to="/admission"
+                  className="btn-slide-wrap px-8 py-4 rounded-full bg-[#c6ff34] hover:bg-[#bbf029] text-[#090D11] font-bold text-sm tracking-wide shadow-[0_4px_20px_rgba(198,255,52,0.35)] flex items-center gap-2"
+                >
+                  <span>Apply Now</span>
+                  <span className="font-bold">→</span>
+                </Link>
+                <Link
+                  to="/consultation"
+                  className="px-7 py-4 rounded-full bg-white/5 hover:bg-white/10 text-white border border-white/15 text-sm font-semibold transition-colors"
+                >
+                  Book a Consultation
+                </Link>
+              </div>
+            </div>
 
-      {/* FAQ / Queries Section */}
-      <section className="py-24 md:py-32 px-6 sm:px-12 lg:px-20 border-b-2 border-[#050521]">
-        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20">
-          <div>
-            <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.8] mb-8">Common<br /><span className="text-stroke-dark">Queries.</span></h2>
-            <p className="text-slate-400 font-mono text-sm uppercase tracking-widest">Everything you need to know about the journey.</p>
+            {/* Bottom 4-Column Grid: FAQ / Quick Links / Contact / Socials */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
+              
+              {/* Col 1: FAQ Section (5 cols) */}
+              <div className="lg:col-span-5 space-y-4">
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
+                  FAQ
+                </div>
+                <h3 className="text-xl font-bold text-white tracking-tight">
+                  Frequently Asked Questions.
+                </h3>
+                
+                {/* Social icons row */}
+                <div className="flex items-center gap-3 pt-2">
+                  {[
+                    { label: "Instagram", href: "https://www.instagram.com/deepstaq/", icon: "📸" },
+                    { label: "LinkedIn", href: "https://www.linkedin.com/company/deepstaq/", icon: "💼" },
+                    { label: "YouTube", href: "https://youtube.com/@deepstaq", icon: "▶️" },
+                  ].map((soc, sIdx) => (
+                    <a
+                      key={sIdx}
+                      href={soc.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={soc.label}
+                      className="w-9 h-9 rounded-xl bg-white/5 hover:bg-[#c6ff34] text-slate-300 hover:text-[#090D11] border border-white/10 flex items-center justify-center text-sm transition-all"
+                    >
+                      {soc.icon}
+                    </a>
+                  ))}
+                </div>
+
+                {/* Quick Expandable FAQs */}
+                <div className="space-y-2 pt-2 text-xs">
+                  {[
+                    {
+                      q: "What are the eligibility criteria?",
+                      a: "No coding background is strictly required. We begin with Python fundamentals, algorithmic thinking, and math essentials.",
+                    },
+                    {
+                      q: "Is there placement assistance provided?",
+                      a: "Yes. 100% placement support including mock technical interviews, resume polishing, and portfolio showcases to hiring partners.",
+                    },
+                    {
+                      q: "Can I work on my own projects?",
+                      a: "Absolutely. Students frequently build domain-specific capstones (healthcare, finance, robotics) under 1-on-1 mentor guidance.",
+                    },
+                  ].map((faq, fIdx) => (
+                    <div key={fIdx} className="border-b border-white/10 pb-2">
+                      <button
+                        onClick={() => setOpenFaq(openFaq === fIdx ? null : fIdx)}
+                        className="w-full text-left py-1 text-slate-300 hover:text-[#c6ff34] font-medium flex items-center justify-between gap-2"
+                      >
+                        <span>&gt; {faq.q}</span>
+                        <span className="text-slate-500 font-bold">{openFaq === fIdx ? "−" : "+"}</span>
+                      </button>
+                      {openFaq === fIdx && (
+                        <p className="text-slate-400 text-[11px] pt-1 pl-3 leading-relaxed">
+                          {faq.a}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Col 2: Quick Links (3 cols) */}
+              <div className="lg:col-span-3 space-y-4">
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
+                  Quick Links
+                </div>
+                <ul className="space-y-2.5 text-xs text-slate-300 font-medium">
+                  <li>
+                    <a href="#programs" className="hover:text-[#c6ff34] transition-colors">Programs</a>
+                  </li>
+                  <li>
+                    <a href="#experience" className="hover:text-[#c6ff34] transition-colors">Learning Experience</a>
+                  </li>
+                  <li>
+                    <a href="#projects" className="hover:text-[#c6ff34] transition-colors">Projects</a>
+                  </li>
+                  <li>
+                    <a href="#events" className="hover:text-[#c6ff34] transition-colors">Events</a>
+                  </li>
+                  <li>
+                    <a href="#about" className="hover:text-[#c6ff34] transition-colors">About</a>
+                  </li>
+                  <li>
+                    <Link to="/blog" className="hover:text-[#c6ff34] transition-colors">AI Learning Guides</Link>
+                  </li>
+                  <li>
+                    <Link to="/scholarship" className="hover:text-[#c6ff34] transition-colors">Scholarship</Link>
+                  </li>
+                  <li>
+                    <Link to="/contact" className="hover:text-[#c6ff34] transition-colors">Contact</Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Col 3: Contact & Direct Actions (4 cols) */}
+              <div id="contact" className="lg:col-span-4 space-y-4">
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
+                  Contact
+                </div>
+                
+                <div className="space-y-2.5 text-xs text-slate-300 leading-relaxed">
+                  <div className="flex items-center gap-2">
+                    <span>📍</span>
+                    <span>Kannur, Kerala, India</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>✉️</span>
+                    <a href="mailto:info@deepstaq.in" className="hover:text-[#c6ff34] transition-colors">
+                      info@deepstaq.in
+                    </a>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>📞</span>
+                    <a href="tel:+919495957011" className="hover:text-[#c6ff34] transition-colors font-bold text-white">
+                      +91 94959 57011
+                    </a>
+                  </div>
+                </div>
+
+                <div className="pt-3">
+                  <Link
+                    to="/admission"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#c6ff34] hover:bg-[#bbf029] text-[#090D11] text-xs font-bold tracking-wide transition-all shadow-md"
+                  >
+                    <span>Apply Now</span>
+                    <span>→</span>
+                  </Link>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Copyright & Legal Bar */}
+            <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+              <div>
+                © 2026 Deepstaq. All rights reserved.
+              </div>
+              <div className="flex items-center gap-6">
+                <Link to="/contact" className="hover:text-slate-300 transition-colors">Privacy Policy</Link>
+                <span>•</span>
+                <Link to="/contact" className="hover:text-slate-300 transition-colors">Terms of Service</Link>
+                <span>•</span>
+                <Link to="/contact" className="hover:text-slate-300 transition-colors">Sitemap</Link>
+              </div>
+            </div>
+
           </div>
-          <InlineFAQ />
-        </div>
-      </section>
+        </footer>
 
-      {/* Bottom CTA / Contact Section */}
-      <section className="py-24 px-5 bg-[#c6ff34] border-b-2 border-[#050521] text-[#050521]">
-        <div className="max-w-[1200px] mx-auto text-center space-y-8">
-          <h2 className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-none">
-            Ready to Become <br />An AI Builder?
-          </h2>
-          <p className="font-mono text-sm md:text-base font-black uppercase tracking-widest max-w-md mx-auto">
-            Future Won't Wait. Why Should You?
-          </p>
+      </div>
 
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md sm:max-w-none mx-auto">
-            <Link to="/aptitude" className="w-full sm:w-auto">
-              <button className="w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 bg-[#050521] text-[#c6ff34] hover:bg-white hover:text-[#050521] font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-[6px_6px_0px_0px_#050521] hover:scale-105 active:translate-y-1 duration-200">
-                Take Aptitude Test
-              </button>
-            </Link>
-            <Link to="/programs" className="w-full sm:w-auto">
-              <button className="w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 border-2 border-[#050521] text-[#050521] hover:bg-[#050521] hover:text-[#c6ff34] font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-[6px_6px_0px_0px_rgba(5,5,33,0.15)] sm:shadow-none hover:shadow-[6px_6px_0px_0px_#050521] hover:scale-105 active:translate-y-1 duration-200">
-                Explore Our Course
-              </button>
-            </Link>
+      {/* ── Event Lightbox Modal ── */}
+      <AnimatePresence>
+        {activeEventLightbox && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setActiveEventLightbox(null)}
+              className="fixed inset-0 bg-[#090D11]/90 backdrop-blur-xl"
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative max-w-4xl w-full rounded-3xl overflow-hidden bg-[#0D1318] border border-white/20 shadow-2xl z-10"
+            >
+              <div className="relative aspect-[16/10] w-full bg-black">
+                <img
+                  src={activeEventLightbox.img}
+                  alt={activeEventLightbox.title}
+                  className="w-full h-full object-contain"
+                />
+                <button
+                  type="button"
+                  aria-label="Close image preview"
+                  onClick={() => setActiveEventLightbox(null)}
+                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-[#090D11]/80 hover:bg-[#c6ff34] text-white hover:text-[#090D11] border border-white/20 flex items-center justify-center text-lg font-bold transition-colors cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="p-6 space-y-2">
+                <span className="text-xs font-bold text-[#c6ff34] uppercase tracking-wider">
+                  {activeEventLightbox.badge}
+                </span>
+                <h3 className="text-2xl font-bold text-white">
+                  {activeEventLightbox.title}
+                </h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  {activeEventLightbox.desc}
+                </p>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      </section>
+        )}
+      </AnimatePresence>
+
+      {/* ── Campus Tour Video Modal ── */}
+      <AnimatePresence>
+        {videoModalOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setVideoModalOpen(false)}
+              className="fixed inset-0 bg-[#090D11]/90 backdrop-blur-xl"
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative max-w-4xl w-full rounded-3xl overflow-hidden bg-[#0D1318] border border-white/20 shadow-2xl z-10 p-6 space-y-4"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#c6ff34] animate-pulse" />
+                  <span className="text-sm font-bold text-white">Deepstaq AI Institute Campus Tour</span>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Close tour video"
+                  onClick={() => setVideoModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#c6ff34] text-white hover:text-[#090D11] flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="relative aspect-video rounded-2xl overflow-hidden bg-black flex items-center justify-center border border-white/10">
+                <img
+                  src={offlineClassroomImg}
+                  alt="Deepstaq Campus Walkthrough"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center p-6 space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-[#c6ff34] text-[#090D11] flex items-center justify-center text-2xl font-bold shadow-[0_0_30px_#c6ff34]">
+                    ▶
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-bold text-white">Interactive Campus Experience</h4>
+                    <p className="text-xs text-slate-300 max-w-md mx-auto mt-1">
+                      Located in Kannur, Kerala. Direct offline batches running with dedicated workstations.
+                    </p>
+                  </div>
+                  <Link
+                    to="/consultation"
+                    onClick={() => setVideoModalOpen(false)}
+                    className="px-6 py-2.5 rounded-full bg-white text-[#090D11] font-bold text-xs uppercase tracking-wider hover:bg-[#c6ff34] transition-colors"
+                  >
+                    Schedule In-Person Campus Visit →
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

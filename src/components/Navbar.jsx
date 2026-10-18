@@ -124,18 +124,41 @@ function Navbar() {
     }, 150);
   };
 
-  const navLinks = [
-    { name: "HOME", path: "/" },
-    { name: "COURSES", path: "/programs" },
- 
-    { name: "BLOG", path: "/blog", hasBlogDropdown: true },
-    { name: "SCHOLARSHIP", path: "/scholarship" },
-    { name: "ADMISSION", path: "/admission" },
-    { name: "CONTACT", path: "/contact" },
-  ];
+  const isHome = location.pathname === "/";
+
+  const navLinks = isHome
+    ? [
+        { name: "Programs", path: "#programs" },
+        { name: "Learning Experience", path: "#experience" },
+        { name: "Projects", path: "#projects" },
+        { name: "Events", path: "#events" },
+        { name: "About", path: "#about" },
+        { name: "Contact", path: "#contact" },
+      ]
+    : [
+        { name: "Home", path: "/" },
+        { name: "Programs", path: "/programs" },
+        { name: "Blog", path: "/blog", hasBlogDropdown: true },
+        { name: "Scholarship", path: "/scholarship" },
+        { name: "Admission", path: "/admission" },
+        { name: "Contact", path: "/contact" },
+      ];
+
+  const handleNavClick = (e, targetPath) => {
+    if (targetPath.startsWith("#")) {
+      e.preventDefault();
+      const id = targetPath.replace("#", "");
+      const elem = document.getElementById(id);
+      if (elem) {
+        elem.scrollIntoView({ behavior: "smooth" });
+      }
+      setIsOpen(false);
+    }
+  };
 
   const isActiveRoute = (path) => {
     if (path === "/") return location.pathname === "/";
+    if (path.startsWith("#")) return false;
     return location.pathname.startsWith(path);
   };
 
@@ -144,30 +167,29 @@ function Navbar() {
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: showNavbar ? 0 : -120, opacity: showNavbar ? 1 : 0 }}
       transition={{ duration: 0.4, ease: "easeInOut" }}
-      className="fixed top-3 sm:top-4 md:top-6 left-0 w-full z-[100] px-3 sm:px-6 md:px-8 lg:px-12 flex justify-center pointer-events-none"
+      className="fixed top-3 sm:top-4 md:top-5 left-0 w-full z-[100] px-3 sm:px-6 md:px-8 lg:px-10 flex justify-center pointer-events-none"
     >
       <nav
         ref={navContainerRef}
-        className="w-full max-w-7xl flex items-center justify-between px-4 sm:px-6 md:px-8 xl:px-10 py-3 md:py-4 rounded-full bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-[0_8px_30px_rgba(0,0,0,0.06)] pointer-events-auto relative"
+        className="w-full max-w-7xl flex items-center justify-between px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-full pointer-events-auto transition-all duration-300 relative bg-[#090D11]/85 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
       >
         {/* LOGO */}
         <Link
           to="/"
-          className="flex items-center gap-2 group transition-opacity hover:opacity-80 flex-shrink-0 relative z-10"
+          className="flex items-center gap-2 group transition-opacity hover:opacity-85 flex-shrink-0 relative z-10"
         >
           <img
             src={logo}
             alt="DeepStaq Logo"
-            className="h-5 sm:h-6 md:h-7 w-auto object-contain"
+            className="h-6 sm:h-7 md:h-8 w-auto object-contain"
             style={{
-              filter:
-                "brightness(0) invert(7%) sepia(16%) saturate(3603%) hue-rotate(211deg) brightness(94%) contrast(109%)",
+              filter: "brightness(0) invert(1)",
             }}
           />
         </Link>
 
-        {/* DESKTOP LINKS (>= xl breakpoint for comfortable spacing) */}
-        <div className="hidden xl:flex items-center gap-6 2xl:gap-8 relative z-10">
+        {/* DESKTOP LINKS */}
+        <div className="hidden lg:flex items-center gap-5 xl:gap-7 relative z-10">
           {navLinks.map((link) => {
             const active = isActiveRoute(link.path);
 
@@ -270,11 +292,12 @@ function Navbar() {
             }
 
             return (
-              <Link
+              <a
                 key={link.path}
-                to={link.path}
-                className={`relative text-xs font-black uppercase tracking-[0.25em] transition-all duration-300 group ${
-                  active ? "text-[#050521]" : "text-slate-700 hover:text-[#050521]"
+                href={link.path}
+                onClick={(e) => handleNavClick(e, link.path)}
+                className={`relative text-xs sm:text-sm font-medium tracking-normal transition-all duration-200 group py-1 ${
+                  active ? "text-[#c6ff34] font-semibold" : "text-white/80 hover:text-white"
                 }`}
               >
                 {link.name}
@@ -283,22 +306,39 @@ function Navbar() {
                     active ? "w-full" : "w-0 group-hover:w-full"
                   }`}
                 />
-              </Link>
+              </a>
             );
           })}
         </div>
 
-        {/* MOBILE & TABLET MENU TOGGLE BUTTON (< xl screens) */}
-        <div className="xl:hidden flex items-center gap-2 relative z-10">
+        {/* DESKTOP ACTION BUTTONS (Free AI Class + Apply Now) */}
+        <div className="hidden lg:flex items-center gap-2.5 relative z-10">
+          <Link
+            to="/consultation"
+            className="px-4 py-2 rounded-full text-xs font-medium tracking-wide transition-all duration-200 border bg-white/[0.06] hover:bg-white/[0.12] text-white border-white/15 hover:border-white/30"
+          >
+            Free AI Class
+          </Link>
+          <Link
+            to="/admission"
+            className="group relative px-4 py-2 rounded-full bg-[#c6ff34] hover:bg-[#b8f522] text-[#090D11] text-xs font-bold tracking-wide transition-all duration-200 shadow-[0_2px_12px_rgba(198,255,52,0.3)] hover:scale-105 active:scale-95 flex items-center gap-1.5"
+          >
+            <span>Apply Now</span>
+            <span className="transition-transform duration-200 group-hover:translate-x-0.5 font-bold">→</span>
+          </Link>
+        </div>
+
+        {/* MOBILE & TABLET MENU TOGGLE BUTTON (< lg screens) */}
+        <div className="lg:hidden flex items-center gap-2 relative z-10">
           <button
             type="button"
             aria-label={isOpen ? "Close Menu" : "Open Navigation Menu"}
             aria-expanded={isOpen}
             onClick={() => setIsOpen(!isOpen)}
-            className={`p-2.5 rounded-full transition-all duration-300 border flex items-center justify-center ${
+            className={`p-2 rounded-full transition-all duration-300 border flex items-center justify-center ${
               isOpen
-                ? "bg-[#050521] text-[#c6ff34] border-[#050521] shadow-md"
-                : "bg-slate-100 hover:bg-slate-200 text-[#050521] border-slate-200/80"
+                ? "bg-[#c6ff34] text-[#090D11] border-[#c6ff34] shadow-md"
+                : "bg-white/10 hover:bg-white/20 text-white border-white/20"
             }`}
           >
             {isOpen ? <Icons.X className="w-5 h-5" /> : <Icons.Menu className="w-5 h-5" />}
@@ -313,7 +353,7 @@ function Navbar() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -16, scale: 0.97 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
-              className="absolute top-[calc(100%+10px)] left-0 w-full rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 xl:hidden z-50 flex flex-col gap-2 shadow-2xl border-2 border-[#050521] bg-white max-h-[82vh] overflow-y-auto"
+              className="absolute top-[calc(100%+10px)] left-0 w-full rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 lg:hidden z-50 flex flex-col gap-2 shadow-2xl border bg-[#0B1015]/95 backdrop-blur-2xl border-white/15 text-white max-h-[82vh] overflow-y-auto"
             >
               {/* Menu Header in Tablet/Mobile */}
               <div className="flex items-center justify-between pb-3 px-2 border-b border-slate-100">
@@ -421,40 +461,55 @@ function Navbar() {
                   }
 
                   return (
-                    <Link
+                    <a
                       key={link.path}
-                      to={link.path}
-                      onClick={() => setIsOpen(false)}
-                      className={`text-sm sm:text-base font-black uppercase tracking-[0.2em] py-2.5 sm:py-3 px-3 sm:px-4 transition-all flex items-center justify-between group rounded-2xl ${
-                        active
-                          ? "bg-[#c6ff34]/30 text-[#050521] font-black border border-[#050521]/20"
-                          : "text-slate-800 hover:bg-slate-100 hover:text-[#050521]"
+                      href={link.path}
+                      onClick={(e) => handleNavClick(e, link.path)}
+                      className={`text-sm sm:text-base font-semibold py-2.5 sm:py-3 px-3 sm:px-4 transition-all flex items-center justify-between group rounded-2xl ${
+                        isHome
+                          ? active
+                            ? "bg-[#c6ff34]/20 text-[#c6ff34] border border-[#c6ff34]/30"
+                            : "text-white/90 hover:bg-white/10 hover:text-white"
+                          : active
+                            ? "bg-[#c6ff34]/30 text-[#050521] font-black border border-[#050521]/20"
+                            : "text-slate-800 hover:bg-slate-100 hover:text-[#050521]"
                       }`}
                     >
                       <span className="flex items-center gap-2">{link.name}</span>
                       <span
-                        className={`w-2.5 h-2.5 rounded-full border border-[#050521] transition-transform ${
+                        className={`w-2 h-2 rounded-full transition-transform ${
                           active
                             ? "bg-[#c6ff34] scale-100"
                             : "bg-[#c6ff34] scale-0 group-hover:scale-100"
                         }`}
                       />
-                    </Link>
+                    </a>
                   );
                 })}
               </div>
 
-              <div className="h-px bg-slate-200 w-full my-2" />
-              <div className="flex items-center justify-between px-2 pt-1">
-                <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                  DeepStaq · Build AI
-                </p>
+              <div className={`h-px w-full my-2 ${isHome ? "bg-white/10" : "bg-slate-200"}`} />
+              
+              {/* Mobile Direct Action Buttons */}
+              <div className="grid grid-cols-2 gap-2.5 pt-1">
                 <Link
-                  to="/programs"
+                  to="/consultation"
                   onClick={() => setIsOpen(false)}
-                  className="text-[11px] font-black uppercase tracking-wider text-[#050521] bg-[#c6ff34] px-3 py-1 rounded-lg border border-[#050521] shadow-[2px_2px_0px_0px_#050521]"
+                  className={`py-3 px-3 rounded-xl text-center text-xs font-semibold border transition-all ${
+                    isHome
+                      ? "bg-white/5 hover:bg-white/10 text-white border-white/15"
+                      : "bg-slate-100 hover:bg-slate-200 text-[#050521] border-slate-300"
+                  }`}
                 >
-                  Explore Programs
+                  Free AI Class
+                </Link>
+                <Link
+                  to="/admission"
+                  onClick={() => setIsOpen(false)}
+                  className="py-3 px-3 rounded-xl text-center text-xs font-bold bg-[#c6ff34] hover:bg-[#b8f522] text-[#090D11] shadow-md flex items-center justify-center gap-1.5 transition-all"
+                >
+                  <span>Apply Now</span>
+                  <span className="font-bold">→</span>
                 </Link>
               </div>
             </motion.div>

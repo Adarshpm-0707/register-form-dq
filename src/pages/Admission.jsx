@@ -502,14 +502,14 @@ function Admission() {
   };
 
   return (
-    <div className="relative min-h-screen pt-28 pb-20 px-4 md:px-8 overflow-x-hidden bg-[#f8f9fa] text-[#050521]">
+    <div className="relative min-h-screen pt-28 pb-20 px-4 md:px-8 overflow-x-hidden bg-[#090D11] text-white">
       {/* Dynamic Background Effects */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-[10%] left-[-15%] w-[60vw] h-[60vw] rounded-full bg-gradient-to-br from-[#c6ff34]/20 to-transparent blur-3xl opacity-40 mix-blend-multiply" />
-        <div className="absolute bottom-[5%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-gradient-to-tl from-[#c6ff34]/15 to-[#050521]/5 blur-3xl opacity-50 mix-blend-multiply" />
+        <div className="absolute top-[10%] left-[-15%] w-[60vw] h-[60vw] rounded-full bg-gradient-to-br from-[#c6ff34]/15 to-transparent blur-[140px] pointer-events-none" />
+        <div className="absolute bottom-[5%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-gradient-to-tl from-emerald-500/10 to-transparent blur-[160px] pointer-events-none" />
       </div>
 
-      <div className="w-full max-w-4xl mx-auto">
+      <div className="w-full max-w-4xl mx-auto relative z-10">
 
         {/* Banner Headers */}
         <div className="text-center mb-12">
@@ -517,7 +517,7 @@ function Admission() {
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#050521] text-[#c6ff34] rounded-full text-[10px] font-black uppercase tracking-[0.25em] mb-4 border border-[#c6ff34]/20 shadow-md"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#c6ff34]/10 text-[#c6ff34] rounded-full text-[10px] font-mono font-bold uppercase tracking-[0.25em] mb-4 border border-[#c6ff34]/30 shadow-md"
           >
             <span className="w-2 h-2 rounded-full bg-[#c6ff34] animate-pulse"></span>
             Enrollment Gateway
@@ -525,15 +525,15 @@ function Admission() {
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl font-black uppercase tracking-tight text-[#050521] mb-2"
+            className="text-4xl md:text-5xl font-extrabold uppercase tracking-tight text-white mb-2"
           >
-            Student Admission <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-[#c6ff34]">Form</span>
+            Student Admission <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-[#c6ff34] to-emerald-400">Form</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-[#050521]/60 text-sm font-bold uppercase tracking-widest"
+            className="text-slate-400 text-sm font-medium uppercase tracking-wider"
           >
             Apply Online for Admission Check-In
           </motion.p>
@@ -544,14 +544,14 @@ function Admission() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="bg-white/70 backdrop-blur-xl border border-white/50 rounded-[2.5rem] p-6 md:p-12 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.06)] relative overflow-hidden"
+          className="bg-[#0D1318]/90 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-6 md:p-12 shadow-2xl relative overflow-hidden"
         >
           {/* Stepper Progress */}
           {step <= 3 && (
-            <div className="flex justify-between items-center mb-10 pb-8 border-b border-[#050521]/5 relative">
-              <div className="absolute top-[35%] left-0 right-0 h-0.5 bg-[#050521]/5 -z-10"></div>
+            <div className="flex justify-between items-center mb-10 pb-8 border-b border-white/10 relative">
+              <div className="absolute top-[35%] left-0 right-0 h-0.5 bg-white/10 -z-10"></div>
               <div
-                className="absolute top-[35%] left-0 h-0.5 bg-[#c6ff34] -z-10 transition-all duration-500"
+                className="absolute top-[35%] left-0 h-0.5 bg-[#c6ff34] -z-10 transition-all duration-500 shadow-[0_0_8px_#c6ff34]"
                 style={{ width: `${((step - 1) / 2) * 100}%` }}
               ></div>
 
@@ -561,13 +561,13 @@ function Admission() {
                 { s: 3, title: "Documents & Submit" }
               ].map((item) => (
                 <div key={item.s} className="flex flex-col items-center">
-                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-black text-sm transition-all duration-300 ${step >= item.s
-                      ? "bg-[#050521] text-[#c6ff34] border-2 border-[#c6ff34] shadow-[0_0_15px_rgba(198,255,52,0.3)]"
-                      : "bg-[#f8f9fa] text-[#050521]/30 border border-[#050521]/5"
+                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${step >= item.s
+                      ? "bg-[#c6ff34] text-[#090D11] border-2 border-[#c6ff34] shadow-[0_0_20px_rgba(198,255,52,0.4)]"
+                      : "bg-[#090D11] text-slate-500 border border-white/10"
                     }`}>
                     {item.s}
                   </div>
-                  <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-wider mt-2.5 hidden sm:block ${step >= item.s ? "text-[#050521]" : "text-[#050521]/30"
+                  <span className={`text-[10px] md:text-[11px] font-bold uppercase tracking-wider mt-2.5 hidden sm:block ${step >= item.s ? "text-[#c6ff34]" : "text-slate-500"
                     }`}>
                     {item.title}
                   </span>
@@ -584,10 +584,10 @@ function Admission() {
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 className={`mb-6 p-4 rounded-2xl text-xs font-bold uppercase tracking-widest text-center border transition-all ${status.type === "error"
-                    ? "bg-red-50 text-red-600 border-red-200"
+                    ? "bg-red-500/10 text-red-400 border-red-500/30"
                     : status.type === "success"
-                      ? "bg-[#c6ff34]/20 text-[#050521] border-[#c6ff34]/30"
-                      : "bg-blue-50 text-blue-700 border-blue-200"
+                      ? "bg-[#c6ff34]/15 text-[#c6ff34] border-[#c6ff34]/30"
+                      : "bg-blue-500/10 text-blue-400 border-blue-500/30"
                   }`}
               >
                 {status.message}
@@ -608,47 +608,47 @@ function Admission() {
                 {/* 1. STUDENT DETAILS */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 border-l-4 border-[#c6ff34] pl-3">
-                    <span className="text-[#050521]/30 font-black text-xl">01</span>
-                    <h2 className="text-lg font-black uppercase tracking-widest text-[#050521]">Student Details</h2>
+                    <span className="text-[#c6ff34]/40 font-mono font-bold text-xl">01</span>
+                    <h2 className="text-lg font-bold uppercase tracking-wider text-white">Student Details</h2>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">Full Name *</label>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">Full Name *</label>
                       <input
                         type="text"
                         required
                         value={formData.fullName}
                         onChange={(e) => handleTextChange(e, null, "fullName")}
-                        className="w-full bg-white border border-[#050521]/10 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] focus:ring-4 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-[#050521]/30 font-medium shadow-sm"
+                        className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] focus:ring-2 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-slate-500 text-white font-medium"
                         placeholder="ENTER STUDENT NAME"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">Gender *</label>
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">Gender *</label>
                         <select
                           required
                           value={formData.gender}
                           onChange={(e) => handleTextChange(e, null, "gender")}
-                          className="w-full bg-white border border-[#050521]/10 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] focus:ring-4 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-[#050521]/30 font-bold uppercase tracking-wider text-xs shadow-sm cursor-pointer"
+                          className="w-full bg-[#0D1318] border border-white/15 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] focus:ring-2 focus:ring-[#c6ff34]/20 transition-all duration-300 text-white font-bold uppercase tracking-wider text-xs cursor-pointer"
                         >
-                          <option value="">SELECT</option>
-                          <option value="Male">Male</option>
-                          <option value="Female">Female</option>
-                          <option value="Other">Other</option>
+                          <option value="" className="bg-[#0D1318] text-slate-400">SELECT</option>
+                          <option value="Male" className="bg-[#0D1318] text-white">Male</option>
+                          <option value="Female" className="bg-[#0D1318] text-white">Female</option>
+                          <option value="Other" className="bg-[#0D1318] text-white">Other</option>
                         </select>
                       </div>
 
                       <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">Date of Birth *</label>
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">Date of Birth *</label>
                         <input
                           type="date"
                           required
                           value={formData.dob}
                           onChange={(e) => handleTextChange(e, null, "dob")}
-                          className="w-full bg-white border border-[#050521]/10 rounded-2xl px-5 py-3.5 outline-none focus:border-[#c6ff34] focus:ring-4 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-[#050521]/30 font-medium text-sm shadow-sm cursor-pointer"
+                          className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-5 py-3.5 outline-none focus:border-[#c6ff34] focus:ring-2 focus:ring-[#c6ff34]/20 transition-all duration-300 text-white font-medium text-sm cursor-pointer"
                         />
                       </div>
                     </div>
@@ -658,94 +658,94 @@ function Admission() {
                 {/* 2. CONTACT DETAILS */}
                 <div className="space-y-6 pt-4">
                   <div className="flex items-center gap-3 border-l-4 border-[#c6ff34] pl-3">
-                    <span className="text-[#050521]/30 font-black text-xl">02</span>
-                    <h2 className="text-lg font-black uppercase tracking-widest text-[#050521]">Contact Details</h2>
+                    <span className="text-[#c6ff34]/40 font-mono font-bold text-xl">02</span>
+                    <h2 className="text-lg font-bold uppercase tracking-wider text-white">Contact Details</h2>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">Student Mobile Number *</label>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">Student Mobile Number *</label>
                       <input
                         type="tel"
                         required
                         maxLength="10"
                         value={formData.phone}
                         onChange={(e) => handleTextChange(e, null, "phone")}
-                        className="w-full bg-white border border-[#050521]/10 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] focus:ring-4 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-[#050521]/30 font-medium shadow-sm"
+                        className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] focus:ring-2 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-slate-500 text-white font-medium"
                         placeholder="10 DIGIT NUMBER"
                       />
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">Student Email ID *</label>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">Student Email ID *</label>
                       <input
                         type="email"
                         required
                         value={formData.email}
                         onChange={(e) => handleTextChange(e, null, "email")}
-                        className="w-full bg-white border border-[#050521]/10 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] focus:ring-4 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-[#050521]/30 font-medium shadow-sm"
+                        className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] focus:ring-2 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-slate-500 text-white font-medium"
                         placeholder="STUDENT@EXAMPLE.COM"
                       />
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">Current Address *</label>
+                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">Current Address *</label>
                     <textarea
                       required
                       value={formData.address}
                       onChange={(e) => handleTextChange(e, null, "address")}
-                      className="w-full bg-white border border-[#050521]/10 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] focus:ring-4 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-[#050521]/30 font-medium min-h-[100px] resize-none shadow-sm"
+                      className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] focus:ring-2 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-slate-500 text-white font-medium min-h-[100px] resize-none"
                       placeholder="ENTER HOUSE NAME, STREET DETAILS, ETC."
                     />
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">City *</label>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">City *</label>
                       <input
                         type="text"
                         required
                         value={formData.city}
                         onChange={(e) => handleTextChange(e, null, "city")}
-                        className="w-full bg-white border border-[#050521]/10 rounded-2xl px-4 py-3.5 outline-none focus:border-[#c6ff34] focus:ring-4 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-[#050521]/30 font-medium text-sm shadow-sm"
+                        className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-4 py-3.5 outline-none focus:border-[#c6ff34] focus:ring-2 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-slate-500 text-white font-medium text-sm"
                         placeholder="CITY"
                       />
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">District *</label>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">District *</label>
                       <input
                         type="text"
                         required
                         value={formData.district}
                         onChange={(e) => handleTextChange(e, null, "district")}
-                        className="w-full bg-white border border-[#050521]/10 rounded-2xl px-4 py-3.5 outline-none focus:border-[#c6ff34] focus:ring-4 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-[#050521]/30 font-medium text-sm shadow-sm"
+                        className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-4 py-3.5 outline-none focus:border-[#c6ff34] focus:ring-2 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-slate-500 text-white font-medium text-sm"
                         placeholder="DISTRICT"
                       />
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">State *</label>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">State *</label>
                       <input
                         type="text"
                         required
                         value={formData.state}
                         onChange={(e) => handleTextChange(e, null, "state")}
-                        className="w-full bg-white border border-[#050521]/10 rounded-2xl px-4 py-3.5 outline-none focus:border-[#c6ff34] focus:ring-4 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-[#050521]/30 font-medium text-sm shadow-sm"
+                        className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-4 py-3.5 outline-none focus:border-[#c6ff34] focus:ring-2 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-slate-500 text-white font-medium text-sm"
                         placeholder="STATE"
                       />
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">PIN Code *</label>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">PIN Code *</label>
                       <input
                         type="text"
                         required
                         maxLength="6"
                         value={formData.pinCode}
                         onChange={(e) => handleTextChange(e, null, "pinCode")}
-                        className="w-full bg-white border border-[#050521]/10 rounded-2xl px-4 py-3.5 outline-none focus:border-[#c6ff34] focus:ring-4 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-[#050521]/30 font-medium text-sm shadow-sm"
+                        className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-4 py-3.5 outline-none focus:border-[#c6ff34] focus:ring-2 focus:ring-[#c6ff34]/20 transition-all duration-300 placeholder:text-slate-500 text-white font-medium text-sm"
                         placeholder="6 DIGIT PIN"
                       />
                     </div>
@@ -753,13 +753,13 @@ function Admission() {
                 </div>
 
                 {/* Navigation Buttons */}
-                <div className="flex justify-end pt-6 border-t border-[#050521]/5">
+                <div className="flex justify-end pt-6 border-t border-white/10">
                   <button
                     type="button"
                     onClick={handleNext}
-                    className="px-10 py-4 rounded-2xl bg-[#050521] text-white hover:bg-[#c6ff34] hover:text-[#050521] font-black uppercase tracking-[0.2em] transition-all duration-300 shadow-md cursor-pointer"
+                    className="px-10 py-4 rounded-2xl bg-[#c6ff34] text-[#090D11] hover:shadow-[0_0_25px_rgba(198,255,52,0.4)] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer hover:scale-105 active:scale-95"
                   >
-                    Next Step
+                    Next Step →
                   </button>
                 </div>
               </motion.div>
@@ -776,42 +776,42 @@ function Admission() {
                 {/* 3. PARENT / GUARDIAN DETAILS */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 border-l-4 border-[#c6ff34] pl-3">
-                    <span className="text-[#050521]/30 font-black text-xl">03</span>
-                    <h2 className="text-lg font-black uppercase tracking-widest text-[#050521]">Parent / Guardian Details</h2>
+                    <span className="text-[#c6ff34]/40 font-mono font-bold text-xl">03</span>
+                    <h2 className="text-lg font-bold uppercase tracking-wider text-white">Parent / Guardian Details</h2>
                   </div>
 
                   {/* Father Details */}
-                  <div className="bg-slate-50/50 p-6 rounded-3xl border border-[#050521]/5 space-y-4">
-                    <h3 className="text-xs font-black uppercase tracking-widest text-[#050521]/60">Father’s Details</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-white/[0.03] p-6 rounded-3xl border border-white/10 space-y-4">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-[#c6ff34]">Father’s Details</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-black uppercase tracking-[0.2em] text-[#050521]/50 ml-1">Father's Name</label>
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-1">Father's Name</label>
                         <input
                           type="text"
                           value={formData.fatherName}
                           onChange={(e) => handleTextChange(e, null, "fatherName")}
-                          className="w-full bg-white border border-[#050521]/5 rounded-xl px-4 py-3 outline-none focus:border-[#c6ff34] text-xs font-medium"
+                          className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-[#c6ff34] text-xs font-medium text-white placeholder-slate-500"
                           placeholder="FATHER'S NAME"
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-black uppercase tracking-[0.2em] text-[#050521]/50 ml-1">Occupation</label>
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-1">Occupation</label>
                         <input
                           type="text"
                           value={formData.fatherOccupation}
                           onChange={(e) => handleTextChange(e, null, "fatherOccupation")}
-                          className="w-full bg-white border border-[#050521]/5 rounded-xl px-4 py-3 outline-none focus:border-[#c6ff34] text-xs font-medium"
+                          className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-[#c6ff34] text-xs font-medium text-white placeholder-slate-500"
                           placeholder="OCCUPATION"
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-black uppercase tracking-[0.2em] text-[#050521]/50 ml-1">Mobile Number</label>
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-1">Mobile Number</label>
                         <input
                           type="tel"
                           maxLength="10"
                           value={formData.fatherPhone}
                           onChange={(e) => handleTextChange(e, null, "fatherPhone")}
-                          className="w-full bg-white border border-[#050521]/5 rounded-xl px-4 py-3 outline-none focus:border-[#c6ff34] text-xs font-medium"
+                          className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-[#c6ff34] text-xs font-medium text-white placeholder-slate-500"
                           placeholder="FATHER'S MOBILE"
                         />
                       </div>
@@ -819,37 +819,37 @@ function Admission() {
                   </div>
 
                   {/* Mother Details */}
-                  <div className="bg-slate-50/50 p-6 rounded-3xl border border-[#050521]/5 space-y-4">
-                    <h3 className="text-xs font-black uppercase tracking-widest text-[#050521]/60">Mother’s Details</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-white/[0.03] p-6 rounded-3xl border border-white/10 space-y-4">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-[#c6ff34]">Mother’s Details</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-black uppercase tracking-[0.2em] text-[#050521]/50 ml-1">Mother's Name</label>
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-1">Mother's Name</label>
                         <input
                           type="text"
                           value={formData.motherName}
                           onChange={(e) => handleTextChange(e, null, "motherName")}
-                          className="w-full bg-white border border-[#050521]/5 rounded-xl px-4 py-3 outline-none focus:border-[#c6ff34] text-xs font-medium"
+                          className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-[#c6ff34] text-xs font-medium text-white placeholder-slate-500"
                           placeholder="MOTHER'S NAME"
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-black uppercase tracking-[0.2em] text-[#050521]/50 ml-1">Occupation</label>
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-1">Occupation</label>
                         <input
                           type="text"
                           value={formData.motherOccupation}
                           onChange={(e) => handleTextChange(e, null, "motherOccupation")}
-                          className="w-full bg-white border border-[#050521]/5 rounded-xl px-4 py-3 outline-none focus:border-[#c6ff34] text-xs font-medium"
+                          className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-[#c6ff34] text-xs font-medium text-white placeholder-slate-500"
                           placeholder="OCCUPATION"
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-black uppercase tracking-[0.2em] text-[#050521]/50 ml-1">Mobile Number</label>
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-1">Mobile Number</label>
                         <input
                           type="tel"
                           maxLength="10"
                           value={formData.motherPhone}
                           onChange={(e) => handleTextChange(e, null, "motherPhone")}
-                          className="w-full bg-white border border-[#050521]/5 rounded-xl px-4 py-3 outline-none focus:border-[#c6ff34] text-xs font-medium"
+                          className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-[#c6ff34] text-xs font-medium text-white placeholder-slate-500"
                           placeholder="MOTHER'S MOBILE"
                         />
                       </div>
@@ -860,33 +860,33 @@ function Admission() {
                 {/* 4. EDUCATIONAL QUALIFICATION */}
                 <div className="space-y-6 pt-4">
                   <div className="flex items-center gap-3 border-l-4 border-[#c6ff34] pl-3">
-                    <span className="text-[#050521]/30 font-black text-xl">04</span>
-                    <h2 className="text-lg font-black uppercase tracking-widest text-[#050521]">Educational Qualification</h2>
+                    <span className="text-[#c6ff34]/40 font-mono font-bold text-xl">04</span>
+                    <h2 className="text-lg font-bold uppercase tracking-wider text-white">Educational Qualification</h2>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">Highest Qualification</label>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">Highest Qualification</label>
                       <select
                         value={formData.highestQualification}
                         onChange={(e) => handleTextChange(e, null, "highestQualification")}
-                        className="w-full bg-white border border-[#050521]/10 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-xs font-bold uppercase tracking-wider shadow-sm cursor-pointer"
+                        className="w-full bg-[#0D1318] border border-white/15 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-xs font-bold uppercase tracking-wider text-white cursor-pointer"
                       >
-                        <option value="">SELECT LEVEL</option>
-                        <option value="Degree">Bachelor Degree</option>
-                        <option value="Plus Two">Plus Two / HSC</option>
-                        <option value="PG">Post Graduate</option>
-                        <option value="Other">Other</option>
+                        <option value="" className="bg-[#0D1318] text-slate-400">SELECT LEVEL</option>
+                        <option value="Degree" className="bg-[#0D1318] text-white">Bachelor Degree</option>
+                        <option value="Plus Two" className="bg-[#0D1318] text-white">Plus Two / HSC</option>
+                        <option value="PG" className="bg-[#0D1318] text-white">Post Graduate</option>
+                        <option value="Other" className="bg-[#0D1318] text-white">Other</option>
                       </select>
                     </div>
 
                     <div className="flex flex-col gap-2 md:col-span-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">Course Name</label>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">Course Name</label>
                       <input
                         type="text"
                         value={formData.institutionName}
                         onChange={(e) => handleTextChange(e, null, "institutionName")}
-                        className="w-full bg-white border border-[#050521]/10 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-medium shadow-sm"
+                        className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-medium text-white placeholder-slate-500"
                         placeholder="NAME OF SCHOOL OR COLLEGE"
                       />
                     </div>
@@ -894,41 +894,41 @@ function Admission() {
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">Board / University</label>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">Board / University</label>
                       <input
                         type="text"
                         value={formData.boardUniversity}
                         onChange={(e) => handleTextChange(e, null, "boardUniversity")}
-                        className="w-full bg-white border border-[#050521]/10 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-medium shadow-sm"
+                        className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-medium text-white placeholder-slate-500"
                         placeholder="E.G. CBSE, UNIVERSITY OF KERALA"
                       />
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">Year of Passing</label>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">Year of Passing</label>
                       <input
                         type="number"
                         value={formData.passingYear}
                         onChange={(e) => handleTextChange(e, null, "passingYear")}
-                        className="w-full bg-white border border-[#050521]/10 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-medium shadow-sm"
+                        className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-medium text-white placeholder-slate-500"
                         placeholder="YEAR"
                       />
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">Marks / Percentage / CGPA</label>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">Marks / Percentage / CGPA</label>
                       <input
                         type="text"
                         value={formData.percentageCGPA}
                         onChange={(e) => handleTextChange(e, null, "percentageCGPA")}
-                        className="w-full bg-white border border-[#050521]/10 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-medium shadow-sm"
+                        className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-medium text-white placeholder-slate-500"
                         placeholder="E.G. 85% OR 9.2 CGPA"
                       />
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-2 pt-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">Course Mode *</label>
+                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">Course Mode *</label>
                     <div className="flex gap-6 mt-1 ml-2">
                       <label className="inline-flex items-center gap-3 cursor-pointer group">
                         <input
@@ -938,9 +938,9 @@ function Admission() {
                           required
                           checked={formData.courseMode === "Offline"}
                           onChange={(e) => handleTextChange(e, null, "courseMode")}
-                          className="w-4 h-4 text-[#050521] border-[#050521]/20 focus:ring-[#c6ff34] accent-[#050521]"
+                          className="w-4 h-4 accent-[#c6ff34]"
                         />
-                        <span className="text-xs font-black uppercase tracking-wider text-[#050521]/80 group-hover:text-[#050521]">Offline Mode</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-300 group-hover:text-white">Offline Mode</span>
                       </label>
 
                       <label className="inline-flex items-center gap-3 cursor-pointer group">
@@ -950,29 +950,29 @@ function Admission() {
                           value="Online"
                           checked={formData.courseMode === "Online"}
                           onChange={(e) => handleTextChange(e, null, "courseMode")}
-                          className="w-4 h-4 text-[#050521] border-[#050521]/20 focus:ring-[#c6ff34] accent-[#050521]"
+                          className="w-4 h-4 accent-[#c6ff34]"
                         />
-                        <span className="text-xs font-black uppercase tracking-wider text-[#050521]/80 group-hover:text-[#050521]">Online Mode</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-300 group-hover:text-white">Online Mode</span>
                       </label>
                     </div>
                   </div>
                 </div>
 
                 {/* Navigation Buttons */}
-                <div className="flex justify-between pt-6 border-t border-[#050521]/5">
+                <div className="flex justify-between pt-6 border-t border-white/10">
                   <button
                     type="button"
                     onClick={handleBack}
-                    className="px-8 py-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-[#050521] font-black uppercase tracking-[0.2em] transition-all duration-300 cursor-pointer"
+                    className="px-8 py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer"
                   >
-                    Go Back
+                    ← Go Back
                   </button>
                   <button
                     type="button"
                     onClick={handleNext}
-                    className="px-10 py-4 rounded-2xl bg-[#050521] text-white hover:bg-[#c6ff34] hover:text-[#050521] font-black uppercase tracking-[0.2em] transition-all duration-300 shadow-md cursor-pointer"
+                    className="px-10 py-4 rounded-2xl bg-[#c6ff34] text-[#090D11] hover:shadow-[0_0_25px_rgba(198,255,52,0.4)] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer hover:scale-105 active:scale-95"
                   >
-                    Next Step
+                    Next Step →
                   </button>
                 </div>
               </motion.div>
@@ -989,45 +989,45 @@ function Admission() {
                 {/* 6. DOCUMENTS SUBMITTED */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 border-l-4 border-[#c6ff34] pl-3">
-                    <span className="text-[#050521]/30 font-black text-xl">06</span>
-                    <h2 className="text-lg font-black uppercase tracking-widest text-[#050521]">Documents & Photo Upload</h2>
+                    <span className="text-[#c6ff34]/40 font-mono font-bold text-xl">06</span>
+                    <h2 className="text-lg font-bold uppercase tracking-wider text-white">Documents & Photo Upload</h2>
                   </div>
-                  <p className="text-[10px] text-[#050521]/60 font-medium leading-relaxed bg-[#f8f9fa] p-4 rounded-2xl border border-[#050521]/5 ml-1">
-                    Please upload your <strong>Passport Size Photo</strong> as an image, and combine all other certificates (Aadhaar, SSLC, Plus Two, and Degree) into <strong>a single PDF file</strong> for upload.
+                  <p className="text-xs text-slate-300 leading-relaxed bg-white/[0.03] p-4 rounded-2xl border border-white/10 ml-1">
+                    Please upload your <strong className="text-[#c6ff34]">Passport Size Photo</strong> as an image, and combine all other certificates (Aadhaar, SSLC, Plus Two, and Degree) into <strong className="text-[#c6ff34]">a single PDF file</strong> for upload.
                   </p>
 
                   <div className="space-y-5">
                     {/* 1. Passport Size Photo Upload */}
-                    <div className={`p-5 rounded-2xl border transition-all duration-300 ${files.photo ? "bg-[#c6ff34]/10 border-[#c6ff34]/50 shadow-sm" : "bg-white border-[#050521]/10 hover:border-[#c6ff34]/50"}`}>
+                    <div className={`p-5 rounded-2xl border transition-all duration-300 ${files.photo ? "bg-[#c6ff34]/10 border-[#c6ff34]/50 shadow-sm" : "bg-white/[0.03] border-white/10 hover:border-[#c6ff34]/50"}`}>
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-start gap-3">
                           <input
                             type="checkbox"
                             checked={!!files.photo}
                             readOnly
-                            className="w-4 h-4 text-[#050521] border-[#050521]/20 focus:ring-[#c6ff34] accent-[#050521] mt-0.5"
+                            className="w-4 h-4 accent-[#c6ff34] mt-0.5"
                           />
                           <div>
-                            <span className="text-xs font-black uppercase tracking-wider text-[#050521]">Passport Size Photo *</span>
-                            <p className="text-[9px] text-[#050521]/40 font-bold uppercase tracking-widest mt-0.5">JPEG, PNG, or WebP image format</p>
+                            <span className="text-xs font-bold uppercase tracking-wider text-white">Passport Size Photo *</span>
+                            <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">JPEG, PNG, or WebP image format</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                           {files.photo ? (
                             <div className="flex items-center gap-3.5">
-                              <span className="text-[10px] font-bold text-blue-700 truncate max-w-[150px] md:max-w-[200px]">
+                              <span className="text-xs font-bold text-[#c6ff34] truncate max-w-[150px] md:max-w-[200px]">
                                 {files.photo.name}
                               </span>
                               <button
                                 type="button"
                                 onClick={() => removeFile("photo")}
-                                className="p-2 bg-red-55 hover:bg-red-100 text-red-500 rounded-lg text-[9px] font-black uppercase tracking-wider transition-colors border border-red-200/50 cursor-pointer"
+                                className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors border border-red-500/30 cursor-pointer"
                               >
                                 Delete
                               </button>
                             </div>
                           ) : (
-                            <label className="px-5 py-2.5 bg-slate-50 border border-[#050521]/10 rounded-xl text-[10px] font-black uppercase tracking-wider text-[#050521] hover:bg-[#050521] hover:text-white transition-all cursor-pointer inline-block">
+                            <label className="px-5 py-2.5 bg-white/5 border border-white/15 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-200 hover:bg-[#c6ff34] hover:text-[#090D11] transition-all cursor-pointer inline-block">
                               Upload Photo
                               <input
                                 type="file"
@@ -1042,36 +1042,36 @@ function Admission() {
                     </div>
 
                     {/* 2. All Documents in One PDF Upload */}
-                    <div className={`p-5 rounded-2xl border transition-all duration-300 ${files.allDocsPdf ? "bg-[#c6ff34]/10 border-[#c6ff34]/50 shadow-sm" : "bg-white border-[#050521]/10 hover:border-[#c6ff34]/50"}`}>
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#050521]/5">
+                    <div className={`p-5 rounded-2xl border transition-all duration-300 ${files.allDocsPdf ? "bg-[#c6ff34]/10 border-[#c6ff34]/50 shadow-sm" : "bg-white/[0.03] border-white/10 hover:border-[#c6ff34]/50"}`}>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
                         <div className="flex items-start gap-3">
                           <input
                             type="checkbox"
                             checked={!!files.allDocsPdf}
                             readOnly
-                            className="w-4 h-4 text-[#050521] border-[#050521]/20 focus:ring-[#c6ff34] accent-[#050521] mt-0.5"
+                            className="w-4 h-4 accent-[#c6ff34] mt-0.5"
                           />
                           <div>
-                            <span className="text-xs font-black uppercase tracking-wider text-[#050521]">All Documents in One PDF *</span>
-                            <p className="text-[9px] text-[#050521]/40 font-bold uppercase tracking-widest mt-0.5">Single consolidated PDF file format</p>
+                            <span className="text-xs font-bold uppercase tracking-wider text-white">All Documents in One PDF *</span>
+                            <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">Single consolidated PDF file format</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                           {files.allDocsPdf ? (
                             <div className="flex items-center gap-3.5">
-                              <span className="text-[10px] font-bold text-blue-700 truncate max-w-[150px] md:max-w-[200px]">
+                              <span className="text-xs font-bold text-[#c6ff34] truncate max-w-[150px] md:max-w-[200px]">
                                 {files.allDocsPdf.name}
                               </span>
                               <button
                                 type="button"
                                 onClick={() => removeFile("allDocsPdf")}
-                                className="p-2 bg-red-55 hover:bg-red-100 text-red-500 rounded-lg text-[9px] font-black uppercase tracking-wider transition-colors border border-red-200/50 cursor-pointer"
+                                className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors border border-red-500/30 cursor-pointer"
                               >
                                 Delete
                               </button>
                             </div>
                           ) : (
-                            <label className="px-5 py-2.5 bg-slate-50 border border-[#050521]/10 rounded-xl text-[10px] font-black uppercase tracking-wider text-[#050521] hover:bg-[#050521] hover:text-white transition-all cursor-pointer inline-block">
+                            <label className="px-5 py-2.5 bg-white/5 border border-white/15 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-200 hover:bg-[#c6ff34] hover:text-[#090D11] transition-all cursor-pointer inline-block">
                               Upload PDF
                               <input
                                 type="file"
@@ -1086,7 +1086,7 @@ function Admission() {
 
                       {/* Internal Checklist */}
                       <div className="pt-4 space-y-3.5">
-                        <span className="text-[9px] font-black uppercase tracking-[0.15em] text-[#050521]/60 block ml-1">Check the documents included inside the PDF:</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 block ml-1">Check the documents included inside the PDF:</span>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 ml-1">
                           {[
                             { key: "aadhaar", label: "Aadhaar Copy" },
@@ -1099,9 +1099,9 @@ function Admission() {
                                 type="checkbox"
                                 checked={formData.submittedDocuments[doc.key]}
                                 onChange={() => handleCheckboxChange("submittedDocuments", doc.key)}
-                                className="w-4 h-4 text-[#050521] border-[#050521]/20 focus:ring-[#c6ff34] accent-[#050521]"
+                                className="w-4 h-4 accent-[#c6ff34]"
                               />
-                              <span className="text-xs font-bold text-[#050521]/70 group-hover:text-[#050521]">{doc.label}</span>
+                              <span className="text-xs font-medium text-slate-300 group-hover:text-white">{doc.label}</span>
                             </label>
                           ))}
                         </div>
@@ -1113,55 +1113,55 @@ function Admission() {
                 {/* 7. EMERGENCY CONTACT */}
                 <div className="space-y-6 pt-4">
                   <div className="flex items-center gap-3 border-l-4 border-[#c6ff34] pl-3">
-                    <span className="text-[#050521]/30 font-black text-xl">07</span>
-                    <h2 className="text-lg font-black uppercase tracking-widest text-[#050521]">Emergency Contact</h2>
+                    <span className="text-[#c6ff34]/40 font-mono font-bold text-xl">07</span>
+                    <h2 className="text-lg font-bold uppercase tracking-wider text-white">Emergency Contact</h2>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">Contact Name *</label>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">Contact Name *</label>
                       <input
                         type="text"
                         required
                         value={formData.emergencyName}
                         onChange={(e) => handleTextChange(e, null, "emergencyName")}
-                        className="w-full bg-white border border-[#050521]/10 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-medium shadow-sm"
+                        className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-medium text-white placeholder-slate-500"
                         placeholder="CONTACT PERSON"
                       />
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">Relationship *</label>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">Relationship *</label>
                       <input
                         type="text"
                         required
                         value={formData.emergencyRelationship}
                         onChange={(e) => handleTextChange(e, null, "emergencyRelationship")}
-                        className="w-full bg-white border border-[#050521]/10 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-medium shadow-sm"
+                        className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-medium text-white placeholder-slate-500"
                         placeholder="E.G. BROTHER, UNCLE"
                       />
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">Mobile Number *</label>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">Mobile Number *</label>
                       <input
                         type="tel"
                         required
                         maxLength="10"
                         value={formData.emergencyPhone}
                         onChange={(e) => handleTextChange(e, null, "emergencyPhone")}
-                        className="w-full bg-white border border-[#050521]/10 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-medium shadow-sm"
+                        className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-medium text-white placeholder-slate-500"
                         placeholder="10 DIGIT PHONE"
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* 9. HOW DID YOU HEAR ABOUT US? */}
+                {/* 8. HOW DID YOU HEAR ABOUT US? */}
                 <div className="space-y-6 pt-4">
                   <div className="flex items-center gap-3 border-l-4 border-[#c6ff34] pl-3">
-                    <span className="text-[#050521]/30 font-black text-xl">08x</span>
-                    <h2 className="text-lg font-black uppercase tracking-widest text-[#050521]">How did you hear about us?</h2>
+                    <span className="text-[#c6ff34]/40 font-mono font-bold text-xl">08</span>
+                    <h2 className="text-lg font-bold uppercase tracking-wider text-white">How did you hear about us?</h2>
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 ml-1">
@@ -1180,9 +1180,9 @@ function Admission() {
                           type="checkbox"
                           checked={formData.heardAboutUs[src.key]}
                           onChange={() => handleCheckboxChange("heardAboutUs", src.key)}
-                          className="w-4 h-4 text-[#050521] border-[#050521]/20 focus:ring-[#c6ff34] accent-[#050521]"
+                          className="w-4 h-4 accent-[#c6ff34]"
                         />
-                        <span className="text-xs font-bold text-[#050521]/80 group-hover:text-[#050521]">{src.label}</span>
+                        <span className="text-xs font-medium text-slate-300 group-hover:text-white">{src.label}</span>
                       </label>
                     ))}
                   </div>
@@ -1193,12 +1193,12 @@ function Admission() {
                       animate={{ opacity: 1, height: "auto" }}
                       className="flex flex-col gap-2 pt-2"
                     >
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">Specify other source</label>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">Specify other source</label>
                       <input
                         type="text"
                         value={formData.heardAboutUsOther}
                         onChange={(e) => handleTextChange(e, null, "heardAboutUsOther")}
-                        className="w-full bg-white border border-[#050521]/10 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-medium shadow-sm"
+                        className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-medium text-white placeholder-slate-500"
                         placeholder="PLEASE WRITE DOWN THE DETAILS"
                       />
                     </motion.div>
@@ -1208,24 +1208,24 @@ function Admission() {
                 {/* 9. ADMISSION PAYMENT */}
                 <div className="space-y-6 pt-4">
                   <div className="flex items-center gap-3 border-l-4 border-[#c6ff34] pl-3">
-                    <span className="text-[#050521]/30 font-black text-xl">09</span>
-                    <h2 className="text-lg font-black uppercase tracking-widest text-[#050521]">Payment Amount</h2>
+                    <span className="text-[#c6ff34]/40 font-mono font-bold text-xl">09</span>
+                    <h2 className="text-lg font-bold uppercase tracking-wider text-white">Payment Amount</h2>
                   </div>
-                  <p className="text-[10px] text-[#050521]/60 font-medium leading-relaxed bg-[#f8f9fa] p-4 rounded-2xl border border-[#050521]/5 ml-1">
+                  <p className="text-xs text-slate-300 leading-relaxed bg-white/[0.03] p-4 rounded-2xl border border-white/10 ml-1">
                     Please enter the custom amount you wish to pay. This will initiate the Razorpay checkout portal for the specified amount.
                   </p>
 
                   <div className="max-w-xs flex flex-col gap-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]/60 ml-2">Amount to Pay (INR) *</label>
+                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 ml-2">Amount to Pay (INR) *</label>
                     <div className="relative">
-                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-sm font-bold text-[#050521]/60">₹</span>
+                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-sm font-bold text-[#c6ff34]">₹</span>
                       <input
                         type="number"
                         required
                         min="1"
                         value={formData.amount}
                         onChange={(e) => handleTextChange(e, null, "amount")}
-                        className="w-full bg-white border border-[#050521]/10 rounded-2xl pl-10 pr-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-bold shadow-sm"
+                        className="w-full bg-white/[0.04] border border-white/15 rounded-2xl pl-10 pr-5 py-4 outline-none focus:border-[#c6ff34] text-sm font-bold text-white"
                         placeholder="ENTER AMOUNT"
                       />
                     </div>
@@ -1233,24 +1233,24 @@ function Admission() {
                 </div>
 
                 {/* Navigation & Submit Buttons */}
-                <div className="flex justify-between pt-6 border-t border-[#050521]/5">
+                <div className="flex justify-between pt-6 border-t border-white/10">
                   <button
                     type="button"
                     onClick={handleBack}
                     disabled={loading}
-                    className="px-8 py-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-[#050521] font-black uppercase tracking-[0.2em] transition-all duration-300 cursor-pointer disabled:opacity-50"
+                    className="px-8 py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer disabled:opacity-50"
                   >
-                    Go Back
+                    ← Go Back
                   </button>
 
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-10 py-4 rounded-2xl bg-[#050521] text-white hover:bg-[#c6ff34] hover:text-[#050521] font-black uppercase tracking-[0.2em] transition-all duration-300 shadow-md cursor-pointer disabled:opacity-80 flex items-center gap-3"
+                    className="px-10 py-4 rounded-2xl bg-[#c6ff34] text-[#090D11] hover:shadow-[0_0_25px_rgba(198,255,52,0.4)] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer disabled:opacity-80 flex items-center gap-3 hover:scale-105 active:scale-95"
                   >
                     {loading ? (
                       <>
-                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        <span className="w-4 h-4 border-2 border-[#090D11] border-t-transparent rounded-full animate-spin"></span>
                         Submitting...
                       </>
                     ) : (
@@ -1268,22 +1268,22 @@ function Admission() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="py-12 flex flex-col items-center justify-center text-center gap-6"
               >
-                <div className="w-20 h-20 rounded-full bg-[#c6ff34]/20 flex items-center justify-center border border-[#c6ff34] shadow-[0_0_30px_rgba(198,255,52,0.3)]">
-                  <svg className="w-10 h-10 text-[#050521]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-20 h-20 rounded-full bg-[#c6ff34] text-[#090D11] flex items-center justify-center shadow-[0_0_35px_rgba(198,255,52,0.4)]">
+                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
                   </svg>
                 </div>
 
                 <div>
-                  <h2 className="text-2xl font-black uppercase tracking-tight text-[#050521] mb-2">Form Submitted Successfully!</h2>
-                  <p className="text-sm font-bold text-[#050521]/60 max-w-md mx-auto leading-relaxed mb-4">
+                  <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-white mb-2">Form Submitted Successfully!</h2>
+                  <p className="text-sm text-slate-300 max-w-md mx-auto leading-relaxed mb-4">
                     Thank you for applying. We have received your admission form along with your documents. Our team will verify them and contact you shortly.
                   </p>
 
                   {payId && (
-                    <div className="inline-block bg-[#050521] text-white px-6 py-3 rounded-2xl border border-white/10 shadow-sm mt-2">
-                      <span className="text-[8px] font-black uppercase tracking-[0.25em] text-[#c6ff34] block mb-1">Application Reference</span>
-                      <strong className="font-mono text-xs uppercase tracking-widest">{payId}</strong>
+                    <div className="inline-block bg-white/[0.04] text-white px-6 py-3 rounded-2xl border border-white/10 shadow-sm mt-2">
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-[0.25em] text-[#c6ff34] block mb-1">Application Reference</span>
+                      <strong className="font-mono text-sm uppercase tracking-widest text-white">{payId}</strong>
                     </div>
                   )}
                 </div>
@@ -1292,14 +1292,14 @@ function Admission() {
                   <button
                     type="button"
                     onClick={generateReceiptPDF}
-                    className="px-8 py-4 rounded-2xl bg-[#c6ff34] text-[#050521] hover:bg-[#050521] hover:text-white font-black uppercase tracking-[0.2em] transition-all duration-300 shadow-md cursor-pointer border border-[#c6ff34] hover:border-[#050521]"
+                    className="px-8 py-4 rounded-2xl bg-[#c6ff34] text-[#090D11] hover:shadow-[0_0_25px_rgba(198,255,52,0.4)] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer"
                   >
                     Download Receipt
                   </button>
                   <button
                     type="button"
                     onClick={resetForm}
-                    className="px-8 py-4 rounded-2xl bg-[#050521] text-[#c6ff34] hover:bg-[#c6ff34] hover:text-[#050521] font-black uppercase tracking-[0.2em] transition-all duration-300 shadow-md cursor-pointer"
+                    className="px-8 py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-white border border-white/10 font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer"
                   >
                     Fill Another Form
                   </button>
