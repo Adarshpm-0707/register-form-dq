@@ -5,8 +5,6 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import SecurityGuard from "./components/SecurityGuard";
 import SEO from "./components/SEO";
-import Background3D from "./components/Background3D";
-import WaterBubbles from "./components/WaterBubbles";
 import LeadPopupModal from "./components/LeadPopupModal";
 import "./styles/global.css";
 import "./styles/effects.css";
