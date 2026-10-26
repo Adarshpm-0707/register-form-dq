@@ -41,14 +41,26 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // Security for Aptitude Test Submissions
+    match /aptitude_submissions/{document} {
+      allow create: if isStringOfSize(request.resource.data.fullName, 100)
+                    && isStringOfSize(request.resource.data.phone, 20)
+                    && isStringOfSize(request.resource.data.email, 100);
+      allow read, update, delete: if isAdmin();
+    }
+
     // Security for Aptitude Test Leads
     match /aptitude_test_leads/{document} {
       allow create: if isStringOfSize(request.resource.data.fullName, 100)
                     && isStringOfSize(request.resource.data.phone, 20)
-                    && isStringOfSize(request.resource.data.email, 100)
-                    && request.resource.data.status == 'started'
-                    && request.resource.data.createdAt == request.time;
+                    && isStringOfSize(request.resource.data.email, 100);
       allow read, update, delete: if isAdmin();
+    }
+
+    // Security for Aptitude Test V2 Submissions
+    match /aptitude_v2_submissions/{document} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
     }
 
     // Security for Collected Contacts
@@ -90,6 +102,50 @@ service cloud.firestore {
                     && isStringOfSize(request.resource.data.phone, 20)
                     && request.resource.data.timestamp == request.time;
       allow read, update, delete: if isAdmin();
+    }
+
+    // Security for Scholarship Applications
+    match /scholarship_applications/{document} {
+      allow create: if isStringOfSize(request.resource.data.fullName, 150)
+                    && isStringOfSize(request.resource.data.phone, 20)
+                    && (!('email' in request.resource.data) || isStringOfSize(request.resource.data.email, 100))
+                    && (!('whyJoinReason' in request.resource.data) || isStringOfSize(request.resource.data.whyJoinReason, 2000))
+                    && request.resource.data.type == 'SCHOLARSHIP_APPLICATION';
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Security for Popup Lead Inquiries (Step-by-step lead capture)
+    match /popup_leads/{document} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
+    }
+
+    // Security for AI easy Ayi Registrations
+    match /ai_easy_ayi_registrations/{document} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
+    }
+
+    // Security for AI For Everyone / AI Easy Ayi Registrations
+    match /ai_for_everyone_registrations/{document} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
+    }
+
+    match /ai_easy_ayi_registrations/{document} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
+    }
+
+    // Security for AI for Students / AI Booster Program Registrations
+    match /ai_for_students_registrations/{document} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
+    }
+
+    match /ai_booster_program_registrations/{document} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
     }
 
     // Security for Admins - Strict Ownership, Write restricted to existing Admins (no self privilege escalation)

@@ -1,29 +1,59 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import Home from "./pages/Home";
-import Blog from "./pages/Blog";
 import ScrollToTop from "./components/ScrollToTop";
-import BackToTopButton from "./components/BackToTopButton";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import Contact from "./pages/Contact";
-import Admission from "./pages/Admission";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminLogin from "./pages/admin/AdminLogin";
 import SecurityGuard from "./components/SecurityGuard";
 import SEO from "./components/SEO";
+import LeadPopupModal from "./components/LeadPopupModal";
 import "./styles/global.css";
 import "./styles/effects.css";
+
+// Lazy-loaded pages for instant code-splitting and zero navigation lag
+const Home = lazy(() => import("./pages/Home"));
+const Programs = lazy(() => import("./pages/Programs"));
+
+// 7 Dedicated AI/ML Course & Guide Pages
+const AiCourse = lazy(() => import("./pages/AiCourse"));
+const MachineLearningCourse = lazy(() => import("./pages/MachineLearningCourse"));
+const AiMlCourse = lazy(() => import("./pages/AiMlCourse"));
+const OfflineAiCourse = lazy(() => import("./pages/OfflineAiCourse"));
+const AiCourseKannur = lazy(() => import("./pages/AiCourseKannur"));
+const OnlineAiCourse = lazy(() => import("./pages/OnlineAiCourse"));
+const AiMlCourseGuide = lazy(() => import("./pages/AiMlCourseGuide"));
+
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
+const Aptitude = lazy(() => import("./pages/Aptitude"));
+const Admission = lazy(() => import("./pages/Admission"));
+const Scholarship = lazy(() => import("./pages/Scholarship"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Consultation = lazy(() => import("./pages/Consultation"));
+const AiEasyAyi = lazy(() => import("./pages/AiEasyAyi"));
+const AiEasyAyiForm = lazy(() => import("./pages/AiEasyAyiForm"));
+const AiBoosterProgram = lazy(() => import("./pages/AiBoosterProgram"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
+
+const PageFallback = () => (
+  <div className="min-h-[70vh] flex items-center justify-center">
+    <div className="w-10 h-10 border-4 border-sky-400 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
 
 const AppLayout = ({ children }) => {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith("/admin");
+  const isHome = location.pathname === "/";
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-white text-[#050521]">
+    <div className="relative min-h-screen flex flex-col bg-[#090D11] text-white font-sans selection:bg-sky-400 selection:text-slate-950">
       {!isAdmin && <Navbar />}
+      {isHome && <LeadPopupModal />}
       <div className="flex-grow">
-        {children}
+        <Suspense fallback={<PageFallback />}>
+          {children}
+        </Suspense>
       </div>
       {!isAdmin && <Footer />}
     </div>
@@ -36,13 +66,37 @@ function App() {
       <Router>
         <SEO />
         <ScrollToTop />
-        <BackToTopButton />
         <AppLayout>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/programs" element={<Programs />} />
+
+            {/* 7 Separate AI/ML Course & Guide Pages */}
+            <Route path="/ai-course" element={<AiCourse />} />
+            <Route path="/machine-learning-course" element={<MachineLearningCourse />} />
+            <Route path="/ai-ml-course" element={<AiMlCourse />} />
+            <Route path="/offline-ai-course" element={<OfflineAiCourse />} />
+            <Route path="/ai-course-kannur" element={<AiCourseKannur />} />
+            <Route path="/online-ai-course" element={<OnlineAiCourse />} />
+            <Route path="/ai-ml-course-guide" element={<AiMlCourseGuide />} />
+
             <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/aptitude" element={<Aptitude />} />
             <Route path="/admission" element={<Admission />} />
+            <Route path="/scholarship" element={<Scholarship />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/consultation" element={<Consultation />} />
+            <Route path="/ai-easy-ayi" element={<AiEasyAyi />} />
+            <Route path="/aieasyayi" element={<AiEasyAyi />} />
+            <Route path="/ai-for-everyone" element={<AiEasyAyi />} />
+            <Route path="/ai-easy-ayi-form" element={<AiEasyAyiForm />} />
+            <Route path="/ai-easy-ayi/form" element={<AiEasyAyiForm />} />
+            <Route path="/ai-booster-program" element={<AiBoosterProgram />} />
+            <Route path="/aiboosterprogram" element={<AiBoosterProgram />} />
+            <Route path="/ai-booster" element={<AiBoosterProgram />} />
+
+   
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/login" element={<AdminLogin />} />
           </Routes>

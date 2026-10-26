@@ -40,7 +40,7 @@ export default function AdmissionsTimeline() {
       <div className="flex flex-col items-center text-center space-y-4 mb-12">
         <div className="text-[10px] font-black text-[#050521]/60 uppercase tracking-[0.5em]">Enrollment_Pipeline_Protocol</div>
         <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-[#050521]">
-          Admissions <span className="underline decoration-[#c6ff34] decoration-4 underline-offset-4">Protocol</span>
+          Admissions <span className="underline decoration-sky-400 decoration-4 underline-offset-4">Protocol</span>
         </h2>
       </div>
 
@@ -56,7 +56,7 @@ export default function AdmissionsTimeline() {
           >
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-[9px] font-black text-[#050521] bg-[#c6ff34] uppercase tracking-widest px-2 py-0.5 rounded">
+                <span className="text-[9px] font-black text-slate-950 bg-sky-400 uppercase tracking-widest px-2 py-0.5 rounded">
                   Step {item.step}
                 </span>
                 <span className="text-2xl font-black text-[#050521]/15 group-hover:text-[#050521] transition-colors">

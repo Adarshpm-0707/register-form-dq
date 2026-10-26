@@ -1,36 +1,54 @@
 import React, { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "../../firebase/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, deleteDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import { aptitudeQuestions } from "../Aptitude";
+import { aptitudeV2Questions } from "../../data/aptitudeV2Questions";
 import { 
   getSlotRegistrations, 
   getEventRegistrations, 
   getMasterRegistrations, 
-  getAptitudeLeads,
-  getCollectedContacts,
-  getUploadedContactFiles,
-  getWebinarRegistrations,
-  getAdmissionRegistrations
+  getAptitudeLeads, 
+  getAptitudeSubmissions, 
+  getAptitudeV2Submissions,
+  deleteAptitudeV2Submission,
+  getCollectedContacts, 
+  getUploadedContactFiles, 
+  getWebinarRegistrations, 
+  getAdmissionRegistrations, 
+  getConsultationBookings,
+  getScholarshipApplications,
+  updateScholarshipApplication,
+  getPopupLeads,
+  updatePopupLeadStatus,
+  deletePopupLead,
+  getAiForEveryoneRegistrations,
+  updateAiForEveryoneRegistration,
+  deleteAiForEveryoneRegistration,
+  getAiBoosterProgramRegistrations,
+  updateAiBoosterProgramRegistration,
+  deleteAiBoosterProgramRegistration
 } from "../../services/dbService";
 
-const DataCard = ({ item, headers }) => {
+const DataCard = ({ item, headers, onDelete }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const mainKeywords = ["name", "email", "phone", "course", "institution", "year"];
+  const mainKeywords = ["name", "email", "phone", "place", "city", "location", "course", "institution", "year", "qualification", "education"];
   
   const mainHeaders = headers.filter(h => mainKeywords.some(kw => h.toLowerCase().includes(kw)));
   let topHeaders = mainHeaders.length > 0 ? mainHeaders : headers.slice(0, 4);
   
-  // Sort topHeaders to ensure Name, Email, and Phone are at the very top
+  // Sort topHeaders to ensure Name, Email, Phone, Place are at the very top
   const getPriority = (h) => {
     const lower = h.toLowerCase();
     if (lower === "name" || lower.includes("name")) return 1;
     if (lower === "email" || lower.includes("email")) return 2;
     if (lower.includes("phone") || lower.includes("number")) return 3;
-    if (lower.includes("institution")) return 4;
-    if (lower.includes("course")) return 5;
-    if (lower.includes("year")) return 6;
+    if (lower.includes("place") || lower.includes("city") || lower.includes("location")) return 4;
+    if (lower.includes("institution")) return 5;
+    if (lower.includes("course")) return 6;
+    if (lower.includes("year")) return 7;
     return 10;
   };
   
@@ -68,7 +86,7 @@ const DataCard = ({ item, headers }) => {
         <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#050521]/40">{h.replace(/_/g, " ")}</span>
         <span className="text-sm font-medium text-[#050521] break-words">
           {displayVal.includes("http") ? (
-            <a href={displayVal} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-[#c6ff34] underline decoration-blue-300 hover:decoration-[#c6ff34] underline-offset-4 transition-colors">Link</a>
+            <a href={displayVal} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-white underline decoration-blue-300 hover:decoration-[#c6ff34] underline-offset-4 transition-colors">Link</a>
           ) : (
             displayVal
           )}
@@ -82,7 +100,7 @@ const DataCard = ({ item, headers }) => {
       <div className="flex justify-between items-center mb-5 pb-5 border-b border-[#050521]/5">
         <span className="font-mono text-[10px] text-[#050521]/40 uppercase tracking-widest">ID: {item.id.slice(0, 8)}</span>
         <span className="text-[10px] font-bold text-[#050521]/70 bg-[#f8f9fa] px-3 py-1.5 rounded-xl border border-[#050521]/5">
-          {item.timestamp ? new Date(item.timestamp.seconds * 1000).toLocaleDateString() : "-"}
+          {item.timestamp ? new Date(item.timestamp.seconds * 1000).toLocaleDateString() : item.createdAt ? new Date(item.createdAt.seconds * 1000).toLocaleDateString() : "-"}
         </span>
       </div>
       
@@ -96,19 +114,33 @@ const DataCard = ({ item, headers }) => {
         )}
       </div>
 
-      {extraHeaders.length > 0 && (
-        <button 
-          onClick={() => setIsExpanded(!isExpanded)} 
-          className="mt-6 w-full py-3 rounded-xl bg-slate-50 hover:bg-[#c6ff34]/20 text-[#050521] text-[10px] font-black uppercase tracking-widest transition-colors duration-300 border border-[#050521]/5"
-        >
-          {isExpanded ? "Show Less" : "See More"}
-        </button>
-      )}
+      <div className="flex gap-3 mt-6">
+        {extraHeaders.length > 0 && (
+          <button 
+            onClick={() => setIsExpanded(!isExpanded)} 
+            className="flex-1 py-3 rounded-xl bg-slate-50 hover:bg-[#c6ff34]/20 text-[#050521] text-[10px] font-black uppercase tracking-widest transition-colors duration-300 border border-[#050521]/5"
+          >
+            {isExpanded ? "Show Less" : "See More"}
+          </button>
+        )}
+        {onDelete && (
+          <button
+            type="button"
+            onClick={() => onDelete(item.id, item.fullName || item.name || item.email || "this record")}
+            className="px-4 py-3 rounded-xl bg-red-50 hover:bg-red-500 hover:text-white text-red-600 text-[10px] font-black uppercase tracking-widest transition-all duration-200 border border-red-200 flex items-center justify-center gap-1.5 shrink-0"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete
+          </button>
+        )}
+      </div>
     </div>
   );
 };
 
-const AdmissionCard = ({ item }) => {
+const AdmissionCard = ({ item, onDelete }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const submissionDate = item.timestamp 
@@ -128,14 +160,14 @@ const AdmissionCard = ({ item }) => {
     <div className="bg-white border border-[#050521]/10 rounded-[2rem] p-6 md:p-8 shadow-sm hover:shadow-xl hover:border-[#c6ff34]/50 transition-all duration-300 flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-5 border-b border-[#050521]/5">
         <div>
-          <span className="font-mono text-[9px] text-[#050521]/40 uppercase tracking-widest block">ID: {item.id.slice(0, 8)}</span>
+          <span className="font-mono text-[9px] text-[#050521]/40 uppercase tracking-widest block">ID: {item.id ? item.id.slice(0, 8) : "ADM"}</span>
           <h3 className="text-base font-black text-[#050521] uppercase tracking-wide mt-1">{item.fullName}</h3>
           <div className="flex flex-wrap gap-2 mt-2">
             <span className="inline-block px-3 py-1 bg-[#c6ff34]/20 text-[#050521] rounded-full text-[9px] font-black uppercase tracking-wider">
               {item.courseMode || "Offline"} Course
             </span>
-            <span className={`inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${item.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-              {item.paymentStatus === 'Paid' ? `Paid: ₹${item.amount ? Number(item.amount).toLocaleString("en-IN") : "30,000"} (Ref: ${item.paymentId ? item.paymentId.slice(0, 10) : 'Direct'})` : 'Pending'}
+            <span className={`inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${item.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-emerald-100 text-emerald-800'}`}>
+              {item.paymentStatus === 'Paid' ? `Paid: ₹${item.amount ? Number(item.amount).toLocaleString("en-IN") : "30,000"} (Ref: ${item.paymentId ? item.paymentId.slice(0, 10) : 'Direct'})` : (item.status || item.paymentStatus || 'Admission Submitted')}
             </span>
           </div>
         </div>
@@ -207,7 +239,7 @@ const AdmissionCard = ({ item }) => {
             ))}
           </div>
         ) : (
-          <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">No documents uploaded.</span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No documents uploaded (Optional).</span>
         )}
       </div>
 
@@ -294,22 +326,24 @@ const AdmissionCard = ({ item }) => {
           </div>
 
           <div className="space-y-3 pt-4 border-t border-[#050521]/5">
-            <h5 className="text-[9px] font-black uppercase tracking-widest text-slate-400">Payment Breakdown</h5>
+            <h5 className="text-[9px] font-black uppercase tracking-widest text-slate-400">Admission & Application Details</h5>
             <div className="bg-[#f8f9fa] p-4 rounded-2xl border border-[#050521]/5 grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <span className="text-[8px] font-black uppercase text-[#050521]/40 block">Course Fee Paid</span>
-                <strong className="text-xs text-[#050521] font-mono">₹{item.amount ? Number(item.amount).toLocaleString("en-IN") : "30,000"}</strong>
+                <span className="text-[8px] font-black uppercase text-[#050521]/40 block">Admission Fee</span>
+                <strong className="text-xs text-[#050521] font-mono">
+                  {item.amount && Number(item.amount) > 0 ? `₹${Number(item.amount).toLocaleString("en-IN")}` : "Direct Admission (No Fee)"}
+                </strong>
               </div>
               <div>
                 <span className="text-[8px] font-black uppercase text-[#050521]/40 block">Status</span>
-                <span className={`text-[10px] font-black uppercase ${item.paymentStatus === 'Paid' ? 'text-green-600' : 'text-yellow-600'}`}>
-                  {item.paymentStatus || "Pending"}
+                <span className={`text-[10px] font-black uppercase ${item.paymentStatus === 'Paid' || item.status === 'Submitted' ? 'text-green-600' : 'text-slate-600'}`}>
+                  {item.status || item.paymentStatus || "Submitted"}
                 </span>
               </div>
-              {item.paymentId && (
+              {(item.admissionRefId || item.paymentId) && (
                 <div>
                   <span className="text-[8px] font-black uppercase text-[#050521]/40 block">Reference ID</span>
-                  <span className="text-xs font-mono font-bold text-[#050521] break-all">{item.paymentId}</span>
+                  <span className="text-xs font-mono font-bold text-[#050521] break-all">{item.admissionRefId || item.paymentId}</span>
                 </div>
               )}
             </div>
@@ -317,12 +351,1922 @@ const AdmissionCard = ({ item }) => {
         </div>
       )}
 
-      <button 
-        onClick={() => setIsExpanded(!isExpanded)} 
-        className="mt-2 w-full py-3 rounded-2xl bg-slate-50 hover:bg-[#c6ff34]/20 text-[#050521] text-[10px] font-black uppercase tracking-widest transition-colors duration-300 border border-[#050521]/5"
-      >
-        {isExpanded ? "Show Less Details" : "See Complete Form Details"}
-      </button>
+      <div className="flex flex-col sm:flex-row gap-3 mt-2">
+        <button 
+          onClick={() => setIsExpanded(!isExpanded)} 
+          className="flex-1 py-3 rounded-2xl bg-slate-50 hover:bg-[#c6ff34]/20 text-[#050521] text-[10px] font-black uppercase tracking-widest transition-colors duration-300 border border-[#050521]/5"
+        >
+          {isExpanded ? "Show Less Details" : "See Complete Form Details"}
+        </button>
+        {onDelete && (
+          <button
+            type="button"
+            onClick={() => onDelete(item.id, item.fullName || "this admission")}
+            className="px-5 py-3 rounded-2xl bg-red-50 hover:bg-red-500 hover:text-white text-red-600 text-[10px] font-black uppercase tracking-widest transition-all duration-200 border border-red-200 flex items-center justify-center gap-1.5 shrink-0"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const AptitudeSubmissionCard = ({ item, onDelete }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const submissionDate = item.timestamp 
+    ? new Date(item.timestamp.seconds * 1000).toLocaleString() 
+    : item.createdAt?.seconds 
+    ? new Date(item.createdAt.seconds * 1000).toLocaleString()
+    : "-";
+
+  const rawAnswers = item.detailedAnswers || [];
+  const score = item.score !== undefined ? item.score : "-";
+  const total = item.totalQuestions || 15;
+  const pct = item.percentage !== undefined ? item.percentage : (score !== "-" ? Math.round((Number(score) / total) * 100) : 0);
+
+  // If detailedAnswers array exists and is not empty, use it. Otherwise, render the 15 standard questions breakdown!
+  const displayAnswers = rawAnswers.length > 0 ? rawAnswers : aptitudeQuestions.map((q) => {
+    const correctOpt = q.options.find((o) => o.key === q.answer);
+    return {
+      questionId: q.id,
+      question: q.question,
+      category: q.category,
+      selectedAnswerKey: null,
+      selectedAnswerText: "Submitted in Test",
+      correctAnswerKey: q.answer,
+      correctAnswerText: correctOpt ? correctOpt.text : "",
+      isCorrect: true,
+      options: q.options
+    };
+  });
+
+  return (
+    <div className="bg-white border border-[#050521]/10 rounded-[2rem] p-6 md:p-8 shadow-sm hover:shadow-xl hover:border-[#c6ff34]/50 transition-all duration-300 flex flex-col gap-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-5 border-b border-[#050521]/5">
+        <div>
+          <span className="font-mono text-[9px] text-[#050521]/40 uppercase tracking-widest block">
+            ID: {item.id ? item.id.slice(0, 8) : "TEST"}
+          </span>
+          <h3 className="text-base font-black text-[#050521] uppercase tracking-wide mt-1">
+            {item.fullName || item.name || "Anonymous Candidate"}
+          </h3>
+          <div className="flex flex-wrap gap-2 mt-2">
+            <span className="inline-block px-3 py-1 bg-[#c6ff34] text-[#050521] rounded-full text-[9px] font-black uppercase tracking-wider border border-[#050521]/20">
+              Score: {score} / {total} ({pct}%)
+            </span>
+            <span className="inline-block px-3 py-1 bg-slate-100 text-[#050521] rounded-full text-[9px] font-black uppercase tracking-wider border border-[#050521]/10">
+              {item.place || item.city || item.location || "Location Not Provided"}
+            </span>
+            <span className="inline-block px-3 py-1 bg-slate-100 text-[#050521] rounded-full text-[9px] font-black uppercase tracking-wider border border-[#050521]/10">
+              {item.institution && item.institution !== "N/A" ? item.institution : "AI Aptitude Candidate"}
+            </span>
+          </div>
+        </div>
+        <span className="text-[10px] font-bold text-[#050521]/70 bg-[#f8f9fa] px-3 py-1.5 rounded-xl border border-[#050521]/5 shrink-0">
+          {submissionDate}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-2xl border border-[#050521]/5">
+        <div>
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/40 block">Email</span>
+          <span className="text-xs font-bold text-[#050521] break-all">{item.email || "-"}</span>
+        </div>
+        <div>
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/40 block">Phone</span>
+          <span className="text-xs font-bold text-[#050521]">{item.phone || "-"}</span>
+        </div>
+        <div>
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/40 block">Place / City</span>
+          <span className="text-xs font-bold text-[#050521]">{item.place || item.city || "-"}</span>
+        </div>
+        <div>
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/40 block">Status</span>
+          <span className="text-xs font-black uppercase text-green-600">COMPLETED</span>
+        </div>
+      </div>
+
+      {isExpanded && (
+        <div className="space-y-4 pt-4 border-t border-[#050521]/5 animate-in fade-in duration-300">
+          <div className="flex items-center justify-between">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]">
+              Full 15 Questions & Answers Breakdown
+            </h4>
+            <span className="text-[9px] font-bold text-slate-400 font-mono">
+              Score: {score} / {total} ({pct}%)
+            </span>
+          </div>
+
+          <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+            {displayAnswers.map((ans, idx) => (
+              <div
+                key={idx}
+                className={`p-4 rounded-2xl border text-left transition-all ${
+                  ans.isCorrect
+                    ? "bg-green-50/60 border-green-200"
+                    : "bg-red-50/60 border-red-200"
+                }`}
+              >
+                <div className="flex justify-between items-start gap-2 mb-2">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-[#050521]/60">
+                    Q{idx + 1}. [{ans.category || "General"}]
+                  </span>
+                  <span
+                    className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${
+                      ans.isCorrect
+                        ? "bg-green-600 text-white"
+                        : "bg-red-600 text-white"
+                    }`}
+                  >
+                    {ans.isCorrect ? "✓ Correct" : "✕ Incorrect"}
+                  </span>
+                </div>
+
+                <p className="text-xs font-black text-[#050521] mb-2 leading-relaxed">
+                  {ans.question}
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono">
+                  {ans.selectedAnswerKey && (
+                    <div className={`p-2 rounded-xl border ${ans.isCorrect ? "bg-green-100/50 border-green-300" : "bg-red-100/50 border-red-300"}`}>
+                      <span className="block text-[8px] font-black uppercase tracking-wider text-slate-500">
+                        Selected Answer:
+                      </span>
+                      <span className="font-bold">
+                        ({ans.selectedAnswerKey}) {ans.selectedAnswerText}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="p-2 rounded-xl border bg-white border-green-300 col-span-2 sm:col-span-1">
+                    <span className="block text-[8px] font-black uppercase tracking-wider text-green-700">
+                      Correct Answer:
+                    </span>
+                    <span className="font-bold text-green-800">
+                      ({ans.correctAnswerKey}) {ans.correctAnswerText}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col sm:flex-row gap-3 pt-2">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex-1 py-3 rounded-2xl bg-slate-50 hover:bg-[#c6ff34]/20 text-[#050521] text-[10px] font-black uppercase tracking-widest transition-colors duration-300 border border-[#050521]/5"
+        >
+          {isExpanded ? "Hide Question Breakdown" : "View Full Question & Answer Breakdown"}
+        </button>
+        {onDelete && (
+          <button
+            type="button"
+            onClick={() => onDelete(item.id, item.fullName || item.name || "this submission")}
+            className="px-5 py-3 rounded-2xl bg-red-50 hover:bg-red-500 hover:text-white text-red-600 text-[10px] font-black uppercase tracking-widest transition-all duration-200 border border-red-200 flex items-center justify-center gap-1.5 shrink-0"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const AptitudeV2SubmissionCard = ({ item, onDelete }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [filterSection, setFilterSection] = useState("ALL");
+  const [phoneCopied, setPhoneCopied] = useState(false);
+  const [emailCopied, setEmailCopied] = useState(false);
+
+  const submissionDate = item.completedAt?.seconds
+    ? new Date(item.completedAt.seconds * 1000).toLocaleString()
+    : item.timestamp?.seconds
+    ? new Date(item.timestamp.seconds * 1000).toLocaleString()
+    : item.createdAt?.seconds
+    ? new Date(item.createdAt.seconds * 1000).toLocaleString()
+    : item.testDate || "-";
+
+  const rawAnswers = item.detailedAnswers || [];
+  const score = item.score !== undefined && item.score !== null ? item.score : "-";
+  const total = item.totalQuestions || 40;
+  const pct = item.percentage !== undefined && item.percentage !== null
+    ? item.percentage
+    : (score !== "-" ? Math.round((Number(score) / total) * 100) : 0);
+
+  const isCompleted = item.status === "completed" || item.testStatus === "completed" || score !== "-";
+
+  // If detailedAnswers array is present, use it. Otherwise, populate default from aptitudeV2Questions
+  const displayAnswers = rawAnswers.length > 0 ? rawAnswers : aptitudeV2Questions.map((q) => {
+    const correctOpt = q.options.find((o) => o.key === q.answer);
+    return {
+      questionId: q.id,
+      section: q.section,
+      sectionTitle: q.sectionTitle,
+      question: q.question,
+      selectedAnswerKey: null,
+      selectedAnswerText: "Recorded in Test",
+      correctAnswerKey: q.answer,
+      correctAnswerText: correctOpt ? correctOpt.text : "",
+      isCorrect: true,
+      explanation: q.explanation || "",
+    };
+  });
+
+  const secA = item.sectionBreakdown?.SECTION_A?.score ?? null;
+  const secB = item.sectionBreakdown?.SECTION_B?.score ?? null;
+  const secC = item.sectionBreakdown?.SECTION_C?.score ?? null;
+  const secD = item.sectionBreakdown?.SECTION_D?.score ?? null;
+
+  const handleCopyPhone = () => {
+    if (item.phone) {
+      navigator.clipboard.writeText(item.phone);
+      setPhoneCopied(true);
+      setTimeout(() => setPhoneCopied(false), 2000);
+    }
+  };
+
+  const handleCopyEmail = () => {
+    if (item.email) {
+      navigator.clipboard.writeText(item.email);
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    }
+  };
+
+  const filteredAnswers = displayAnswers.filter((ans) => {
+    if (filterSection === "ALL") return true;
+    if (filterSection === "INCORRECT") return !ans.isCorrect;
+    return ans.section === filterSection;
+  });
+
+  return (
+    <div className="bg-white border-2 border-[#050521] rounded-[2rem] p-6 md:p-8 shadow-[6px_6px_0px_0px_#050521] hover:shadow-[8px_8px_0px_0px_#c6ff34] transition-all duration-300 flex flex-col gap-5 w-full">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 pb-4 border-b border-[#050521]/10">
+        <div>
+          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+            <span className="font-mono text-[9px] text-[#050521]/50 uppercase tracking-widest">
+              ID: {item.id ? item.id.slice(0, 10) : "V2-TEST"}
+            </span>
+            <span className="px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-[#050521] text-white">
+              APTITUDE V2 (40Q)
+            </span>
+            <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider ${
+              isCompleted ? "bg-emerald-100 text-emerald-800 border border-emerald-300" : "bg-amber-100 text-amber-800 border border-amber-300"
+            }`}>
+              {isCompleted ? "✓ Completed" : "⏳ Started / In Progress"}
+            </span>
+          </div>
+
+          <h3 className="text-lg font-black text-[#050521] uppercase tracking-tight">
+            {item.fullName || item.name || "Anonymous Candidate"}
+          </h3>
+
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            <span className="px-3 py-1 bg-[#c6ff34] text-[#050521] rounded-full text-xs font-black uppercase tracking-wider border border-[#050521]/20">
+              Score: {score} / {total} ({pct}%)
+            </span>
+            {item.performanceRating && (
+              <span className="px-3 py-1 bg-[#050521]/5 text-[#050521] rounded-full text-[10px] font-black uppercase tracking-wider border border-[#050521]/10">
+                {item.performanceRating}
+              </span>
+            )}
+            <span className="px-3 py-1 bg-slate-100 text-[#050521] rounded-full text-[10px] font-bold">
+              {item.place || item.city || item.location || "Place N/A"}
+            </span>
+          </div>
+        </div>
+
+        <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 shrink-0 font-mono">
+          {submissionDate}
+        </span>
+      </div>
+
+      {/* 4 Section Score Badges Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-[#f4f6f8] p-3 rounded-2xl border border-[#050521]/10 font-mono">
+        <div className="p-2.5 bg-white rounded-xl border border-[#050521]/5 text-center">
+          <span className="text-[8px] font-black uppercase text-slate-400 block tracking-wider">Sec A: Numerical</span>
+          <span className="text-sm font-black text-[#050521]">
+            {secA !== null ? `${secA} / 10` : "-"}
+          </span>
+        </div>
+        <div className="p-2.5 bg-white rounded-xl border border-[#050521]/5 text-center">
+          <span className="text-[8px] font-black uppercase text-slate-400 block tracking-wider">Sec B: Logical</span>
+          <span className="text-sm font-black text-[#050521]">
+            {secB !== null ? `${secB} / 10` : "-"}
+          </span>
+        </div>
+        <div className="p-2.5 bg-white rounded-xl border border-[#050521]/5 text-center">
+          <span className="text-[8px] font-black uppercase text-slate-400 block tracking-wider">Sec C: Analytical</span>
+          <span className="text-sm font-black text-[#050521]">
+            {secC !== null ? `${secC} / 10` : "-"}
+          </span>
+        </div>
+        <div className="p-2.5 bg-white rounded-xl border border-[#050521]/5 text-center">
+          <span className="text-[8px] font-black uppercase text-slate-400 block tracking-wider">Sec D: Computat.</span>
+          <span className="text-sm font-black text-[#050521]">
+            {secD !== null ? `${secD} / 10` : "-"}
+          </span>
+        </div>
+      </div>
+
+      {/* Candidate Details Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white p-3 rounded-2xl border border-[#050521]/10 text-xs">
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Phone</span>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="font-bold text-[#050521] font-mono">{item.phone || "-"}</span>
+            {item.phone && (
+              <button
+                type="button"
+                onClick={handleCopyPhone}
+                className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-bold"
+              >
+                {phoneCopied ? "✓" : "Copy"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Email</span>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="font-bold text-[#050521] truncate max-w-[150px]">{item.email || "-"}</span>
+            {item.email && (
+              <button
+                type="button"
+                onClick={handleCopyEmail}
+                className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-bold"
+              >
+                {emailCopied ? "✓" : "Copy"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Institution / College</span>
+          <span className="font-bold text-[#050521] truncate block mt-0.5">{item.institution && item.institution !== "N/A" ? item.institution : "Not Specified"}</span>
+        </div>
+      </div>
+
+      {/* Expandable Answers Breakdown */}
+      {isExpanded && (
+        <div className="space-y-4 pt-4 border-t border-[#050521]/10 animate-in fade-in duration-300">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]">
+              Full 40 Questions Breakdown ({displayAnswers.length} Questions)
+            </h4>
+
+            {/* Filter pills */}
+            <div className="flex flex-wrap gap-1 text-[9px] font-mono">
+              {["ALL", "SECTION A", "SECTION B", "SECTION C", "SECTION D", "INCORRECT"].map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setFilterSection(f)}
+                  className={`px-2 py-1 rounded-md border font-bold cursor-pointer transition-colors ${
+                    filterSection === f
+                      ? "bg-[#050521] text-white border-[#050521]"
+                      : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200"
+                  }`}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+            {filteredAnswers.map((ans, idx) => (
+              <div
+                key={ans.questionId || idx}
+                className={`p-3.5 rounded-2xl border text-left transition-all ${
+                  ans.isCorrect
+                    ? "bg-green-50/70 border-green-200"
+                    : "bg-red-50/70 border-red-200"
+                }`}
+              >
+                <div className="flex justify-between items-start gap-2 mb-1.5">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-[#050521]/60 font-mono">
+                    Q{ans.questionId}. [{ans.section || "SECTION"} · {ans.sectionTitle || ""}]
+                  </span>
+                  <span
+                    className={`text-[8px] font-black uppercase px-2 py-0.5 rounded font-mono ${
+                      ans.isCorrect
+                        ? "bg-green-600 text-white"
+                        : "bg-red-600 text-white"
+                    }`}
+                  >
+                    {ans.isCorrect ? "✓ Correct" : "✕ Incorrect"}
+                  </span>
+                </div>
+
+                <p className="text-xs font-black text-[#050521] mb-2 leading-relaxed whitespace-pre-line">
+                  {ans.question}
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px] font-mono">
+                  <div className={`p-2 rounded-xl border ${ans.isCorrect ? "bg-green-100/60 border-green-300" : "bg-red-100/60 border-red-300"}`}>
+                    <span className="block text-[8px] font-black uppercase tracking-wider text-slate-500">
+                      Selected Answer:
+                    </span>
+                    <span className="font-bold">
+                      {ans.selectedAnswerKey ? `(${ans.selectedAnswerKey}) ${ans.selectedAnswerText}` : "Not Answered"}
+                    </span>
+                  </div>
+
+                  <div className="p-2 rounded-xl border bg-white border-green-300">
+                    <span className="block text-[8px] font-black uppercase tracking-wider text-green-700">
+                      Correct Answer:
+                    </span>
+                    <span className="font-bold text-green-800">
+                      ({ans.correctAnswerKey}) {ans.correctAnswerText}
+                    </span>
+                  </div>
+                </div>
+
+                {ans.explanation && (
+                  <p className="text-[10px] font-mono text-slate-600 mt-2 pt-2 border-t border-black/5">
+                    <strong>Solution:</strong> {ans.explanation}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Card Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-3 pt-2">
+        <button
+          type="button"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex-1 py-3 rounded-2xl bg-[#050521]/5 hover:bg-[#c6ff34] text-[#050521] text-[10px] font-black uppercase tracking-widest transition-colors duration-300 border border-[#050521]/10 cursor-pointer"
+        >
+          {isExpanded ? "Hide Question Breakdown" : "View Full 40 Questions Breakdown"}
+        </button>
+        {onDelete && (
+          <button
+            type="button"
+            onClick={() => onDelete(item.id, item.fullName || item.name || "this submission", item._sourceCol)}
+            className="px-5 py-3 rounded-2xl bg-red-50 hover:bg-red-500 hover:text-white text-red-600 text-[10px] font-black uppercase tracking-widest transition-all duration-200 border border-red-200 flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const ConsultationCard = ({ item, onDelete }) => {
+  const submissionDate = item.timestamp 
+    ? new Date(item.timestamp.seconds * 1000).toLocaleString() 
+    : item.createdAt?.seconds 
+    ? new Date(item.createdAt.seconds * 1000).toLocaleString()
+    : typeof item.createdAt === "string" ? item.createdAt : "-";
+
+  const modeLabel = item.preferredMode === "remote" ? "Remote / Online" : item.preferredMode === "offline" ? "Offline / In-person" : item.preferredMode === "hybrid" ? "Hybrid (Both)" : item.preferredMode || "Not Specified";
+
+  const whyList = Array.isArray(item.whyAI) ? item.whyAI : (item.whyAI ? [item.whyAI] : []);
+  const cleanPhone = (item.phone || "").replace(/\D/g, "");
+
+  return (
+    <div className="bg-white border-2 border-[#050521] rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-6 md:p-8 shadow-[4px_4px_0px_0px_#050521] sm:shadow-[6px_6px_0px_0px_#050521] hover:shadow-[8px_8px_0px_0px_#c6ff34] transition-all duration-300 flex flex-col gap-4 sm:gap-5 w-full min-w-0 overflow-hidden">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4 pb-4 border-b border-[#050521]/10 w-full min-w-0">
+        <div className="w-full min-w-0">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
+            <span className="bg-[#c6ff34] text-[#050521] px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest border border-[#050521]/20">
+              Free Consultation
+            </span>
+            <span className="bg-[#050521] text-white px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest">
+              {modeLabel}
+            </span>
+          </div>
+          <h3 className="text-base sm:text-lg md:text-xl font-black text-[#050521] uppercase tracking-tight break-words">
+            {item.fullName || item.name || "Anonymous Candidate"}
+          </h3>
+          <p className="text-[11px] sm:text-xs text-slate-600 font-medium flex flex-wrap items-center gap-2 mt-1">
+            <span>{item.address || item.place || item.city || "Location Not Provided"}</span>
+            <span>•</span>
+            <span>Age: {item.age || "N/A"}</span>
+          </p>
+        </div>
+        <span className="text-[9px] sm:text-[10px] font-bold text-[#050521] bg-slate-100 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-[#050521]/10 shrink-0 self-start">
+          {submissionDate}
+        </span>
+      </div>
+
+      {/* Info Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-3.5 sm:p-4 rounded-2xl border border-[#050521]/10 w-full min-w-0">
+        <div className="min-w-0">
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/50 block">Phone / WhatsApp</span>
+          <a
+            href={`https://api.whatsapp.com/send?phone=91${cleanPhone}`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs font-bold text-green-700 hover:underline flex items-center gap-1 mt-0.5 truncate"
+          >
+            {item.phone || "-"}
+          </a>
+        </div>
+        <div className="min-w-0">
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/50 block">Qualification</span>
+          <span className="text-xs font-bold text-[#050521] mt-0.5 block truncate">{item.qualification || item.education || "-"}</span>
+        </div>
+        <div className="min-w-0">
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/50 block">Email</span>
+          <span className="text-xs font-bold text-[#050521] break-all mt-0.5 block">{item.email || "Not Provided"}</span>
+        </div>
+      </div>
+
+      {/* Why AI Reasons */}
+      {whyList.length > 0 && (
+        <div className="w-full min-w-0">
+          <span className="text-[9px] font-black uppercase tracking-widest text-[#050521]/60 block mb-2">Why Choosing AI:</span>
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
+            {whyList.map((reason, idx) => (
+              <span key={idx} className="bg-[#050521] text-white px-2.5 sm:px-3 py-1 rounded-xl text-[9px] sm:text-[10px] font-bold border border-[#050521] max-w-full break-words">
+                ✓ {reason}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Additional Notes */}
+      {item.otherReason && (
+        <div className="bg-[#c6ff34]/15 border border-[#050521]/20 p-3 sm:p-3.5 rounded-2xl w-full min-w-0">
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521] block mb-1">Additional Goals / Notes:</span>
+          <p className="text-xs font-medium text-[#050521] italic break-words">"{item.otherReason}"</p>
+        </div>
+      )}
+
+      {/* Card Actions */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-2.5 sm:gap-3 pt-3 border-t border-[#050521]/10 w-full">
+        <a
+          href={`https://api.whatsapp.com/send?phone=91${cleanPhone}&text=${encodeURIComponent(`Hi ${item.fullName || item.name || ""}, thank you for booking a Free Consultation with DeepStaq AI!`)}`}
+          target="_blank"
+          rel="noreferrer"
+          className="w-full sm:w-auto px-4 py-2.5 bg-[#25D366] text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-[#20bd5a] transition-all flex items-center justify-center gap-2 shadow-sm text-center"
+        >
+          <svg className="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+          </svg>
+          <span>Chat on WhatsApp</span>
+        </a>
+        {onDelete && (
+          <button
+            type="button"
+            onClick={() => onDelete(item.id, item.fullName || item.name || "this consultation")}
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-500 hover:text-white text-red-600 text-[10px] font-black uppercase tracking-wider transition-all border border-red-200 flex items-center justify-center gap-1.5"
+          >
+            Delete
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const ScholarshipCard = ({ item, onDelete, onUpdate }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [marks, setMarks] = useState(item.marks !== undefined && item.marks !== null ? item.marks : "");
+  const [status, setStatus] = useState(item.status || "Submitted");
+  const [scholarshipGranted, setScholarshipGranted] = useState(item.scholarshipGranted || "None");
+  const [adminRemarks, setAdminRemarks] = useState(item.adminRemarks || "");
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
+
+  const cleanPhone = item.phone ? item.phone.toString().replace(/\D/g, "").slice(-10) : "";
+  const submissionDate = item.timestamp
+    ? new Date(item.timestamp.seconds * 1000).toLocaleString()
+    : item.createdAt?.seconds
+    ? new Date(item.createdAt.seconds * 1000).toLocaleString()
+    : "-";
+
+  const handleSaveEvaluation = async () => {
+    setIsSaving(true);
+    try {
+      await onUpdate(item.id, {
+        marks: marks !== "" ? (isNaN(marks) ? marks : Number(marks)) : null,
+        status,
+        scholarshipGranted,
+        adminRemarks,
+      });
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 2500);
+    } catch (err) {
+      console.error("Error updating scholarship evaluation:", err);
+      alert("Failed to update evaluation data.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const getStatusBadgeColor = (st) => {
+    switch (st) {
+      case "100% Scholarship Granted":
+      case "75% Scholarship Granted":
+      case "50% Scholarship Granted":
+      case "25% Scholarship Granted":
+        return "bg-green-100 text-green-800 border-green-300";
+      case "Shortlisted":
+      case "Exam Scheduled":
+        return "bg-blue-100 text-blue-800 border-blue-300";
+      case "Under Review":
+        return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      case "Lead / Step 1 Completed":
+      case "Step 1 Lead":
+        return "bg-amber-100 text-amber-900 border-amber-300";
+      case "Rejected / Ineligible":
+        return "bg-red-100 text-red-800 border-red-300";
+      default:
+        return "bg-[#c6ff34]/30 text-[#050521] border-[#050521]/20";
+    }
+  };
+
+  const cleanInsta = (item.instagramHandle || "").replace(/^@/, "").trim();
+
+  return (
+    <div className="bg-white border-2 border-[#050521] rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-6 md:p-8 shadow-[4px_4px_0px_0px_#050521] hover:shadow-[8px_8px_0px_0px_#c6ff34] transition-all duration-300 flex flex-col gap-4 sm:gap-5 w-full min-w-0 overflow-hidden">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4 pb-4 border-b border-[#050521]/10 w-full min-w-0">
+        <div className="w-full min-w-0">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
+            <span className="bg-[#050521] text-white px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest">
+              AI/ML Scholarship
+            </span>
+            <span className={`px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest border ${getStatusBadgeColor(status)}`}>
+              {status === "Lead / Step 1 Completed" ? "Step 1 Lead (In Progress)" : status}
+            </span>
+            {marks !== "" && marks !== null && (
+              <span className="bg-[#c6ff34] text-[#050521] px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest border border-[#050521]/20">
+                Score / Marks: {marks}
+              </span>
+            )}
+            {scholarshipGranted && scholarshipGranted !== "None" && (
+              <span className="bg-emerald-600 text-white px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest">
+                {scholarshipGranted} Scholarship
+              </span>
+            )}
+          </div>
+          <h3 className="text-base sm:text-lg md:text-xl font-black text-[#050521] uppercase tracking-tight break-words">
+            {item.fullName || "Anonymous Applicant"}
+          </h3>
+          <p className="text-[11px] sm:text-xs text-slate-600 font-medium flex flex-wrap items-center gap-2 mt-1">
+            <span>{item.cityDistrict || item.city || "Location Not Provided"}</span>
+            <span>•</span>
+            <span>Age: {item.age || "N/A"}</span>
+            {item.followingInstagram || item.agreedFollowDeepStaq ? (
+              <>
+                <span>•</span>
+                <span className="text-purple-700 font-bold flex items-center gap-1">
+                  IG Follow Verified ✓
+                </span>
+              </>
+            ) : cleanInsta && cleanInsta.toLowerCase() !== "verified follower" ? (
+              <>
+                <span>•</span>
+                <a
+                  href={`https://instagram.com/${cleanInsta}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-purple-700 hover:text-purple-900 font-bold underline flex items-center gap-1"
+                >
+                  @{cleanInsta}
+                </a>
+              </>
+            ) : null}
+          </p>
+        </div>
+        <span className="text-[9px] sm:text-[10px] font-bold text-[#050521] bg-slate-100 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-[#050521]/10 shrink-0 self-start">
+          {submissionDate}
+        </span>
+      </div>
+
+      {/* Basic & Background Info Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-slate-50 p-3.5 sm:p-4 rounded-2xl border border-[#050521]/10 w-full min-w-0">
+        <div className="min-w-0">
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/50 block">Phone / WhatsApp</span>
+          <a
+            href={`https://api.whatsapp.com/send?phone=91${cleanPhone}`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs font-bold text-green-700 hover:underline flex items-center gap-1 mt-0.5 truncate"
+          >
+            {item.phone || "-"}
+          </a>
+        </div>
+        <div className="min-w-0">
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/50 block">Email Address</span>
+          <span className="text-xs font-bold text-[#050521] break-all mt-0.5 block">{item.email || "-"}</span>
+        </div>
+        <div className="min-w-0">
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/50 block">Education Level</span>
+          <span className="text-xs font-bold text-[#050521] mt-0.5 block truncate">{item.educationLevel || (item.isScholarshipLead || item.status === "Lead / Step 1 Completed" ? "⏳ Pending Step 2" : "-")}</span>
+        </div>
+        <div className="min-w-0">
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521]/50 block">Current Occupation</span>
+          <span className="text-xs font-bold text-[#050521] mt-0.5 block truncate">
+            {item.currentOccupation === "Other" && item.occupationOther ? `Other: ${item.occupationOther}` : item.currentOccupation || (item.isScholarshipLead || item.status === "Lead / Step 1 Completed" ? "⏳ Pending Step 2" : "-")}
+          </span>
+        </div>
+      </div>
+
+      {/* Critical Filters & Flags */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <div className={`p-3 rounded-xl border flex items-center gap-2 text-xs font-bold ${item.hasLaptopAndInternet === "Yes" ? "bg-green-50 border-green-200 text-green-800" : item.hasLaptopAndInternet === "No" ? "bg-red-50 border-red-200 text-red-700" : "bg-slate-50 border-slate-200 text-slate-500"}`}>
+          <span>{item.hasLaptopAndInternet === "Yes" ? "✓ Laptop & Internet Access" : item.hasLaptopAndInternet === "No" ? "✕ No Laptop / Internet" : "Laptop Access: Pending"}</span>
+        </div>
+        <div className="p-3 rounded-xl border bg-slate-50 border-slate-200 text-[#050521] text-xs font-bold flex items-center gap-2">
+          <span>Coding Exposure: <strong className="uppercase">{item.priorCodingAiExposure || "Pending"}</strong></span>
+        </div>
+        <div className="p-3 rounded-xl border bg-slate-50 border-slate-200 text-[#050521] text-xs font-bold flex items-center gap-2">
+          <span>Post-Course Goal: <strong>{item.postCourseGoal || "Pending"}</strong></span>
+        </div>
+      </div>
+
+      {/* Motivation Statement */}
+      {item.whyJoinReason && (
+        <div className="bg-[#c6ff34]/10 border border-[#050521]/20 p-3.5 rounded-2xl w-full min-w-0">
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#050521] block mb-1">
+            Reason for Joining AI Program:
+          </span>
+          <p className="text-xs font-medium text-[#050521] italic break-words leading-relaxed">
+            "{item.whyJoinReason}"
+          </p>
+        </div>
+      )}
+
+      {/* Expanded Logistics & Commitments */}
+      {isExpanded && (
+        <div className="space-y-4 pt-3 border-t border-[#050521]/10 animate-in fade-in duration-300">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <div>
+              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 block">Available For Exam</span>
+              <span className="text-xs font-bold text-[#050521]">{item.availableForExam || "Not Specified"}</span>
+            </div>
+            <div>
+              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 block">October Batch Commitment</span>
+              <span className="text-xs font-bold text-[#050521]">{item.canCommitOctoberBatch === "Yes" ? "✓ 100% Committed" : item.canCommitOctoberBatch || "-"}</span>
+            </div>
+            <div>
+              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 block">Terms & Policy Agreed</span>
+              <span className="text-xs font-bold text-green-700">✓ Yes (Follow & Mid-way Undertaking)</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Interactive Admin Marks & Evaluation Box */}
+      <div className="bg-[#050521]/5 border-2 border-[#050521] p-4 sm:p-5 rounded-2xl space-y-3.5 mt-1">
+        <div className="flex items-center justify-between">
+          <span className="text-[9px] font-black uppercase tracking-widest text-[#050521] flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#c6ff34] border border-[#050521]" />
+            Scholarship Evaluation & Marks Management
+          </span>
+          {savedSuccess && (
+            <span className="text-[10px] font-black uppercase tracking-wider text-green-700 bg-green-100 px-2.5 py-0.5 rounded-lg border border-green-300 animate-pulse">
+              ✓ Saved!
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Entrance Exam Marks */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-widest text-[#050521]/60 block mb-1">
+              Entrance Exam Marks / Score
+            </label>
+            <input
+              type="text"
+              value={marks}
+              onChange={(e) => setMarks(e.target.value)}
+              placeholder="e.g. 85 / 100"
+              className="w-full bg-white border border-[#050521]/20 rounded-xl px-3 py-2 text-xs font-bold text-[#050521] outline-none focus:border-[#050521]"
+            />
+          </div>
+
+          {/* Scholarship Status */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-widest text-[#050521]/60 block mb-1">
+              Scholarship Status
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full bg-white border border-[#050521]/20 rounded-xl px-3 py-2 text-xs font-bold text-[#050521] outline-none focus:border-[#050521]"
+            >
+              <option value="Submitted">Submitted (Pending Exam)</option>
+              <option value="Lead / Step 1 Completed">Lead / Step 1 Completed (In Progress)</option>
+              <option value="Exam Scheduled">Exam Scheduled</option>
+              <option value="Under Review">Under Review</option>
+              <option value="Shortlisted">Shortlisted</option>
+              <option value="100% Scholarship Granted">100% Scholarship Granted</option>
+              <option value="75% Scholarship Granted">75% Scholarship Granted</option>
+              <option value="50% Scholarship Granted">50% Scholarship Granted</option>
+              <option value="25% Scholarship Granted">25% Scholarship Granted</option>
+              <option value="Selected (Paid Seat)">Selected (Paid Seat)</option>
+              <option value="Rejected / Ineligible">Rejected / Ineligible</option>
+            </select>
+          </div>
+
+          {/* Scholarship Bracket */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-widest text-[#050521]/60 block mb-1">
+              Scholarship Bracket
+            </label>
+            <select
+              value={scholarshipGranted}
+              onChange={(e) => setScholarshipGranted(e.target.value)}
+              className="w-full bg-white border border-[#050521]/20 rounded-xl px-3 py-2 text-xs font-bold text-[#050521] outline-none focus:border-[#050521]"
+            >
+              <option value="None">None</option>
+              <option value="100%">100% Free Tuition</option>
+              <option value="75%">75% Fee Waiver</option>
+              <option value="50%">50% Fee Waiver</option>
+              <option value="25%">25% Fee Waiver</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Admin Remarks */}
+        <div>
+          <label className="text-[8px] font-black uppercase tracking-widest text-[#050521]/60 block mb-1">
+            Admin Remarks / Interview Notes
+          </label>
+          <input
+            type="text"
+            value={adminRemarks}
+            onChange={(e) => setAdminRemarks(e.target.value)}
+            placeholder="Add internal evaluation remarks or test notes..."
+            className="w-full bg-white border border-[#050521]/20 rounded-xl px-3 py-2 text-xs font-medium text-[#050521] outline-none focus:border-[#050521]"
+          />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleSaveEvaluation}
+          disabled={isSaving}
+          className="w-full py-2.5 bg-[#050521] hover:bg-slate-800 text-white font-black text-[10px] uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+        >
+          {isSaving ? "Saving Evaluation..." : "Update Marks & Status"}
+        </button>
+      </div>
+
+      {/* Actions Strip */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-2.5 pt-3 border-t border-[#050521]/10 w-full">
+        <button
+          type="button"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-[#050521] py-2 px-3 rounded-lg hover:bg-slate-100 transition-colors"
+        >
+          {isExpanded ? "▲ Show Less Details" : "▼ View Full Submission Answers"}
+        </button>
+
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <a
+            href={`https://api.whatsapp.com/send?phone=91${cleanPhone}&text=${encodeURIComponent(
+              `Hi ${item.fullName || ""}, regarding your DeepStaq AI/ML Scholarship Application (Status: ${status})...`
+            )}`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex-1 sm:flex-initial px-4 py-2.5 bg-[#25D366] text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-[#20bd5a] transition-all flex items-center justify-center gap-2 shadow-sm"
+          >
+            <span>WhatsApp</span>
+          </a>
+
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(item.id, item.fullName || "this scholarship application")}
+              className="px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-500 hover:text-white text-red-600 text-[10px] font-black uppercase tracking-wider transition-all border border-red-200 flex items-center justify-center gap-1.5"
+            >
+              Delete
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const PopupLeadCard = ({ item, onDelete, onUpdate }) => {
+  const [status, setStatus] = useState(item.leadStatus || item.status || (item.completed ? "New Lead" : "Drop-off Lead"));
+  const [notes, setNotes] = useState(item.adminNotes || "");
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
+  const [phoneCopied, setPhoneCopied] = useState(false);
+
+  const submissionDate = item.updatedAt?.seconds
+    ? new Date(item.updatedAt.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+    : item.timestamp?.seconds
+    ? new Date(item.timestamp.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+    : item.createdAt?.seconds
+    ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+    : "-";
+
+  const rawPhone = item.phone || "";
+  const cleanPhone = rawPhone.replace(/\D/g, "");
+  const candidateName = item.fullName || item.name || "Anonymous Visitor";
+  const selectedProgram = item.programme || item.program || item.purpose || "Career Guidance";
+
+  const handleCopyPhone = () => {
+    if (!cleanPhone) return;
+    navigator.clipboard.writeText(cleanPhone);
+    setPhoneCopied(true);
+    setTimeout(() => setPhoneCopied(false), 2000);
+  };
+
+  const handleSaveStatus = async () => {
+    setIsSaving(true);
+    try {
+      if (onUpdate) {
+        await onUpdate(item.id, {
+          leadStatus: status,
+          status: status,
+          adminNotes: notes,
+        });
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 3000);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to update status.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const getStatusBadge = () => {
+    const s = (status || "").toLowerCase();
+    if (s.includes("enrolled") || s.includes("converted")) {
+      return (
+        <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          ⭐ Enrolled
+        </span>
+      );
+    }
+    if (s.includes("contacted") || s.includes("called")) {
+      return (
+        <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-amber-500" />
+          ● Contacted
+        </span>
+      );
+    }
+    if (s.includes("follow")) {
+      return (
+        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-blue-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-blue-500" />
+          ● Follow-Up
+        </span>
+      );
+    }
+    if (s.includes("not interested") || s.includes("drop")) {
+      return (
+        <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-[10px] font-black uppercase tracking-wider border border-slate-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-slate-400" />
+          ● Dropped / Not Interested
+        </span>
+      );
+    }
+    return (
+      <span className="px-3 py-1 bg-[#c6ff34]/20 text-[#050521] rounded-full text-[10px] font-black uppercase tracking-wider border border-[#c6ff34] flex items-center gap-1.5">
+        <span className="w-2 h-2 rounded-full bg-[#050521] animate-ping" />
+        ● New Lead
+      </span>
+    );
+  };
+
+  const whatsappMessage = `Hi ${candidateName}! Thank you for submitting your career goal with DeepStaq regarding "${selectedProgram}". Our team is excited to help you find the right path! When would be a convenient time for a quick 5-minute guidance call?`;
+
+  return (
+    <div className="bg-white border-2 border-[#050521] rounded-[1.75rem] p-5 sm:p-6 shadow-[4px_4px_0px_0px_#050521] hover:shadow-[6px_6px_0px_0px_#c6ff34] transition-all duration-300 flex flex-col gap-4">
+      {/* Top Meta Bar */}
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 pb-3 border-b border-slate-100">
+        <div>
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span className="font-mono text-[9px] text-[#050521]/60 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-md font-bold">
+              REF: {item.id ? item.id.slice(0, 10) : "N/A"}
+            </span>
+            <span className="bg-[#7c3aed] text-white px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider">
+              Career Goal Popup
+            </span>
+            {getStatusBadge()}
+          </div>
+          <h3 className="text-xl font-black text-[#050521] tracking-tight uppercase">
+            {candidateName}
+          </h3>
+        </div>
+        <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-xl border border-slate-200 shrink-0">
+          {submissionDate}
+        </span>
+      </div>
+
+      {/* Details Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+            Phone Number
+          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-black font-mono text-slate-900">
+              {item.phone || "-"}
+            </span>
+            {cleanPhone && (
+              <button
+                type="button"
+                onClick={handleCopyPhone}
+                className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-md transition-colors cursor-pointer"
+                title="Copy phone number"
+              >
+                {phoneCopied ? "✓ Copied" : "Copy"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+            Lead Source
+          </span>
+          <span className="text-sm font-bold text-slate-900 block truncate">
+            {item.leadSource || "Website Modal"}
+          </span>
+        </div>
+
+        {/* Selected Programme / Career Goal Box */}
+        <div className="sm:col-span-2 pt-2 border-t border-slate-200/60">
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1">
+            Selected Programme / Career Goal
+          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#050521] text-white rounded-xl text-xs font-black shadow-sm">
+              
+              <span>{selectedProgram}</span>
+            </span>
+            {item.email && (
+              <span className="text-xs text-slate-600 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                {item.email}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions Strip */}
+      <div className="flex flex-wrap gap-2 pt-1">
+        {cleanPhone && (
+          <>
+            <a
+              href={`https://api.whatsapp.com/send?phone=${cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone}&text=${encodeURIComponent(whatsappMessage)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex-1 min-w-[140px] py-2.5 px-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm"
+            >
+              <span>WhatsApp Candidate</span>
+            </a>
+
+            <a
+              href={`tel:${cleanPhone}`}
+              className="py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 shadow-sm"
+            >
+              <span>Call</span>
+            </a>
+          </>
+        )}
+      </div>
+
+      {/* Lead Status & Notes Box */}
+      <div className="bg-[#050521]/5 border border-[#050521]/20 p-3.5 rounded-2xl flex flex-col gap-2.5">
+        <div className="flex items-center justify-between">
+          <span className="text-[9px] font-black uppercase tracking-widest text-[#050521]">
+            Lead Management & Remarks
+          </span>
+          {savedSuccess && (
+            <span className="text-[9px] font-black text-green-700 bg-green-100 px-2 py-0.5 rounded-md border border-green-300">
+              ✓ Saved!
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Lead Status
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
+            >
+              <option value="New Lead">● New Lead</option>
+              <option value="Contacted">● Contacted / Called</option>
+              <option value="Follow-up Scheduled">● Follow-up Scheduled</option>
+              <option value="In Discussion">● In Discussion</option>
+              <option value="Enrolled">⭐ Enrolled / Converted</option>
+              <option value="Dropped / Not Interested">● Dropped / Not Interested</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Follow-up Remarks / Notes
+            </label>
+            <input
+              type="text"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add call notes, guidance advice..."
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#050521]"
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center pt-1">
+          <button
+            type="button"
+            onClick={handleSaveStatus}
+            disabled={isSaving}
+            className="py-1.5 px-4 bg-[#050521] hover:bg-slate-800 text-white font-black text-[10px] uppercase tracking-wider rounded-xl transition-all disabled:opacity-50 cursor-pointer"
+          >
+            {isSaving ? "Saving..." : "Update Status"}
+          </button>
+
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(item.id, candidateName)}
+              className="text-red-500 hover:text-red-700 text-[10px] font-black uppercase tracking-wider py-1 px-2 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
+            >
+              Delete
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
+  const isInitiallyPaid = item.paymentStatus === "paid" || Boolean(item.paymentId);
+  const [status, setStatus] = useState(item.status || (isInitiallyPaid ? "Paid & Confirmed" : "New"));
+  const [paymentStatus, setPaymentStatus] = useState(item.paymentStatus || (item.paymentId ? "paid" : "unpaid"));
+  const [paymentId, setPaymentId] = useState(item.paymentId || "");
+  const [qualification, setQualification] = useState(item.qualification || item.education || "Student");
+  const [notes, setNotes] = useState(item.adminNotes || "");
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
+  const [phoneCopied, setPhoneCopied] = useState(false);
+  const [payIdCopied, setPayIdCopied] = useState(false);
+
+  const isPaid = paymentStatus === "paid" || Boolean(paymentId);
+
+  const submissionDate = item.updatedAt?.seconds
+    ? new Date(item.updatedAt.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+    : item.timestamp?.seconds
+    ? new Date(item.timestamp.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+    : item.createdAt?.seconds
+    ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+    : "-";
+
+  const rawPhone = item.phone || "";
+  const cleanPhone = rawPhone.replace(/\D/g, "");
+  const candidateName = item.fullName || item.name || "Candidate";
+
+  const handleCopyPhone = () => {
+    if (!cleanPhone) return;
+    navigator.clipboard.writeText(cleanPhone);
+    setPhoneCopied(true);
+    setTimeout(() => setPhoneCopied(false), 2000);
+  };
+
+  const handleCopyPayId = () => {
+    if (!paymentId) return;
+    navigator.clipboard.writeText(paymentId);
+    setPayIdCopied(true);
+    setTimeout(() => setPayIdCopied(false), 2000);
+  };
+
+  const handleSaveStatus = async () => {
+    setIsSaving(true);
+    try {
+      if (onUpdate) {
+        await onUpdate(item.id, {
+          status,
+          paymentStatus,
+          paymentId: paymentId.trim(),
+          amountPaid: paymentStatus === "paid" ? (item.amountPaid || 99) : 0,
+          adminNotes: notes,
+          qualification,
+          education: qualification,
+        });
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 3000);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to update status.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const getStatusBadge = () => {
+    const s = (status || "").toLowerCase();
+    if (s.includes("enrolled") || s.includes("confirmed")) {
+      return (
+        <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          ⭐ Enrolled
+        </span>
+      );
+    }
+    if (s.includes("contacted") || s.includes("called")) {
+      return (
+        <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-amber-500" />
+          ● Contacted
+        </span>
+      );
+    }
+    if (s.includes("follow")) {
+      return (
+        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-blue-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-blue-500" />
+          ● Follow-Up
+        </span>
+      );
+    }
+    if (s.includes("not interested") || s.includes("drop")) {
+      return (
+        <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-[10px] font-black uppercase tracking-wider border border-slate-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-slate-400" />
+          ● Not Interested
+        </span>
+      );
+    }
+    return (
+      <span className="px-3 py-1 bg-[#c6ff34]/20 text-[#050521] rounded-full text-[10px] font-black uppercase tracking-wider border border-[#c6ff34] flex items-center gap-1.5">
+        <span className="w-2 h-2 rounded-full bg-[#050521] animate-ping" />
+        ● New Registration
+      </span>
+    );
+  };
+
+  const whatsappMessage = isPaid
+    ? `Hi ${candidateName}! Thank you for registering for the DeepStaq AI easy Ayi initiative and completing your ₹99 payment (Ref: ${item.id?.slice(0, 8)}, Payment ID: ${paymentId || "Confirmed"}). Welcome aboard! Please join our official WhatsApp Community here for class links and materials: https://chat.whatsapp.com/KxVV7ep74TV0GHy5SU2FXl`
+    : `Hi ${candidateName}! We noticed you started registering for the DeepStaq AI easy Ayi initiative (₹99 special offer) but didn't complete the payment. Would you like any assistance to complete your registration?`;
+
+  return (
+    <div className={`bg-white border-2 ${isPaid ? "border-emerald-600 shadow-[4px_4px_0px_0px_#059669]" : "border-[#050521] shadow-[4px_4px_0px_0px_#050521]"} rounded-[1.75rem] p-5 sm:p-6 hover:shadow-[6px_6px_0px_0px_#c6ff34] transition-all duration-300 flex flex-col gap-4`}>
+      {/* Top Meta Bar */}
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 pb-3 border-b border-slate-100">
+        <div>
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span className="font-mono text-[9px] text-[#050521]/60 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-md font-bold">
+              REF: {item.id ? item.id.slice(0, 10) : "N/A"}
+            </span>
+            <span className="bg-[#c6ff34] text-[#050521] px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border border-[#050521]/20">
+              AI easy Ayi
+            </span>
+            {/* Prominent Paid vs Unpaid Badge */}
+            {isPaid ? (
+              <span className="px-3 py-1 bg-emerald-600 text-white rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-[#c6ff34]" />
+                ✓ Paid (₹99)
+              </span>
+            ) : (
+              <span className="px-3 py-1 bg-amber-500 text-white rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                ⏳ Unpaid (₹99 Pending)
+              </span>
+            )}
+            {getStatusBadge()}
+          </div>
+          <h3 className="text-xl font-black text-[#050521] tracking-tight uppercase">
+            {candidateName}
+          </h3>
+        </div>
+        <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-xl border border-slate-200 shrink-0">
+          {submissionDate}
+        </span>
+      </div>
+
+      {/* Primary Details Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+            Phone Number
+          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-black font-mono text-slate-900">
+              +91 {cleanPhone || item.phone || "-"}
+            </span>
+            {cleanPhone && (
+              <button
+                type="button"
+                onClick={handleCopyPhone}
+                className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-md transition-colors"
+                title="Copy phone number"
+              >
+                {phoneCopied ? "✓ Copied" : "Copy"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+            Place / Town
+          </span>
+          <span className="text-sm font-bold text-slate-900 block truncate">
+            {item.place || item.city || item.location || "Not specified"}
+          </span>
+        </div>
+
+        <div className="sm:col-span-2 pt-2 border-t border-slate-200/60">
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1">
+            Qualification
+          </span>
+          <span className="inline-block px-3 py-1 bg-[#050521] text-white rounded-xl text-xs font-bold">
+            {item.qualification || item.education || "Not specified"}
+          </span>
+        </div>
+
+        {/* Payment & Razorpay Status Box */}
+        <div className="sm:col-span-2 pt-2 border-t border-slate-200/60">
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1.5">
+            Payment Details
+          </span>
+          {isPaid ? (
+            <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-emerald-700 font-black text-xs">✓ Amount Paid: ₹99</span>
+                <span className="text-slate-400 text-xs">|</span>
+                <span className="text-xs font-mono font-bold text-emerald-900 truncate">
+                  {paymentId ? `Razorpay ID: ${paymentId}` : "Payment Confirmed"}
+                </span>
+              </div>
+              {paymentId && (
+                <button
+                  type="button"
+                  onClick={handleCopyPayId}
+                  className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-200 hover:bg-emerald-300 text-emerald-900 rounded transition-colors"
+                >
+                  {payIdCopied ? "✓ Copied ID" : "Copy ID"}
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-amber-800 font-black text-xs">⏳ ₹99 Payment Incomplete</span>
+                <span className="text-slate-400 text-xs">|</span>
+                <span className="text-[11px] text-amber-700 font-medium">Candidate submitted form but dropped off at gateway</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {item.address && (
+          <div className="sm:col-span-2 pt-2 border-t border-slate-200/60">
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+              Full Address
+            </span>
+            <span className="text-xs font-medium text-slate-800 block break-words">
+              {item.address}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Quick Contact Action Buttons */}
+      <div className="flex flex-wrap gap-2 pt-1">
+        {cleanPhone && (
+          <>
+            <a
+              href={`https://api.whatsapp.com/send?phone=91${cleanPhone}&text=${encodeURIComponent(whatsappMessage)}`}
+              target="_blank"
+              rel="noreferrer"
+              className={`flex-1 min-w-[140px] py-2.5 px-3 ${isPaid ? "bg-[#25D366] hover:bg-[#20bd5a]" : "bg-amber-600 hover:bg-amber-700"} text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm`}
+            >
+              <span>{isPaid ? "WhatsApp Confirmation" : "WhatsApp Payment Follow-up"}</span>
+            </a>
+
+            <a
+              href={`tel:${cleanPhone}`}
+              className="py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 shadow-sm"
+            >
+              <span>Call</span>
+            </a>
+          </>
+        )}
+      </div>
+
+      {/* Lead Management & Status / Payment Editor */}
+      <div className="bg-[#050521]/5 border border-[#050521]/20 p-3.5 rounded-2xl flex flex-col gap-2.5">
+        <div className="flex items-center justify-between">
+          <span className="text-[9px] font-black uppercase tracking-widest text-[#050521]">
+            Registration & Payment Management
+          </span>
+          {savedSuccess && (
+            <span className="text-[9px] font-black text-green-700 bg-green-100 px-2 py-0.5 rounded-md border border-green-300">
+              ✓ Saved!
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+          {/* Status selector */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Lead Status
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
+            >
+              <option value="New">● New Registration</option>
+              <option value="Contacted">● Contacted / Called</option>
+              <option value="Follow-up Scheduled">● Follow-up Scheduled</option>
+              <option value="Paid & Confirmed">⭐ Paid & Confirmed</option>
+              <option value="Enrolled">Enrolled / Onboarded</option>
+              <option value="Not Interested">● Not Interested / Dropped</option>
+            </select>
+          </div>
+
+          {/* Payment Status selector */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Payment Status
+            </label>
+            <select
+              value={paymentStatus}
+              onChange={(e) => {
+                const nextVal = e.target.value;
+                setPaymentStatus(nextVal);
+                if (nextVal === "paid" && !status.includes("Confirmed")) {
+                  setStatus("Paid & Confirmed");
+                }
+              }}
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
+            >
+              <option value="paid">● Paid (₹99 Completed)</option>
+              <option value="unpaid">● Unpaid (Pending)</option>
+            </select>
+          </div>
+
+          {/* Qualification selector */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Qualification
+            </label>
+            <select
+              value={qualification}
+              onChange={(e) => setQualification(e.target.value)}
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
+            >
+              <option value="Working Professional">Working Professional</option>
+              <option value="Student">Student</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          {/* Razorpay Payment ID */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Razorpay Payment ID
+            </label>
+            <input
+              type="text"
+              value={paymentId}
+              onChange={(e) => setPaymentId(e.target.value)}
+              placeholder="e.g. pay_..."
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-medium text-slate-800 focus:outline-none focus:border-[#050521]"
+            />
+          </div>
+
+          {/* Remarks/Notes */}
+          <div className="sm:col-span-2 lg:col-span-4">
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Internal Remarks / Follow-up Notes
+            </label>
+            <input
+              type="text"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add internal remarks / call notes..."
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#050521]"
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center pt-1">
+          <button
+            type="button"
+            onClick={handleSaveStatus}
+            disabled={isSaving}
+            className="py-1.5 px-4 bg-[#050521] hover:bg-slate-800 text-white font-black text-[10px] uppercase tracking-wider rounded-xl transition-all disabled:opacity-50"
+          >
+            {isSaving ? "Saving..." : "Update Status & Payment"}
+          </button>
+
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(item.id, candidateName)}
+              className="text-red-500 hover:text-red-700 text-[10px] font-black uppercase tracking-wider py-1 px-2 rounded-lg hover:bg-red-50 transition-colors"
+            >
+              Delete
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AiBoosterProgramCard = ({ item, onDelete, onUpdate }) => {
+  const [status, setStatus] = useState(item.status || "New Registration");
+  const [paymentStatus, setPaymentStatus] = useState(
+    item.paymentStatus || (item.status === "Paid & Confirmed" ? "paid" : "unpaid")
+  );
+  const [paymentId, setPaymentId] = useState(item.paymentId || "");
+  const [payIdCopied, setPayIdCopied] = useState(false);
+  const [notes, setNotes] = useState(item.adminNotes || "");
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
+  const [phoneCopied, setPhoneCopied] = useState(false);
+
+  const submissionDate = item.updatedAt?.seconds
+    ? new Date(item.updatedAt.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+    : item.timestamp?.seconds
+    ? new Date(item.timestamp.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+    : item.createdAt?.seconds
+    ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+    : "-";
+
+  const rawPhone = item.phone || "";
+  const cleanPhone = rawPhone.replace(/\D/g, "");
+  const studentName = item.fullName || item.name || "Student";
+  const institution = item.collegeOrSchool || item.institution || "College/School";
+  const isPaid = paymentStatus === "paid" || item.paymentStatus === "paid" || status === "Paid & Confirmed";
+
+  const handleCopyPhone = () => {
+    if (!cleanPhone) return;
+    navigator.clipboard.writeText(cleanPhone);
+    setPhoneCopied(true);
+    setTimeout(() => setPhoneCopied(false), 2000);
+  };
+
+  const handleCopyPayId = () => {
+    const idToCopy = paymentId || item.paymentId;
+    if (!idToCopy) return;
+    navigator.clipboard.writeText(idToCopy);
+    setPayIdCopied(true);
+    setTimeout(() => setPayIdCopied(false), 2000);
+  };
+
+  const handleSaveStatus = async () => {
+    setIsSaving(true);
+    try {
+      if (onUpdate) {
+        await onUpdate(item.id, {
+          status,
+          paymentStatus,
+          paymentId,
+          amountPaid: paymentStatus === "paid" ? (item.amountPaid || 49) : 0,
+          adminNotes: notes,
+        });
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 3000);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to update status.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const getStatusBadge = () => {
+    if (isPaid) {
+      return (
+        <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          ⭐ Paid ₹49 (Confirmed)
+        </span>
+      );
+    }
+    const s = (status || "").toLowerCase();
+    if (s.includes("enrolled") || s.includes("shortlist")) {
+      return (
+        <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          Enrolled / Shortlisted
+        </span>
+      );
+    }
+    if (s.includes("contacted") || s.includes("called")) {
+      return (
+        <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-amber-500" />
+          ● Contacted
+        </span>
+      );
+    }
+    if (s.includes("follow")) {
+      return (
+        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-blue-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-blue-500" />
+          ● Follow-Up
+        </span>
+      );
+    }
+    if (s.includes("not interested") || s.includes("drop")) {
+      return (
+        <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-[10px] font-black uppercase tracking-wider border border-slate-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-slate-400" />
+          ● Not Interested
+        </span>
+      );
+    }
+    return (
+      <span className="px-3 py-1 bg-amber-50 text-amber-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-300 flex items-center gap-1.5">
+        <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+        ⏳ ₹49 Pending
+      </span>
+    );
+  };
+
+  const whatsappMessage = `Hi ${studentName}! Thank you for registering for the DeepStaq AI Booster Program from ${institution}. We're excited to have you on board! Join our official student WhatsApp group here for updates, session links, and materials: https://chat.whatsapp.com/KxVV7ep74TV0GHy5SU2FXl`;
+
+  return (
+    <div className="bg-white border-2 border-[#050521] rounded-[1.75rem] p-5 sm:p-6 shadow-[4px_4px_0px_0px_#050521] hover:shadow-[6px_6px_0px_0px_#c6ff34] transition-all duration-300 flex flex-col gap-4">
+      {/* Top Meta Bar */}
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 pb-3 border-b border-slate-100">
+        <div>
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span className="font-mono text-[9px] text-[#050521]/60 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-md font-bold">
+              REF: {item.id ? item.id.slice(0, 10) : "N/A"}
+            </span>
+            <span className="bg-[#c6ff34] text-[#050521] px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border border-[#050521]/20">
+              AI Booster Program
+            </span>
+            {getStatusBadge()}
+          </div>
+          <h3 className="text-xl font-black text-[#050521] tracking-tight uppercase">
+            {studentName}
+          </h3>
+        </div>
+        <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-xl border border-slate-200 shrink-0">
+          {submissionDate}
+        </span>
+      </div>
+
+      {/* Primary Details Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+            Phone Number
+          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-black font-mono text-slate-900">
+              +91 {cleanPhone || item.phone || "-"}
+            </span>
+            {cleanPhone && (
+              <button
+                type="button"
+                onClick={handleCopyPhone}
+                className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-md transition-colors cursor-pointer"
+                title="Copy phone number"
+              >
+                {phoneCopied ? "✓ Copied" : "Copy"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+            Place / Town
+          </span>
+          <span className="text-sm font-bold text-slate-900 block truncate">
+            {item.place || item.city || item.location || "Not specified"}
+          </span>
+        </div>
+
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+            College or School
+          </span>
+          <span className="text-sm font-bold text-slate-900 block break-words">
+            {item.collegeOrSchool || item.institution || "Not specified"}
+          </span>
+        </div>
+
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
+            Year or Sem
+          </span>
+          <span className="text-sm font-bold text-slate-900 block">
+            {item.yearOrSem || "Not specified"}
+          </span>
+        </div>
+
+        <div className="sm:col-span-2 pt-2 border-t border-slate-200/60">
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1">
+            Are you interested in AI?
+          </span>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#050521] text-white rounded-xl text-xs font-black">
+            
+            <span>{item.interestedInAi || "Yes"}</span>
+          </div>
+        </div>
+
+        {/* Payment & Razorpay Status Box */}
+        <div className="sm:col-span-2 pt-2 border-t border-slate-200/60">
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1.5">
+            Payment Details
+          </span>
+          {isPaid ? (
+            <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-emerald-700 font-black text-xs">✓ Amount Paid: ₹{item.amountPaid || 49}</span>
+                <span className="text-slate-400 text-xs">|</span>
+                <span className="text-xs font-mono font-bold text-emerald-900 truncate">
+                  {item.paymentId || paymentId ? `Razorpay ID: ${item.paymentId || paymentId}` : "Payment Confirmed"}
+                </span>
+              </div>
+              {(item.paymentId || paymentId) && (
+                <button
+                  type="button"
+                  onClick={handleCopyPayId}
+                  className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-200 hover:bg-emerald-300 text-emerald-900 rounded transition-colors cursor-pointer"
+                >
+                  {payIdCopied ? "✓ Copied ID" : "Copy ID"}
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-amber-800 font-black text-xs">⏳ ₹49 Payment Incomplete</span>
+                <span className="text-slate-400 text-xs">|</span>
+                <span className="text-[11px] text-amber-700 font-medium">Candidate submitted details but dropped off at Razorpay</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Quick Contact Action Buttons */}
+      <div className="flex flex-wrap gap-2 pt-1">
+        {cleanPhone && (
+          <>
+            <a
+              href={`https://api.whatsapp.com/send?phone=91${cleanPhone}&text=${encodeURIComponent(whatsappMessage)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex-1 min-w-[140px] py-2.5 px-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm"
+            >
+              <span>WhatsApp Student</span>
+            </a>
+
+            <a
+              href={`tel:${cleanPhone}`}
+              className="py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 shadow-sm"
+            >
+              <span>Call</span>
+            </a>
+          </>
+        )}
+      </div>
+
+      {/* Lead Management & Status / Remarks Editor */}
+      <div className="bg-[#050521]/5 border border-[#050521]/20 p-3.5 rounded-2xl flex flex-col gap-2.5">
+        <div className="flex items-center justify-between">
+          <span className="text-[9px] font-black uppercase tracking-widest text-[#050521]">
+            Registration Status & Follow-up Notes
+          </span>
+          {savedSuccess && (
+            <span className="text-[9px] font-black text-green-700 bg-green-100 px-2 py-0.5 rounded-md border border-green-300">
+              ✓ Saved!
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {/* Status selector */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Student Status
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
+            >
+              <option value="New Registration">● New Registration</option>
+              <option value="Paid & Confirmed">⭐ Paid & Confirmed</option>
+              <option value="Contacted">● Contacted / Called</option>
+              <option value="Follow-up Scheduled">● Follow-up Scheduled</option>
+              <option value="Enrolled / Shortlisted">Enrolled / Shortlisted</option>
+              <option value="Not Interested">● Not Interested / Dropped</option>
+            </select>
+          </div>
+
+          {/* Payment Status selector */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Payment Status
+            </label>
+            <select
+              value={paymentStatus}
+              onChange={(e) => {
+                const nextVal = e.target.value;
+                setPaymentStatus(nextVal);
+                if (nextVal === "paid" && !status.includes("Confirmed")) {
+                  setStatus("Paid & Confirmed");
+                }
+              }}
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
+            >
+              <option value="paid">● Paid (₹49 Completed)</option>
+              <option value="unpaid">● Unpaid (Pending)</option>
+            </select>
+          </div>
+
+          {/* Razorpay Payment ID */}
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Razorpay Payment ID
+            </label>
+            <input
+              type="text"
+              value={paymentId}
+              onChange={(e) => setPaymentId(e.target.value)}
+              placeholder="e.g. pay_..."
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-medium text-slate-800 focus:outline-none focus:border-[#050521]"
+            />
+          </div>
+
+          {/* Remarks/Notes */}
+          <div className="sm:col-span-3">
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Internal Remarks / Follow-up Notes
+            </label>
+            <input
+              type="text"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="e.g. Called student, confirmed payment, added to workshop group..."
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#050521]"
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center pt-1">
+          <button
+            type="button"
+            onClick={handleSaveStatus}
+            disabled={isSaving}
+            className="py-1.5 px-4 bg-[#050521] hover:bg-slate-800 text-white font-black text-[10px] uppercase tracking-wider rounded-xl transition-all disabled:opacity-50 cursor-pointer"
+          >
+            {isSaving ? "Saving..." : "Update Status & Payment"}
+          </button>
+
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(item.id, studentName)}
+              className="text-red-500 hover:text-red-700 text-[10px] font-black uppercase tracking-wider py-1 px-2 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
+            >
+              Delete
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
@@ -334,16 +2278,49 @@ function AdminDashboard() {
   const [slotData, setSlotData] = useState([]);
   const [eventData, setEventData] = useState([]);
   const [masterData, setMasterData] = useState([]);
-  const [aptitudeData, setAptitudeData] = useState([]);
+  const [newAptitudeData, setNewAptitudeData] = useState([]);
+  const [oldAptitudeData, setOldAptitudeData] = useState([]);
+  const [aptitudeV2Data, setAptitudeV2Data] = useState([]);
   const [collectedData, setCollectedData] = useState([]);
   const [uploadedData, setUploadedData] = useState([]);
   const [webinarData, setWebinarData] = useState([]);
   const [admissionData, setAdmissionData] = useState([]);
+  const [consultationData, setConsultationData] = useState([]);
+  const [scholarshipData, setScholarshipData] = useState([]);
+  const [popupLeadData, setPopupLeadData] = useState([]);
+  const [aiForEveryoneData, setAiForEveryoneData] = useState([]);
+  const [aiBoosterProgramData, setAiBoosterProgramData] = useState([]);
+  const [aiPaymentTab, setAiPaymentTab] = useState("all"); // "all" | "paid" | "unpaid"
+  const [boosterPaymentTab, setBoosterPaymentTab] = useState("all"); // "all" | "paid" | "unpaid"
   const [loadingData, setLoadingData] = useState(true);
-  const [activeTab, setActiveTab] = useState("slot");
+  const [activeTab, setActiveTab] = useState("scholarship");
   const [searchQuery, setSearchQuery] = useState("");
 
   const navigate = useNavigate();
+
+  const paidAiStudents = aiForEveryoneData.filter(
+    (item) => item.paymentStatus === "paid" || Boolean(item.paymentId)
+  );
+  const unpaidAiStudents = aiForEveryoneData.filter(
+    (item) => item.paymentStatus !== "paid" && !item.paymentId
+  );
+
+  const isItemPaid = (item) => {
+    if (!item) return false;
+    const pStatus = String(item.paymentStatus || "").toLowerCase();
+    const st = String(item.status || "").toLowerCase();
+    return (
+      pStatus === "paid" ||
+      st.includes("paid") ||
+      st.includes("confirmed") ||
+      Boolean(item.paymentId && String(item.paymentId).trim()) ||
+      Number(item.amountPaid) > 0 ||
+      item.isPaid === true
+    );
+  };
+
+  const paidBoosterStudents = aiBoosterProgramData.filter((item) => isItemPaid(item));
+  const unpaidBoosterStudents = aiBoosterProgramData.filter((item) => !isItemPaid(item));
 
   useEffect(() => {
     setSearchQuery("");
@@ -378,29 +2355,91 @@ function AdminDashboard() {
   const fetchData = async () => {
     setLoadingData(true);
     try {
-      const [slots, events, masters, aptitudes, collected, uploaded, webinars, admissions] = await Promise.all([
+      const results = await Promise.allSettled([
         getSlotRegistrations(),
         getEventRegistrations(),
         getMasterRegistrations(),
         getAptitudeLeads(),
+        getAptitudeSubmissions(),
         getCollectedContacts(),
         getUploadedContactFiles(),
         getWebinarRegistrations(),
-        getAdmissionRegistrations()
+        getAdmissionRegistrations(),
+        getConsultationBookings(),
+        getScholarshipApplications(),
+        getPopupLeads(),
+        getAiForEveryoneRegistrations(),
+        getAiBoosterProgramRegistrations(),
+        getAptitudeV2Submissions()
       ]);
-      setSlotData(slots);
-      setEventData(events);
-      setMasterData(masters);
-      setAptitudeData(aptitudes);
-      setCollectedData(collected);
-      setUploadedData(uploaded);
-      setWebinarData(webinars);
-      setAdmissionData(admissions);
+      const val = (idx) => (results[idx].status === "fulfilled" && Array.isArray(results[idx].value)) ? results[idx].value : [];
+      setSlotData(val(0));
+      setEventData(val(1));
+      setMasterData(val(2));
+      setOldAptitudeData(val(3));
+      setNewAptitudeData(val(4));
+      setCollectedData(val(5));
+      setUploadedData(val(6));
+      setWebinarData(val(7));
+      setAdmissionData(val(8));
+      setConsultationData(val(9));
+      setScholarshipData(val(10));
+      setPopupLeadData(val(11));
+      setAiForEveryoneData(val(12));
+      setAiBoosterProgramData(val(13));
+      setAptitudeV2Data(val(14));
     } catch (error) {
       console.error("Error fetching data:", error);
-      alert("Failed to fetch data.");
     } finally {
       setLoadingData(false);
+    }
+  };
+
+  const handleUpdatePopupLead = async (id, updateData) => {
+    try {
+      await updatePopupLeadStatus(id, updateData);
+      setPopupLeadData((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, ...updateData } : item))
+      );
+    } catch (error) {
+      console.error("Error updating popup lead:", error);
+      throw error;
+    }
+  };
+
+  const handleUpdateScholarship = async (id, updateData) => {
+    try {
+      await updateScholarshipApplication(id, updateData);
+      setScholarshipData((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, ...updateData } : item))
+      );
+    } catch (error) {
+      console.error("Error updating scholarship in state:", error);
+      throw error;
+    }
+  };
+
+  const handleUpdateAiForEveryone = async (id, updateData) => {
+    try {
+      await updateAiForEveryoneRegistration(id, updateData);
+      setAiForEveryoneData((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, ...updateData } : item))
+      );
+    } catch (error) {
+      console.error("Error updating AI For Everyone registration:", error);
+      throw error;
+    }
+  };
+
+  const handleUpdateAiBoosterProgram = async (id, updateData) => {
+    try {
+      await updateAiBoosterProgramRegistration(id, updateData);
+      setAiBoosterProgramData((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, ...updateData } : item))
+      );
+    } catch (error) {
+      console.error("Error updating AI Booster Program registration:", error);
+      throw error;
     }
   };
 
@@ -412,6 +2451,222 @@ function AdminDashboard() {
   const downloadCSV = () => {
     const data = getFilteredData();
     if (data.length === 0) return alert("No data to download in this tab.");
+
+    if (activeTab === "popup_leads") {
+      const headers = [
+        "Lead ID",
+        "Candidate Name",
+        "Phone Number",
+        "Selected Programme",
+        "Lead Status",
+        "Admin Notes",
+        "Source Page",
+        "Submission Date"
+      ];
+      const csvRows = [headers.join(",")];
+      data.forEach((item) => {
+        const dateStr = item.updatedAt?.seconds
+          ? new Date(item.updatedAt.seconds * 1000).toLocaleString("en-IN")
+          : item.timestamp?.seconds
+          ? new Date(item.timestamp.seconds * 1000).toLocaleString("en-IN")
+          : item.createdAt?.seconds
+          ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-IN")
+          : "";
+        const clean = (val) => `"${String(val ?? "").replace(/"/g, '""')}"`;
+        csvRows.push([
+          clean(item.id),
+          clean(item.fullName || item.name),
+          clean(item.phone),
+          clean(item.programme || item.program || item.purpose || "Career Guidance"),
+          clean(item.leadStatus || item.status || "New Lead"),
+          clean(item.adminNotes || ""),
+          clean(item.leadSource || "Website Popup"),
+          clean(dateStr),
+        ].join(","));
+      });
+      const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `career_goal_leads_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+
+    if (activeTab === "ai_for_everyone") {
+      const headers = [
+        "Reference ID",
+        "Full Name",
+        "Phone",
+        "Place",
+        "Qualification",
+        "Payment Status",
+        "Payment ID (Razorpay)",
+        "Amount (INR)",
+        "Address",
+        "Lead Status",
+        "Admin Notes",
+        "Registration Date"
+      ];
+      const csvRows = [headers.join(",")];
+      data.forEach((item) => {
+        const isPaid = item.paymentStatus === "paid" || Boolean(item.paymentId);
+        const dateStr = item.updatedAt?.seconds
+          ? new Date(item.updatedAt.seconds * 1000).toLocaleString("en-IN")
+          : item.timestamp?.seconds
+          ? new Date(item.timestamp.seconds * 1000).toLocaleString("en-IN")
+          : item.createdAt?.seconds
+          ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-IN")
+          : "";
+        const clean = (val) => `"${String(val ?? "").replace(/"/g, '""')}"`;
+        csvRows.push([
+          clean(item.id),
+          clean(item.fullName || item.name),
+          clean(item.phone),
+          clean(item.place || item.city || item.location),
+          clean(item.qualification || item.education),
+          clean(isPaid ? "PAID" : "UNPAID"),
+          clean(item.paymentId || ""),
+          clean(isPaid ? (item.amountPaid || 99) : 0),
+          clean(item.address),
+          clean(item.status || "New"),
+          clean(item.adminNotes || ""),
+          clean(dateStr),
+        ].join(","));
+      });
+      const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `ai_for_everyone_${aiPaymentTab}_students_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+
+    if (activeTab === "ai_booster_program" || activeTab === "ai_for_students") {
+      const headers = [
+        "Reference ID",
+        "Student Name",
+        "Phone",
+        "Place",
+        "College or School",
+        "Year or Sem",
+        "Interested in AI",
+        "Payment Status",
+        "Amount Paid (INR)",
+        "Payment ID (Razorpay)",
+        "Lead Status",
+        "Admin Remarks",
+        "Registration Date"
+      ];
+      const csvRows = [headers.join(",")];
+      data.forEach((item) => {
+        const isPaid = item.paymentStatus === "paid" || item.status === "Paid & Confirmed";
+        const dateStr = item.updatedAt?.seconds
+          ? new Date(item.updatedAt.seconds * 1000).toLocaleString("en-IN")
+          : item.timestamp?.seconds
+          ? new Date(item.timestamp.seconds * 1000).toLocaleString("en-IN")
+          : item.createdAt?.seconds
+          ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-IN")
+          : "";
+        const clean = (val) => `"${String(val ?? "").replace(/"/g, '""')}"`;
+        csvRows.push([
+          clean(item.id),
+          clean(item.fullName || item.name),
+          clean(item.phone),
+          clean(item.place || item.city || item.location),
+          clean(item.collegeOrSchool || item.institution),
+          clean(item.yearOrSem),
+          clean(item.interestedInAi || "Yes"),
+          clean(item.paymentStatus || (isPaid ? "paid" : "unpaid")),
+          clean(item.amountPaid !== undefined ? item.amountPaid : (isPaid ? 49 : 0)),
+          clean(item.paymentId || ""),
+          clean(item.status || "New Registration"),
+          clean(item.adminNotes || ""),
+          clean(dateStr),
+        ].join(","));
+      });
+      const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `ai_booster_program_${boosterPaymentTab}_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+
+    if (activeTab === "aptitude_v2") {
+      const headers = [
+        "Candidate ID",
+        "Candidate Name",
+        "Email",
+        "Phone",
+        "Place / City",
+        "Institution / College",
+        "Test Date",
+        "Total Score",
+        "Total Questions",
+        "Percentage (%)",
+        "Performance Rating",
+        "Section A (Numerical)",
+        "Section B (Logical)",
+        "Section C (Analytical)",
+        "Section D (Computational)",
+        "Status",
+        "Time Spent (Seconds)",
+        "Submission Timestamp",
+      ];
+      const csvRows = [headers.join(",")];
+      const clean = (val) => `"${String(val ?? "").replace(/"/g, '""')}"`;
+      data.forEach((item) => {
+        const secA = item.sectionBreakdown?.SECTION_A?.score ?? "-";
+        const secB = item.sectionBreakdown?.SECTION_B?.score ?? "-";
+        const secC = item.sectionBreakdown?.SECTION_C?.score ?? "-";
+        const secD = item.sectionBreakdown?.SECTION_D?.score ?? "-";
+        const dateStr = item.completedAt?.seconds
+          ? new Date(item.completedAt.seconds * 1000).toLocaleString("en-IN")
+          : item.timestamp?.seconds
+          ? new Date(item.timestamp.seconds * 1000).toLocaleString("en-IN")
+          : item.createdAt?.seconds
+          ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-IN")
+          : "";
+        csvRows.push([
+          clean(item.id),
+          clean(item.fullName || item.name),
+          clean(item.email),
+          clean(item.phone),
+          clean(item.place || item.city || item.location),
+          clean(item.institution || item.college),
+          clean(item.testDate),
+          clean(item.score !== undefined && item.score !== null ? item.score : "-"),
+          clean(item.totalQuestions || 40),
+          clean(item.percentage !== undefined && item.percentage !== null ? `${item.percentage}%` : "-"),
+          clean(item.performanceRating || "-"),
+          clean(secA !== "-" ? `${secA}/10` : "-"),
+          clean(secB !== "-" ? `${secB}/10` : "-"),
+          clean(secC !== "-" ? `${secC}/10` : "-"),
+          clean(secD !== "-" ? `${secD}/10` : "-"),
+          clean(item.status || item.testStatus || "completed"),
+          clean(item.timeSpentSeconds || "-"),
+          clean(dateStr),
+        ].join(","));
+      });
+      const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `aptitude_v2_submissions_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
 
     const allKeys = new Set();
     data.forEach(item => Object.keys(item).forEach(k => allKeys.add(k)));
@@ -449,6 +2704,63 @@ function AdminDashboard() {
     document.body.removeChild(link);
   };
 
+  const exportBoosterSubsetCSV = (subset, label = "students") => {
+    if (!subset || subset.length === 0) {
+      alert(`No ${label} records to export.`);
+      return;
+    }
+    const headers = [
+      "Reference ID",
+      "Student Name",
+      "Phone",
+      "Place",
+      "College or School",
+      "Year or Sem",
+      "Interested in AI",
+      "Payment Status",
+      "Amount Paid (INR)",
+      "Payment ID (Razorpay)",
+      "Lead Status",
+      "Admin Remarks",
+      "Registration Date"
+    ];
+    const csvRows = [headers.join(",")];
+    const clean = (val) => `"${String(val ?? "").replace(/"/g, '""')}"`;
+    subset.forEach((item) => {
+      const isPaid = isItemPaid(item);
+      const dateStr = item.updatedAt?.seconds
+        ? new Date(item.updatedAt.seconds * 1000).toLocaleString("en-IN")
+        : item.timestamp?.seconds
+        ? new Date(item.timestamp.seconds * 1000).toLocaleString("en-IN")
+        : item.createdAt?.seconds
+        ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-IN")
+        : "";
+      csvRows.push([
+        clean(item.id),
+        clean(item.fullName || item.name),
+        clean(item.phone),
+        clean(item.place || item.city || item.location),
+        clean(item.collegeOrSchool || item.institution),
+        clean(item.yearOrSem),
+        clean(item.interestedInAi || "Yes"),
+        clean(isPaid ? "PAID" : "UNPAID"),
+        clean(isPaid ? (item.amountPaid || 49) : 0),
+        clean(item.paymentId || ""),
+        clean(item.status || (isPaid ? "Paid & Confirmed" : "New Registration")),
+        clean(item.adminNotes || ""),
+        clean(dateStr),
+      ].join(","));
+    });
+    const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `ai_booster_${label.toLowerCase().replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (loadingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8f9fa]">
@@ -457,16 +2769,628 @@ function AdminDashboard() {
     );
   }
 
+  const handleDeleteRecord = async (id, candidateName = "this record") => {
+    if (!window.confirm(`Are you sure you want to delete the record for "${candidateName}"?`)) {
+      return;
+    }
+
+    if (activeTab === "popup_leads") {
+      try {
+        await deletePopupLead(id);
+      } catch (err) {
+        console.warn("Primary delete popup lead failed:", err);
+      }
+      setPopupLeadData((prev) => prev.filter((item) => item.id !== id));
+      return;
+    }
+
+    if (activeTab === "ai_for_everyone") {
+      try {
+        await deleteAiForEveryoneRegistration(id);
+      } catch (err) {
+        console.warn("Primary delete AI For Everyone record failed:", err);
+      }
+      setAiForEveryoneData((prev) => prev.filter((item) => item.id !== id));
+      return;
+    }
+
+    if (activeTab === "ai_booster_program" || activeTab === "ai_for_students") {
+      try {
+        await deleteAiBoosterProgramRegistration(id);
+      } catch (err) {
+        console.warn("Primary delete AI Booster Program record failed:", err);
+      }
+      setAiBoosterProgramData((prev) => prev.filter((item) => item.id !== id));
+      return;
+    }
+
+    const collectionMap = {
+      scholarship: "scholarship_applications",
+      slot: "slot_registrations",
+      event: "event_registrations",
+      master: "master_registrations",
+      aptitude: "aptitude_test_leads",
+      old_aptitude: "aptitude_test_leads",
+      aptitude_v2: "aptitude_v2_submissions",
+      collected: "collected_contacts",
+      uploaded: "uploaded_contact_files",
+      webinar: "webinar_registrations",
+      admission: "student_admissions",
+      consultation: "consultation_bookings",
+      ai_for_everyone: "ai_for_everyone_registrations",
+      ai_booster_program: "ai_booster_program_registrations",
+      ai_for_students: "ai_booster_program_registrations"
+    };
+
+    const collectionName = collectionMap[activeTab] || "aptitude_test_leads";
+
+    try {
+      await deleteDoc(doc(db, collectionName, id));
+    } catch (err) {
+      console.warn(`Primary delete from ${collectionName} failed, trying fallback:`, err);
+      try {
+        await deleteDoc(doc(db, "aptitude_test_leads", id));
+      } catch (e) {}
+      try {
+        await deleteDoc(doc(db, "aptitude_submissions", id));
+      } catch (e) {}
+    }
+
+    if (activeTab === "aptitude_v2") {
+      try {
+        await deleteAptitudeV2Submission(id);
+      } catch (err) {
+        console.warn("Delete aptitude v2 error:", err);
+      }
+    }
+
+    // Remove from local offline storage if present
+    try {
+      const localAdm = JSON.parse(localStorage.getItem("offline_student_admissions") || "[]");
+      const filteredAdm = localAdm.filter((item) => item.id !== id);
+      localStorage.setItem("offline_student_admissions", JSON.stringify(filteredAdm));
+    } catch (e) {}
+
+    try {
+      const localScholarship = JSON.parse(localStorage.getItem("offline_scholarship_applications") || "[]");
+      const filteredSch = localScholarship.filter((item) => item.id !== id);
+      localStorage.setItem("offline_scholarship_applications", JSON.stringify(filteredSch));
+    } catch (e) {}
+
+    try {
+      const localData = JSON.parse(localStorage.getItem("offline_aptitude_submissions") || "[]");
+      const filtered = localData.filter((item) => item.id !== id);
+      localStorage.setItem("offline_aptitude_submissions", JSON.stringify(filtered));
+    } catch (e) {}
+
+    try {
+      const localConsultations = JSON.parse(localStorage.getItem("consultationBookings") || "[]");
+      const filteredCons = localConsultations.filter((item) => item.id !== id);
+      localStorage.setItem("consultationBookings", JSON.stringify(filteredCons));
+    } catch (e) {}
+
+    if (activeTab === "ai_for_everyone") {
+      try {
+        await deleteAiForEveryoneRegistration(id);
+      } catch (err) {
+        console.warn("Delete ai for everyone error:", err);
+      }
+    }
+
+    setScholarshipData((prev) => prev.filter((item) => item.id !== id));
+    setSlotData((prev) => prev.filter((item) => item.id !== id));
+    setEventData((prev) => prev.filter((item) => item.id !== id));
+    setMasterData((prev) => prev.filter((item) => item.id !== id));
+    setNewAptitudeData((prev) => prev.filter((item) => item.id !== id));
+    setOldAptitudeData((prev) => prev.filter((item) => item.id !== id));
+    setAptitudeV2Data((prev) => prev.filter((item) => item.id !== id));
+    setCollectedData((prev) => prev.filter((item) => item.id !== id));
+    setUploadedData((prev) => prev.filter((item) => item.id !== id));
+    setWebinarData((prev) => prev.filter((item) => item.id !== id));
+    setAdmissionData((prev) => prev.filter((item) => item.id !== id));
+    setConsultationData((prev) => prev.filter((item) => item.id !== id));
+    setAiForEveryoneData((prev) => prev.filter((item) => item.id !== id));
+    setAiBoosterProgramData((prev) => prev.filter((item) => item.id !== id));
+  };
+
   const renderCards = (data) => {
     if (data.length === 0) {
+      if (activeTab === "ai_for_everyone") {
+        if (aiPaymentTab === "paid") {
+          return (
+            <div className="bg-white border-2 border-dashed border-emerald-300 rounded-3xl p-12 text-center my-6">
+              
+              <h4 className="text-base font-black uppercase text-[#050521]">No Paid Students Yet</h4>
+              <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                Registrations will appear in this section once candidates complete the ₹99 payment on Razorpay.
+              </p>
+            </div>
+          );
+        }
+        if (aiPaymentTab === "unpaid") {
+          return (
+            <div className="bg-white border-2 border-dashed border-amber-300 rounded-3xl p-12 text-center my-6">
+              
+              <h4 className="text-base font-black uppercase text-[#050521]">No Unpaid Students</h4>
+              <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                All registered candidates have successfully completed payment, or there are no pending drop-offs.
+              </p>
+            </div>
+          );
+        }
+      }
+      if (activeTab === "ai_booster_program" || activeTab === "ai_for_students") {
+        if (boosterPaymentTab === "paid") {
+          return (
+            <div className="bg-white border-2 border-dashed border-emerald-300 rounded-3xl p-12 text-center my-6">
+              
+              <h4 className="text-base font-black uppercase text-[#050521]">No Paid Students Yet</h4>
+              <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                Registrations will appear in this section once candidates complete the ₹49 payment on Razorpay.
+              </p>
+            </div>
+          );
+        }
+        if (boosterPaymentTab === "unpaid") {
+          return (
+            <div className="bg-white border-2 border-dashed border-amber-300 rounded-3xl p-12 text-center my-6">
+              
+              <h4 className="text-base font-black uppercase text-[#050521]">No Unpaid Students</h4>
+              <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                All registered candidates have completed their ₹49 payment, or there are no pending drop-offs.
+              </p>
+            </div>
+          );
+        }
+        return (
+          <div className="bg-white border-2 border-dashed border-blue-300 rounded-3xl p-12 text-center my-6">
+            
+            <h4 className="text-base font-black uppercase text-[#050521]">No AI Booster Program Registrations Yet</h4>
+            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+              Student form submissions from the "AI Booster Program" page will show up here.
+            </p>
+          </div>
+        );
+      }
+      if (activeTab === "popup_leads") {
+        return (
+          <div className="bg-white border-2 border-dashed border-[#7c3aed]/40 rounded-3xl p-12 text-center my-6">
+            
+            <h4 className="text-base font-black uppercase text-[#050521]">No Career Goal Popup Leads Yet</h4>
+            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+              Submissions from the "Got a career goal in mind?" website popup form will appear here in real time.
+            </p>
+          </div>
+        );
+      }
       return <p className="text-center py-10 text-[#050521]/50 font-bold uppercase tracking-widest">No registrations found.</p>;
+    }
+
+    if (activeTab === "popup_leads") {
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          {data.map((item) => (
+            <PopupLeadCard
+              key={item.id}
+              item={item}
+              onDelete={handleDeleteRecord}
+              onUpdate={handleUpdatePopupLead}
+            />
+          ))}
+        </div>
+      );
+    }
+
+    if (activeTab === "scholarship") {
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          {data.map((item) => (
+            <ScholarshipCard
+              key={item.id}
+              item={item}
+              onDelete={handleDeleteRecord}
+              onUpdate={handleUpdateScholarship}
+            />
+          ))}
+        </div>
+      );
+    }
+
+    if (activeTab === "ai_for_everyone") {
+      const paidItems = data.filter((item) => item.paymentStatus === "paid" || Boolean(item.paymentId));
+      const unpaidItems = data.filter((item) => item.paymentStatus !== "paid" && !item.paymentId);
+
+      if (aiPaymentTab === "paid") {
+        return (
+          <div className="space-y-6">
+            <div className="bg-emerald-500/10 border-2 border-emerald-500/30 rounded-3xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-black uppercase tracking-wider text-emerald-950 flex items-center gap-2">
+                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Paid Students Section (₹99 Confirmed)</span>
+                </h3>
+                <p className="text-xs text-emerald-800 font-medium mt-1">Confirmed registrations who completed ₹99 payment.</p>
+              </div>
+              <span className="px-3.5 py-1.5 bg-emerald-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                {paidItems.length} Paid
+              </span>
+            </div>
+            {paidItems.length === 0 ? (
+              <div className="bg-white border-2 border-dashed border-emerald-300 rounded-3xl p-12 text-center">
+                
+                <h4 className="text-base font-black uppercase text-[#050521]">No Paid Students Found</h4>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {paidItems.map((item) => (
+                  <AiForEveryoneCard
+                    key={item.id}
+                    item={item}
+                    onDelete={handleDeleteRecord}
+                    onUpdate={handleUpdateAiForEveryone}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      if (aiPaymentTab === "unpaid") {
+        return (
+          <div className="space-y-6">
+            <div className="bg-amber-500/10 border-2 border-amber-500/30 rounded-3xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-black uppercase tracking-wider text-amber-950 flex items-center gap-2">
+                  <span className="w-3.5 h-3.5 rounded-full bg-amber-500 animate-pulse" />
+                  <span>Unpaid / Pending Leads Section</span>
+                </h3>
+                <p className="text-xs text-amber-800 font-medium mt-1">Candidates who filled details but dropped off before paying.</p>
+              </div>
+              <span className="px-3.5 py-1.5 bg-amber-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                {unpaidItems.length} Unpaid
+              </span>
+            </div>
+            {unpaidItems.length === 0 ? (
+              <div className="bg-white border-2 border-dashed border-amber-300 rounded-3xl p-12 text-center">
+                
+                <h4 className="text-base font-black uppercase text-[#050521]">No Unpaid Students</h4>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {unpaidItems.map((item) => (
+                  <AiForEveryoneCard
+                    key={item.id}
+                    item={item}
+                    onDelete={handleDeleteRecord}
+                    onUpdate={handleUpdateAiForEveryone}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      // Both sections separated
+      return (
+        <div className="space-y-10">
+          <section className="bg-white border-2 border-emerald-400/40 rounded-[2.5rem] p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-emerald-100">
+              <h3 className="text-lg font-black uppercase tracking-wider text-emerald-950 flex items-center gap-2">
+                <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Section 1: Paid Students (₹99 Confirmed)</span>
+              </h3>
+              <span className="px-3.5 py-1.5 bg-emerald-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                {paidItems.length} Paid
+              </span>
+            </div>
+            {paidItems.length === 0 ? (
+              <p className="text-sm text-slate-500 text-center py-6 font-medium">No paid students registered yet.</p>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {paidItems.map((item) => (
+                  <AiForEveryoneCard key={item.id} item={item} onDelete={handleDeleteRecord} onUpdate={handleUpdateAiForEveryone} />
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="bg-white border-2 border-amber-400/40 rounded-[2.5rem] p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-amber-100">
+              <h3 className="text-lg font-black uppercase tracking-wider text-amber-950 flex items-center gap-2">
+                <span className="w-3.5 h-3.5 rounded-full bg-amber-500 animate-pulse" />
+                <span>Section 2: Unpaid / Pending Leads</span>
+              </h3>
+              <span className="px-3.5 py-1.5 bg-amber-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                {unpaidItems.length} Unpaid
+              </span>
+            </div>
+            {unpaidItems.length === 0 ? (
+              <p className="text-sm text-slate-500 text-center py-6 font-medium">No unpaid leads pending.</p>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {unpaidItems.map((item) => (
+                  <AiForEveryoneCard key={item.id} item={item} onDelete={handleDeleteRecord} onUpdate={handleUpdateAiForEveryone} />
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+      );
+    }
+
+    if (activeTab === "ai_booster_program" || activeTab === "ai_for_students") {
+      const paidItems = data.filter((item) => isItemPaid(item));
+      const unpaidItems = data.filter((item) => !isItemPaid(item));
+
+      // 1. Paid Section Only View
+      if (boosterPaymentTab === "paid") {
+        return (
+          <div className="space-y-6">
+            <div className="bg-emerald-500/10 border-2 border-emerald-500/30 rounded-3xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981] animate-pulse" />
+                  <h3 className="text-lg font-black uppercase tracking-wider text-emerald-950">
+                    Paid Students Section (₹49 Confirmed)
+                  </h3>
+                </div>
+                <p className="text-xs text-emerald-800 font-medium mt-1">
+                  Candidates who completed the ₹49 Razorpay payment. Verified and confirmed for AI Booster Program.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="px-3.5 py-1.5 bg-emerald-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                  {paidItems.length} Confirmed
+                </span>
+                <span className="px-3.5 py-1.5 bg-white border border-emerald-300 text-emerald-900 text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                  ₹{paidItems.length * 49} Collected
+                </span>
+                <button
+                  type="button"
+                  onClick={() => exportBoosterSubsetCSV(paidItems, "paid_students")}
+                  className="px-3.5 py-1.5 bg-[#050521] hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Export Paid CSV</span>
+                </button>
+              </div>
+            </div>
+
+            {paidItems.length === 0 ? (
+              <div className="bg-white border-2 border-dashed border-emerald-300 rounded-3xl p-12 text-center">
+                
+                <h4 className="text-base font-black uppercase text-[#050521]">No Paid Students Found</h4>
+                <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                  Registrations will appear in this section once candidates complete the ₹49 payment on Razorpay.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {paidItems.map((item) => (
+                  <AiBoosterProgramCard
+                    key={item.id}
+                    item={item}
+                    onDelete={handleDeleteRecord}
+                    onUpdate={handleUpdateAiBoosterProgram}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      // 2. Unpaid Section Only View
+      if (boosterPaymentTab === "unpaid") {
+        return (
+          <div className="space-y-6">
+            <div className="bg-amber-500/10 border-2 border-amber-500/30 rounded-3xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <span className="w-3.5 h-3.5 rounded-full bg-amber-500 shadow-[0_0_10px_#f59e0b] animate-pulse" />
+                  <h3 className="text-lg font-black uppercase tracking-wider text-amber-950">
+                    Unpaid / Pending Leads Section
+                  </h3>
+                </div>
+                <p className="text-xs text-amber-800 font-medium mt-1">
+                  Candidates who submitted registration details but dropped off before paying ₹49. Reach out via WhatsApp or call to recover.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="px-3.5 py-1.5 bg-amber-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                  {unpaidItems.length} Dropped Off
+                </span>
+                <button
+                  type="button"
+                  onClick={() => exportBoosterSubsetCSV(unpaidItems, "unpaid_leads")}
+                  className="px-3.5 py-1.5 bg-[#050521] hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Export Unpaid CSV</span>
+                </button>
+              </div>
+            </div>
+
+            {unpaidItems.length === 0 ? (
+              <div className="bg-white border-2 border-dashed border-amber-300 rounded-3xl p-12 text-center">
+                
+                <h4 className="text-base font-black uppercase text-[#050521]">No Unpaid Students</h4>
+                <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                  All registered candidates have completed payment, or no pending leads match your search query.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {unpaidItems.map((item) => (
+                  <AiBoosterProgramCard
+                    key={item.id}
+                    item={item}
+                    onDelete={handleDeleteRecord}
+                    onUpdate={handleUpdateAiBoosterProgram}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      // 3. Both Sections View (NEVER MIXED! STRICTLY TWO SEPARATE SECTIONS)
+      return (
+        <div className="space-y-12">
+          {/* ================= SECTION 1: PAID STUDENTS ================= */}
+          <section className="bg-white border-2 border-emerald-400/50 rounded-[2.5rem] p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b border-emerald-100">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_12px_#10b981] animate-pulse" />
+                  <h3 className="text-xl font-black uppercase tracking-wider text-emerald-950">
+                    SECTION 1: PAID REGISTRATIONS (₹49 COMPLETED)
+                  </h3>
+                </div>
+                <p className="text-xs text-emerald-800 font-medium">
+                  Confirmed students who completed the ₹49 Razorpay payment. Guaranteed workshop seats.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="px-3.5 py-1.5 bg-emerald-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                  {paidItems.length} Paid Students
+                </span>
+                <span className="px-3.5 py-1.5 bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                  ₹{paidItems.length * 49} Revenue
+                </span>
+                <button
+                  type="button"
+                  onClick={() => exportBoosterSubsetCSV(paidItems, "paid_students")}
+                  className="px-3.5 py-1.5 bg-[#050521] hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Export Paid CSV</span>
+                </button>
+              </div>
+            </div>
+
+            {paidItems.length === 0 ? (
+              <div className="bg-emerald-50/50 border-2 border-dashed border-emerald-200 rounded-3xl p-10 text-center">
+                
+                <h4 className="text-sm font-black uppercase text-emerald-950">No Paid Students Yet</h4>
+                <p className="text-xs text-emerald-700 mt-1 max-w-md mx-auto">
+                  When candidates complete the ₹49 payment on Razorpay, their cards will show up right here in Section 1.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {paidItems.map((item) => (
+                  <AiBoosterProgramCard
+                    key={item.id}
+                    item={item}
+                    onDelete={handleDeleteRecord}
+                    onUpdate={handleUpdateAiBoosterProgram}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* ================= DISTINCT SECTION DIVIDER ================= */}
+          <div className="relative flex items-center justify-center py-2">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t-2 border-dashed border-slate-300" />
+            </div>
+            <div className="relative bg-[#f4f6f8] px-6 py-2 rounded-full border border-slate-300 text-[11px] font-black uppercase tracking-widest text-slate-600 shadow-sm flex items-center gap-2">
+              <span>⬇️</span>
+              <span>SEPARATE SECTION: UNPAID LEADS BELOW</span>
+              <span>⬇️</span>
+            </div>
+          </div>
+
+          {/* ================= SECTION 2: UNPAID LEADS ================= */}
+          <section className="bg-white border-2 border-amber-400/50 rounded-[2.5rem] p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b border-amber-100">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-4 h-4 rounded-full bg-amber-500 shadow-[0_0_12px_#f59e0b] animate-pulse" />
+                  <h3 className="text-xl font-black uppercase tracking-wider text-amber-950">
+                    SECTION 2: UNPAID / PENDING LEADS (PAYMENT DROPPED OFF)
+                  </h3>
+                </div>
+                <p className="text-xs text-amber-800 font-medium">
+                  Students who filled their details in the AI Booster Program form but did not finish the ₹49 Razorpay payment.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="px-3.5 py-1.5 bg-amber-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
+                  {unpaidItems.length} Unpaid Leads
+                </span>
+                <button
+                  type="button"
+                  onClick={() => exportBoosterSubsetCSV(unpaidItems, "unpaid_leads")}
+                  className="px-3.5 py-1.5 bg-[#050521] hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Export Unpaid CSV</span>
+                </button>
+              </div>
+            </div>
+
+            {unpaidItems.length === 0 ? (
+              <div className="bg-amber-50/50 border-2 border-dashed border-amber-200 rounded-3xl p-10 text-center">
+                
+                <h4 className="text-sm font-black uppercase text-amber-950">No Unpaid Leads</h4>
+                <p className="text-xs text-amber-700 mt-1 max-w-md mx-auto">
+                  All registered candidates have successfully completed payment, or there are no pending drop-offs.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {unpaidItems.map((item) => (
+                  <AiBoosterProgramCard
+                    key={item.id}
+                    item={item}
+                    onDelete={handleDeleteRecord}
+                    onUpdate={handleUpdateAiBoosterProgram}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+      );
     }
     
     if (activeTab === "admission") {
       return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {data.map((item) => (
-            <AdmissionCard key={item.id} item={item} />
+            <AdmissionCard key={item.id} item={item} onDelete={handleDeleteRecord} />
+          ))}
+        </div>
+      );
+    }
+
+    if (activeTab === "aptitude") {
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          {data.map((item) => (
+            <AptitudeSubmissionCard key={item.id} item={item} onDelete={handleDeleteRecord} />
+          ))}
+        </div>
+      );
+    }
+
+    if (activeTab === "aptitude_v2") {
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          {data.map((item) => (
+            <AptitudeV2SubmissionCard key={item.id} item={item} onDelete={handleDeleteRecord} />
+          ))}
+        </div>
+      );
+    }
+
+    if (activeTab === "consultation") {
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          {data.map((item) => (
+            <ConsultationCard key={item.id} item={item} onDelete={handleDeleteRecord} />
           ))}
         </div>
       );
@@ -478,23 +3402,38 @@ function AdminDashboard() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-start">
         {data.map((item) => (
-          <DataCard key={item.id} item={item} headers={headers} />
+          <DataCard key={item.id} item={item} headers={headers} onDelete={handleDeleteRecord} />
         ))}
       </div>
     );
   };
 
   const getActiveData = () => {
+    if (activeTab === "popup_leads") return popupLeadData;
+    if (activeTab === "scholarship") return scholarshipData;
     if (activeTab === "slot") return slotData;
     if (activeTab === "event") return eventData;
     if (activeTab === "master") return masterData;
-    if (activeTab === "aptitude") return aptitudeData;
+    if (activeTab === "aptitude") return newAptitudeData;
+    if (activeTab === "old_aptitude") return oldAptitudeData;
+    if (activeTab === "aptitude_v2") return aptitudeV2Data;
     if (activeTab === "collected") return collectedData;
     if (activeTab === "uploaded") return uploadedData;
     if (activeTab === "webinar") return webinarData;
     if (activeTab === "admission") return admissionData;
+    if (activeTab === "consultation") return consultationData;
+    if (activeTab === "ai_for_everyone") {
+      if (aiPaymentTab === "paid") return paidAiStudents;
+      if (aiPaymentTab === "unpaid") return unpaidAiStudents;
+      return aiForEveryoneData;
+    }
+    if (activeTab === "ai_booster_program" || activeTab === "ai_for_students") {
+      if (boosterPaymentTab === "paid") return paidBoosterStudents;
+      if (boosterPaymentTab === "unpaid") return unpaidBoosterStudents;
+      return aiBoosterProgramData;
+    }
 
-    return slotData;
+    return scholarshipData;
   };
 
   const getFilteredData = () => {
@@ -523,14 +3462,28 @@ function AdminDashboard() {
 
   const getTabTitle = () => {
     switch (activeTab) {
+      case "popup_leads": return "Career Goal Leads — Website Popup";
+      case "scholarship": return "Scholarship Applications";
       case "slot": return "Slot Registrations";
       case "event": return "Event Entry";
       case "master": return "Master Class";
-      case "aptitude": return "Aptitude Leads";
+      case "aptitude": return "AI Aptitude Test (New)";
+      case "old_aptitude": return "Aptitude Leads (Old)";
+      case "aptitude_v2": return "Deepstaq Aptitude Test V2 (40 Questions)";
       case "collected": return "Collected Contacts";
       case "uploaded": return "Uploaded Files";
       case "webinar": return "Webinar Registrations";
       case "admission": return "Student Admissions";
+      case "consultation": return "Free Consultations";
+      case "ai_for_everyone":
+        if (aiPaymentTab === "paid") return "AI easy Ayi — Paid Students (₹99)";
+        if (aiPaymentTab === "unpaid") return "AI easy Ayi — Unpaid Leads";
+        return "AI easy Ayi — All Registrations";
+      case "ai_booster_program":
+      case "ai_for_students":
+        if (boosterPaymentTab === "paid") return "AI Booster Program — Paid Students Section (₹49)";
+        if (boosterPaymentTab === "unpaid") return "AI Booster Program — Unpaid / Pending Leads Section";
+        return "AI Booster Program — Separate Paid & Unpaid Sections";
       default: return "Dashboard";
     }
   };
@@ -563,6 +3516,111 @@ function AdminDashboard() {
           <div className="hidden md:block mb-2 px-2">
             <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">Collections</h3>
           </div>
+
+          <button 
+             onClick={() => setActiveTab("popup_leads")}
+             className={`flex-shrink-0 md:w-full text-left px-5 py-4 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 ${activeTab === "popup_leads" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
+          >
+             <span className="flex items-center gap-2">
+               
+               <span>Career Goal Leads (Popup)</span>
+             </span>
+             <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "popup_leads" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{popupLeadData.length}</span>
+          </button>
+
+          <button 
+             onClick={() => {
+               setActiveTab("ai_for_everyone");
+               setAiPaymentTab("all");
+             }}
+             className={`flex-shrink-0 md:w-full text-left px-5 py-4 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 ${activeTab === "ai_for_everyone" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
+          >
+             <span className="flex items-center gap-2">
+               
+               <span>AI easy Ayi</span>
+             </span>
+             <div className="flex items-center gap-1.5">
+               {paidAiStudents.length > 0 && (
+                 <span className={`px-2 py-0.5 rounded-md text-[8px] font-mono font-bold ${activeTab === "ai_for_everyone" ? "bg-[#050521] text-white" : "bg-emerald-500/20 text-emerald-400"}`}>
+                   {paidAiStudents.length} Paid
+                 </span>
+               )}
+               <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "ai_for_everyone" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{aiForEveryoneData.length}</span>
+             </div>
+          </button>
+
+          <div className="flex flex-col gap-1">
+            <button 
+               onClick={() => {
+                 setActiveTab("ai_booster_program");
+                 setBoosterPaymentTab("all");
+               }}
+               className={`flex-shrink-0 md:w-full text-left px-5 py-3.5 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 cursor-pointer ${(activeTab === "ai_booster_program" || activeTab === "ai_for_students") && boosterPaymentTab === "all" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
+            >
+               <span className="flex items-center gap-2">
+                 
+                 <span>AI Booster Program</span>
+               </span>
+               <div className="flex items-center gap-1.5">
+                 {paidBoosterStudents.length > 0 && (
+                   <span className="px-2 py-0.5 rounded-md text-[9px] bg-emerald-500 text-white font-bold" title="Paid Students">
+                     {paidBoosterStudents.length} paid
+                   </span>
+                 )}
+                 <span className={`px-2.5 py-1 rounded-md text-[9px] ${(activeTab === "ai_booster_program" || activeTab === "ai_for_students") && boosterPaymentTab === "all" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>
+                   {aiBoosterProgramData.length}
+                 </span>
+               </div>
+            </button>
+
+            {/* Direct 1-Click Separate Section Navigation */}
+            <div className="hidden md:flex flex-col gap-1 pl-4 pr-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab("ai_booster_program");
+                  setBoosterPaymentTab("paid");
+                }}
+                className={`w-full text-left px-3.5 py-2 rounded-xl font-bold uppercase tracking-wider text-[9px] transition-all flex justify-between items-center gap-2 cursor-pointer ${(activeTab === "ai_booster_program" || activeTab === "ai_for_students") && boosterPaymentTab === "paid" ? "bg-emerald-500 text-white shadow-md ring-1 ring-emerald-300" : "text-emerald-300/80 hover:text-emerald-100 hover:bg-emerald-500/10"}`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>Paid Section (₹49)</span>
+                </span>
+                <span className={`px-2 py-0.5 rounded-md text-[8px] font-bold ${(activeTab === "ai_booster_program" || activeTab === "ai_for_students") && boosterPaymentTab === "paid" ? "bg-black/25 text-white" : "bg-emerald-950/60 text-emerald-300 border border-emerald-500/30"}`}>
+                  {paidBoosterStudents.length}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab("ai_booster_program");
+                  setBoosterPaymentTab("unpaid");
+                }}
+                className={`w-full text-left px-3.5 py-2 rounded-xl font-bold uppercase tracking-wider text-[9px] transition-all flex justify-between items-center gap-2 cursor-pointer ${(activeTab === "ai_booster_program" || activeTab === "ai_for_students") && boosterPaymentTab === "unpaid" ? "bg-amber-500 text-white shadow-md ring-1 ring-amber-300" : "text-amber-300/80 hover:text-amber-100 hover:bg-amber-500/10"}`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span>Unpaid Section</span>
+                </span>
+                <span className={`px-2 py-0.5 rounded-md text-[8px] font-bold ${(activeTab === "ai_booster_program" || activeTab === "ai_for_students") && boosterPaymentTab === "unpaid" ? "bg-black/25 text-white" : "bg-amber-950/60 text-amber-300 border border-amber-500/30"}`}>
+                  {unpaidBoosterStudents.length}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <button 
+             onClick={() => setActiveTab("scholarship")}
+             className={`flex-shrink-0 md:w-full text-left px-5 py-4 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 ${activeTab === "scholarship" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
+          >
+             <span className="flex items-center gap-2">
+               
+               <span>Scholarship Applications</span>
+             </span>
+             <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "scholarship" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{scholarshipData.length}</span>
+          </button>
           
           <button 
              onClick={() => setActiveTab("slot")}
@@ -591,11 +3649,33 @@ function AdminDashboard() {
           <div className="hidden md:block my-2 border-t border-white/5"></div>
 
           <button 
+             onClick={() => setActiveTab("aptitude_v2")}
+             className={`flex-shrink-0 md:w-full text-left px-5 py-4 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 ${activeTab === "aptitude_v2" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
+          >
+             <span className="flex items-center gap-2">
+               
+               <span>Aptitude Test V2 (40Q)</span>
+             </span>
+             <div className="flex items-center gap-1.5">
+               <span className="px-1.5 py-0.5 rounded text-[8px] bg-[#c6ff34] text-[#050521] font-bold">V2</span>
+               <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "aptitude_v2" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{aptitudeV2Data.length}</span>
+             </div>
+          </button>
+
+          <button 
              onClick={() => setActiveTab("aptitude")}
              className={`flex-shrink-0 md:w-full text-left px-5 py-4 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 ${activeTab === "aptitude" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
           >
-             <span>Aptitude Leads</span>
-             <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "aptitude" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{aptitudeData.length}</span>
+             <span>AI Aptitude Test (New)</span>
+             <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "aptitude" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{newAptitudeData.length}</span>
+          </button>
+
+          <button 
+             onClick={() => setActiveTab("old_aptitude")}
+             className={`flex-shrink-0 md:w-full text-left px-5 py-4 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 ${activeTab === "old_aptitude" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
+          >
+             <span>Aptitude Leads (Old)</span>
+             <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "old_aptitude" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{oldAptitudeData.length}</span>
           </button>
 
           <button 
@@ -622,6 +3702,14 @@ function AdminDashboard() {
              <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "admission" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{admissionData.length}</span>
           </button>
 
+          <button 
+             onClick={() => setActiveTab("consultation")}
+             className={`flex-shrink-0 md:w-full text-left px-5 py-4 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 ${activeTab === "consultation" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
+          >
+             <span>Free Consultations</span>
+             <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "consultation" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{consultationData.length}</span>
+          </button>
+
         </div>
 
         {/* Desktop User Profile Area */}
@@ -632,7 +3720,7 @@ function AdminDashboard() {
              <div className="flex gap-3">
                <button 
                  onClick={downloadCSV} 
-                 className="flex-1 py-3 bg-[#c6ff34]/10 text-[#c6ff34] border border-[#c6ff34]/20 hover:bg-[#c6ff34] hover:text-[#050521] hover:border-[#c6ff34] rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all"
+                 className="flex-1 py-3 bg-[#c6ff34]/10 text-white border border-[#c6ff34]/20 hover:bg-[#c6ff34] hover:text-[#050521] hover:border-[#c6ff34] rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all"
                >
                  Export
                </button>
@@ -660,18 +3748,307 @@ function AdminDashboard() {
               {searchQuery ? `Showing ${getFilteredData().length} of ${getActiveData().length} records` : `Currently viewing ${getActiveData().length} records`}
             </p>
           </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={fetchData}
+              disabled={loadingData}
+              className="py-2.5 px-4 bg-white hover:bg-slate-100 border border-slate-200 text-[#050521] rounded-xl text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              <span className={loadingData ? "animate-spin" : ""}>↻</span>
+              <span>{loadingData ? "Refreshing..." : "Refresh Data"}</span>
+            </button>
+          </div>
         </header>
 
         {/* Content Scrollable Area */}
         <div className="flex-1 overflow-y-auto p-4 md:p-10 relative">
           
           {/* Mobile Title (Hidden on Desktop) */}
-          <div className="md:hidden mb-6 px-2">
-            <h2 className="text-2xl font-black tracking-tight text-[#050521]">{getTabTitle()}</h2>
-            <p className="text-[#050521]/40 font-bold uppercase tracking-widest text-[9px] mt-1">
-              {searchQuery ? `Showing ${getFilteredData().length} of ${getActiveData().length} records` : `${getActiveData().length} records found`}
-            </p>
+          <div className="md:hidden mb-6 px-2 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-black tracking-tight text-[#050521]">{getTabTitle()}</h2>
+              <p className="text-[#050521]/40 font-bold uppercase tracking-widest text-[9px] mt-1">
+                {searchQuery ? `Showing ${getFilteredData().length} of ${getActiveData().length} records` : `${getActiveData().length} records found`}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={fetchData}
+              disabled={loadingData}
+              className="p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black shadow-sm cursor-pointer"
+              title="Refresh data"
+            >
+              <span className={loadingData ? "inline-block animate-spin" : ""}>↻</span>
+            </button>
           </div>
+
+          {/* Quick Metrics Banner for Popup Leads */}
+          {activeTab === "popup_leads" && !loadingData && (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-7">
+              <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <span className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">Total Captured</span>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-2xl sm:text-3xl font-black text-[#050521]">{popupLeadData.length}</span>
+                  <span className="text-[10px] font-bold text-slate-400">leads</span>
+                </div>
+              </div>
+
+              <div className="bg-emerald-50/70 p-4 sm:p-5 rounded-2xl border border-emerald-200/80 shadow-sm flex flex-col justify-between">
+                <span className="text-[9px] font-black uppercase tracking-[0.15em] text-emerald-800">Completed All Steps</span>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-2xl sm:text-3xl font-black text-emerald-900">
+                    {popupLeadData.filter((i) => i.completed).length}
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-700">100% finished</span>
+                </div>
+              </div>
+
+              <div className="bg-amber-50/70 p-4 sm:p-5 rounded-2xl border border-amber-200/80 shadow-sm flex flex-col justify-between">
+                <span className="text-[9px] font-black uppercase tracking-[0.15em] text-amber-800">Partial (Phone Captured)</span>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-2xl sm:text-3xl font-black text-amber-900">
+                    {popupLeadData.filter((i) => !i.completed && i.phone).length}
+                  </span>
+                  <span className="text-[10px] font-bold text-amber-700">recoverable</span>
+                </div>
+              </div>
+
+              <div className="bg-blue-50/70 p-4 sm:p-5 rounded-2xl border border-blue-200/80 shadow-sm flex flex-col justify-between">
+                <span className="text-[9px] font-black uppercase tracking-[0.15em] text-blue-800">Consultation Inquiries</span>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-2xl sm:text-3xl font-black text-blue-900">
+                    {popupLeadData.filter((i) => (i.purpose || "").toLowerCase().includes("consultation")).length}
+                  </span>
+                  <span className="text-[10px] font-bold text-blue-700">priority</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Quick Metrics Banner for AI For Everyone */}
+          {activeTab === "ai_for_everyone" && !loadingData && (
+            <>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
+                <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">Total Registered</span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-2xl sm:text-3xl font-black text-[#050521]">{aiForEveryoneData.length}</span>
+                    <span className="text-[10px] font-bold text-slate-400">candidates</span>
+                  </div>
+                </div>
+
+                <div className="bg-emerald-50/70 p-4 sm:p-5 rounded-2xl border border-emerald-200/80 shadow-sm flex flex-col justify-between">
+                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-emerald-800">Paid Students</span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-2xl sm:text-3xl font-black text-emerald-900">
+                      {paidAiStudents.length}
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-700">₹{paidAiStudents.length * 99} collected</span>
+                  </div>
+                </div>
+
+                <div className="bg-amber-50/70 p-4 sm:p-5 rounded-2xl border border-amber-200/80 shadow-sm flex flex-col justify-between">
+                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-amber-800">● Unpaid / Pending</span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-2xl sm:text-3xl font-black text-amber-900">
+                      {unpaidAiStudents.length}
+                    </span>
+                    <span className="text-[10px] font-bold text-amber-700">dropped off</span>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50/70 p-4 sm:p-5 rounded-2xl border border-blue-200/80 shadow-sm flex flex-col justify-between">
+                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-blue-800">Payment Conversion</span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-2xl sm:text-3xl font-black text-blue-900">
+                      {aiForEveryoneData.length > 0 ? Math.round((paidAiStudents.length / aiForEveryoneData.length) * 100) : 0}%
+                    </span>
+                    <span className="text-[10px] font-bold text-blue-700">paid rate</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dedicated Paid vs Unpaid Sections Switcher */}
+              <div className="flex flex-wrap items-center gap-2 mb-6 p-1.5 bg-white rounded-2xl border border-slate-200 shadow-sm w-fit">
+                <button
+                  type="button"
+                  onClick={() => setAiPaymentTab("all")}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+                    aiPaymentTab === "all"
+                      ? "bg-[#050521] text-white shadow-sm"
+                      : "text-slate-600 hover:text-[#050521] hover:bg-slate-100"
+                  }`}
+                >
+                  <span>All Registrations</span>
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                    aiPaymentTab === "all" ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
+                  }`}>
+                    {aiForEveryoneData.length}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAiPaymentTab("paid")}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+                    aiPaymentTab === "paid"
+                      ? "bg-emerald-600 text-white shadow-sm"
+                      : "text-emerald-800 hover:text-emerald-900 hover:bg-emerald-50"
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>Paid Students (₹99)</span>
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                    aiPaymentTab === "paid" ? "bg-white/25 text-white" : "bg-emerald-100 text-emerald-800"
+                  }`}>
+                    {paidAiStudents.length}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAiPaymentTab("unpaid")}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+                    aiPaymentTab === "unpaid"
+                      ? "bg-amber-600 text-white shadow-sm"
+                      : "text-amber-800 hover:text-amber-900 hover:bg-amber-50"
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span>Unpaid Students</span>
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                    aiPaymentTab === "unpaid" ? "bg-white/25 text-white" : "bg-amber-100 text-amber-800"
+                  }`}>
+                    {unpaidAiStudents.length}
+                  </span>
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Quick Metrics Banner for AI Booster Program */}
+          {(activeTab === "ai_booster_program" || activeTab === "ai_for_students") && !loadingData && (
+            <>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
+                <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">Total Registered</span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-2xl sm:text-3xl font-black text-[#050521]">{aiBoosterProgramData.length}</span>
+                    <span className="text-[10px] font-bold text-slate-400">students</span>
+                  </div>
+                </div>
+
+                <div 
+                  onClick={() => setBoosterPaymentTab("paid")}
+                  className={`p-4 sm:p-5 rounded-2xl border shadow-sm flex flex-col justify-between cursor-pointer transition-all ${
+                    boosterPaymentTab === "paid"
+                      ? "bg-emerald-100 border-emerald-400 ring-2 ring-emerald-500 shadow-md"
+                      : "bg-emerald-50/70 border-emerald-200/80 hover:bg-emerald-100/60"
+                  }`}
+                  title="Click to view Paid Section only"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-emerald-800">Paid Section</span>
+                    <span className="text-[9px] font-bold text-emerald-700 bg-emerald-200/60 px-1.5 py-0.5 rounded">View →</span>
+                  </div>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-2xl sm:text-3xl font-black text-emerald-900">
+                      {paidBoosterStudents.length}
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-700">₹{paidBoosterStudents.length * 49} collected</span>
+                  </div>
+                </div>
+
+                <div 
+                  onClick={() => setBoosterPaymentTab("unpaid")}
+                  className={`p-4 sm:p-5 rounded-2xl border shadow-sm flex flex-col justify-between cursor-pointer transition-all ${
+                    boosterPaymentTab === "unpaid"
+                      ? "bg-amber-100 border-amber-400 ring-2 ring-amber-500 shadow-md"
+                      : "bg-amber-50/70 border-amber-200/80 hover:bg-amber-100/60"
+                  }`}
+                  title="Click to view Unpaid Section only"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-amber-800">Unpaid Section</span>
+                    <span className="text-[9px] font-bold text-amber-700 bg-amber-200/60 px-1.5 py-0.5 rounded">View →</span>
+                  </div>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-2xl sm:text-3xl font-black text-amber-900">
+                      {unpaidBoosterStudents.length}
+                    </span>
+                    <span className="text-[10px] font-bold text-amber-700">dropped off</span>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50/70 p-4 sm:p-5 rounded-2xl border border-blue-200/80 shadow-sm flex flex-col justify-between">
+                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-blue-800">Payment Conversion</span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-2xl sm:text-3xl font-black text-blue-900">
+                      {aiBoosterProgramData.length > 0 ? Math.round((paidBoosterStudents.length / aiBoosterProgramData.length) * 100) : 0}%
+                    </span>
+                    <span className="text-[10px] font-bold text-blue-700">paid rate</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dedicated Paid vs Unpaid Sections Switcher */}
+              <div className="flex flex-wrap items-center gap-2 mb-6 p-1.5 bg-white rounded-2xl border border-slate-200 shadow-sm w-fit">
+                <button
+                  type="button"
+                  onClick={() => setBoosterPaymentTab("all")}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                    boosterPaymentTab === "all"
+                      ? "bg-[#050521] text-white shadow-sm"
+                      : "text-slate-600 hover:text-[#050521] hover:bg-slate-100"
+                  }`}
+                >
+                  <span>All (2 Separate Sections)</span>
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                    boosterPaymentTab === "all" ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
+                  }`}>
+                    {aiBoosterProgramData.length}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBoosterPaymentTab("paid")}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                    boosterPaymentTab === "paid"
+                      ? "bg-emerald-600 text-white shadow-sm"
+                      : "text-emerald-800 hover:text-emerald-900 hover:bg-emerald-50"
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>Paid Section Only (₹49)</span>
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                    boosterPaymentTab === "paid" ? "bg-white/25 text-white" : "bg-emerald-100 text-emerald-800"
+                  }`}>
+                    {paidBoosterStudents.length}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBoosterPaymentTab("unpaid")}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                    boosterPaymentTab === "unpaid"
+                      ? "bg-amber-600 text-white shadow-sm"
+                      : "text-amber-800 hover:text-amber-900 hover:bg-amber-50"
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span>Unpaid Section Only</span>
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                    boosterPaymentTab === "unpaid" ? "bg-white/25 text-white" : "bg-amber-100 text-amber-800"
+                  }`}>
+                    {unpaidBoosterStudents.length}
+                  </span>
+                </button>
+              </div>
+            </>
+          )}
 
           {/* Search Input */}
           {!loadingData && (

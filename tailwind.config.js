@@ -4,7 +4,27 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
+        sans: ["Outfit", "Plus Jakarta Sans", "Inter", "sans-serif"],
+        outfit: ["Outfit", "sans-serif"],
+        jakarta: ["Plus Jakarta Sans", "sans-serif"],
+        mono: ["Space Mono", "monospace"],
         inter: ["Inter", "sans-serif"],
+      },
+      colors: {
+        neon: {
+          lime: "#ffffff",
+          emerald: "#38bdf8",
+          dark: "#030a16",
+          surface: "#071731",
+          border: "rgba(255, 255, 255, 0.08)",
+        },
+        navy: {
+          950: "#020712",
+          900: "#040d1a",
+          850: "#06152d",
+          800: "#082142",
+          700: "#0d3266",
+        },
       },
       animation: {
         "fade-in": "fadeIn 0.5s ease-in-out",

@@ -1,8 +1,8 @@
 import React from "react";
 
-const NUM_BUBBLES = 28;
+const NUM_BUBBLES = 24;
 
-export default function WaterBubbles() {
+function WaterBubbles() {
   return (
     <div
       aria-hidden="true"
@@ -14,3 +14,5 @@ export default function WaterBubbles() {
     </div>
   );
 }
+
+export default React.memo(WaterBubbles);

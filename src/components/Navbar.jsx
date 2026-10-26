@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "../assets/Asset 1@4x.png";
+import { BLOG_POSTS } from "../data/blogPosts";
 
 const Icons = {
   Menu: ({ className }) => (
@@ -33,6 +34,19 @@ const Icons = {
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   ),
+  ChevronDown: ({ className }) => (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  ),
 };
 
 function Navbar() {
@@ -40,9 +54,52 @@ function Navbar() {
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
+  const [isBlogHovered, setIsBlogHovered] = useState(false);
+  const [mobileBlogExpanded, setMobileBlogExpanded] = useState(false);
+
+  const blogTimeoutRef = useRef(null);
+  const navContainerRef = useRef(null);
+  const location = useLocation();
+
+  // Close menus on route change
+  useEffect(() => {
+    setIsOpen(false);
+    setIsBlogHovered(false);
+    setMobileBlogExpanded(false);
+  }, [location.pathname]);
+
+  // Handle click outside & escape key to close menu on tablet & mobile
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (navContainerRef.current && !navContainerRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+        setIsBlogHovered(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
+  // Scroll detection to hide/show navbar
   useEffect(() => {
     const handleScroll = () => {
-      if (isOpen) return; // Don't hide navbar if mobile menu is open
+      if (isOpen) return;
       if (window.scrollY > lastScrollY && window.scrollY > 80) {
         setShowNavbar(false);
       } else {
@@ -55,86 +112,399 @@ function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY, isOpen]);
 
-  const navLinks = [
-    { name: "HOME", path: "/" },
-    { name: "BLOG", path: "/blog" },
-    { name: "ADMISSION", path: "/admission" },
-    { name: "CONTACT", path: "/contact" },
-  ];
+  // Handlers for Blog Dropdown in desktop view
+  const handleMouseEnterBlog = () => {
+    if (blogTimeoutRef.current) clearTimeout(blogTimeoutRef.current);
+    setIsBlogHovered(true);
+  };
+
+  const handleMouseLeaveBlog = () => {
+    blogTimeoutRef.current = setTimeout(() => {
+      setIsBlogHovered(false);
+    }, 150);
+  };
+
+  const isHome = location.pathname === "/";
+
+  const navLinks = isHome
+    ? [
+        { name: "Programs", path: "#programs" },
+        { name: "Learning Experience", path: "#experience" },
+        { name: "Projects", path: "#projects" },
+        { name: "Events", path: "#events" },
+        { name: "About", path: "#about" },
+        { name: "Contact", path: "#contact" },
+      ]
+    : [
+        { name: "Home", path: "/" },
+        { name: "Programs", path: "/programs" },
+        { name: "Blog", path: "/blog", hasBlogDropdown: true },
+        { name: "Scholarship", path: "/scholarship" },
+        { name: "Admission", path: "/admission" },
+        { name: "Contact", path: "/contact" },
+      ];
+
+  const handleNavClick = (e, targetPath) => {
+    if (targetPath.startsWith("#")) {
+      e.preventDefault();
+      const id = targetPath.replace("#", "");
+      const elem = document.getElementById(id);
+      if (elem) {
+        elem.scrollIntoView({ behavior: "smooth" });
+      }
+      setIsOpen(false);
+    }
+  };
+
+  const isActiveRoute = (path) => {
+    if (path === "/") return location.pathname === "/";
+    if (path.startsWith("#")) return false;
+    return location.pathname.startsWith(path);
+  };
 
   return (
     <motion.div
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: showNavbar ? 0 : -120, opacity: showNavbar ? 1 : 0 }}
       transition={{ duration: 0.4, ease: "easeInOut" }}
-      className="fixed top-4 md:top-6 left-0 w-full z-[100] px-4 md:px-12 flex justify-center pointer-events-none"
+      className="fixed top-3 sm:top-4 md:top-5 left-0 w-full z-[100] px-3 sm:px-6 md:px-8 lg:px-10 flex justify-center pointer-events-none"
     >
-      <nav className="w-full max-w-7xl flex items-center justify-between px-5 md:px-10 py-3 md:py-4 rounded-full bg-white border border-slate-200/80 shadow-[0_8px_30px_rgba(0,0,0,0.04)] pointer-events-auto relative">
+      <nav
+        ref={navContainerRef}
+        className="w-full max-w-7xl flex items-center justify-between px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-full pointer-events-auto transition-all duration-300 relative bg-[#090D11]/85 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+      >
         {/* LOGO */}
         <Link
           to="/"
-          className="flex items-center gap-2 group transition-opacity hover:opacity-75 flex-shrink-0 relative z-10"
+          className="flex items-center gap-2 group transition-opacity hover:opacity-85 flex-shrink-0 relative z-10"
         >
           <img
             src={logo}
             alt="DeepStaq Logo"
-            className="h-5 md:h-7 w-auto object-contain"
-            style={{ filter: "brightness(0) invert(7%) sepia(16%) saturate(3603%) hue-rotate(211deg) brightness(94%) contrast(109%)" }}
+            className="h-6 sm:h-7 md:h-8 w-auto object-contain"
+            style={{
+              filter: "brightness(0) invert(1)",
+            }}
           />
         </Link>
 
-        {/* DESKTOP LINKS (Hidden on mobile) */}
-        <div className="hidden md:flex items-center gap-10 relative z-10">
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className="relative text-xs font-black uppercase tracking-[0.3em] transition-all duration-300 group text-[#050521]"
-            >
-              {link.name}
-              <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-[#c6ff34] group-hover:w-full transition-all duration-300 rounded-full" />
-            </Link>
-          ))}
+        {/* DESKTOP LINKS */}
+        <div className="hidden lg:flex items-center gap-5 xl:gap-7 relative z-10">
+          {navLinks.map((link) => {
+            const active = isActiveRoute(link.path);
+
+            // BLOG HOVER DROPDOWN (6 GUIDES)
+            if (link.hasBlogDropdown) {
+              return (
+                <div
+                  key={link.path}
+                  className="relative py-2"
+                  onMouseEnter={handleMouseEnterBlog}
+                  onMouseLeave={handleMouseLeaveBlog}
+                >
+                  <Link
+                    to={link.path}
+                    className={`relative text-xs sm:text-sm font-medium tracking-normal transition-all duration-200 group flex items-center gap-1.5 py-1 ${
+                      active || isBlogHovered ? "text-sky-400 font-semibold" : "text-white/80 hover:text-white"
+                    }`}
+                  >
+                    <span>{link.name}</span>
+                    <Icons.ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                        isBlogHovered ? "rotate-180 text-sky-400" : "text-slate-400"
+                      }`}
+                    />
+                    <span
+                      className={`absolute -bottom-1 left-0 h-[2px] bg-gradient-to-r from-sky-400 to-blue-500 transition-all duration-300 rounded-full ${
+                        active || isBlogHovered ? "w-full" : "w-0 group-hover:w-full"
+                      }`}
+                    />
+                  </Link>
+
+                  {/* HOVER DROPDOWN MENU FOR 6 BLOG PAGES */}
+                  <AnimatePresence>
+                    {isBlogHovered && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 12, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.96 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="absolute top-full left-1/2 -translate-x-1/2 w-[480px] lg:w-[560px] bg-[#040d1a]/95 backdrop-blur-2xl border border-sky-500/20 rounded-3xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-50 mt-2 text-white"
+                      >
+                        <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
+                            <span className="text-[11px] font-bold uppercase tracking-widest text-slate-200 font-mono">
+                              AI/ML Learning Guides (2026)
+                            </span>
+                          </div>
+                          <Link
+                            to="/blog"
+                            onClick={() => setIsBlogHovered(false)}
+                            className="text-[10px] font-mono font-bold uppercase tracking-wider text-sky-400 hover:text-sky-300 transition-colors"
+                          >
+                            All Guides →
+                          </Link>
+                        </div>
+
+                        {/* 6 Grid items */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          {BLOG_POSTS.map((post, idx) => (
+                            <Link
+                              key={post.id}
+                              to={`/blog/${post.slug}`}
+                              onClick={() => setIsBlogHovered(false)}
+                              className="group p-3 rounded-2xl bg-white/[0.03] hover:bg-sky-400/10 border border-white/8 hover:border-sky-400/40 transition-all flex flex-col justify-between space-y-1.5"
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-mono font-bold text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-500/20">
+                                  0{idx + 1}
+                                </span>
+                                <span className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-wider">
+                                  {post.category}
+                                </span>
+                              </div>
+                              <h4 className="text-xs font-bold text-slate-200 group-hover:text-white line-clamp-2 leading-tight transition-colors">
+                                {post.title.split(" (2026")[0].split(" (2026 Guide)")[0]}
+                              </h4>
+                            </Link>
+                          ))}
+                        </div>
+
+                        {/* Footer Link */}
+                        <div className="pt-3 mt-3 border-t border-white/10 flex items-center justify-between">
+                          <span className="text-[10px] font-mono text-slate-400">
+                            6 Comprehensive Hands-On Guides
+                          </span>
+                          <Link
+                            to="/blog"
+                            onClick={() => setIsBlogHovered(false)}
+                            className="text-xs font-bold px-4 py-2 rounded-xl bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-slate-950 shadow-[0_2px_12px_rgba(56,189,248,0.35)] transition-all flex items-center gap-1"
+                          >
+                            <span>Explore Blog Hub</span>
+                            <span>→</span>
+                          </Link>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            }
+
+            return (
+              <a
+                key={link.path}
+                href={link.path}
+                onClick={(e) => handleNavClick(e, link.path)}
+                className={`relative text-xs sm:text-sm font-medium tracking-normal transition-all duration-200 group py-1 ${
+                  active ? "text-sky-400 font-semibold" : "text-white/80 hover:text-white"
+                }`}
+              >
+                {link.name}
+                <span
+                  className={`absolute -bottom-1 left-0 h-[2px] bg-gradient-to-r from-sky-400 to-blue-500 transition-all duration-300 rounded-full ${
+                    active ? "w-full" : "w-0 group-hover:w-full"
+                  }`}
+                />
+              </a>
+            );
+          })}
         </div>
 
-        {/* MOBILE MENU BUTTON (Visible on mobile) */}
-        <div className="md:hidden flex items-center relative z-10">
+        {/* DESKTOP ACTION BUTTONS (Free AI Class + Apply Now) */}
+        <div className="hidden lg:flex items-center gap-2.5 relative z-10">
+          <Link
+            to="/consultation"
+            className="px-4 py-2 rounded-full text-xs font-medium tracking-wide transition-all duration-200 border bg-white/[0.06] hover:bg-white/[0.12] text-white border-white/15 hover:border-white/30"
+          >
+            Free AI Class
+          </Link>
+          <Link
+            to="/admission"
+            className="group relative px-4 py-2 rounded-full bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-slate-950 text-xs font-bold tracking-wide transition-all duration-200 shadow-[0_2px_16px_rgba(56,189,248,0.35)] hover:scale-105 active:scale-95 flex items-center gap-1.5"
+          >
+            <span>Apply Now</span>
+            <span className="transition-transform duration-200 group-hover:translate-x-0.5 font-bold">→</span>
+          </Link>
+        </div>
+
+        {/* MOBILE & TABLET MENU TOGGLE BUTTON (< lg screens) */}
+        <div className="lg:hidden flex items-center gap-2 relative z-10">
           <button
             type="button"
+            aria-label={isOpen ? "Close Menu" : "Open Navigation Menu"}
+            aria-expanded={isOpen}
             onClick={() => setIsOpen(!isOpen)}
-            className={`p-2 rounded-full transition-all duration-300 ${
-              isOpen ? "bg-[#050521] text-[#c6ff34]" : "text-[#050521]"
+            className={`p-2 rounded-full transition-all duration-300 border flex items-center justify-center ${
+              isOpen
+                ? "bg-sky-400 text-slate-950 border-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.4)]"
+                : "bg-white/10 hover:bg-white/20 text-white border-white/20"
             }`}
           >
             {isOpen ? <Icons.X className="w-5 h-5" /> : <Icons.Menu className="w-5 h-5" />}
           </button>
         </div>
 
-        {/* MOBILE DROPDOWN MENU */}
+        {/* MOBILE & TABLET RESPONSIVE DROPDOWN MENU */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              initial={{ opacity: 0, y: -16, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="absolute top-[calc(100%+12px)] left-0 w-full rounded-[24px] p-6 md:hidden z-50 flex flex-col gap-4 shadow-xl border border-slate-200 bg-white overflow-hidden"
+              exit={{ opacity: 0, y: -16, scale: 0.97 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="absolute top-[calc(100%+10px)] left-0 w-full rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 lg:hidden z-50 flex flex-col gap-2 shadow-2xl border bg-[#040d1a]/95 backdrop-blur-2xl border-white/15 text-white max-h-[82vh] overflow-y-auto"
             >
-              {navLinks.map((link) => (
+              {/* Menu Header in Tablet/Mobile */}
+              <div className="flex items-center justify-between pb-3 px-2 border-b border-white/10">
+                <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-slate-400">
+                  Navigation Menu
+                </span>
+                <span className="text-[10px] font-mono font-bold text-sky-400 bg-sky-950/60 px-2.5 py-0.5 rounded-full border border-sky-500/30">
+                  DeepStaq AI Hub
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-1.5 pt-1">
+                {navLinks.map((link) => {
+                  const active = isActiveRoute(link.path);
+
+                  // MOBILE / TABLET BLOG DROPDOWN
+                  if (link.hasBlogDropdown) {
+                    return (
+                      <div
+                        key={link.path}
+                        className={`flex flex-col rounded-2xl border transition-all ${
+                          active
+                            ? "bg-sky-400/10 border-sky-500/30"
+                            : "border-transparent hover:border-white/10"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between py-2.5 px-3 sm:px-4 rounded-2xl hover:bg-white/[0.04]">
+                          <Link
+                            to={link.path}
+                            onClick={() => setIsOpen(false)}
+                            className={`text-sm sm:text-base font-bold uppercase tracking-wider flex items-center gap-2 ${
+                              active ? "text-sky-400" : "text-white"
+                            }`}
+                          >
+                            <span>{link.name}</span>
+                            {active && (
+                              <span className="w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
+                            )}
+                          </Link>
+                          <button
+                            type="button"
+                            aria-label="Toggle Blog Guides Submenu"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setMobileBlogExpanded(!mobileBlogExpanded);
+                            }}
+                            className="p-2 rounded-xl bg-white/5 hover:bg-sky-400/20 text-white border border-white/10 transition-colors flex items-center gap-1"
+                          >
+                            <span className="text-[10px] font-mono font-bold uppercase hidden sm:inline">
+                              Guides
+                            </span>
+                            <Icons.ChevronDown
+                              className={`w-4 h-4 transition-transform duration-200 ${
+                                mobileBlogExpanded ? "rotate-180 text-sky-400" : "text-slate-400"
+                              }`}
+                            />
+                          </button>
+                        </div>
+
+                        {/* Tablet/Mobile Submenu for 6 Blog Posts */}
+                        <AnimatePresence>
+                          {mobileBlogExpanded && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="p-3 mx-2 mb-2 grid grid-cols-1 sm:grid-cols-2 gap-2 bg-white/[0.02] rounded-xl border border-white/10">
+                                <div className="sm:col-span-2 flex items-center justify-between pb-1 px-1">
+                                  <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">
+                                    Learning Guides
+                                  </span>
+                                  <Link
+                                    to="/blog"
+                                    onClick={() => setIsOpen(false)}
+                                    className="text-[10px] font-mono font-bold text-sky-400 hover:underline"
+                                  >
+                                    View All →
+                                  </Link>
+                                </div>
+                                {BLOG_POSTS.map((post, idx) => (
+                                  <Link
+                                    key={post.id}
+                                    to={`/blog/${post.slug}`}
+                                    onClick={() => setIsOpen(false)}
+                                    className="text-xs font-mono font-bold text-slate-200 hover:text-white p-2.5 rounded-lg bg-white/[0.03] hover:bg-sky-400/15 border border-white/8 hover:border-sky-400/40 flex items-start gap-2 transition-all shadow-sm"
+                                  >
+                                    <span className="text-[10px] font-black bg-sky-950/60 text-sky-400 border border-sky-500/20 px-1.5 py-0.5 rounded">
+                                      0{idx + 1}
+                                    </span>
+                                    <span className="line-clamp-1 leading-snug">
+                                      {post.title.split(" (2026")[0]}
+                                    </span>
+                                  </Link>
+                                ))}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <a
+                      key={link.path}
+                      href={link.path}
+                      onClick={(e) => handleNavClick(e, link.path)}
+                      className={`text-sm sm:text-base font-semibold py-2.5 sm:py-3 px-3 sm:px-4 transition-all flex items-center justify-between group rounded-2xl ${
+                        active
+                          ? "bg-sky-400/15 text-sky-300 border border-sky-400/30 font-bold"
+                          : "text-white/80 hover:bg-white/5 hover:text-white"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">{link.name}</span>
+                      <span
+                        className={`w-2 h-2 rounded-full transition-transform ${
+                          active
+                            ? "bg-sky-400 scale-100 shadow-[0_0_8px_rgba(56,189,248,0.6)]"
+                            : "bg-sky-400 scale-0 group-hover:scale-100"
+                        }`}
+                      />
+                    </a>
+                  );
+                })}
+              </div>
+
+              <div className="h-px w-full my-2 bg-white/10" />
+              
+              {/* Mobile Direct Action Buttons */}
+              <div className="grid grid-cols-2 gap-2.5 pt-1">
                 <Link
-                  key={link.path}
-                  to={link.path}
+                  to="/consultation"
                   onClick={() => setIsOpen(false)}
-                  className="text-base font-black uppercase tracking-[0.2em] py-3 px-4 transition-all flex items-center justify-between group rounded-xl hover:bg-[#c6ff34]/20"
+                  className="py-3 px-3 rounded-xl text-center text-xs font-semibold border transition-all bg-white/5 hover:bg-white/10 text-white border-white/15 hover:border-white/30"
                 >
-                  {link.name}
-                  <span className="w-2 h-2 rounded-full bg-[#c6ff34] border border-[#050521] scale-0 group-hover:scale-100 transition-transform" />
+                  Free AI Class
                 </Link>
-              ))}
-              <div className="h-px bg-[#050521]/5 w-full my-2" />
-              <p className="text-[9px] font-black uppercase tracking-[0.4em] text-center opacity-40">
-                DeepStaq · Build AI
-              </p>
+                <Link
+                  to="/admission"
+                  onClick={() => setIsOpen(false)}
+                  className="py-3 px-3 rounded-xl text-center text-xs font-bold bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-slate-950 shadow-[0_2px_12px_rgba(56,189,248,0.35)] flex items-center justify-center gap-1.5 transition-all"
+                >
+                  <span>Apply Now</span>
+                  <span className="font-bold">→</span>
+                </Link>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
