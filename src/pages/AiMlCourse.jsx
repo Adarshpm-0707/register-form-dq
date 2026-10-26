@@ -63,7 +63,7 @@ export default function AiMlCourse() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#090D11] text-white font-sans pb-24 selection:bg-[#c6ff34] selection:text-[#090D11] relative overflow-hidden">
+    <div className="min-h-screen bg-transparent text-white font-sans pb-24 selection:bg-sky-500/30 selection:text-white relative overflow-hidden">
       
       {/* Background Ambient Glows */}
       <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-[#c6ff34]/10 rounded-full blur-[160px] pointer-events-none -z-0" />
@@ -73,7 +73,7 @@ export default function AiMlCourse() {
       <section className="relative pt-28 pb-16 md:pt-36 md:pb-24 px-6 md:px-12 border-b border-white/10 overflow-hidden">
         <div className="max-w-[1200px] mx-auto space-y-6 relative z-10">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="bg-[#c6ff34]/15 text-[#c6ff34] text-xs font-black px-3.5 py-1.5 rounded-lg border border-[#c6ff34]/30 uppercase tracking-wider font-mono shadow-[0_0_15px_rgba(198,255,52,0.2)]">
+            <span className="bg-[#c6ff34]/15 text-white text-xs font-black px-3.5 py-1.5 rounded-lg border border-[#c6ff34]/30 uppercase tracking-wider font-mono shadow-[0_0_15px_rgba(198,255,52,0.2)]">
               Dual Skill Track
             </span>
             <span className="bg-white/5 text-slate-300 text-xs font-mono font-bold px-3 py-1 rounded-md border border-white/10 uppercase">
@@ -106,7 +106,7 @@ export default function AiMlCourse() {
               href="tel:+919495957011"
               className="bg-white/5 hover:bg-white/10 text-white font-mono font-bold text-xs md:text-sm px-6 py-4 rounded-2xl border border-white/15 hover:border-white/30 transition-all flex items-center gap-2"
             >
-              📞 Talk to Us: +91 949 595 7011
+              Talk to Us: +91 949 595 7011
             </a>
           </div>
         </div>
@@ -141,7 +141,7 @@ export default function AiMlCourse() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {outcomes.map((item, idx) => (
               <div key={idx} className="p-4 rounded-xl border border-white/10 bg-[#0D1318]/80 flex items-start gap-3 text-sm font-mono text-slate-300 shadow-lg">
-                <span className="text-[#c6ff34] font-black">✔</span>
+                <span className="text-white font-black">✔</span>
                 <span>{item}</span>
               </div>
             ))}
@@ -156,7 +156,7 @@ export default function AiMlCourse() {
           <div className="overflow-x-auto border border-white/10 rounded-3xl shadow-2xl bg-[#0D1318]/90 backdrop-blur-xl">
             <table className="w-full text-left border-collapse text-xs md:text-sm font-mono">
               <thead>
-                <tr className="bg-white/[0.05] text-[#c6ff34] uppercase tracking-wider border-b border-white/10">
+                <tr className="bg-white/[0.05] text-white uppercase tracking-wider border-b border-white/10">
                   <th className="p-4 md:p-5">Month</th>
                   <th className="p-4 md:p-5">Focus</th>
                   <th className="p-4 md:p-5">Key Skills</th>
@@ -166,7 +166,7 @@ export default function AiMlCourse() {
                 {syllabus.map((s, idx) => (
                   <tr key={idx} className="hover:bg-white/[0.02]">
                     <td className="p-4 md:p-5 font-bold text-white bg-white/[0.02]">{s.month}</td>
-                    <td className="p-4 md:p-5 font-bold text-[#c6ff34]">{s.focus}</td>
+                    <td className="p-4 md:p-5 font-bold text-white">{s.focus}</td>
                     <td className="p-4 md:p-5 text-slate-300">{s.skills}</td>
                   </tr>
                 ))}
@@ -200,8 +200,8 @@ export default function AiMlCourse() {
           </p>
           <div className="flex flex-wrap gap-2.5">
             {careerRoles.map((role, idx) => (
-              <span key={idx} className="bg-white/[0.04] hover:bg-[#c6ff34]/15 hover:text-[#c6ff34] text-slate-300 text-xs font-mono font-bold px-4 py-2 rounded-xl border border-white/10 transition-colors">
-                💼 {role}
+              <span key={idx} className="bg-white/[0.04] hover:bg-[#c6ff34]/15 hover:text-white text-slate-300 text-xs font-mono font-bold px-4 py-2 rounded-xl border border-white/10 transition-colors">
+                {role}
               </span>
             ))}
           </div>
@@ -229,7 +229,7 @@ export default function AiMlCourse() {
         <section className="space-y-6">
           <div className="border border-white/10 rounded-3xl p-6 md:p-10 bg-[#0D1318]/90 text-white shadow-2xl space-y-6 relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#c6ff34] to-transparent" />
-            <span className="bg-[#c6ff34]/15 text-[#c6ff34] text-xs font-black px-3 py-1 rounded-md uppercase font-mono tracking-wider border border-[#c6ff34]/30 inline-block">
+            <span className="bg-[#c6ff34]/15 text-white text-xs font-black px-3 py-1 rounded-md uppercase font-mono tracking-wider border border-[#c6ff34]/30 inline-block">
               Proof Over Certificates
             </span>
             <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-white">
@@ -240,12 +240,12 @@ export default function AiMlCourse() {
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/10">
               <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
-                <span className="text-3xl md:text-4xl font-black text-[#c6ff34] font-mono">60%</span>
+                <span className="text-3xl md:text-4xl font-black text-white font-mono">60%</span>
                 <h4 className="text-base font-bold uppercase text-white">Capstone Project</h4>
                 <p className="text-xs text-slate-400 font-mono leading-relaxed">Assessed on architecture, data pipelines, and production readiness.</p>
               </div>
               <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
-                <span className="text-3xl md:text-4xl font-black text-[#c6ff34] font-mono">40%</span>
+                <span className="text-3xl md:text-4xl font-black text-white font-mono">40%</span>
                 <h4 className="text-base font-bold uppercase text-white">Theory Assessment</h4>
                 <p className="text-xs text-slate-400 font-mono leading-relaxed">Covering programming foundations through Generative AI and MLOps.</p>
               </div>
@@ -291,7 +291,7 @@ export default function AiMlCourse() {
                   className="w-full text-left p-5 font-black uppercase tracking-tight text-sm md:text-base flex justify-between items-center gap-4 bg-white/[0.02] hover:bg-white/[0.05] text-white transition-colors cursor-pointer"
                 >
                   <span>{faq.q}</span>
-                  <span className="w-7 h-7 rounded-full bg-[#c6ff34]/20 border border-[#c6ff34]/30 text-[#c6ff34] flex items-center justify-center font-mono text-xs flex-shrink-0">
+                  <span className="w-7 h-7 rounded-full bg-[#c6ff34]/20 border border-[#c6ff34]/30 text-white flex items-center justify-center font-mono text-xs flex-shrink-0">
                     {openFAQs[index] ? "−" : "+"}
                   </span>
                 </button>
@@ -317,7 +317,7 @@ export default function AiMlCourse() {
         <section className="pt-8">
           <div className="bg-[#0D1318]/95 text-white rounded-3xl p-8 md:p-12 border border-white/15 shadow-2xl space-y-6 text-center md:text-left relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#c6ff34] to-transparent" />
-            <span className="bg-[#c6ff34]/15 text-[#c6ff34] text-xs font-black px-3.5 py-1.5 rounded-md uppercase font-mono tracking-wider inline-block border border-[#c6ff34]/30">
+            <span className="bg-[#c6ff34]/15 text-white text-xs font-black px-3.5 py-1.5 rounded-md uppercase font-mono tracking-wider inline-block border border-[#c6ff34]/30">
               Unified Track
             </span>
             <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-white max-w-3xl">
@@ -341,11 +341,11 @@ export default function AiMlCourse() {
               </Link>
             </div>
             <div className="pt-6 border-t border-white/10 flex flex-wrap items-center justify-center md:justify-start gap-6 text-xs font-mono text-slate-400">
-              <span>📞 +91 949 595 7011</span>
+              <span>+91 949 595 7011</span>
               <span>•</span>
-              <span>✉️ info@deepstaq.in</span>
+              <span>deepstackbyaleef@gmail.com</span>
               <span>•</span>
-              <span>🌐 www.deepstaq.in</span>
+              <span>www.deepstaq.in</span>
             </div>
           </div>
         </section>

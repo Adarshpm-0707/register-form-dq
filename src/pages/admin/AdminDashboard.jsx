@@ -4,12 +4,15 @@ import { auth, db } from "../../firebase/firebase";
 import { doc, getDoc, deleteDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { aptitudeQuestions } from "../Aptitude";
+import { aptitudeV2Questions } from "../../data/aptitudeV2Questions";
 import { 
   getSlotRegistrations, 
   getEventRegistrations, 
   getMasterRegistrations, 
   getAptitudeLeads, 
   getAptitudeSubmissions, 
+  getAptitudeV2Submissions,
+  deleteAptitudeV2Submission,
   getCollectedContacts, 
   getUploadedContactFiles, 
   getWebinarRegistrations, 
@@ -83,7 +86,7 @@ const DataCard = ({ item, headers, onDelete }) => {
         <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#050521]/40">{h.replace(/_/g, " ")}</span>
         <span className="text-sm font-medium text-[#050521] break-words">
           {displayVal.includes("http") ? (
-            <a href={displayVal} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-[#c6ff34] underline decoration-blue-300 hover:decoration-[#c6ff34] underline-offset-4 transition-colors">Link</a>
+            <a href={displayVal} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-white underline decoration-blue-300 hover:decoration-[#c6ff34] underline-offset-4 transition-colors">Link</a>
           ) : (
             displayVal
           )}
@@ -157,14 +160,14 @@ const AdmissionCard = ({ item, onDelete }) => {
     <div className="bg-white border border-[#050521]/10 rounded-[2rem] p-6 md:p-8 shadow-sm hover:shadow-xl hover:border-[#c6ff34]/50 transition-all duration-300 flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-5 border-b border-[#050521]/5">
         <div>
-          <span className="font-mono text-[9px] text-[#050521]/40 uppercase tracking-widest block">ID: {item.id.slice(0, 8)}</span>
+          <span className="font-mono text-[9px] text-[#050521]/40 uppercase tracking-widest block">ID: {item.id ? item.id.slice(0, 8) : "ADM"}</span>
           <h3 className="text-base font-black text-[#050521] uppercase tracking-wide mt-1">{item.fullName}</h3>
           <div className="flex flex-wrap gap-2 mt-2">
             <span className="inline-block px-3 py-1 bg-[#c6ff34]/20 text-[#050521] rounded-full text-[9px] font-black uppercase tracking-wider">
               {item.courseMode || "Offline"} Course
             </span>
-            <span className={`inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${item.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-              {item.paymentStatus === 'Paid' ? `Paid: ₹${item.amount ? Number(item.amount).toLocaleString("en-IN") : "30,000"} (Ref: ${item.paymentId ? item.paymentId.slice(0, 10) : 'Direct'})` : 'Pending'}
+            <span className={`inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${item.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-emerald-100 text-emerald-800'}`}>
+              {item.paymentStatus === 'Paid' ? `Paid: ₹${item.amount ? Number(item.amount).toLocaleString("en-IN") : "30,000"} (Ref: ${item.paymentId ? item.paymentId.slice(0, 10) : 'Direct'})` : (item.status || item.paymentStatus || 'Admission Submitted')}
             </span>
           </div>
         </div>
@@ -236,7 +239,7 @@ const AdmissionCard = ({ item, onDelete }) => {
             ))}
           </div>
         ) : (
-          <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">No documents uploaded.</span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No documents uploaded (Optional).</span>
         )}
       </div>
 
@@ -323,22 +326,24 @@ const AdmissionCard = ({ item, onDelete }) => {
           </div>
 
           <div className="space-y-3 pt-4 border-t border-[#050521]/5">
-            <h5 className="text-[9px] font-black uppercase tracking-widest text-slate-400">Payment Breakdown</h5>
+            <h5 className="text-[9px] font-black uppercase tracking-widest text-slate-400">Admission & Application Details</h5>
             <div className="bg-[#f8f9fa] p-4 rounded-2xl border border-[#050521]/5 grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <span className="text-[8px] font-black uppercase text-[#050521]/40 block">Course Fee Paid</span>
-                <strong className="text-xs text-[#050521] font-mono">₹{item.amount ? Number(item.amount).toLocaleString("en-IN") : "30,000"}</strong>
+                <span className="text-[8px] font-black uppercase text-[#050521]/40 block">Admission Fee</span>
+                <strong className="text-xs text-[#050521] font-mono">
+                  {item.amount && Number(item.amount) > 0 ? `₹${Number(item.amount).toLocaleString("en-IN")}` : "Direct Admission (No Fee)"}
+                </strong>
               </div>
               <div>
                 <span className="text-[8px] font-black uppercase text-[#050521]/40 block">Status</span>
-                <span className={`text-[10px] font-black uppercase ${item.paymentStatus === 'Paid' ? 'text-green-600' : 'text-yellow-600'}`}>
-                  {item.paymentStatus || "Pending"}
+                <span className={`text-[10px] font-black uppercase ${item.paymentStatus === 'Paid' || item.status === 'Submitted' ? 'text-green-600' : 'text-slate-600'}`}>
+                  {item.status || item.paymentStatus || "Submitted"}
                 </span>
               </div>
-              {item.paymentId && (
+              {(item.admissionRefId || item.paymentId) && (
                 <div>
                   <span className="text-[8px] font-black uppercase text-[#050521]/40 block">Reference ID</span>
-                  <span className="text-xs font-mono font-bold text-[#050521] break-all">{item.paymentId}</span>
+                  <span className="text-xs font-mono font-bold text-[#050521] break-all">{item.admissionRefId || item.paymentId}</span>
                 </div>
               )}
             </div>
@@ -415,7 +420,7 @@ const AptitudeSubmissionCard = ({ item, onDelete }) => {
               Score: {score} / {total} ({pct}%)
             </span>
             <span className="inline-block px-3 py-1 bg-slate-100 text-[#050521] rounded-full text-[9px] font-black uppercase tracking-wider border border-[#050521]/10">
-              📍 {item.place || item.city || item.location || "Location Not Provided"}
+              {item.place || item.city || item.location || "Location Not Provided"}
             </span>
             <span className="inline-block px-3 py-1 bg-slate-100 text-[#050521] rounded-full text-[9px] font-black uppercase tracking-wider border border-[#050521]/10">
               {item.institution && item.institution !== "N/A" ? item.institution : "AI Aptitude Candidate"}
@@ -537,6 +542,297 @@ const AptitudeSubmissionCard = ({ item, onDelete }) => {
   );
 };
 
+const AptitudeV2SubmissionCard = ({ item, onDelete }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [filterSection, setFilterSection] = useState("ALL");
+  const [phoneCopied, setPhoneCopied] = useState(false);
+  const [emailCopied, setEmailCopied] = useState(false);
+
+  const submissionDate = item.completedAt?.seconds
+    ? new Date(item.completedAt.seconds * 1000).toLocaleString()
+    : item.timestamp?.seconds
+    ? new Date(item.timestamp.seconds * 1000).toLocaleString()
+    : item.createdAt?.seconds
+    ? new Date(item.createdAt.seconds * 1000).toLocaleString()
+    : item.testDate || "-";
+
+  const rawAnswers = item.detailedAnswers || [];
+  const score = item.score !== undefined && item.score !== null ? item.score : "-";
+  const total = item.totalQuestions || 40;
+  const pct = item.percentage !== undefined && item.percentage !== null
+    ? item.percentage
+    : (score !== "-" ? Math.round((Number(score) / total) * 100) : 0);
+
+  const isCompleted = item.status === "completed" || item.testStatus === "completed" || score !== "-";
+
+  // If detailedAnswers array is present, use it. Otherwise, populate default from aptitudeV2Questions
+  const displayAnswers = rawAnswers.length > 0 ? rawAnswers : aptitudeV2Questions.map((q) => {
+    const correctOpt = q.options.find((o) => o.key === q.answer);
+    return {
+      questionId: q.id,
+      section: q.section,
+      sectionTitle: q.sectionTitle,
+      question: q.question,
+      selectedAnswerKey: null,
+      selectedAnswerText: "Recorded in Test",
+      correctAnswerKey: q.answer,
+      correctAnswerText: correctOpt ? correctOpt.text : "",
+      isCorrect: true,
+      explanation: q.explanation || "",
+    };
+  });
+
+  const secA = item.sectionBreakdown?.SECTION_A?.score ?? null;
+  const secB = item.sectionBreakdown?.SECTION_B?.score ?? null;
+  const secC = item.sectionBreakdown?.SECTION_C?.score ?? null;
+  const secD = item.sectionBreakdown?.SECTION_D?.score ?? null;
+
+  const handleCopyPhone = () => {
+    if (item.phone) {
+      navigator.clipboard.writeText(item.phone);
+      setPhoneCopied(true);
+      setTimeout(() => setPhoneCopied(false), 2000);
+    }
+  };
+
+  const handleCopyEmail = () => {
+    if (item.email) {
+      navigator.clipboard.writeText(item.email);
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    }
+  };
+
+  const filteredAnswers = displayAnswers.filter((ans) => {
+    if (filterSection === "ALL") return true;
+    if (filterSection === "INCORRECT") return !ans.isCorrect;
+    return ans.section === filterSection;
+  });
+
+  return (
+    <div className="bg-white border-2 border-[#050521] rounded-[2rem] p-6 md:p-8 shadow-[6px_6px_0px_0px_#050521] hover:shadow-[8px_8px_0px_0px_#c6ff34] transition-all duration-300 flex flex-col gap-5 w-full">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 pb-4 border-b border-[#050521]/10">
+        <div>
+          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+            <span className="font-mono text-[9px] text-[#050521]/50 uppercase tracking-widest">
+              ID: {item.id ? item.id.slice(0, 10) : "V2-TEST"}
+            </span>
+            <span className="px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-[#050521] text-white">
+              APTITUDE V2 (40Q)
+            </span>
+            <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider ${
+              isCompleted ? "bg-emerald-100 text-emerald-800 border border-emerald-300" : "bg-amber-100 text-amber-800 border border-amber-300"
+            }`}>
+              {isCompleted ? "✓ Completed" : "⏳ Started / In Progress"}
+            </span>
+          </div>
+
+          <h3 className="text-lg font-black text-[#050521] uppercase tracking-tight">
+            {item.fullName || item.name || "Anonymous Candidate"}
+          </h3>
+
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            <span className="px-3 py-1 bg-[#c6ff34] text-[#050521] rounded-full text-xs font-black uppercase tracking-wider border border-[#050521]/20">
+              Score: {score} / {total} ({pct}%)
+            </span>
+            {item.performanceRating && (
+              <span className="px-3 py-1 bg-[#050521]/5 text-[#050521] rounded-full text-[10px] font-black uppercase tracking-wider border border-[#050521]/10">
+                {item.performanceRating}
+              </span>
+            )}
+            <span className="px-3 py-1 bg-slate-100 text-[#050521] rounded-full text-[10px] font-bold">
+              {item.place || item.city || item.location || "Place N/A"}
+            </span>
+          </div>
+        </div>
+
+        <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 shrink-0 font-mono">
+          {submissionDate}
+        </span>
+      </div>
+
+      {/* 4 Section Score Badges Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-[#f4f6f8] p-3 rounded-2xl border border-[#050521]/10 font-mono">
+        <div className="p-2.5 bg-white rounded-xl border border-[#050521]/5 text-center">
+          <span className="text-[8px] font-black uppercase text-slate-400 block tracking-wider">Sec A: Numerical</span>
+          <span className="text-sm font-black text-[#050521]">
+            {secA !== null ? `${secA} / 10` : "-"}
+          </span>
+        </div>
+        <div className="p-2.5 bg-white rounded-xl border border-[#050521]/5 text-center">
+          <span className="text-[8px] font-black uppercase text-slate-400 block tracking-wider">Sec B: Logical</span>
+          <span className="text-sm font-black text-[#050521]">
+            {secB !== null ? `${secB} / 10` : "-"}
+          </span>
+        </div>
+        <div className="p-2.5 bg-white rounded-xl border border-[#050521]/5 text-center">
+          <span className="text-[8px] font-black uppercase text-slate-400 block tracking-wider">Sec C: Analytical</span>
+          <span className="text-sm font-black text-[#050521]">
+            {secC !== null ? `${secC} / 10` : "-"}
+          </span>
+        </div>
+        <div className="p-2.5 bg-white rounded-xl border border-[#050521]/5 text-center">
+          <span className="text-[8px] font-black uppercase text-slate-400 block tracking-wider">Sec D: Computat.</span>
+          <span className="text-sm font-black text-[#050521]">
+            {secD !== null ? `${secD} / 10` : "-"}
+          </span>
+        </div>
+      </div>
+
+      {/* Candidate Details Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white p-3 rounded-2xl border border-[#050521]/10 text-xs">
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Phone</span>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="font-bold text-[#050521] font-mono">{item.phone || "-"}</span>
+            {item.phone && (
+              <button
+                type="button"
+                onClick={handleCopyPhone}
+                className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-bold"
+              >
+                {phoneCopied ? "✓" : "Copy"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Email</span>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="font-bold text-[#050521] truncate max-w-[150px]">{item.email || "-"}</span>
+            {item.email && (
+              <button
+                type="button"
+                onClick={handleCopyEmail}
+                className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-bold"
+              >
+                {emailCopied ? "✓" : "Copy"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Institution / College</span>
+          <span className="font-bold text-[#050521] truncate block mt-0.5">{item.institution && item.institution !== "N/A" ? item.institution : "Not Specified"}</span>
+        </div>
+      </div>
+
+      {/* Expandable Answers Breakdown */}
+      {isExpanded && (
+        <div className="space-y-4 pt-4 border-t border-[#050521]/10 animate-in fade-in duration-300">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]">
+              Full 40 Questions Breakdown ({displayAnswers.length} Questions)
+            </h4>
+
+            {/* Filter pills */}
+            <div className="flex flex-wrap gap-1 text-[9px] font-mono">
+              {["ALL", "SECTION A", "SECTION B", "SECTION C", "SECTION D", "INCORRECT"].map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setFilterSection(f)}
+                  className={`px-2 py-1 rounded-md border font-bold cursor-pointer transition-colors ${
+                    filterSection === f
+                      ? "bg-[#050521] text-white border-[#050521]"
+                      : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200"
+                  }`}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+            {filteredAnswers.map((ans, idx) => (
+              <div
+                key={ans.questionId || idx}
+                className={`p-3.5 rounded-2xl border text-left transition-all ${
+                  ans.isCorrect
+                    ? "bg-green-50/70 border-green-200"
+                    : "bg-red-50/70 border-red-200"
+                }`}
+              >
+                <div className="flex justify-between items-start gap-2 mb-1.5">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-[#050521]/60 font-mono">
+                    Q{ans.questionId}. [{ans.section || "SECTION"} · {ans.sectionTitle || ""}]
+                  </span>
+                  <span
+                    className={`text-[8px] font-black uppercase px-2 py-0.5 rounded font-mono ${
+                      ans.isCorrect
+                        ? "bg-green-600 text-white"
+                        : "bg-red-600 text-white"
+                    }`}
+                  >
+                    {ans.isCorrect ? "✓ Correct" : "✕ Incorrect"}
+                  </span>
+                </div>
+
+                <p className="text-xs font-black text-[#050521] mb-2 leading-relaxed whitespace-pre-line">
+                  {ans.question}
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px] font-mono">
+                  <div className={`p-2 rounded-xl border ${ans.isCorrect ? "bg-green-100/60 border-green-300" : "bg-red-100/60 border-red-300"}`}>
+                    <span className="block text-[8px] font-black uppercase tracking-wider text-slate-500">
+                      Selected Answer:
+                    </span>
+                    <span className="font-bold">
+                      {ans.selectedAnswerKey ? `(${ans.selectedAnswerKey}) ${ans.selectedAnswerText}` : "Not Answered"}
+                    </span>
+                  </div>
+
+                  <div className="p-2 rounded-xl border bg-white border-green-300">
+                    <span className="block text-[8px] font-black uppercase tracking-wider text-green-700">
+                      Correct Answer:
+                    </span>
+                    <span className="font-bold text-green-800">
+                      ({ans.correctAnswerKey}) {ans.correctAnswerText}
+                    </span>
+                  </div>
+                </div>
+
+                {ans.explanation && (
+                  <p className="text-[10px] font-mono text-slate-600 mt-2 pt-2 border-t border-black/5">
+                    <strong>Solution:</strong> {ans.explanation}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Card Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-3 pt-2">
+        <button
+          type="button"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex-1 py-3 rounded-2xl bg-[#050521]/5 hover:bg-[#c6ff34] text-[#050521] text-[10px] font-black uppercase tracking-widest transition-colors duration-300 border border-[#050521]/10 cursor-pointer"
+        >
+          {isExpanded ? "Hide Question Breakdown" : "View Full 40 Questions Breakdown"}
+        </button>
+        {onDelete && (
+          <button
+            type="button"
+            onClick={() => onDelete(item.id, item.fullName || item.name || "this submission", item._sourceCol)}
+            className="px-5 py-3 rounded-2xl bg-red-50 hover:bg-red-500 hover:text-white text-red-600 text-[10px] font-black uppercase tracking-widest transition-all duration-200 border border-red-200 flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const ConsultationCard = ({ item, onDelete }) => {
   const submissionDate = item.timestamp 
     ? new Date(item.timestamp.seconds * 1000).toLocaleString() 
@@ -544,7 +840,7 @@ const ConsultationCard = ({ item, onDelete }) => {
     ? new Date(item.createdAt.seconds * 1000).toLocaleString()
     : typeof item.createdAt === "string" ? item.createdAt : "-";
 
-  const modeLabel = item.preferredMode === "remote" ? "💻 Remote / Online" : item.preferredMode === "offline" ? "🏫 Offline / In-person" : item.preferredMode === "hybrid" ? "🔀 Hybrid (Both)" : item.preferredMode || "Not Specified";
+  const modeLabel = item.preferredMode === "remote" ? "Remote / Online" : item.preferredMode === "offline" ? "Offline / In-person" : item.preferredMode === "hybrid" ? "Hybrid (Both)" : item.preferredMode || "Not Specified";
 
   const whyList = Array.isArray(item.whyAI) ? item.whyAI : (item.whyAI ? [item.whyAI] : []);
   const cleanPhone = (item.phone || "").replace(/\D/g, "");
@@ -556,9 +852,9 @@ const ConsultationCard = ({ item, onDelete }) => {
         <div className="w-full min-w-0">
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
             <span className="bg-[#c6ff34] text-[#050521] px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest border border-[#050521]/20">
-              🎯 Free Consultation
+              Free Consultation
             </span>
-            <span className="bg-[#050521] text-[#c6ff34] px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest">
+            <span className="bg-[#050521] text-white px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest">
               {modeLabel}
             </span>
           </div>
@@ -566,9 +862,9 @@ const ConsultationCard = ({ item, onDelete }) => {
             {item.fullName || item.name || "Anonymous Candidate"}
           </h3>
           <p className="text-[11px] sm:text-xs text-slate-600 font-medium flex flex-wrap items-center gap-2 mt-1">
-            <span>📍 {item.address || item.place || item.city || "Location Not Provided"}</span>
+            <span>{item.address || item.place || item.city || "Location Not Provided"}</span>
             <span>•</span>
-            <span>🎂 Age: {item.age || "N/A"}</span>
+            <span>Age: {item.age || "N/A"}</span>
           </p>
         </div>
         <span className="text-[9px] sm:text-[10px] font-bold text-[#050521] bg-slate-100 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-[#050521]/10 shrink-0 self-start">
@@ -586,7 +882,7 @@ const ConsultationCard = ({ item, onDelete }) => {
             rel="noreferrer"
             className="text-xs font-bold text-green-700 hover:underline flex items-center gap-1 mt-0.5 truncate"
           >
-            📱 {item.phone || "-"}
+            {item.phone || "-"}
           </a>
         </div>
         <div className="min-w-0">
@@ -605,8 +901,8 @@ const ConsultationCard = ({ item, onDelete }) => {
           <span className="text-[9px] font-black uppercase tracking-widest text-[#050521]/60 block mb-2">Why Choosing AI:</span>
           <div className="flex flex-wrap gap-1.5 sm:gap-2">
             {whyList.map((reason, idx) => (
-              <span key={idx} className="bg-[#050521] text-[#c6ff34] px-2.5 sm:px-3 py-1 rounded-xl text-[9px] sm:text-[10px] font-bold border border-[#050521] max-w-full break-words">
-                ✅ {reason}
+              <span key={idx} className="bg-[#050521] text-white px-2.5 sm:px-3 py-1 rounded-xl text-[9px] sm:text-[10px] font-bold border border-[#050521] max-w-full break-words">
+                ✓ {reason}
               </span>
             ))}
           </div>
@@ -640,7 +936,7 @@ const ConsultationCard = ({ item, onDelete }) => {
             onClick={() => onDelete(item.id, item.fullName || item.name || "this consultation")}
             className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-500 hover:text-white text-red-600 text-[10px] font-black uppercase tracking-wider transition-all border border-red-200 flex items-center justify-center gap-1.5"
           >
-            🗑 Delete
+            Delete
           </button>
         )}
       </div>
@@ -713,11 +1009,11 @@ const ScholarshipCard = ({ item, onDelete, onUpdate }) => {
       <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4 pb-4 border-b border-[#050521]/10 w-full min-w-0">
         <div className="w-full min-w-0">
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
-            <span className="bg-[#050521] text-[#c6ff34] px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest">
-              🎓 AI/ML Scholarship
+            <span className="bg-[#050521] text-white px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest">
+              AI/ML Scholarship
             </span>
             <span className={`px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest border ${getStatusBadgeColor(status)}`}>
-              {status === "Lead / Step 1 Completed" ? "⚡ Step 1 Lead (In Progress)" : status}
+              {status === "Lead / Step 1 Completed" ? "Step 1 Lead (In Progress)" : status}
             </span>
             {marks !== "" && marks !== null && (
               <span className="bg-[#c6ff34] text-[#050521] px-2.5 sm:px-3 py-0.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest border border-[#050521]/20">
@@ -734,14 +1030,14 @@ const ScholarshipCard = ({ item, onDelete, onUpdate }) => {
             {item.fullName || "Anonymous Applicant"}
           </h3>
           <p className="text-[11px] sm:text-xs text-slate-600 font-medium flex flex-wrap items-center gap-2 mt-1">
-            <span>📍 {item.cityDistrict || item.city || "Location Not Provided"}</span>
+            <span>{item.cityDistrict || item.city || "Location Not Provided"}</span>
             <span>•</span>
-            <span>🎂 Age: {item.age || "N/A"}</span>
+            <span>Age: {item.age || "N/A"}</span>
             {item.followingInstagram || item.agreedFollowDeepStaq ? (
               <>
                 <span>•</span>
                 <span className="text-purple-700 font-bold flex items-center gap-1">
-                  📸 IG Follow Verified ✓
+                  IG Follow Verified ✓
                 </span>
               </>
             ) : cleanInsta && cleanInsta.toLowerCase() !== "verified follower" ? (
@@ -753,7 +1049,7 @@ const ScholarshipCard = ({ item, onDelete, onUpdate }) => {
                   rel="noreferrer"
                   className="text-purple-700 hover:text-purple-900 font-bold underline flex items-center gap-1"
                 >
-                  📸 @{cleanInsta}
+                  @{cleanInsta}
                 </a>
               </>
             ) : null}
@@ -774,7 +1070,7 @@ const ScholarshipCard = ({ item, onDelete, onUpdate }) => {
             rel="noreferrer"
             className="text-xs font-bold text-green-700 hover:underline flex items-center gap-1 mt-0.5 truncate"
           >
-            📱 {item.phone || "-"}
+            {item.phone || "-"}
           </a>
         </div>
         <div className="min-w-0">
@@ -796,13 +1092,13 @@ const ScholarshipCard = ({ item, onDelete, onUpdate }) => {
       {/* Critical Filters & Flags */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         <div className={`p-3 rounded-xl border flex items-center gap-2 text-xs font-bold ${item.hasLaptopAndInternet === "Yes" ? "bg-green-50 border-green-200 text-green-800" : item.hasLaptopAndInternet === "No" ? "bg-red-50 border-red-200 text-red-700" : "bg-slate-50 border-slate-200 text-slate-500"}`}>
-          <span>{item.hasLaptopAndInternet === "Yes" ? "💻✓ Laptop & Internet Access" : item.hasLaptopAndInternet === "No" ? "💻✕ No Laptop / Internet" : "💻 Laptop Access: Pending"}</span>
+          <span>{item.hasLaptopAndInternet === "Yes" ? "✓ Laptop & Internet Access" : item.hasLaptopAndInternet === "No" ? "✕ No Laptop / Internet" : "Laptop Access: Pending"}</span>
         </div>
         <div className="p-3 rounded-xl border bg-slate-50 border-slate-200 text-[#050521] text-xs font-bold flex items-center gap-2">
-          <span>🧠 Coding Exposure: <strong className="uppercase">{item.priorCodingAiExposure || "Pending"}</strong></span>
+          <span>Coding Exposure: <strong className="uppercase">{item.priorCodingAiExposure || "Pending"}</strong></span>
         </div>
         <div className="p-3 rounded-xl border bg-slate-50 border-slate-200 text-[#050521] text-xs font-bold flex items-center gap-2">
-          <span>🎯 Post-Course Goal: <strong>{item.postCourseGoal || "Pending"}</strong></span>
+          <span>Post-Course Goal: <strong>{item.postCourseGoal || "Pending"}</strong></span>
         </div>
       </div>
 
@@ -928,9 +1224,9 @@ const ScholarshipCard = ({ item, onDelete, onUpdate }) => {
           type="button"
           onClick={handleSaveEvaluation}
           disabled={isSaving}
-          className="w-full py-2.5 bg-[#050521] hover:bg-slate-800 text-[#c6ff34] font-black text-[10px] uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+          className="w-full py-2.5 bg-[#050521] hover:bg-slate-800 text-white font-black text-[10px] uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
         >
-          {isSaving ? "Saving Evaluation..." : "💾 Update Marks & Status"}
+          {isSaving ? "Saving Evaluation..." : "Update Marks & Status"}
         </button>
       </div>
 
@@ -962,7 +1258,7 @@ const ScholarshipCard = ({ item, onDelete, onUpdate }) => {
               onClick={() => onDelete(item.id, item.fullName || "this scholarship application")}
               className="px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-500 hover:text-white text-red-600 text-[10px] font-black uppercase tracking-wider transition-all border border-red-200 flex items-center justify-center gap-1.5"
             >
-              🗑 Delete
+              Delete
             </button>
           )}
         </div>
@@ -972,21 +1268,31 @@ const ScholarshipCard = ({ item, onDelete, onUpdate }) => {
 };
 
 const PopupLeadCard = ({ item, onDelete, onUpdate }) => {
-  const [status, setStatus] = useState(item.leadStatus || (item.completed ? "New Lead" : "Drop-off Lead"));
+  const [status, setStatus] = useState(item.leadStatus || item.status || (item.completed ? "New Lead" : "Drop-off Lead"));
   const [notes, setNotes] = useState(item.adminNotes || "");
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [phoneCopied, setPhoneCopied] = useState(false);
 
-  const submissionDate = item.updatedAt
-    ? new Date(item.updatedAt.seconds * 1000).toLocaleString()
-    : item.timestamp
-    ? new Date(item.timestamp.seconds * 1000).toLocaleString()
+  const submissionDate = item.updatedAt?.seconds
+    ? new Date(item.updatedAt.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+    : item.timestamp?.seconds
+    ? new Date(item.timestamp.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
     : item.createdAt?.seconds
-    ? new Date(item.createdAt.seconds * 1000).toLocaleString()
+    ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
     : "-";
 
   const rawPhone = item.phone || "";
   const cleanPhone = rawPhone.replace(/\D/g, "");
+  const candidateName = item.fullName || item.name || "Anonymous Visitor";
+  const selectedProgram = item.programme || item.program || item.purpose || "Career Guidance";
+
+  const handleCopyPhone = () => {
+    if (!cleanPhone) return;
+    navigator.clipboard.writeText(cleanPhone);
+    setPhoneCopied(true);
+    setTimeout(() => setPhoneCopied(false), 2000);
+  };
 
   const handleSaveStatus = async () => {
     setIsSaving(true);
@@ -994,6 +1300,7 @@ const PopupLeadCard = ({ item, onDelete, onUpdate }) => {
       if (onUpdate) {
         await onUpdate(item.id, {
           leadStatus: status,
+          status: status,
           adminNotes: notes,
         });
         setSavedSuccess(true);
@@ -1007,44 +1314,66 @@ const PopupLeadCard = ({ item, onDelete, onUpdate }) => {
     }
   };
 
-  const getStepBadge = () => {
-    if (item.completed) {
+  const getStatusBadge = () => {
+    const s = (status || "").toLowerCase();
+    if (s.includes("enrolled") || s.includes("converted")) {
       return (
-        <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-green-300 flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          Completed All Steps
+        <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          ⭐ Enrolled
         </span>
       );
     }
-    if (item.phone) {
+    if (s.includes("contacted") || s.includes("called")) {
       return (
-        <span className="px-3 py-1 bg-amber-100 text-amber-900 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-300 flex items-center gap-1.5">
+        <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-300 flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-amber-500" />
-          Partial: Step {item.step || 3} (Phone Captured)
+          ● Contacted
+        </span>
+      );
+    }
+    if (s.includes("follow")) {
+      return (
+        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-blue-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-blue-500" />
+          ● Follow-Up
+        </span>
+      );
+    }
+    if (s.includes("not interested") || s.includes("drop")) {
+      return (
+        <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-[10px] font-black uppercase tracking-wider border border-slate-300 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-slate-400" />
+          ● Dropped / Not Interested
         </span>
       );
     }
     return (
-      <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-[10px] font-black uppercase tracking-wider border border-slate-300 flex items-center gap-1.5">
-        <span className="w-2 h-2 rounded-full bg-slate-400" />
-        Partial: Step 2 (Name Only)
+      <span className="px-3 py-1 bg-[#c6ff34]/20 text-[#050521] rounded-full text-[10px] font-black uppercase tracking-wider border border-[#c6ff34] flex items-center gap-1.5">
+        <span className="w-2 h-2 rounded-full bg-[#050521] animate-ping" />
+        ● New Lead
       </span>
     );
   };
 
+  const whatsappMessage = `Hi ${candidateName}! Thank you for submitting your career goal with DeepStaq regarding "${selectedProgram}". Our team is excited to help you find the right path! When would be a convenient time for a quick 5-minute guidance call?`;
+
   return (
     <div className="bg-white border-2 border-[#050521] rounded-[1.75rem] p-5 sm:p-6 shadow-[4px_4px_0px_0px_#050521] hover:shadow-[6px_6px_0px_0px_#c6ff34] transition-all duration-300 flex flex-col gap-4">
-      {/* Top Meta */}
+      {/* Top Meta Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-start gap-3 pb-3 border-b border-slate-100">
         <div>
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-            <span className="font-mono text-[9px] text-[#050521]/50 uppercase tracking-widest">
-              ID: {item.id.slice(0, 8)}
+            <span className="font-mono text-[9px] text-[#050521]/60 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-md font-bold">
+              REF: {item.id ? item.id.slice(0, 10) : "N/A"}
             </span>
-            {getStepBadge()}
+            <span className="bg-[#7c3aed] text-white px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider">
+              Career Goal Popup
+            </span>
+            {getStatusBadge()}
           </div>
-          <h3 className="text-lg font-black text-[#050521] tracking-tight">
-            {item.fullName || "Anonymous Visitor"}
+          <h3 className="text-xl font-black text-[#050521] tracking-tight uppercase">
+            {candidateName}
           </h3>
         </div>
         <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-xl border border-slate-200 shrink-0">
@@ -1052,37 +1381,51 @@ const PopupLeadCard = ({ item, onDelete, onUpdate }) => {
         </span>
       </div>
 
-      {/* Contact & Inquiry Details Grid */}
+      {/* Details Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
         <div>
           <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
             Phone Number
           </span>
-          <span className="text-sm font-bold text-slate-900 block">
-            {item.phone || "Not entered yet"}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-black font-mono text-slate-900">
+              {item.phone || "-"}
+            </span>
+            {cleanPhone && (
+              <button
+                type="button"
+                onClick={handleCopyPhone}
+                className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-md transition-colors cursor-pointer"
+                title="Copy phone number"
+              >
+                {phoneCopied ? "✓ Copied" : "Copy"}
+              </button>
+            )}
+          </div>
         </div>
 
         <div>
           <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">
-            Email Address
+            Lead Source
           </span>
-          <span className="text-sm font-bold text-slate-900 break-all block">
-            {item.email || "Not entered yet"}
+          <span className="text-sm font-bold text-slate-900 block truncate">
+            {item.leadSource || "Website Modal"}
           </span>
         </div>
 
+        {/* Selected Programme / Career Goal Box */}
         <div className="sm:col-span-2 pt-2 border-t border-slate-200/60">
           <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1">
-            Purpose / Inquiry Topic
+            Selected Programme / Career Goal
           </span>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-block px-3 py-1 bg-[#050521] text-[#c6ff34] rounded-xl text-xs font-bold">
-              {item.purpose || (item.completed ? "Consultation / General" : "In Progress")}
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#050521] text-white rounded-xl text-xs font-black shadow-sm">
+              
+              <span>{selectedProgram}</span>
             </span>
-            {item.purposeOther && (
-              <span className="text-xs text-slate-600 italic">
-                Note: "{item.purposeOther}"
+            {item.email && (
+              <span className="text-xs text-slate-600 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                {item.email}
               </span>
             )}
           </div>
@@ -1094,32 +1437,21 @@ const PopupLeadCard = ({ item, onDelete, onUpdate }) => {
         {cleanPhone && (
           <>
             <a
-              href={`https://api.whatsapp.com/send?phone=${cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone}&text=${encodeURIComponent(
-                `Hello ${item.fullName || ""}, this is DeepStaq following up on your consultation enquiry for: ${item.purpose || "our AI programs"}.`
-              )}`}
+              href={`https://api.whatsapp.com/send?phone=${cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone}&text=${encodeURIComponent(whatsappMessage)}`}
               target="_blank"
               rel="noreferrer"
-              className="flex-1 min-w-[120px] py-2 px-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm"
+              className="flex-1 min-w-[140px] py-2.5 px-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm"
             >
-              <span>💬 WhatsApp</span>
+              <span>WhatsApp Candidate</span>
             </a>
 
             <a
               href={`tel:${cleanPhone}`}
-              className="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 shadow-sm"
+              className="py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 shadow-sm"
             >
-              <span>📞 Call</span>
+              <span>Call</span>
             </a>
           </>
-        )}
-
-        {item.email && (
-          <a
-            href={`mailto:${item.email}?subject=${encodeURIComponent("DeepStaq AI Consultation Enquiry")}&body=${encodeURIComponent(`Hi ${item.fullName || ""},\n\nThank you for reaching out to DeepStaq regarding: ${item.purpose || "our courses"}.\n\nBest regards,\nDeepStaq Team`)}`}
-            className="py-2 px-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1"
-          >
-            <span>✉️ Email</span>
-          </a>
         )}
       </div>
 
@@ -1127,7 +1459,7 @@ const PopupLeadCard = ({ item, onDelete, onUpdate }) => {
       <div className="bg-[#050521]/5 border border-[#050521]/20 p-3.5 rounded-2xl flex flex-col gap-2.5">
         <div className="flex items-center justify-between">
           <span className="text-[9px] font-black uppercase tracking-widest text-[#050521]">
-            Lead Management
+            Lead Management & Remarks
           </span>
           {savedSuccess && (
             <span className="text-[9px] font-black text-green-700 bg-green-100 px-2 py-0.5 rounded-md border border-green-300">
@@ -1137,26 +1469,36 @@ const PopupLeadCard = ({ item, onDelete, onUpdate }) => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
-          >
-            <option value="New Lead">🟢 New Lead</option>
-            <option value="Contacted">🟡 Contacted</option>
-            <option value="Follow-up Scheduled">🔵 Follow-up Scheduled</option>
-            <option value="In Discussion">🟣 In Discussion</option>
-            <option value="Enrolled">⭐ Enrolled / Converted</option>
-            <option value="Dropped / Not Interested">⚪ Dropped / Not Interested</option>
-          </select>
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Lead Status
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
+            >
+              <option value="New Lead">● New Lead</option>
+              <option value="Contacted">● Contacted / Called</option>
+              <option value="Follow-up Scheduled">● Follow-up Scheduled</option>
+              <option value="In Discussion">● In Discussion</option>
+              <option value="Enrolled">⭐ Enrolled / Converted</option>
+              <option value="Dropped / Not Interested">● Dropped / Not Interested</option>
+            </select>
+          </div>
 
-          <input
-            type="text"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Add internal remarks / call notes..."
-            className="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#050521]"
-          />
+          <div>
+            <label className="text-[8px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Follow-up Remarks / Notes
+            </label>
+            <input
+              type="text"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add call notes, guidance advice..."
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#050521]"
+            />
+          </div>
         </div>
 
         <div className="flex justify-between items-center pt-1">
@@ -1164,18 +1506,18 @@ const PopupLeadCard = ({ item, onDelete, onUpdate }) => {
             type="button"
             onClick={handleSaveStatus}
             disabled={isSaving}
-            className="py-1.5 px-4 bg-[#050521] hover:bg-slate-800 text-[#c6ff34] font-black text-[10px] uppercase tracking-wider rounded-xl transition-all disabled:opacity-50"
+            className="py-1.5 px-4 bg-[#050521] hover:bg-slate-800 text-white font-black text-[10px] uppercase tracking-wider rounded-xl transition-all disabled:opacity-50 cursor-pointer"
           >
-            {isSaving ? "Saving..." : "💾 Update Status"}
+            {isSaving ? "Saving..." : "Update Status"}
           </button>
 
           {onDelete && (
             <button
               type="button"
-              onClick={() => onDelete(item.id, item.fullName || "this lead")}
-              className="text-red-500 hover:text-red-700 text-[10px] font-black uppercase tracking-wider py-1 px-2 rounded-lg hover:bg-red-50 transition-colors"
+              onClick={() => onDelete(item.id, candidateName)}
+              className="text-red-500 hover:text-red-700 text-[10px] font-black uppercase tracking-wider py-1 px-2 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
             >
-              🗑 Delete
+              Delete
             </button>
           )}
         </div>
@@ -1262,7 +1604,7 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
       return (
         <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-300 flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-amber-500" />
-          🟡 Contacted
+          ● Contacted
         </span>
       );
     }
@@ -1270,7 +1612,7 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
       return (
         <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-blue-300 flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-blue-500" />
-          🔵 Follow-Up
+          ● Follow-Up
         </span>
       );
     }
@@ -1278,14 +1620,14 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
       return (
         <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-[10px] font-black uppercase tracking-wider border border-slate-300 flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-slate-400" />
-          ⚪ Not Interested
+          ● Not Interested
         </span>
       );
     }
     return (
       <span className="px-3 py-1 bg-[#c6ff34]/20 text-[#050521] rounded-full text-[10px] font-black uppercase tracking-wider border border-[#c6ff34] flex items-center gap-1.5">
         <span className="w-2 h-2 rounded-full bg-[#050521] animate-ping" />
-        🟢 New Registration
+        ● New Registration
       </span>
     );
   };
@@ -1357,7 +1699,7 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
             Place / Town
           </span>
           <span className="text-sm font-bold text-slate-900 block truncate">
-            📍 {item.place || item.city || item.location || "Not specified"}
+            {item.place || item.city || item.location || "Not specified"}
           </span>
         </div>
 
@@ -1365,8 +1707,8 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
           <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1">
             Qualification
           </span>
-          <span className="inline-block px-3 py-1 bg-[#050521] text-[#c6ff34] rounded-xl text-xs font-bold">
-            🎓 {item.qualification || item.education || "Not specified"}
+          <span className="inline-block px-3 py-1 bg-[#050521] text-white rounded-xl text-xs font-bold">
+            {item.qualification || item.education || "Not specified"}
           </span>
         </div>
 
@@ -1427,14 +1769,14 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
               rel="noreferrer"
               className={`flex-1 min-w-[140px] py-2.5 px-3 ${isPaid ? "bg-[#25D366] hover:bg-[#20bd5a]" : "bg-amber-600 hover:bg-amber-700"} text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm`}
             >
-              <span>{isPaid ? "💬 WhatsApp Confirmation" : "💬 WhatsApp Payment Follow-up"}</span>
+              <span>{isPaid ? "WhatsApp Confirmation" : "WhatsApp Payment Follow-up"}</span>
             </a>
 
             <a
               href={`tel:${cleanPhone}`}
               className="py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 shadow-sm"
             >
-              <span>📞 Call</span>
+              <span>Call</span>
             </a>
           </>
         )}
@@ -1464,12 +1806,12 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
               onChange={(e) => setStatus(e.target.value)}
               className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
             >
-              <option value="New">🟢 New Registration</option>
-              <option value="Contacted">🟡 Contacted / Called</option>
-              <option value="Follow-up Scheduled">🔵 Follow-up Scheduled</option>
+              <option value="New">● New Registration</option>
+              <option value="Contacted">● Contacted / Called</option>
+              <option value="Follow-up Scheduled">● Follow-up Scheduled</option>
               <option value="Paid & Confirmed">⭐ Paid & Confirmed</option>
-              <option value="Enrolled">🎓 Enrolled / Onboarded</option>
-              <option value="Not Interested">⚪ Not Interested / Dropped</option>
+              <option value="Enrolled">Enrolled / Onboarded</option>
+              <option value="Not Interested">● Not Interested / Dropped</option>
             </select>
           </div>
 
@@ -1489,8 +1831,8 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
               }}
               className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
             >
-              <option value="paid">🟢 Paid (₹99 Completed)</option>
-              <option value="unpaid">🟠 Unpaid (Pending)</option>
+              <option value="paid">● Paid (₹99 Completed)</option>
+              <option value="unpaid">● Unpaid (Pending)</option>
             </select>
           </div>
 
@@ -1544,9 +1886,9 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
             type="button"
             onClick={handleSaveStatus}
             disabled={isSaving}
-            className="py-1.5 px-4 bg-[#050521] hover:bg-slate-800 text-[#c6ff34] font-black text-[10px] uppercase tracking-wider rounded-xl transition-all disabled:opacity-50"
+            className="py-1.5 px-4 bg-[#050521] hover:bg-slate-800 text-white font-black text-[10px] uppercase tracking-wider rounded-xl transition-all disabled:opacity-50"
           >
-            {isSaving ? "Saving..." : "💾 Update Status & Payment"}
+            {isSaving ? "Saving..." : "Update Status & Payment"}
           </button>
 
           {onDelete && (
@@ -1555,7 +1897,7 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
               onClick={() => onDelete(item.id, candidateName)}
               className="text-red-500 hover:text-red-700 text-[10px] font-black uppercase tracking-wider py-1 px-2 rounded-lg hover:bg-red-50 transition-colors"
             >
-              🗑 Delete
+              Delete
             </button>
           )}
         </div>
@@ -1641,7 +1983,7 @@ const AiBoosterProgramCard = ({ item, onDelete, onUpdate }) => {
       return (
         <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-300 flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          🎓 Enrolled / Shortlisted
+          Enrolled / Shortlisted
         </span>
       );
     }
@@ -1649,7 +1991,7 @@ const AiBoosterProgramCard = ({ item, onDelete, onUpdate }) => {
       return (
         <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-300 flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-amber-500" />
-          🟡 Contacted
+          ● Contacted
         </span>
       );
     }
@@ -1657,7 +1999,7 @@ const AiBoosterProgramCard = ({ item, onDelete, onUpdate }) => {
       return (
         <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-blue-300 flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-blue-500" />
-          🔵 Follow-Up
+          ● Follow-Up
         </span>
       );
     }
@@ -1665,7 +2007,7 @@ const AiBoosterProgramCard = ({ item, onDelete, onUpdate }) => {
       return (
         <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-[10px] font-black uppercase tracking-wider border border-slate-300 flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-slate-400" />
-          ⚪ Not Interested
+          ● Not Interested
         </span>
       );
     }
@@ -1730,7 +2072,7 @@ const AiBoosterProgramCard = ({ item, onDelete, onUpdate }) => {
             Place / Town
           </span>
           <span className="text-sm font-bold text-slate-900 block truncate">
-            📍 {item.place || item.city || item.location || "Not specified"}
+            {item.place || item.city || item.location || "Not specified"}
           </span>
         </div>
 
@@ -1739,7 +2081,7 @@ const AiBoosterProgramCard = ({ item, onDelete, onUpdate }) => {
             College or School
           </span>
           <span className="text-sm font-bold text-slate-900 block break-words">
-            🏫 {item.collegeOrSchool || item.institution || "Not specified"}
+            {item.collegeOrSchool || item.institution || "Not specified"}
           </span>
         </div>
 
@@ -1748,7 +2090,7 @@ const AiBoosterProgramCard = ({ item, onDelete, onUpdate }) => {
             Year or Sem
           </span>
           <span className="text-sm font-bold text-slate-900 block">
-            🎓 {item.yearOrSem || "Not specified"}
+            {item.yearOrSem || "Not specified"}
           </span>
         </div>
 
@@ -1756,8 +2098,8 @@ const AiBoosterProgramCard = ({ item, onDelete, onUpdate }) => {
           <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 block mb-1">
             Are you interested in AI?
           </span>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#050521] text-[#c6ff34] rounded-xl text-xs font-black">
-            <span>🚀</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#050521] text-white rounded-xl text-xs font-black">
+            
             <span>{item.interestedInAi || "Yes"}</span>
           </div>
         </div>
@@ -1808,14 +2150,14 @@ const AiBoosterProgramCard = ({ item, onDelete, onUpdate }) => {
               rel="noreferrer"
               className="flex-1 min-w-[140px] py-2.5 px-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm"
             >
-              <span>💬 WhatsApp Student</span>
+              <span>WhatsApp Student</span>
             </a>
 
             <a
               href={`tel:${cleanPhone}`}
               className="py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 shadow-sm"
             >
-              <span>📞 Call</span>
+              <span>Call</span>
             </a>
           </>
         )}
@@ -1845,12 +2187,12 @@ const AiBoosterProgramCard = ({ item, onDelete, onUpdate }) => {
               onChange={(e) => setStatus(e.target.value)}
               className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
             >
-              <option value="New Registration">🟢 New Registration</option>
+              <option value="New Registration">● New Registration</option>
               <option value="Paid & Confirmed">⭐ Paid & Confirmed</option>
-              <option value="Contacted">🟡 Contacted / Called</option>
-              <option value="Follow-up Scheduled">🔵 Follow-up Scheduled</option>
-              <option value="Enrolled / Shortlisted">🎓 Enrolled / Shortlisted</option>
-              <option value="Not Interested">⚪ Not Interested / Dropped</option>
+              <option value="Contacted">● Contacted / Called</option>
+              <option value="Follow-up Scheduled">● Follow-up Scheduled</option>
+              <option value="Enrolled / Shortlisted">Enrolled / Shortlisted</option>
+              <option value="Not Interested">● Not Interested / Dropped</option>
             </select>
           </div>
 
@@ -1870,8 +2212,8 @@ const AiBoosterProgramCard = ({ item, onDelete, onUpdate }) => {
               }}
               className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#050521]"
             >
-              <option value="paid">🟢 Paid (₹49 Completed)</option>
-              <option value="unpaid">🟠 Unpaid (Pending)</option>
+              <option value="paid">● Paid (₹49 Completed)</option>
+              <option value="unpaid">● Unpaid (Pending)</option>
             </select>
           </div>
 
@@ -1909,9 +2251,9 @@ const AiBoosterProgramCard = ({ item, onDelete, onUpdate }) => {
             type="button"
             onClick={handleSaveStatus}
             disabled={isSaving}
-            className="py-1.5 px-4 bg-[#050521] hover:bg-slate-800 text-[#c6ff34] font-black text-[10px] uppercase tracking-wider rounded-xl transition-all disabled:opacity-50 cursor-pointer"
+            className="py-1.5 px-4 bg-[#050521] hover:bg-slate-800 text-white font-black text-[10px] uppercase tracking-wider rounded-xl transition-all disabled:opacity-50 cursor-pointer"
           >
-            {isSaving ? "Saving..." : "💾 Update Status & Payment"}
+            {isSaving ? "Saving..." : "Update Status & Payment"}
           </button>
 
           {onDelete && (
@@ -1920,7 +2262,7 @@ const AiBoosterProgramCard = ({ item, onDelete, onUpdate }) => {
               onClick={() => onDelete(item.id, studentName)}
               className="text-red-500 hover:text-red-700 text-[10px] font-black uppercase tracking-wider py-1 px-2 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
             >
-              🗑 Delete
+              Delete
             </button>
           )}
         </div>
@@ -1938,6 +2280,7 @@ function AdminDashboard() {
   const [masterData, setMasterData] = useState([]);
   const [newAptitudeData, setNewAptitudeData] = useState([]);
   const [oldAptitudeData, setOldAptitudeData] = useState([]);
+  const [aptitudeV2Data, setAptitudeV2Data] = useState([]);
   const [collectedData, setCollectedData] = useState([]);
   const [uploadedData, setUploadedData] = useState([]);
   const [webinarData, setWebinarData] = useState([]);
@@ -2026,7 +2369,8 @@ function AdminDashboard() {
         getScholarshipApplications(),
         getPopupLeads(),
         getAiForEveryoneRegistrations(),
-        getAiBoosterProgramRegistrations()
+        getAiBoosterProgramRegistrations(),
+        getAptitudeV2Submissions()
       ]);
       const val = (idx) => (results[idx].status === "fulfilled" && Array.isArray(results[idx].value)) ? results[idx].value : [];
       setSlotData(val(0));
@@ -2043,6 +2387,7 @@ function AdminDashboard() {
       setPopupLeadData(val(11));
       setAiForEveryoneData(val(12));
       setAiBoosterProgramData(val(13));
+      setAptitudeV2Data(val(14));
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -2106,6 +2451,49 @@ function AdminDashboard() {
   const downloadCSV = () => {
     const data = getFilteredData();
     if (data.length === 0) return alert("No data to download in this tab.");
+
+    if (activeTab === "popup_leads") {
+      const headers = [
+        "Lead ID",
+        "Candidate Name",
+        "Phone Number",
+        "Selected Programme",
+        "Lead Status",
+        "Admin Notes",
+        "Source Page",
+        "Submission Date"
+      ];
+      const csvRows = [headers.join(",")];
+      data.forEach((item) => {
+        const dateStr = item.updatedAt?.seconds
+          ? new Date(item.updatedAt.seconds * 1000).toLocaleString("en-IN")
+          : item.timestamp?.seconds
+          ? new Date(item.timestamp.seconds * 1000).toLocaleString("en-IN")
+          : item.createdAt?.seconds
+          ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-IN")
+          : "";
+        const clean = (val) => `"${String(val ?? "").replace(/"/g, '""')}"`;
+        csvRows.push([
+          clean(item.id),
+          clean(item.fullName || item.name),
+          clean(item.phone),
+          clean(item.programme || item.program || item.purpose || "Career Guidance"),
+          clean(item.leadStatus || item.status || "New Lead"),
+          clean(item.adminNotes || ""),
+          clean(item.leadSource || "Website Popup"),
+          clean(dateStr),
+        ].join(","));
+      });
+      const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `career_goal_leads_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
 
     if (activeTab === "ai_for_everyone") {
       const headers = [
@@ -2207,6 +2595,73 @@ function AdminDashboard() {
       const link = document.createElement("a");
       link.setAttribute("href", url);
       link.setAttribute("download", `ai_booster_program_${boosterPaymentTab}_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+
+    if (activeTab === "aptitude_v2") {
+      const headers = [
+        "Candidate ID",
+        "Candidate Name",
+        "Email",
+        "Phone",
+        "Place / City",
+        "Institution / College",
+        "Test Date",
+        "Total Score",
+        "Total Questions",
+        "Percentage (%)",
+        "Performance Rating",
+        "Section A (Numerical)",
+        "Section B (Logical)",
+        "Section C (Analytical)",
+        "Section D (Computational)",
+        "Status",
+        "Time Spent (Seconds)",
+        "Submission Timestamp",
+      ];
+      const csvRows = [headers.join(",")];
+      const clean = (val) => `"${String(val ?? "").replace(/"/g, '""')}"`;
+      data.forEach((item) => {
+        const secA = item.sectionBreakdown?.SECTION_A?.score ?? "-";
+        const secB = item.sectionBreakdown?.SECTION_B?.score ?? "-";
+        const secC = item.sectionBreakdown?.SECTION_C?.score ?? "-";
+        const secD = item.sectionBreakdown?.SECTION_D?.score ?? "-";
+        const dateStr = item.completedAt?.seconds
+          ? new Date(item.completedAt.seconds * 1000).toLocaleString("en-IN")
+          : item.timestamp?.seconds
+          ? new Date(item.timestamp.seconds * 1000).toLocaleString("en-IN")
+          : item.createdAt?.seconds
+          ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-IN")
+          : "";
+        csvRows.push([
+          clean(item.id),
+          clean(item.fullName || item.name),
+          clean(item.email),
+          clean(item.phone),
+          clean(item.place || item.city || item.location),
+          clean(item.institution || item.college),
+          clean(item.testDate),
+          clean(item.score !== undefined && item.score !== null ? item.score : "-"),
+          clean(item.totalQuestions || 40),
+          clean(item.percentage !== undefined && item.percentage !== null ? `${item.percentage}%` : "-"),
+          clean(item.performanceRating || "-"),
+          clean(secA !== "-" ? `${secA}/10` : "-"),
+          clean(secB !== "-" ? `${secB}/10` : "-"),
+          clean(secC !== "-" ? `${secC}/10` : "-"),
+          clean(secD !== "-" ? `${secD}/10` : "-"),
+          clean(item.status || item.testStatus || "completed"),
+          clean(item.timeSpentSeconds || "-"),
+          clean(dateStr),
+        ].join(","));
+      });
+      const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `aptitude_v2_submissions_${new Date().toISOString().slice(0, 10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -2356,10 +2811,11 @@ function AdminDashboard() {
       master: "master_registrations",
       aptitude: "aptitude_test_leads",
       old_aptitude: "aptitude_test_leads",
+      aptitude_v2: "aptitude_v2_submissions",
       collected: "collected_contacts",
       uploaded: "uploaded_contact_files",
       webinar: "webinar_registrations",
-      admission: "admissions",
+      admission: "student_admissions",
       consultation: "consultation_bookings",
       ai_for_everyone: "ai_for_everyone_registrations",
       ai_booster_program: "ai_booster_program_registrations",
@@ -2380,7 +2836,21 @@ function AdminDashboard() {
       } catch (e) {}
     }
 
+    if (activeTab === "aptitude_v2") {
+      try {
+        await deleteAptitudeV2Submission(id);
+      } catch (err) {
+        console.warn("Delete aptitude v2 error:", err);
+      }
+    }
+
     // Remove from local offline storage if present
+    try {
+      const localAdm = JSON.parse(localStorage.getItem("offline_student_admissions") || "[]");
+      const filteredAdm = localAdm.filter((item) => item.id !== id);
+      localStorage.setItem("offline_student_admissions", JSON.stringify(filteredAdm));
+    } catch (e) {}
+
     try {
       const localScholarship = JSON.parse(localStorage.getItem("offline_scholarship_applications") || "[]");
       const filteredSch = localScholarship.filter((item) => item.id !== id);
@@ -2413,6 +2883,7 @@ function AdminDashboard() {
     setMasterData((prev) => prev.filter((item) => item.id !== id));
     setNewAptitudeData((prev) => prev.filter((item) => item.id !== id));
     setOldAptitudeData((prev) => prev.filter((item) => item.id !== id));
+    setAptitudeV2Data((prev) => prev.filter((item) => item.id !== id));
     setCollectedData((prev) => prev.filter((item) => item.id !== id));
     setUploadedData((prev) => prev.filter((item) => item.id !== id));
     setWebinarData((prev) => prev.filter((item) => item.id !== id));
@@ -2428,7 +2899,7 @@ function AdminDashboard() {
         if (aiPaymentTab === "paid") {
           return (
             <div className="bg-white border-2 border-dashed border-emerald-300 rounded-3xl p-12 text-center my-6">
-              <span className="text-4xl block mb-2">🟢</span>
+              
               <h4 className="text-base font-black uppercase text-[#050521]">No Paid Students Yet</h4>
               <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
                 Registrations will appear in this section once candidates complete the ₹99 payment on Razorpay.
@@ -2439,7 +2910,7 @@ function AdminDashboard() {
         if (aiPaymentTab === "unpaid") {
           return (
             <div className="bg-white border-2 border-dashed border-amber-300 rounded-3xl p-12 text-center my-6">
-              <span className="text-4xl block mb-2">🎉</span>
+              
               <h4 className="text-base font-black uppercase text-[#050521]">No Unpaid Students</h4>
               <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
                 All registered candidates have successfully completed payment, or there are no pending drop-offs.
@@ -2452,7 +2923,7 @@ function AdminDashboard() {
         if (boosterPaymentTab === "paid") {
           return (
             <div className="bg-white border-2 border-dashed border-emerald-300 rounded-3xl p-12 text-center my-6">
-              <span className="text-4xl block mb-2">🟢</span>
+              
               <h4 className="text-base font-black uppercase text-[#050521]">No Paid Students Yet</h4>
               <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
                 Registrations will appear in this section once candidates complete the ₹49 payment on Razorpay.
@@ -2463,7 +2934,7 @@ function AdminDashboard() {
         if (boosterPaymentTab === "unpaid") {
           return (
             <div className="bg-white border-2 border-dashed border-amber-300 rounded-3xl p-12 text-center my-6">
-              <span className="text-4xl block mb-2">🎉</span>
+              
               <h4 className="text-base font-black uppercase text-[#050521]">No Unpaid Students</h4>
               <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
                 All registered candidates have completed their ₹49 payment, or there are no pending drop-offs.
@@ -2473,10 +2944,21 @@ function AdminDashboard() {
         }
         return (
           <div className="bg-white border-2 border-dashed border-blue-300 rounded-3xl p-12 text-center my-6">
-            <span className="text-4xl block mb-2">🚀</span>
+            
             <h4 className="text-base font-black uppercase text-[#050521]">No AI Booster Program Registrations Yet</h4>
             <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
               Student form submissions from the "AI Booster Program" page will show up here.
+            </p>
+          </div>
+        );
+      }
+      if (activeTab === "popup_leads") {
+        return (
+          <div className="bg-white border-2 border-dashed border-[#7c3aed]/40 rounded-3xl p-12 text-center my-6">
+            
+            <h4 className="text-base font-black uppercase text-[#050521]">No Career Goal Popup Leads Yet</h4>
+            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+              Submissions from the "Got a career goal in mind?" website popup form will appear here in real time.
             </p>
           </div>
         );
@@ -2525,7 +3007,7 @@ function AdminDashboard() {
               <div>
                 <h3 className="text-lg font-black uppercase tracking-wider text-emerald-950 flex items-center gap-2">
                   <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>🟢 Paid Students Section (₹99 Confirmed)</span>
+                  <span>Paid Students Section (₹99 Confirmed)</span>
                 </h3>
                 <p className="text-xs text-emerald-800 font-medium mt-1">Confirmed registrations who completed ₹99 payment.</p>
               </div>
@@ -2535,7 +3017,7 @@ function AdminDashboard() {
             </div>
             {paidItems.length === 0 ? (
               <div className="bg-white border-2 border-dashed border-emerald-300 rounded-3xl p-12 text-center">
-                <span className="text-4xl block mb-2">🟢</span>
+                
                 <h4 className="text-base font-black uppercase text-[#050521]">No Paid Students Found</h4>
               </div>
             ) : (
@@ -2561,7 +3043,7 @@ function AdminDashboard() {
               <div>
                 <h3 className="text-lg font-black uppercase tracking-wider text-amber-950 flex items-center gap-2">
                   <span className="w-3.5 h-3.5 rounded-full bg-amber-500 animate-pulse" />
-                  <span>🟠 Unpaid / Pending Leads Section</span>
+                  <span>Unpaid / Pending Leads Section</span>
                 </h3>
                 <p className="text-xs text-amber-800 font-medium mt-1">Candidates who filled details but dropped off before paying.</p>
               </div>
@@ -2571,7 +3053,7 @@ function AdminDashboard() {
             </div>
             {unpaidItems.length === 0 ? (
               <div className="bg-white border-2 border-dashed border-amber-300 rounded-3xl p-12 text-center">
-                <span className="text-4xl block mb-2">🎉</span>
+                
                 <h4 className="text-base font-black uppercase text-[#050521]">No Unpaid Students</h4>
               </div>
             ) : (
@@ -2597,7 +3079,7 @@ function AdminDashboard() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-emerald-100">
               <h3 className="text-lg font-black uppercase tracking-wider text-emerald-950 flex items-center gap-2">
                 <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span>🟢 Section 1: Paid Students (₹99 Confirmed)</span>
+                <span>Section 1: Paid Students (₹99 Confirmed)</span>
               </h3>
               <span className="px-3.5 py-1.5 bg-emerald-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
                 {paidItems.length} Paid
@@ -2618,7 +3100,7 @@ function AdminDashboard() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-amber-100">
               <h3 className="text-lg font-black uppercase tracking-wider text-amber-950 flex items-center gap-2">
                 <span className="w-3.5 h-3.5 rounded-full bg-amber-500 animate-pulse" />
-                <span>🟠 Section 2: Unpaid / Pending Leads</span>
+                <span>Section 2: Unpaid / Pending Leads</span>
               </h3>
               <span className="px-3.5 py-1.5 bg-amber-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
                 {unpaidItems.length} Unpaid
@@ -2651,7 +3133,7 @@ function AdminDashboard() {
                 <div className="flex items-center gap-2.5">
                   <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981] animate-pulse" />
                   <h3 className="text-lg font-black uppercase tracking-wider text-emerald-950">
-                    🟢 Paid Students Section (₹49 Confirmed)
+                    Paid Students Section (₹49 Confirmed)
                   </h3>
                 </div>
                 <p className="text-xs text-emerald-800 font-medium mt-1">
@@ -2668,16 +3150,16 @@ function AdminDashboard() {
                 <button
                   type="button"
                   onClick={() => exportBoosterSubsetCSV(paidItems, "paid_students")}
-                  className="px-3.5 py-1.5 bg-[#050521] hover:bg-slate-800 text-[#c6ff34] text-xs font-black uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 bg-[#050521] hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
                 >
-                  <span>📥 Export Paid CSV</span>
+                  <span>Export Paid CSV</span>
                 </button>
               </div>
             </div>
 
             {paidItems.length === 0 ? (
               <div className="bg-white border-2 border-dashed border-emerald-300 rounded-3xl p-12 text-center">
-                <span className="text-4xl block mb-2">🟢</span>
+                
                 <h4 className="text-base font-black uppercase text-[#050521]">No Paid Students Found</h4>
                 <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
                   Registrations will appear in this section once candidates complete the ₹49 payment on Razorpay.
@@ -2708,7 +3190,7 @@ function AdminDashboard() {
                 <div className="flex items-center gap-2.5">
                   <span className="w-3.5 h-3.5 rounded-full bg-amber-500 shadow-[0_0_10px_#f59e0b] animate-pulse" />
                   <h3 className="text-lg font-black uppercase tracking-wider text-amber-950">
-                    🟠 Unpaid / Pending Leads Section
+                    Unpaid / Pending Leads Section
                   </h3>
                 </div>
                 <p className="text-xs text-amber-800 font-medium mt-1">
@@ -2722,16 +3204,16 @@ function AdminDashboard() {
                 <button
                   type="button"
                   onClick={() => exportBoosterSubsetCSV(unpaidItems, "unpaid_leads")}
-                  className="px-3.5 py-1.5 bg-[#050521] hover:bg-slate-800 text-[#c6ff34] text-xs font-black uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 bg-[#050521] hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
                 >
-                  <span>📥 Export Unpaid CSV</span>
+                  <span>Export Unpaid CSV</span>
                 </button>
               </div>
             </div>
 
             {unpaidItems.length === 0 ? (
               <div className="bg-white border-2 border-dashed border-amber-300 rounded-3xl p-12 text-center">
-                <span className="text-4xl block mb-2">🎉</span>
+                
                 <h4 className="text-base font-black uppercase text-[#050521]">No Unpaid Students</h4>
                 <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
                   All registered candidates have completed payment, or no pending leads match your search query.
@@ -2763,7 +3245,7 @@ function AdminDashboard() {
                 <div className="flex items-center gap-2.5">
                   <span className="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_12px_#10b981] animate-pulse" />
                   <h3 className="text-xl font-black uppercase tracking-wider text-emerald-950">
-                    🟢 SECTION 1: PAID REGISTRATIONS (₹49 COMPLETED)
+                    SECTION 1: PAID REGISTRATIONS (₹49 COMPLETED)
                   </h3>
                 </div>
                 <p className="text-xs text-emerald-800 font-medium">
@@ -2780,16 +3262,16 @@ function AdminDashboard() {
                 <button
                   type="button"
                   onClick={() => exportBoosterSubsetCSV(paidItems, "paid_students")}
-                  className="px-3.5 py-1.5 bg-[#050521] hover:bg-slate-800 text-[#c6ff34] text-xs font-black uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 bg-[#050521] hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
                 >
-                  <span>📥 Export Paid CSV</span>
+                  <span>Export Paid CSV</span>
                 </button>
               </div>
             </div>
 
             {paidItems.length === 0 ? (
               <div className="bg-emerald-50/50 border-2 border-dashed border-emerald-200 rounded-3xl p-10 text-center">
-                <span className="text-3xl block mb-2">🟢</span>
+                
                 <h4 className="text-sm font-black uppercase text-emerald-950">No Paid Students Yet</h4>
                 <p className="text-xs text-emerald-700 mt-1 max-w-md mx-auto">
                   When candidates complete the ₹49 payment on Razorpay, their cards will show up right here in Section 1.
@@ -2828,7 +3310,7 @@ function AdminDashboard() {
                 <div className="flex items-center gap-2.5">
                   <span className="w-4 h-4 rounded-full bg-amber-500 shadow-[0_0_12px_#f59e0b] animate-pulse" />
                   <h3 className="text-xl font-black uppercase tracking-wider text-amber-950">
-                    🟠 SECTION 2: UNPAID / PENDING LEADS (PAYMENT DROPPED OFF)
+                    SECTION 2: UNPAID / PENDING LEADS (PAYMENT DROPPED OFF)
                   </h3>
                 </div>
                 <p className="text-xs text-amber-800 font-medium">
@@ -2842,16 +3324,16 @@ function AdminDashboard() {
                 <button
                   type="button"
                   onClick={() => exportBoosterSubsetCSV(unpaidItems, "unpaid_leads")}
-                  className="px-3.5 py-1.5 bg-[#050521] hover:bg-slate-800 text-[#c6ff34] text-xs font-black uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 bg-[#050521] hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
                 >
-                  <span>📥 Export Unpaid CSV</span>
+                  <span>Export Unpaid CSV</span>
                 </button>
               </div>
             </div>
 
             {unpaidItems.length === 0 ? (
               <div className="bg-amber-50/50 border-2 border-dashed border-amber-200 rounded-3xl p-10 text-center">
-                <span className="text-3xl block mb-2">🎉</span>
+                
                 <h4 className="text-sm font-black uppercase text-amber-950">No Unpaid Leads</h4>
                 <p className="text-xs text-amber-700 mt-1 max-w-md mx-auto">
                   All registered candidates have successfully completed payment, or there are no pending drop-offs.
@@ -2894,6 +3376,16 @@ function AdminDashboard() {
       );
     }
 
+    if (activeTab === "aptitude_v2") {
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          {data.map((item) => (
+            <AptitudeV2SubmissionCard key={item.id} item={item} onDelete={handleDeleteRecord} />
+          ))}
+        </div>
+      );
+    }
+
     if (activeTab === "consultation") {
       return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
@@ -2924,6 +3416,7 @@ function AdminDashboard() {
     if (activeTab === "master") return masterData;
     if (activeTab === "aptitude") return newAptitudeData;
     if (activeTab === "old_aptitude") return oldAptitudeData;
+    if (activeTab === "aptitude_v2") return aptitudeV2Data;
     if (activeTab === "collected") return collectedData;
     if (activeTab === "uploaded") return uploadedData;
     if (activeTab === "webinar") return webinarData;
@@ -2969,13 +3462,14 @@ function AdminDashboard() {
 
   const getTabTitle = () => {
     switch (activeTab) {
-      case "popup_leads": return "Website Leads (Interactive Popup)";
+      case "popup_leads": return "Career Goal Leads — Website Popup";
       case "scholarship": return "Scholarship Applications";
       case "slot": return "Slot Registrations";
       case "event": return "Event Entry";
       case "master": return "Master Class";
       case "aptitude": return "AI Aptitude Test (New)";
       case "old_aptitude": return "Aptitude Leads (Old)";
+      case "aptitude_v2": return "Deepstaq Aptitude Test V2 (40 Questions)";
       case "collected": return "Collected Contacts";
       case "uploaded": return "Uploaded Files";
       case "webinar": return "Webinar Registrations";
@@ -2987,8 +3481,8 @@ function AdminDashboard() {
         return "AI easy Ayi — All Registrations";
       case "ai_booster_program":
       case "ai_for_students":
-        if (boosterPaymentTab === "paid") return "AI Booster Program — 🟢 Paid Students Section (₹49)";
-        if (boosterPaymentTab === "unpaid") return "AI Booster Program — 🟠 Unpaid / Pending Leads Section";
+        if (boosterPaymentTab === "paid") return "AI Booster Program — Paid Students Section (₹49)";
+        if (boosterPaymentTab === "unpaid") return "AI Booster Program — Unpaid / Pending Leads Section";
         return "AI Booster Program — Separate Paid & Unpaid Sections";
       default: return "Dashboard";
     }
@@ -3028,8 +3522,8 @@ function AdminDashboard() {
              className={`flex-shrink-0 md:w-full text-left px-5 py-4 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 ${activeTab === "popup_leads" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
           >
              <span className="flex items-center gap-2">
-               <span>⚡</span>
-               <span>Website Leads (Popup)</span>
+               
+               <span>Career Goal Leads (Popup)</span>
              </span>
              <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "popup_leads" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{popupLeadData.length}</span>
           </button>
@@ -3042,12 +3536,12 @@ function AdminDashboard() {
              className={`flex-shrink-0 md:w-full text-left px-5 py-4 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 ${activeTab === "ai_for_everyone" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
           >
              <span className="flex items-center gap-2">
-               <span>✨</span>
+               
                <span>AI easy Ayi</span>
              </span>
              <div className="flex items-center gap-1.5">
                {paidAiStudents.length > 0 && (
-                 <span className={`px-2 py-0.5 rounded-md text-[8px] font-mono font-bold ${activeTab === "ai_for_everyone" ? "bg-[#050521] text-[#c6ff34]" : "bg-emerald-500/20 text-emerald-400"}`}>
+                 <span className={`px-2 py-0.5 rounded-md text-[8px] font-mono font-bold ${activeTab === "ai_for_everyone" ? "bg-[#050521] text-white" : "bg-emerald-500/20 text-emerald-400"}`}>
                    {paidAiStudents.length} Paid
                  </span>
                )}
@@ -3064,7 +3558,7 @@ function AdminDashboard() {
                className={`flex-shrink-0 md:w-full text-left px-5 py-3.5 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 cursor-pointer ${(activeTab === "ai_booster_program" || activeTab === "ai_for_students") && boosterPaymentTab === "all" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
             >
                <span className="flex items-center gap-2">
-                 <span>🚀</span>
+                 
                  <span>AI Booster Program</span>
                </span>
                <div className="flex items-center gap-1.5">
@@ -3091,7 +3585,7 @@ function AdminDashboard() {
               >
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  <span>🟢 Paid Section (₹49)</span>
+                  <span>Paid Section (₹49)</span>
                 </span>
                 <span className={`px-2 py-0.5 rounded-md text-[8px] font-bold ${(activeTab === "ai_booster_program" || activeTab === "ai_for_students") && boosterPaymentTab === "paid" ? "bg-black/25 text-white" : "bg-emerald-950/60 text-emerald-300 border border-emerald-500/30"}`}>
                   {paidBoosterStudents.length}
@@ -3108,7 +3602,7 @@ function AdminDashboard() {
               >
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-amber-400" />
-                  <span>🟠 Unpaid Section</span>
+                  <span>Unpaid Section</span>
                 </span>
                 <span className={`px-2 py-0.5 rounded-md text-[8px] font-bold ${(activeTab === "ai_booster_program" || activeTab === "ai_for_students") && boosterPaymentTab === "unpaid" ? "bg-black/25 text-white" : "bg-amber-950/60 text-amber-300 border border-amber-500/30"}`}>
                   {unpaidBoosterStudents.length}
@@ -3122,7 +3616,7 @@ function AdminDashboard() {
              className={`flex-shrink-0 md:w-full text-left px-5 py-4 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 ${activeTab === "scholarship" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
           >
              <span className="flex items-center gap-2">
-               <span>🎓</span>
+               
                <span>Scholarship Applications</span>
              </span>
              <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "scholarship" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{scholarshipData.length}</span>
@@ -3153,6 +3647,20 @@ function AdminDashboard() {
           </button>
 
           <div className="hidden md:block my-2 border-t border-white/5"></div>
+
+          <button 
+             onClick={() => setActiveTab("aptitude_v2")}
+             className={`flex-shrink-0 md:w-full text-left px-5 py-4 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 ${activeTab === "aptitude_v2" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
+          >
+             <span className="flex items-center gap-2">
+               
+               <span>Aptitude Test V2 (40Q)</span>
+             </span>
+             <div className="flex items-center gap-1.5">
+               <span className="px-1.5 py-0.5 rounded text-[8px] bg-[#c6ff34] text-[#050521] font-bold">V2</span>
+               <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "aptitude_v2" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{aptitudeV2Data.length}</span>
+             </div>
+          </button>
 
           <button 
              onClick={() => setActiveTab("aptitude")}
@@ -3212,7 +3720,7 @@ function AdminDashboard() {
              <div className="flex gap-3">
                <button 
                  onClick={downloadCSV} 
-                 className="flex-1 py-3 bg-[#c6ff34]/10 text-[#c6ff34] border border-[#c6ff34]/20 hover:bg-[#c6ff34] hover:text-[#050521] hover:border-[#c6ff34] rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all"
+                 className="flex-1 py-3 bg-[#c6ff34]/10 text-white border border-[#c6ff34]/20 hover:bg-[#c6ff34] hover:text-[#050521] hover:border-[#c6ff34] rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all"
                >
                  Export
                </button>
@@ -3247,7 +3755,7 @@ function AdminDashboard() {
               disabled={loadingData}
               className="py-2.5 px-4 bg-white hover:bg-slate-100 border border-slate-200 text-[#050521] rounded-xl text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              <span className={loadingData ? "animate-spin" : ""}>🔄</span>
+              <span className={loadingData ? "animate-spin" : ""}>↻</span>
               <span>{loadingData ? "Refreshing..." : "Refresh Data"}</span>
             </button>
           </div>
@@ -3271,7 +3779,7 @@ function AdminDashboard() {
               className="p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black shadow-sm cursor-pointer"
               title="Refresh data"
             >
-              <span className={loadingData ? "inline-block animate-spin" : ""}>🔄</span>
+              <span className={loadingData ? "inline-block animate-spin" : ""}>↻</span>
             </button>
           </div>
 
@@ -3331,7 +3839,7 @@ function AdminDashboard() {
                 </div>
 
                 <div className="bg-emerald-50/70 p-4 sm:p-5 rounded-2xl border border-emerald-200/80 shadow-sm flex flex-col justify-between">
-                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-emerald-800">🟢 Paid Students</span>
+                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-emerald-800">Paid Students</span>
                   <div className="flex items-baseline gap-2 mt-1">
                     <span className="text-2xl sm:text-3xl font-black text-emerald-900">
                       {paidAiStudents.length}
@@ -3341,7 +3849,7 @@ function AdminDashboard() {
                 </div>
 
                 <div className="bg-amber-50/70 p-4 sm:p-5 rounded-2xl border border-amber-200/80 shadow-sm flex flex-col justify-between">
-                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-amber-800">🟠 Unpaid / Pending</span>
+                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-amber-800">● Unpaid / Pending</span>
                   <div className="flex items-baseline gap-2 mt-1">
                     <span className="text-2xl sm:text-3xl font-black text-amber-900">
                       {unpaidAiStudents.length}
@@ -3368,7 +3876,7 @@ function AdminDashboard() {
                   onClick={() => setAiPaymentTab("all")}
                   className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
                     aiPaymentTab === "all"
-                      ? "bg-[#050521] text-[#c6ff34] shadow-sm"
+                      ? "bg-[#050521] text-white shadow-sm"
                       : "text-slate-600 hover:text-[#050521] hover:bg-slate-100"
                   }`}
                 >
@@ -3390,7 +3898,7 @@ function AdminDashboard() {
                   }`}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  <span>🟢 Paid Students (₹99)</span>
+                  <span>Paid Students (₹99)</span>
                   <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
                     aiPaymentTab === "paid" ? "bg-white/25 text-white" : "bg-emerald-100 text-emerald-800"
                   }`}>
@@ -3408,7 +3916,7 @@ function AdminDashboard() {
                   }`}
                 >
                   <span className="w-2 h-2 rounded-full bg-amber-400" />
-                  <span>🟠 Unpaid Students</span>
+                  <span>Unpaid Students</span>
                   <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
                     aiPaymentTab === "unpaid" ? "bg-white/25 text-white" : "bg-amber-100 text-amber-800"
                   }`}>
@@ -3441,7 +3949,7 @@ function AdminDashboard() {
                   title="Click to view Paid Section only"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-emerald-800">🟢 Paid Section</span>
+                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-emerald-800">Paid Section</span>
                     <span className="text-[9px] font-bold text-emerald-700 bg-emerald-200/60 px-1.5 py-0.5 rounded">View →</span>
                   </div>
                   <div className="flex items-baseline gap-2 mt-1">
@@ -3462,7 +3970,7 @@ function AdminDashboard() {
                   title="Click to view Unpaid Section only"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-amber-800">🟠 Unpaid Section</span>
+                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-amber-800">Unpaid Section</span>
                     <span className="text-[9px] font-bold text-amber-700 bg-amber-200/60 px-1.5 py-0.5 rounded">View →</span>
                   </div>
                   <div className="flex items-baseline gap-2 mt-1">
@@ -3491,7 +3999,7 @@ function AdminDashboard() {
                   onClick={() => setBoosterPaymentTab("all")}
                   className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
                     boosterPaymentTab === "all"
-                      ? "bg-[#050521] text-[#c6ff34] shadow-sm"
+                      ? "bg-[#050521] text-white shadow-sm"
                       : "text-slate-600 hover:text-[#050521] hover:bg-slate-100"
                   }`}
                 >
@@ -3513,7 +4021,7 @@ function AdminDashboard() {
                   }`}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  <span>🟢 Paid Section Only (₹49)</span>
+                  <span>Paid Section Only (₹49)</span>
                   <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
                     boosterPaymentTab === "paid" ? "bg-white/25 text-white" : "bg-emerald-100 text-emerald-800"
                   }`}>
@@ -3531,7 +4039,7 @@ function AdminDashboard() {
                   }`}
                 >
                   <span className="w-2 h-2 rounded-full bg-amber-400" />
-                  <span>🟠 Unpaid Section Only</span>
+                  <span>Unpaid Section Only</span>
                   <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
                     boosterPaymentTab === "unpaid" ? "bg-white/25 text-white" : "bg-amber-100 text-amber-800"
                   }`}>

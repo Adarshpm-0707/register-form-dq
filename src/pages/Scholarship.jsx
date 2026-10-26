@@ -12,11 +12,11 @@ const EDUCATION_OPTIONS = [
 ];
 
 const OCCUPATION_OPTIONS = [
-  { value: "Student", label: "Student", icon: "🎓" },
-  { value: "Employed", label: "Employed", icon: "💼" },
-  { value: "Job-seeking", label: "Job-seeking", icon: "🔍" },
-  { value: "Freelancer", label: "Freelancer", icon: "💻" },
-  { value: "Other", label: "Other", icon: "✨" },
+  { value: "Student", label: "Student" },
+  { value: "Employed", label: "Employed" },
+  { value: "Job-seeking", label: "Job-seeking" },
+  { value: "Freelancer", label: "Freelancer" },
+  { value: "Other", label: "Other" },
 ];
 
 const CODING_EXPOSURE_OPTIONS = [
@@ -26,11 +26,11 @@ const CODING_EXPOSURE_OPTIONS = [
 ];
 
 const POST_COURSE_GOALS = [
-  { value: "Job", label: "Get an AI/Tech Job", icon: "🚀" },
-  { value: "Freelance", label: "Work as Freelancer / Consultant", icon: "🌐" },
-  { value: "Higher studies", label: "Pursue Higher Studies / Research", icon: "📚" },
-  { value: "Start something of my own", label: "Start My Own AI Venture / Product", icon: "💡" },
-  { value: "Not sure yet", label: "Not sure yet / Exploring opportunities", icon: "🎯" },
+  { value: "Job", label: "Get an AI/Tech Job" },
+  { value: "Freelance", label: "Work as Freelancer / Consultant" },
+  { value: "Higher studies", label: "Pursue Higher Studies / Research" },
+  { value: "Start something of my own", label: "Start My Own AI Venture / Product" },
+  { value: "Not sure yet", label: "Not sure yet / Exploring opportunities" },
 ];
 
 const STEPS = [
@@ -261,13 +261,13 @@ export default function Scholarship() {
           {/* Quick Highlight Badges */}
           <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2.5 pt-1">
             <span className="px-3 py-1 bg-white/[0.04] border border-white/10 rounded-lg text-[10px] sm:text-xs font-medium text-slate-200">
-              ✨ Up to 100% Merit Scholarship
+              Up to 100% Merit Scholarship
             </span>
             <span className="px-3 py-1 bg-white/[0.04] border border-white/10 rounded-lg text-[10px] sm:text-xs font-medium text-slate-200">
-              💻 Hands-On AI/ML Training
+              Hands-On AI/ML Training
             </span>
             <span className="px-3 py-1 bg-white/[0.04] border border-white/10 rounded-lg text-[10px] sm:text-xs font-medium text-slate-200">
-              🚀 Industry Mentorship
+              Industry Mentorship
             </span>
           </div>
         </div>
@@ -538,13 +538,12 @@ export default function Scholarship() {
                               key={occ.value}
                               type="button"
                               onClick={() => handleSelectOption("currentOccupation", occ.value)}
-                              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border text-center transition-all text-xs font-bold flex flex-col items-center gap-1 ${
+                              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border text-center transition-all text-xs font-bold flex flex-col items-center justify-center ${
                                 isSelected
                                   ? "bg-[#c6ff34] text-[#090D11] border-[#c6ff34] shadow-[0_0_20px_rgba(198,255,52,0.3)]"
                                   : "bg-white/[0.03] hover:bg-white/[0.06] text-slate-300 border-white/10"
                               }`}
                             >
-                              <span className="text-base sm:text-lg">{occ.icon}</span>
                               <span className="text-[11px] sm:text-xs truncate w-full">{occ.label}</span>
                             </button>
                           );
@@ -574,7 +573,9 @@ export default function Scholarship() {
                     {/* 3. Laptop/Computer Filter */}
                     <div className="space-y-2.5 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white/[0.03] border border-amber-500/30">
                       <div className="flex items-start gap-2">
-                        <span className="text-base shrink-0">⚠️</span>
+                        <svg className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
                         <div>
                           <label className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-200 block">
                             3. Do you have access to a laptop/computer with stable internet? <span className="text-[#c6ff34]">*</span>
@@ -708,15 +709,18 @@ export default function Scholarship() {
                               key={goal.value}
                               type="button"
                               onClick={() => handleSelectOption("postCourseGoal", goal.value)}
-                              className={`p-3 rounded-xl sm:rounded-2xl border text-left transition-all text-xs font-bold flex items-center gap-2.5 ${
+                              className={`p-3 rounded-xl sm:rounded-2xl border text-left transition-all text-xs font-bold flex items-center justify-between gap-2.5 ${
                                 isSelected
                                   ? "bg-[#c6ff34] text-[#090D11] border-[#c6ff34] shadow-[0_0_20px_rgba(198,255,52,0.3)]"
                                   : "bg-white/[0.03] hover:bg-white/[0.06] text-slate-300 border-white/10"
                               }`}
                             >
-                              <span className="text-base shrink-0">{goal.icon}</span>
                               <span className="flex-1 truncate">{goal.label}</span>
-                              {isSelected && <span className="text-[#090D11] font-black shrink-0">✓</span>}
+                              {isSelected ? (
+                                <span className="text-[#090D11] font-black shrink-0">✓</span>
+                              ) : (
+                                <span className="text-slate-500 text-xs shrink-0">→</span>
+                              )}
                             </button>
                           );
                         })}
@@ -857,7 +861,7 @@ export default function Scholarship() {
                           </span>
                           {!hasVisitedInstagram && (
                             <p className="text-[10px] font-medium text-slate-400 mt-1">
-                              💡 Tip: Clicking will open Instagram in a new tab to follow, then click again to check the box.
+                              Tip: Clicking will open Instagram in a new tab to follow, then click again to check the box.
                             </p>
                           )}
                         </div>
@@ -941,7 +945,7 @@ export default function Scholarship() {
                     ) : (
                       <>
                         <span>Submit Application</span>
-                        <span>🚀</span>
+                        <span>→</span>
                       </>
                     )}
                   </button>
@@ -959,7 +963,9 @@ export default function Scholarship() {
             className="bg-[#0D1318]/90 rounded-2xl sm:rounded-[2rem] border border-white/10 p-5 sm:p-10 md:p-12 shadow-2xl backdrop-blur-2xl text-center space-y-5 sm:space-y-6"
           >
             <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#c6ff34] text-[#090D11] rounded-full flex items-center justify-center mx-auto shadow-[0_0_35px_rgba(198,255,52,0.4)]">
-              <span className="text-2xl sm:text-3xl">🎉</span>
+              <svg className="w-8 h-8 sm:w-10 sm:h-10 text-[#090D11]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
 
             <div className="space-y-2">

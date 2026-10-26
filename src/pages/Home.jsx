@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 
-// Hero AI Stack 3D Visual
-import aiStackHero from "../assets/ai_stack_hero.jpg";
 
 // Learning Experience Photos
 import offlineClassroomImg from "../assets/learning/offline_classroom.jpg";
@@ -172,42 +170,42 @@ const curriculumModules = [
   {
     id: 1,
     title: "Programming Foundations",
-    icon: "💻",
+    icon: "01",
     topics: ["Python 3.12 Core & OOP", "Data Structures & Algorithms", "Git, GitHub & Version Control", "Linux & Virtual Environments"],
     desc: "Build rock-solid software engineering fundamentals from zero.",
   },
   {
     id: 2,
     title: "Math & Data Visualization",
-    icon: "📊",
+    icon: "02",
     topics: ["Linear Algebra & Matrix Math", "Calculus & Optimization", "NumPy & Pandas Manipulation", "Matplotlib & Seaborn Dashboards"],
     desc: "Understand the mathematical intuition driving machine intelligence.",
   },
   {
     id: 3,
     title: "Machine Learning",
-    icon: "🧠",
+    icon: "03",
     topics: ["Regression & Classification", "Random Forests & XGBoost", "Unsupervised Clustering & PCA", "Scikit-Learn Pipeline Engineering"],
     desc: "Train, evaluate and optimize classical machine learning models.",
   },
   {
     id: 4,
     title: "Deep Learning & NLP",
-    icon: "⚡",
+    icon: "04",
     topics: ["Neural Networks & Backprop", "PyTorch Tensors & Architectures", "Word2Vec, RNNs & Transformers", "Attention Mechanism & Encoders"],
     desc: "Master modern deep learning and sequence processing pipelines.",
   },
   {
     id: 5,
     title: "Generative AI & LLMs",
-    icon: "🤖",
+    icon: "05",
     topics: ["Prompt Engineering & System Personas", "Retrieval-Augmented Gen (RAG)", "Vector DBs (Pinecone, Chroma)", "LangChain & LlamaIndex Pipelines"],
     desc: "Create enterprise knowledge assistants and generative solutions.",
   },
   {
     id: 6,
     title: "Advanced AI & MLOps",
-    icon: "🚀",
+    icon: "06",
     topics: ["Autonomous AI Agents & Tool Calling", "Multi-Agent Collaboration", "LoRA / QLoRA Model Fine-Tuning", "FastAPI, Docker & Cloud Deployment"],
     desc: "Deploy, containerize, and orchestrate production-grade AI agents.",
   },
@@ -216,6 +214,7 @@ const curriculumModules = [
 /* ─────────────────────────────────────────────
    COUNT UP COMPONENT
 ───────────────────────────────────────────── */
+// eslint-disable-next-line no-unused-vars
 function CountUpNumber({ end, suffix = "" }) {
   const [count, setCount] = useState(0);
   const ref = useRef(null);
@@ -245,6 +244,7 @@ function CountUpNumber({ end, suffix = "" }) {
     return () => observer.disconnect();
   }, [end]);
 
+  
   return <span ref={ref}>{count}{suffix}</span>;
 }
 
@@ -254,7 +254,6 @@ function CountUpNumber({ end, suffix = "" }) {
 export default function Home() {
   const [activeProgramIndex, setActiveProgramIndex] = useState(0);
   const [activeCurriculumIndex, setActiveCurriculumIndex] = useState(0);
-  const [openFaq, setOpenFaq] = useState(0);
   const [activeEventLightbox, setActiveEventLightbox] = useState(null);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
 
@@ -271,187 +270,96 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#090D11] text-white selection:bg-[#c6ff34] selection:text-[#090D11] font-sans overflow-x-hidden relative">
+    <div className="min-h-screen bg-transparent text-white selection:bg-sky-500/30 selection:text-white font-sans overflow-x-hidden relative">
       
-      {/* Subtle Ambient Background Gradients & Grid */}
+      {/* Subtle Ambient Background Gradients */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        {/* Top-right emerald/lime radial glow */}
-        <div className="absolute -top-[10%] -right-[10%] w-[800px] h-[800px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(198,255,52,0.07)_0%,rgba(16,185,129,0.04)_40%,transparent_70%)] blur-[120px]" />
-        {/* Center-left purple/emerald subtle glow */}
-        <div className="absolute top-[40%] -left-[15%] w-[900px] h-[900px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(105,74,255,0.04)_0%,rgba(198,255,52,0.03)_50%,transparent_75%)] blur-[140px]" />
-        {/* Bottom cyan/lime glow */}
-        <div className="absolute bottom-[5%] right-[10%] w-[700px] h-[700px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.05)_0%,transparent_70%)] blur-[120px]" />
-        {/* Micro Tech Grid Overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.035]"
-          style={{
-            backgroundImage: "radial-gradient(#ffffff 1px, transparent 1px)",
-            backgroundSize: "32px 32px",
-          }}
-        />
+        {/* Top-right light blue radial glow */}
+        <div className="absolute -top-[10%] -right-[10%] w-[800px] h-[800px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.14)_0%,rgba(14,165,233,0.08)_40%,transparent_70%)] blur-[120px]" />
+        {/* Center-left navy/blue subtle glow */}
+        <div className="absolute top-[40%] -left-[15%] w-[900px] h-[900px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(37,99,235,0.12)_0%,rgba(56,189,248,0.06)_50%,transparent_75%)] blur-[140px]" />
+        {/* Bottom light blue / cyan glow */}
+        <div className="absolute bottom-[5%] right-[10%] w-[700px] h-[700px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(14,165,233,0.10)_0%,transparent_70%)] blur-[120px]" />
       </div>
 
       <div className="relative z-10">
 
         {/* ══════════════════════════════════════════════════════════
-            1. HERO SECTION (Matching Attached Design with High Fidelity)
+            1. HERO SECTION (Centered Layout)
            ══════════════════════════════════════════════════════════ */}
-        <section className="relative pt-28 sm:pt-32 md:pt-36 lg:pt-40 pb-16 sm:pb-24 px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1440px] mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+        <section className="relative pt-28 sm:pt-32 md:pt-36 lg:pt-40 pb-16 sm:pb-24 px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1440px] mx-auto text-center">
+          {/* Subtle Centered Background Glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.16)_0%,transparent_70%)] blur-[90px] pointer-events-none -z-10" />
+
+          <div className="max-w-4xl mx-auto flex flex-col items-center text-center space-y-6 sm:space-y-8">
             
-            {/* Left Content Column */}
-            <div className="lg:col-span-7 flex flex-col items-start space-y-6 sm:space-y-7">
-              
-              {/* Top Category Badge */}
-              <motion.div
-                initial={{ opacity: 0, y: -16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
-              >
-                <span className="w-2 h-2 rounded-full bg-[#c6ff34] animate-pulse shadow-[0_0_8px_#c6ff34]" />
-                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#E0E7EC]">
-                  AI & MACHINE LEARNING INSTITUTE
-                </span>
-              </motion.div>
-
-              {/* Huge Headline: Learn AI. Build Real Skills. Create What's Next. */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="space-y-1 sm:space-y-2"
-              >
-                <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[76px] xl:text-[84px] font-extrabold tracking-[-0.03em] leading-[0.98] text-white">
-                  Learn AI.<br />
-                  Build <span className="text-[#c6ff34] drop-shadow-[0_0_30px_rgba(198,255,52,0.35)]">Real Skills.</span><br />
-                  Create What's Next.
-                </h1>
-              </motion.div>
-
-              {/* Subtitle Description */}
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-base sm:text-lg md:text-xl text-slate-300 max-w-xl font-normal leading-relaxed"
-              >
-                A 6-month, hands-on program to master AI, Machine Learning, Generative AI and intelligent agents — with real projects and expert mentorship.
-              </motion.p>
-
-              {/* Dual Action CTAs */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                className="flex flex-wrap items-center gap-4 pt-2 w-full sm:w-auto"
-              >
-                {/* Explore Programs Pill (Primary Lime Button) */}
-                <a
-                  href="#programs"
-                  className="btn-slide-wrap group px-7 py-3.5 sm:py-4 rounded-full bg-[#c6ff34] hover:bg-[#bbf029] text-[#090D11] font-bold text-sm sm:text-base tracking-wide shadow-[0_4px_24px_rgba(198,255,52,0.35)] flex items-center gap-2 cursor-pointer"
-                >
-                  <span>Explore Programs</span>
-                  <span className="font-bold transition-transform duration-200 group-hover:translate-x-1">→</span>
-                </a>
-
-                {/* Book a Consultation Pill (Dark Glassmorphic Button) */}
-                <Link
-                  to="/consultation"
-                  className="px-6 py-3.5 sm:py-4 rounded-full bg-white/[0.04] hover:bg-white/[0.09] text-white border border-white/15 hover:border-white/35 font-semibold text-sm sm:text-base tracking-wide transition-all duration-200 backdrop-blur-md flex items-center gap-2.5 shadow-sm"
-                >
-                  <span className="text-base">📅</span>
-                  <span>Book a Consultation</span>
-                </Link>
-              </motion.div>
-
-              {/* 4 Feature Pills in a Row (Offline Classes, Hands-on, Expert Mentorship, Career Skills) */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="pt-6 sm:pt-8 w-full border-t border-white/10"
-              >
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-                  {[
-                    { icon: "🏛️", label: "Offline Classes", sub: "at Kannur" },
-                    { icon: "💻", label: "Hands-on", sub: "Learning" },
-                    { icon: "👥", label: "Expert", sub: "Mentorship" },
-                    { icon: "📈", label: "Career-focused", sub: "Skills" },
-                  ].map((feat, idx) => (
-                    <div
-                      key={idx}
-                      className="p-3 sm:p-3.5 rounded-2xl bg-white/[0.03] border border-white/8 hover:border-white/20 transition-all duration-200 flex items-center gap-3 group"
-                    >
-                      <div className="w-9 h-9 rounded-xl bg-white/5 group-hover:bg-[#c6ff34]/20 text-[#c6ff34] flex items-center justify-center text-lg shrink-0 transition-colors">
-                        {feat.icon}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-xs sm:text-sm font-semibold text-white leading-tight truncate">
-                          {feat.label}
-                        </div>
-                        <div className="text-[11px] text-slate-400 font-normal leading-tight">
-                          {feat.sub}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-
-            </div>
-
-            {/* Right Hero Graphic: 3D Stack Visualization + Floating Badge Card */}
+            {/* Top Category Badge */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="lg:col-span-5 relative flex items-center justify-center mt-6 lg:mt-0"
+              initial={{ opacity: 0, y: -16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md shadow-[0_2px_12px_rgba(0,0,0,0.3)] mx-auto"
             >
-              {/* Outer Glow Halo */}
-              <div className="absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_center,rgba(198,255,52,0.18)_0%,transparent_70%)] blur-2xl pointer-events-none -z-10" />
-
-              {/* Main 3D AI Stack Visual Frame */}
-              <div className="relative w-full max-w-[480px] lg:max-w-none aspect-square rounded-3xl overflow-hidden border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)] bg-[#0C1218] group">
-                <img
-                  src={aiStackHero}
-                  alt="Deepstaq AI Layered Neural Stack Architecture"
-                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                />
-
-                {/* Cyber Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#090D11] via-transparent to-transparent opacity-60 pointer-events-none" />
-
-                {/* Floating Glassmorphism Badge Card (As in Screenshot) */}
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                  className="absolute top-4 sm:top-6 right-4 sm:right-6 p-4 sm:p-5 rounded-2xl bg-[#090D11]/80 backdrop-blur-xl border border-white/15 shadow-[0_12px_32px_rgba(0,0,0,0.6)] max-w-[210px] space-y-2.5 z-20"
-                >
-                  <div className="text-xs font-semibold text-white leading-snug tracking-tight">
-                    From ideas to intelligent solutions.
-                  </div>
-                  <div className="space-y-1.5 pt-1 text-[11px] text-slate-300 font-medium">
-                    {["AI", "Machine Learning", "Generative AI", "LLMs", "AI Agents"].map((item, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff34] shrink-0" />
-                        <span>{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-
-                {/* Bottom Left Live Status Pill */}
-                <div className="absolute bottom-4 left-4 z-20">
-                  <div className="px-3.5 py-1.5 rounded-full bg-[#090D11]/85 backdrop-blur-md border border-[#c6ff34]/30 text-[#c6ff34] text-[11px] font-semibold flex items-center gap-2 shadow-lg">
-                    <span className="w-2 h-2 rounded-full bg-[#c6ff34] animate-ping" />
-                    <span>Next Batch Starting at Kannur</span>
-                  </div>
-                </div>
-
-              </div>
+              <span className="w-2 h-2 rounded-full bg-sky-400" />
+              <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#E0E7EC]">
+                Ai Learning & Innovation Hub
+              </span>
             </motion.div>
+
+            {/* Huge Headline: Learn AI. Build Real Skills. Create What's Next. */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="space-y-1 sm:space-y-2 w-full"
+            >
+              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[76px] xl:text-[84px] font-extrabold tracking-[-0.03em] leading-[0.98] text-white text-center">
+               The Next<br />
+                Big Thing in  <span className="text-white">Your Career</span><br />
+           
+              </h1>
+            </motion.div>
+
+            {/* Subtitle Description */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-base sm:text-lg md:text-xl text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed text-center"
+            >
+             Learn AI from industry professionals across the globe, with experience at leading Tier 1 and Tier 2 companies
+            </motion.p>
+
+            {/* Dual Action CTAs */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-wrap items-center justify-center gap-4 pt-2 w-full sm:w-auto mx-auto"
+            >
+              {/* Explore Programs Pill (Primary Lime Button) */}
+              <a
+                href="#programs"
+                className="btn-slide-wrap group px-7 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-slate-950 font-bold text-sm sm:text-base tracking-wide shadow-[0_4px_24px_rgba(56,189,248,0.35)] flex items-center gap-2 cursor-pointer"
+              >
+                <span>Book a demo class</span>
+                <span className="font-bold transition-transform duration-200 group-hover:translate-x-1">→</span>
+              </a>
+
+              {/* Book a Consultation Pill (Dark Glassmorphic Button) */}
+              <Link
+                to="/consultation"
+                className="px-6 py-3.5 sm:py-4 rounded-full bg-white/[0.04] hover:bg-white/[0.09] text-white border border-white/15 hover:border-white/35 font-semibold text-sm sm:text-base tracking-wide transition-all duration-200 backdrop-blur-md flex items-center gap-2.5 shadow-sm"
+              >
+                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Get a Call back</span>
+              </Link>
+            </motion.div>
+
+            {/* 4 Feature Pills in a Row (Offline Classes, Hands-on, Expert Mentorship, Career Skills) */}
+     
 
           </div>
         </section>
@@ -463,41 +371,39 @@ export default function Home() {
         <section className="px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1440px] mx-auto mb-20 sm:mb-28">
           
           {/* Glassmorphic Stats Strip with Gradient Border */}
-          <div className="relative rounded-3xl p-6 sm:p-8 md:p-10 bg-white/[0.03] backdrop-blur-2xl border border-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.4)]">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-white/10">
-              
-              <div className="flex flex-col items-center pt-3 sm:pt-0">
-                <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-[#c6ff34] tracking-tight">
-                  <CountUpNumber end={100} suffix="%" />
-                </div>
-                <div className="text-xs sm:text-sm font-semibold text-white mt-1.5">Placement Assistance</div>
-                <div className="text-[11px] text-slate-400 mt-0.5">Dedicated career roadmap</div>
-              </div>
+          <div className="relative rounded-2xl sm:rounded-3xl p-3 sm:p-5 md:p-6 lg:p-8 bg-white/[0.03] backdrop-blur-2xl border border-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.4)]">
+            <div className="grid grid-cols-2 md:grid-cols-4 text-center">
+              {[
+                { prefix: "Millions of AI", highlight: "opportunities" },
+                { prefix: "The AI skills", highlight: "gap" },
+                { prefix: "Learn from global", highlight: "experts" },
+                { prefix: "Global placement", highlight: "Assistance" },
+              ].map((item, idx) => {
+                const borderClasses =
+                  idx === 0
+                    ? "border-r border-b md:border-b-0 border-white/10"
+                    : idx === 1
+                    ? "border-b md:border-b-0 md:border-r border-white/10"
+                    : idx === 2
+                    ? "border-r border-white/10"
+                    : "border-none";
 
-              <div className="flex flex-col items-center pt-3 md:pt-0">
-                <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-[#c6ff34] tracking-tight">
-                  <CountUpNumber end={50} suffix="+" />
-                </div>
-                <div className="text-xs sm:text-sm font-semibold text-white mt-1.5">Real AI Projects</div>
-                <div className="text-[11px] text-slate-400 mt-0.5">Production capstones built</div>
-              </div>
-
-              <div className="flex flex-col items-center pt-3 md:pt-0">
-                <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-[#c6ff34] tracking-tight">
-                  <span>6</span><span className="text-xl sm:text-2xl font-bold ml-1 text-[#c6ff34]">Months</span>
-                </div>
-                <div className="text-xs sm:text-sm font-semibold text-white mt-1.5">Intensive Training</div>
-                <div className="text-[11px] text-slate-400 mt-0.5">160+ live learning hours</div>
-              </div>
-
-              <div className="flex flex-col items-center pt-3 md:pt-0">
-                <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-[#c6ff34] tracking-tight">
-                  <span>Kannur</span>
-                </div>
-                <div className="text-xs sm:text-sm font-semibold text-white mt-1.5">Offline Tech Campus</div>
-                <div className="text-[11px] text-slate-400 mt-0.5">In-person mentorship</div>
-              </div>
-
+                return (
+                  <div
+                    key={idx}
+                    className={`flex flex-col items-center justify-center text-center p-3 sm:p-4 md:px-2 md:py-4 lg:py-6 lg:px-4 xl:py-7 xl:px-6 min-h-[85px] sm:min-h-[100px] md:min-h-[110px] lg:min-h-[125px] transition-all duration-300 hover:bg-white/[0.02] group ${borderClasses}`}
+                  >
+                    <div className="font-extrabold tracking-tight leading-snug sm:leading-snug md:leading-tight lg:leading-snug text-xs min-[360px]:text-sm sm:text-base md:text-sm lg:text-xl xl:text-2xl 2xl:text-3xl max-w-[150px] min-[390px]:max-w-[180px] sm:max-w-[220px] md:max-w-[165px] lg:max-w-[230px] xl:max-w-[290px] mx-auto text-balance">
+                      <span className="text-white group-hover:text-slate-100 transition-colors">
+                        {item.prefix}{" "}
+                      </span>
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-sky-300 to-blue-300 drop-shadow-[0_0_12px_rgba(56,189,248,0.25)] group-hover:drop-shadow-[0_0_16px_rgba(56,189,248,0.45)] transition-all">
+                        {item.highlight}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -507,7 +413,7 @@ export default function Home() {
               <span className="text-[11px] uppercase font-semibold tracking-widest text-slate-400">
                 Production AI Tech Stack You Master
               </span>
-              <span className="text-[11px] text-[#c6ff34] font-medium hidden sm:inline">
+              <span className="text-[11px] text-white font-medium hidden sm:inline">
                 Industry-Grade Frameworks
               </span>
             </div>
@@ -522,9 +428,9 @@ export default function Home() {
                 {[...techStack, ...techStack].map((tech, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white/[0.03] border border-white/8 hover:border-[#c6ff34]/40 transition-colors shrink-0 group cursor-default"
+                    className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white/[0.03] border border-white/8 hover:border-sky-400/40 transition-colors shrink-0 group cursor-default"
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff34] group-hover:scale-125 transition-transform" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400 group-hover:scale-125 transition-transform" />
                     <span className="text-xs font-semibold text-slate-200 group-hover:text-white">
                       {tech.name}
                     </span>
@@ -548,7 +454,7 @@ export default function Home() {
           {/* Section Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
             <div className="space-y-2">
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c6ff34]">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white">
                 OUR PROGRAMS
               </div>
               <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
@@ -600,15 +506,28 @@ export default function Home() {
                 {/* Top Row: Icon + Badge */}
                 <div>
                   <div className="flex items-start justify-between gap-4 mb-6">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl ${
-                      prog.flagship ? "bg-[#10b981]/20 text-[#c6ff34] border border-[#10b981]/40" : "bg-white/5 text-white border border-white/10"
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
+                      prog.flagship ? "bg-[#10b981]/20 text-white border border-[#10b981]/40" : "bg-white/5 text-white border border-white/10"
                     }`}>
-                      {prog.flagship ? "🏛️" : prog.id === "genai" ? "🤖" : "⚙️"}
+                      {prog.flagship ? (
+                        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                      ) : prog.id === "genai" ? (
+                        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      )}
                     </div>
 
                     <span className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
                       prog.flagship
-                        ? "bg-[#c6ff34] text-[#090D11] shadow-[0_0_12px_rgba(198,255,52,0.4)]"
+                        ? "bg-sky-400 text-slate-950 shadow-[0_0_12px_rgba(56,189,248,0.4)]"
                         : "bg-white/10 text-slate-300 border border-white/10"
                     }`}>
                       {prog.badge}
@@ -626,12 +545,17 @@ export default function Home() {
                   {/* Metadata Row: Duration & Mode */}
                   <div className="flex items-center gap-4 text-xs text-slate-400 font-medium pb-6 mb-6 border-b border-white/10">
                     <span className="flex items-center gap-1.5">
-                      <span>⏱</span>
+                      <svg className="w-3.5 h-3.5 text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
                       <span>{prog.duration}</span>
                     </span>
                     <span>•</span>
                     <span className="flex items-center gap-1.5">
-                      <span>📍</span>
+                      <svg className="w-3.5 h-3.5 text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
                       <span>{prog.mode}</span>
                     </span>
                   </div>
@@ -653,7 +577,7 @@ export default function Home() {
                   <div className="flex items-center justify-between pt-2">
                     <Link
                       to={prog.link}
-                      className="text-xs font-semibold text-[#c6ff34] hover:underline flex items-center gap-1"
+                      className="text-xs font-semibold text-white hover:underline flex items-center gap-1"
                     >
                       <span>Explore Syllabus</span>
                       <span>→</span>
@@ -664,8 +588,8 @@ export default function Home() {
                       aria-label={`View ${prog.title} details`}
                       className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 ${
                         prog.flagship
-                          ? "bg-white text-[#090D11] group-hover:bg-[#c6ff34]"
-                          : "bg-white/10 text-white group-hover:bg-white group-hover:text-[#090D11]"
+                          ? "bg-white text-[#090D11] group-hover:bg-sky-400"
+                          : "bg-white/10 text-white group-hover:bg-white group-hover:text-slate-950"
                       }`}
                     >
                       <span className="text-base font-bold">→</span>
@@ -687,7 +611,7 @@ export default function Home() {
           
           {/* Header */}
           <div className="space-y-2 mb-12 sm:mb-16">
-            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c6ff34]">
+            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white">
               REAL-WORLD LEARNING
             </div>
             <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
@@ -708,10 +632,10 @@ export default function Home() {
                 <div className="rounded-2xl bg-[#070B0E] border border-white/10 p-4 mb-5 shadow-inner space-y-3 font-mono text-xs">
                   <div className="flex items-center justify-between border-b border-white/10 pb-2">
                     <span className="text-[10px] text-slate-400 font-sans font-bold flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-[#c6ff34]" />
+                      <span className="w-2 h-2 rounded-full bg-sky-400" />
                       RAG Chatbot
                     </span>
-                    <span className="text-[9px] text-[#c6ff34] bg-[#c6ff34]/10 px-1.5 py-0.5 rounded">
+                    <span className="text-[9px] text-white bg-sky-400/10 px-1.5 py-0.5 rounded">
                       Cosine: 0.94
                     </span>
                   </div>
@@ -721,8 +645,8 @@ export default function Home() {
                     "Summarize the Q3 report and top 3 risk factors."
                   </div>
 
-                  <div className="bg-[#10b981]/10 border border-[#10b981]/30 p-2.5 rounded-xl text-emerald-200 text-[11px] leading-relaxed">
-                    <span className="text-[#c6ff34] font-bold block text-[9px] mb-1">Retrieved from docs.pdf:</span>
+                  <div className="bg-sky-500/10 border border-sky-500/30 p-2.5 rounded-xl text-white text-[11px] leading-relaxed">
+                    <span className="text-white font-bold block text-[9px] mb-1">Retrieved from docs.pdf:</span>
                     "1. Market volatility (+12%)<br />2. GPU compute allocation<br />3. Model latency constraint"
                   </div>
                 </div>
@@ -739,7 +663,7 @@ export default function Home() {
                 <Link
                   to="/programs"
                   aria-label="View RAG project details"
-                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-[#090D11] flex items-center justify-center transition-all group-hover:translate-x-1"
+                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-slate-950 flex items-center justify-center transition-all group-hover:translate-x-1"
                 >
                   →
                 </Link>
@@ -769,7 +693,7 @@ export default function Home() {
                     </div>
                     <div className="p-2 rounded-lg bg-white/[0.04]">
                       <div className="text-[9px] text-slate-400">PRECISION</div>
-                      <div className="text-sm font-bold text-[#c6ff34]">0.87</div>
+                      <div className="text-sm font-bold text-white">0.87</div>
                     </div>
                     <div className="p-2 rounded-lg bg-white/[0.04]">
                       <div className="text-[9px] text-slate-400">F1-SCORE</div>
@@ -782,7 +706,7 @@ export default function Home() {
                     {[20, 35, 45, 40, 60, 55, 75, 80, 89].map((val, i) => (
                       <div
                         key={i}
-                        className="flex-1 bg-gradient-to-t from-cyan-500 to-[#c6ff34] rounded-t-sm"
+                        className="flex-1 bg-gradient-to-t from-cyan-500 to-sky-400 rounded-t-sm"
                         style={{ height: `${val}%` }}
                       />
                     ))}
@@ -801,7 +725,7 @@ export default function Home() {
                 <Link
                   to="/programs"
                   aria-label="View Model Dashboard project details"
-                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-[#090D11] flex items-center justify-center transition-all group-hover:translate-x-1"
+                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-slate-950 flex items-center justify-center transition-all group-hover:translate-x-1"
                 >
                   →
                 </Link>
@@ -829,12 +753,12 @@ export default function Home() {
                       <span className="px-2 py-0.5 rounded bg-white/10 text-[9px]">STEP 1</span>
                       <span className="truncate">Plan: Search & verify records</span>
                     </div>
-                    <div className="flex items-center gap-2 text-[#c6ff34]">
-                      <span className="px-2 py-0.5 rounded bg-[#c6ff34]/20 text-[9px] text-[#c6ff34]">STEP 2</span>
+                    <div className="flex items-center gap-2 text-white">
+                      <span className="px-2 py-0.5 rounded bg-sky-400/20 text-[9px] text-white">STEP 2</span>
                       <span className="truncate">Tool: WebSearch(q="AI Kannur")</span>
                     </div>
-                    <div className="flex items-center gap-2 text-emerald-400">
-                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-[9px] text-emerald-300">STEP 3</span>
+                    <div className="flex items-center gap-2 text-white">
+                      <span className="px-2 py-0.5 rounded bg-sky-500/20 text-[9px] text-white">STEP 3</span>
                       <span className="truncate">Output: Formatted brief created</span>
                     </div>
                   </div>
@@ -852,7 +776,7 @@ export default function Home() {
                 <Link
                   to="/programs"
                   aria-label="View Agent Workflow project details"
-                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-[#090D11] flex items-center justify-center transition-all group-hover:translate-x-1"
+                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-slate-950 flex items-center justify-center transition-all group-hover:translate-x-1"
                 >
                   →
                 </Link>
@@ -872,7 +796,7 @@ export default function Home() {
           {/* Header with Navigation Arrows */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
             <div className="space-y-2">
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c6ff34]">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white">
                 OUR LEARNING EXPERIENCE
               </div>
               <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
@@ -909,7 +833,7 @@ export default function Home() {
                 {/* Content */}
                 <div className="p-5 flex flex-col justify-between flex-1">
                   <div>
-                    <h3 className="text-base sm:text-lg font-bold text-white mb-1.5 group-hover:text-[#c6ff34] transition-colors">
+                    <h3 className="text-base sm:text-lg font-bold text-white mb-1.5 group-hover:text-white transition-colors">
                       {exp.title}
                     </h3>
                     <p className="text-xs text-slate-400 leading-relaxed">
@@ -918,7 +842,7 @@ export default function Home() {
                   </div>
 
                   <div className="pt-4 flex justify-end">
-                    <span className="w-8 h-8 rounded-full bg-white/10 group-hover:bg-[#c6ff34] text-white group-hover:text-[#090D11] flex items-center justify-center text-xs font-bold transition-all">
+                    <span className="w-8 h-8 rounded-full bg-white/10 group-hover:bg-sky-400 text-white group-hover:text-slate-950 flex items-center justify-center text-xs font-bold transition-all">
                       →
                     </span>
                   </div>
@@ -938,11 +862,11 @@ export default function Home() {
             
             {/* Ambient Background Blur Highlights */}
             <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full bg-[#FF5600]/15 blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-[#c6ff34]/15 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-sky-400/15 blur-3xl pointer-events-none" />
 
             <div className="relative z-10 max-w-3xl mx-auto text-center space-y-6">
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-semibold text-[#c6ff34]">
-                <span className="w-2 h-2 rounded-full bg-[#c6ff34] animate-pulse" />
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-semibold text-white">
+                <span className="w-2 h-2 rounded-full bg-sky-400" />
                 Campus Immersion
               </span>
 
@@ -968,14 +892,14 @@ export default function Home() {
                 
                 {/* Central Glowing Play Button */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#c6ff34] text-[#090D11] flex items-center justify-center shadow-[0_0_30px_rgba(198,255,52,0.6)] group-hover:scale-110 transition-transform duration-200">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-r from-sky-400 to-blue-500 text-slate-950 flex items-center justify-center shadow-[0_0_30px_rgba(56,189,248,0.5)] group-hover:scale-110 transition-transform duration-200">
                     <span className="text-2xl sm:text-3xl ml-1">▶</span>
                   </div>
                 </div>
 
                 <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs text-white bg-black/60 backdrop-blur-md px-4 py-2 rounded-xl">
                   <span>Watch Institute & Student Experience Tour</span>
-                  <span className="text-[#c6ff34] font-semibold">2:45 Min</span>
+                  <span className="text-white font-semibold">2:45 Min</span>
                 </div>
               </div>
 
@@ -993,7 +917,7 @@ export default function Home() {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
             <div className="space-y-2">
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c6ff34]">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white">
                 PREVIOUS EVENTS
               </div>
               <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
@@ -1014,7 +938,7 @@ export default function Home() {
               <div
                 key={evt.id}
                 onClick={() => setActiveEventLightbox(evt)}
-                className="group rounded-3xl overflow-hidden bg-white/[0.03] border border-white/10 hover:border-[#c6ff34]/40 transition-all duration-300 flex flex-col justify-between shadow-lg cursor-pointer"
+                className="group rounded-3xl overflow-hidden bg-white/[0.03] border border-white/10 hover:border-sky-400/40 transition-all duration-300 flex flex-col justify-between shadow-lg cursor-pointer"
               >
                 {/* Photo Frame */}
                 <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-900">
@@ -1023,7 +947,7 @@ export default function Home() {
                     alt={evt.title}
                     className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                   />
-                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#090D11]/85 backdrop-blur-md border border-white/15 text-[10px] font-semibold text-[#c6ff34]">
+                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#090D11]/85 backdrop-blur-md border border-white/15 text-[10px] font-semibold text-white">
                     {evt.badge}
                   </div>
                 </div>
@@ -1031,7 +955,7 @@ export default function Home() {
                 {/* Content */}
                 <div className="p-5 flex flex-col justify-between flex-1">
                   <div>
-                    <h3 className="text-lg font-bold text-white mb-1 group-hover:text-[#c6ff34] transition-colors">
+                    <h3 className="text-lg font-bold text-white mb-1 group-hover:text-white transition-colors">
                       {evt.title}
                     </h3>
                     <div className="text-xs font-medium text-slate-300 mb-2">
@@ -1046,7 +970,7 @@ export default function Home() {
                     <span className="text-[11px] text-slate-500 font-mono">
                       {evt.date}
                     </span>
-                    <span className="w-8 h-8 rounded-full bg-white/10 group-hover:bg-[#c6ff34] text-white group-hover:text-[#090D11] flex items-center justify-center text-xs font-bold transition-all">
+                    <span className="w-8 h-8 rounded-full bg-white/10 group-hover:bg-sky-400 text-white group-hover:text-slate-950 flex items-center justify-center text-xs font-bold transition-all">
                       →
                     </span>
                   </div>
@@ -1066,7 +990,7 @@ export default function Home() {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
             <div className="space-y-2">
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c6ff34]">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white">
                 WHAT YOU'LL LEARN
               </div>
               <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
@@ -1107,12 +1031,12 @@ export default function Home() {
                 onClick={() => setActiveCurriculumIndex(idx)}
                 className={`p-6 rounded-3xl transition-all duration-300 space-y-4 group cursor-pointer ${
                   activeCurriculumIndex === idx
-                    ? "bg-white/[0.07] border-2 border-[#c6ff34] shadow-[0_0_25px_rgba(198,255,52,0.15)]"
+                    ? "bg-white/[0.07] border-2 border-sky-400 shadow-[0_0_25px_rgba(56,189,248,0.25)]"
                     : "bg-white/[0.03] border border-white/10 hover:border-white/20 hover:bg-white/[0.05]"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl group-hover:bg-[#c6ff34]/20 transition-colors">
+                  <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl group-hover:bg-sky-400/20 transition-colors">
                     {mod.icon}
                   </div>
                   <span className="text-xs font-mono font-bold text-slate-500">
@@ -1120,7 +1044,7 @@ export default function Home() {
                   </span>
                 </div>
 
-                <h3 className="text-lg font-bold text-white group-hover:text-[#c6ff34] transition-colors">
+                <h3 className="text-lg font-bold text-white group-hover:text-white transition-colors">
                   {mod.title}
                 </h3>
 
@@ -1131,7 +1055,7 @@ export default function Home() {
                 <div className="pt-2 border-t border-white/5 space-y-1.5">
                   {mod.topics.map((top, tIdx) => (
                     <div key={tIdx} className="flex items-center gap-2 text-xs text-slate-300">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff34] shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
                       <span>{top}</span>
                     </div>
                   ))}
@@ -1148,7 +1072,7 @@ export default function Home() {
            ══════════════════════════════════════════════════════════ */}
         <section className="py-16 sm:py-24 px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1440px] mx-auto border-t border-white/10">
           <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c6ff34]">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-white">
               DEEPSTAQ PEDAGOGY
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
@@ -1162,31 +1086,47 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
-                icon: "⚡",
+                icon: (
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                ),
                 title: "AI-Integrated Learning",
                 desc: "Every module uses real AI tools to solve real problems. You don't just learn about AI; you use it daily.",
               },
               {
-                icon: "📁",
+                icon: (
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                  </svg>
+                ),
                 title: "Project-First Approach",
                 desc: "10+ portfolio projects to prove real engineering competence to hiring managers from day one.",
               },
               {
-                icon: "👥",
+                icon: (
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                ),
                 title: "Cohort-Based Mentorship",
                 desc: "Small focused groups with live discussions, code reviews, and personal architectural feedback.",
               },
               {
-                icon: "🎯",
+                icon: (
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                ),
                 title: "Career & Placement Launch",
                 desc: "Technical mock interviews, LinkedIn & resume optimization, and direct corporate recruitment pipelines.",
               },
             ].map((adv, i) => (
               <div
                 key={i}
-                className="p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-[#c6ff34]/30 transition-all duration-300 space-y-3"
+                className="p-6 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-sky-400/30 transition-all duration-300 space-y-3"
               >
-                <div className="w-12 h-12 rounded-2xl bg-[#c6ff34]/15 border border-[#c6ff34]/30 text-2xl flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-sky-400/15 border border-sky-400/30 flex items-center justify-center">
                   {adv.icon}
                 </div>
                 <h3 className="text-lg font-bold text-white">
@@ -1204,193 +1144,7 @@ export default function Home() {
         {/* ══════════════════════════════════════════════════════════
             7. READY TO START & SCREENSHOT-PERFECT FOOTER (Matching Screenshot)
            ══════════════════════════════════════════════════════════ */}
-        <footer id="about" className="border-t border-white/10 bg-[#070B0E] pt-16 sm:pt-20 pb-12 px-4 sm:px-6 md:px-10 lg:px-16">
-          <div className="max-w-[1440px] mx-auto space-y-16">
-            
-            {/* Top Banner: READY TO START? Your AI journey starts here. */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 pb-12 border-b border-white/10">
-              <div className="space-y-3 max-w-2xl">
-                <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#c6ff34]">
-                  READY TO START?
-                </div>
-                <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
-                  Your AI journey <span className="text-[#c6ff34]">starts here.</span>
-                </h2>
-                <p className="text-sm text-slate-400 font-normal leading-relaxed">
-                  Talk to our team, understand the right program for you and take the first step towards a future in AI.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-4 shrink-0">
-                <Link
-                  to="/admission"
-                  className="btn-slide-wrap px-8 py-4 rounded-full bg-[#c6ff34] hover:bg-[#bbf029] text-[#090D11] font-bold text-sm tracking-wide shadow-[0_4px_20px_rgba(198,255,52,0.35)] flex items-center gap-2"
-                >
-                  <span>Apply Now</span>
-                  <span className="font-bold">→</span>
-                </Link>
-                <Link
-                  to="/consultation"
-                  className="px-7 py-4 rounded-full bg-white/5 hover:bg-white/10 text-white border border-white/15 text-sm font-semibold transition-colors"
-                >
-                  Book a Consultation
-                </Link>
-              </div>
-            </div>
-
-            {/* Bottom 4-Column Grid: FAQ / Quick Links / Contact / Socials */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
-              
-              {/* Col 1: FAQ Section (5 cols) */}
-              <div className="lg:col-span-5 space-y-4">
-                <div className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
-                  FAQ
-                </div>
-                <h3 className="text-xl font-bold text-white tracking-tight">
-                  Frequently Asked Questions.
-                </h3>
-                
-                {/* Social icons row */}
-                <div className="flex items-center gap-3 pt-2">
-                  {[
-                    { label: "Instagram", href: "https://www.instagram.com/deepstaq/", icon: "📸" },
-                    { label: "LinkedIn", href: "https://www.linkedin.com/company/deepstaq/", icon: "💼" },
-                    { label: "YouTube", href: "https://youtube.com/@deepstaq", icon: "▶️" },
-                  ].map((soc, sIdx) => (
-                    <a
-                      key={sIdx}
-                      href={soc.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={soc.label}
-                      className="w-9 h-9 rounded-xl bg-white/5 hover:bg-[#c6ff34] text-slate-300 hover:text-[#090D11] border border-white/10 flex items-center justify-center text-sm transition-all"
-                    >
-                      {soc.icon}
-                    </a>
-                  ))}
-                </div>
-
-                {/* Quick Expandable FAQs */}
-                <div className="space-y-2 pt-2 text-xs">
-                  {[
-                    {
-                      q: "What are the eligibility criteria?",
-                      a: "No coding background is strictly required. We begin with Python fundamentals, algorithmic thinking, and math essentials.",
-                    },
-                    {
-                      q: "Is there placement assistance provided?",
-                      a: "Yes. 100% placement support including mock technical interviews, resume polishing, and portfolio showcases to hiring partners.",
-                    },
-                    {
-                      q: "Can I work on my own projects?",
-                      a: "Absolutely. Students frequently build domain-specific capstones (healthcare, finance, robotics) under 1-on-1 mentor guidance.",
-                    },
-                  ].map((faq, fIdx) => (
-                    <div key={fIdx} className="border-b border-white/10 pb-2">
-                      <button
-                        onClick={() => setOpenFaq(openFaq === fIdx ? null : fIdx)}
-                        className="w-full text-left py-1 text-slate-300 hover:text-[#c6ff34] font-medium flex items-center justify-between gap-2"
-                      >
-                        <span>&gt; {faq.q}</span>
-                        <span className="text-slate-500 font-bold">{openFaq === fIdx ? "−" : "+"}</span>
-                      </button>
-                      {openFaq === fIdx && (
-                        <p className="text-slate-400 text-[11px] pt-1 pl-3 leading-relaxed">
-                          {faq.a}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Col 2: Quick Links (3 cols) */}
-              <div className="lg:col-span-3 space-y-4">
-                <div className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
-                  Quick Links
-                </div>
-                <ul className="space-y-2.5 text-xs text-slate-300 font-medium">
-                  <li>
-                    <a href="#programs" className="hover:text-[#c6ff34] transition-colors">Programs</a>
-                  </li>
-                  <li>
-                    <a href="#experience" className="hover:text-[#c6ff34] transition-colors">Learning Experience</a>
-                  </li>
-                  <li>
-                    <a href="#projects" className="hover:text-[#c6ff34] transition-colors">Projects</a>
-                  </li>
-                  <li>
-                    <a href="#events" className="hover:text-[#c6ff34] transition-colors">Events</a>
-                  </li>
-                  <li>
-                    <a href="#about" className="hover:text-[#c6ff34] transition-colors">About</a>
-                  </li>
-                  <li>
-                    <Link to="/blog" className="hover:text-[#c6ff34] transition-colors">AI Learning Guides</Link>
-                  </li>
-                  <li>
-                    <Link to="/scholarship" className="hover:text-[#c6ff34] transition-colors">Scholarship</Link>
-                  </li>
-                  <li>
-                    <Link to="/contact" className="hover:text-[#c6ff34] transition-colors">Contact</Link>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Col 3: Contact & Direct Actions (4 cols) */}
-              <div id="contact" className="lg:col-span-4 space-y-4">
-                <div className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
-                  Contact
-                </div>
-                
-                <div className="space-y-2.5 text-xs text-slate-300 leading-relaxed">
-                  <div className="flex items-center gap-2">
-                    <span>📍</span>
-                    <span>Kannur, Kerala, India</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>✉️</span>
-                    <a href="mailto:info@deepstaq.in" className="hover:text-[#c6ff34] transition-colors">
-                      info@deepstaq.in
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>📞</span>
-                    <a href="tel:+919495957011" className="hover:text-[#c6ff34] transition-colors font-bold text-white">
-                      +91 94959 57011
-                    </a>
-                  </div>
-                </div>
-
-                <div className="pt-3">
-                  <Link
-                    to="/admission"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#c6ff34] hover:bg-[#bbf029] text-[#090D11] text-xs font-bold tracking-wide transition-all shadow-md"
-                  >
-                    <span>Apply Now</span>
-                    <span>→</span>
-                  </Link>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Copyright & Legal Bar */}
-            <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-              <div>
-                © 2026 Deepstaq. All rights reserved.
-              </div>
-              <div className="flex items-center gap-6">
-                <Link to="/contact" className="hover:text-slate-300 transition-colors">Privacy Policy</Link>
-                <span>•</span>
-                <Link to="/contact" className="hover:text-slate-300 transition-colors">Terms of Service</Link>
-                <span>•</span>
-                <Link to="/contact" className="hover:text-slate-300 transition-colors">Sitemap</Link>
-              </div>
-            </div>
-
-          </div>
-        </footer>
+   
 
       </div>
 
@@ -1403,13 +1157,13 @@ export default function Home() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setActiveEventLightbox(null)}
-              className="fixed inset-0 bg-[#090D11]/90 backdrop-blur-xl"
+              className="fixed inset-0 bg-[#030917]/90 backdrop-blur-xl"
             />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative max-w-4xl w-full rounded-3xl overflow-hidden bg-[#0D1318] border border-white/20 shadow-2xl z-10"
+              className="relative max-w-4xl w-full rounded-3xl overflow-hidden bg-[#07152b] border border-sky-500/20 shadow-2xl z-10"
             >
               <div className="relative aspect-[16/10] w-full bg-black">
                 <img
@@ -1421,13 +1175,13 @@ export default function Home() {
                   type="button"
                   aria-label="Close image preview"
                   onClick={() => setActiveEventLightbox(null)}
-                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-[#090D11]/80 hover:bg-[#c6ff34] text-white hover:text-[#090D11] border border-white/20 flex items-center justify-center text-lg font-bold transition-colors cursor-pointer"
+                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-[#030917]/80 hover:bg-sky-400 text-white hover:text-slate-950 border border-white/20 flex items-center justify-center text-lg font-bold transition-colors cursor-pointer"
                 >
                   ✕
                 </button>
               </div>
               <div className="p-6 space-y-2">
-                <span className="text-xs font-bold text-[#c6ff34] uppercase tracking-wider">
+                <span className="text-xs font-bold text-white uppercase tracking-wider">
                   {activeEventLightbox.badge}
                 </span>
                 <h3 className="text-2xl font-bold text-white">
@@ -1451,24 +1205,24 @@ export default function Home() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setVideoModalOpen(false)}
-              className="fixed inset-0 bg-[#090D11]/90 backdrop-blur-xl"
+              className="fixed inset-0 bg-[#030917]/90 backdrop-blur-xl"
             />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative max-w-4xl w-full rounded-3xl overflow-hidden bg-[#0D1318] border border-white/20 shadow-2xl z-10 p-6 space-y-4"
+              className="relative max-w-4xl w-full rounded-3xl overflow-hidden bg-[#07152b] border border-sky-500/20 shadow-2xl z-10 p-6 space-y-4"
             >
               <div className="flex items-center justify-between pb-3 border-b border-white/10">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#c6ff34] animate-pulse" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-sky-400" />
                   <span className="text-sm font-bold text-white">Deepstaq AI Institute Campus Tour</span>
                 </div>
                 <button
                   type="button"
                   aria-label="Close tour video"
                   onClick={() => setVideoModalOpen(false)}
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#c6ff34] text-white hover:text-[#090D11] flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-sky-400 text-white hover:text-slate-950 flex items-center justify-center transition-colors cursor-pointer"
                 >
                   ✕
                 </button>
@@ -1481,7 +1235,7 @@ export default function Home() {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center p-6 space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-[#c6ff34] text-[#090D11] flex items-center justify-center text-2xl font-bold shadow-[0_0_30px_#c6ff34]">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-r from-sky-400 to-blue-500 text-slate-950 flex items-center justify-center text-2xl font-bold shadow-[0_0_30px_rgba(56,189,248,0.5)]">
                     ▶
                   </div>
                   <div>
@@ -1493,7 +1247,7 @@ export default function Home() {
                   <Link
                     to="/consultation"
                     onClick={() => setVideoModalOpen(false)}
-                    className="px-6 py-2.5 rounded-full bg-white text-[#090D11] font-bold text-xs uppercase tracking-wider hover:bg-[#c6ff34] transition-colors"
+                    className="px-6 py-2.5 rounded-full bg-white text-[#090D11] font-bold text-xs uppercase tracking-wider hover:bg-sky-400 transition-colors"
                   >
                     Schedule In-Person Campus Visit →
                   </Link>

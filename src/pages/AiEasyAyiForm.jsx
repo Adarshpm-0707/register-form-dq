@@ -29,41 +29,21 @@ const loadRazorpayScript = (src = "https://checkout.razorpay.com/v1/checkout.js"
 };
 
 /**
- * Calculates the next occurrence of Saturday at 5:00 PM (17:00).
- * If today is Saturday and it is already 5:00 PM or later, rolls over to next Saturday 5:00 PM.
+ * Target batch date: November 7th at 5:00 PM (17:00).
  */
 const getNextSaturday5PM = () => {
-  const now = new Date();
-  const target = new Date(now);
-  const day = now.getDay(); // 0 is Sunday, 6 is Saturday
-
-  // Calculate days until Saturday (day 6)
-  const daysUntilSaturday = (6 - day + 7) % 7;
-  target.setDate(now.getDate() + daysUntilSaturday);
-  target.setHours(17, 0, 0, 0); // 5:00 PM
-
-  // If target is in the past or right now, roll over to the next Saturday at 5 PM
-  if (target.getTime() <= now.getTime()) {
-    target.setDate(target.getDate() + 7);
+  const currentYear = new Date().getFullYear();
+  const target = new Date(currentYear, 10, 7, 17, 0, 0, 0); // Month 10 = November
+  if (target.getTime() <= Date.now()) {
+    target.setFullYear(currentYear + 1);
   }
-
   return target;
 };
 
 const getNextSaturdayFormatted = () => {
   const nextSat = getNextSaturday5PM();
-  const day = nextSat.getDate();
-  const suffix =
-    day % 10 === 1 && day !== 11
-      ? "st"
-      : day % 10 === 2 && day !== 12
-      ? "nd"
-      : day % 10 === 3 && day !== 13
-      ? "rd"
-      : "th";
-  const month = nextSat.toLocaleString("en-IN", { month: "long" });
   const year = nextSat.getFullYear();
-  return `${day}${suffix} ${month}, ${year}`;
+  return `7th November, ${year}`;
 };
 
 const calculateTimeLeft = () => {
@@ -109,21 +89,33 @@ const PERSPECTIVE_SHIFTS = [
 const ROADMAP_STEPS = [
   {
     step: "Step 1",
-    icon: "🎟️",
+    icon: (
+      <svg className="w-6 h-6 text-[#c6ff34]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+      </svg>
+    ),
     title: "Secure Your ₹99 Pass",
     desc: "Complete registration in 30 seconds. Instant pass confirmation and bonus access delivered straight to your inbox.",
     highlight: "Instant Confirmation",
   },
   {
     step: "Step 2",
-    icon: "💻",
+    icon: (
+      <svg className="w-6 h-6 text-[#c6ff34]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+    ),
     title: "Attend Live Masterclass",
     desc: "Join live this Saturday on Zoom (5:00 PM – 7:00 PM IST). 2 hours of direct screen-share walkthroughs in Malayalam & English.",
     highlight: "Live Demonstrations",
   },
   {
     step: "Step 3",
-    icon: "⚡",
+    icon: (
+      <svg className="w-6 h-6 text-[#c6ff34]" fill="currentColor" viewBox="0 0 20 20">
+        <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+      </svg>
+    ),
     title: "Save 15+ Hours Weekly",
     desc: "Walk away with ready-to-use prompt templates, workflow automations, and immediate 10x speed in your daily routine.",
     highlight: "Permanent Action Plan",
@@ -166,22 +158,38 @@ const WORKSHOP_OUTCOMES = [
 
 const AUDIENCE_LIST = [
   {
-    icon: "💼",
+    icon: (
+      <svg className="w-6 h-6 text-[#c6ff34]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+    ),
     role: "Working Professionals & Corporate Employees",
     benefit: "Eliminate repetitive tasks, draft complex emails in seconds, and prepare executive presentations faster.",
   },
   {
-    icon: "🎓",
+    icon: (
+      <svg className="w-6 h-6 text-[#c6ff34]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5" />
+      </svg>
+    ),
     role: "College Students & Fresh Graduates",
     benefit: "Build a massive competitive edge for job interviews, placements, resume optimization, and academic research.",
   },
   {
-    icon: "🚀",
+    icon: (
+      <svg className="w-6 h-6 text-[#c6ff34]" fill="currentColor" viewBox="0 0 20 20">
+        <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+      </svg>
+    ),
     role: "Freelancers, Creators & Solopreneurs",
     benefit: "Deliver client projects in half the time, create marketing assets, and scale your personal service offerings.",
   },
   {
-    icon: "🏢",
+    icon: (
+      <svg className="w-6 h-6 text-[#c6ff34]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+      </svg>
+    ),
     role: "Business Owners & Founders",
     benefit: "Automate daily inquiries, analyze sales trends, and standardize team SOPs without costly software subscriptions.",
   },
@@ -210,7 +218,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What is your refund policy?",
-    a: "We offer a 100% no-questions-asked refund guarantee. If you attend the 2-hour masterclass and feel it didn't give you practical clarity to save hours each week, simply email support@deepstaq.com and your ₹99 will be refunded promptly.",
+    a: "We offer a 100% no-questions-asked refund guarantee. If you attend the 2-hour masterclass and feel it didn't give you practical clarity to save hours each week, simply email deepstackbyaleef@gmail.com and your ₹99 will be refunded promptly.",
   },
 ];
 
@@ -562,7 +570,7 @@ export default function AiEasyAyiForm() {
               {/* WhatsApp Community CTA */}
               <div className="bg-[#25D366]/10 border border-[#25D366]/40 rounded-2xl p-4 mb-5">
                 <p className="text-xs text-white font-bold mb-3">
-                  👉 Join the official candidate community for meeting links, session guides, and bonuses:
+                  Join the official candidate community for meeting links, session guides, and bonuses:
                 </p>
                 <a
                   href="https://chat.whatsapp.com/KxVV7ep74TV0GHy5SU2FXl"
@@ -585,7 +593,10 @@ export default function AiEasyAyiForm() {
                   rel="noopener noreferrer"
                   className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/20 rounded-xl text-xs font-bold text-white transition-all flex items-center justify-center gap-2"
                 >
-                  <span>💬 Chat Support</span>
+                  <svg className="w-4 h-4 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
+                  </svg>
+                  <span>Chat Support</span>
                 </a>
                 <button
                   type="button"
@@ -777,7 +788,9 @@ export default function AiEasyAyiForm() {
                     {/* Session Reminder Pill Banner */}
                     <div className="bg-white/[0.04] border border-white/10 text-white p-3 rounded-xl mb-4 sm:mb-5 flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-base flex-shrink-0">⚡</span>
+                        <svg className="w-4 h-4 text-[#c6ff34] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                        </svg>
                         <div className="min-w-0">
                           <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#c6ff34] truncate">
                             2 Hrs Online Class • Live Interactive
@@ -794,8 +807,11 @@ export default function AiEasyAyiForm() {
 
                     {/* Error Banner */}
                     {submitError && (
-                      <div className="p-3 bg-red-950/40 border border-red-500/50 rounded-xl mb-4 text-red-300 text-xs font-bold">
-                        ⚠️ {submitError}
+                      <div className="p-3 bg-red-950/40 border border-red-500/50 rounded-xl mb-4 text-red-300 text-xs font-bold flex items-center gap-2">
+                        <svg className="w-4 h-4 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span>{submitError}</span>
                       </div>
                     )}
 
@@ -837,7 +853,7 @@ export default function AiEasyAyiForm() {
                         />
                         {errors.fullName && (
                           <p className="text-[11px] font-bold text-red-400 font-mono mt-0.5">
-                            ⚠ {errors.fullName}
+                            {errors.fullName}
                           </p>
                         )}
                       </div>
@@ -867,7 +883,7 @@ export default function AiEasyAyiForm() {
                         </div>
                         {errors.phone && (
                           <p className="text-[11px] font-bold text-red-400 font-mono mt-0.5">
-                            ⚠ {errors.phone}
+                            {errors.phone}
                           </p>
                         )}
                       </div>
@@ -891,7 +907,7 @@ export default function AiEasyAyiForm() {
                         />
                         {errors.place && (
                           <p className="text-[11px] font-bold text-red-400 font-mono mt-0.5">
-                            ⚠ {errors.place}
+                            {errors.place}
                           </p>
                         )}
                       </div>
@@ -965,7 +981,7 @@ export default function AiEasyAyiForm() {
                             />
                             {errors.customQualification && (
                               <p className="text-[11px] font-bold text-red-400 mt-1 font-mono">
-                                ⚠ {errors.customQualification}
+                                {errors.customQualification}
                               </p>
                             )}
                           </motion.div>
@@ -973,7 +989,7 @@ export default function AiEasyAyiForm() {
 
                         {errors.qualification && (
                           <p className="text-[11px] font-bold text-red-400 font-mono mt-0.5">
-                            ⚠ {errors.qualification}
+                            {errors.qualification}
                           </p>
                         )}
                       </div>
@@ -1014,7 +1030,7 @@ export default function AiEasyAyiForm() {
                           )}
                         </button>
                         <p className="text-center text-[10px] sm:text-[11px] font-mono font-bold text-slate-400 mt-2">
-                          🎟 Pass includes full access to 2 Hrs Online Class • 5:00 PM – 7:00 PM IST
+                          Pass includes full access to 2 Hrs Online Class • 5:00 PM – 7:00 PM IST
                         </p>
                       </div>
 
@@ -1093,7 +1109,7 @@ export default function AiEasyAyiForm() {
               {/* Tools Ticker Banner */}
               <div className="mt-4 p-3 sm:p-4 bg-white/[0.03] border border-white/10 rounded-xl sm:rounded-2xl flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm font-mono font-bold text-slate-300">
                 <span className="text-[#c6ff34] uppercase tracking-wider text-[11px] sm:text-xs">
-                  ⚡ Tools Mastered:
+                  Tools Mastered:
                 </span>
                 <span className="flex items-center gap-1">✦ ChatGPT 4o</span>
                 <span className="flex items-center gap-1">✦ Claude 3.5 Sonnet</span>
@@ -1157,7 +1173,7 @@ export default function AiEasyAyiForm() {
               {/* Fixable Box */}
               <div className="p-4 sm:p-5 rounded-2xl bg-[#c6ff34]/15 border border-[#c6ff34]/40 text-center space-y-1">
                 <p className="text-xs sm:text-sm md:text-base font-black uppercase text-[#c6ff34] tracking-wide">
-                  ⚡ The Good News: Every Single One of These Bottlenecks Is 100% Solvable in 2 Hours.
+                  The Good News: Every Single One of These Bottlenecks Is 100% Solvable in 2 Hours.
                 </p>
               </div>
             </motion.section>
@@ -1325,7 +1341,9 @@ export default function AiEasyAyiForm() {
 
               {/* Warning Notice: NOT for you if */}
               <div className="p-4 sm:p-5 rounded-2xl bg-amber-950/30 border border-amber-500/30 flex items-start gap-3">
-                <span className="text-xl flex-shrink-0">⚠️</span>
+                <svg className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
                 <p className="text-xs sm:text-sm text-amber-200 font-bold leading-relaxed">
                   <strong>Not For You If:</strong> You are seeking get-rich-quick hacks or passive income illusions. This is 2 hours of direct, practical, workplace-tested workflows to save real time and 10x output.
                 </p>
@@ -1482,9 +1500,24 @@ export default function AiEasyAyiForm() {
               </div>
 
               <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-mono font-bold text-slate-400 pt-3 border-t border-white/10">
-                <span>🔒 100% Secure Payment</span>
-                <span>⚡ Instant Bonus Access</span>
-                <span>🤝 100% Money-Back Guarantee</span>
+                <span className="flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <span>100% Secure Payment</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 text-[#c6ff34] shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                  </svg>
+                  <span>Instant Bonus Access</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 text-sky-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  <span>100% Money-Back Guarantee</span>
+                </span>
               </div>
             </motion.section>
           </>

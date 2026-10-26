@@ -65,7 +65,7 @@ export default function OfflineAiCourse() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#090D11] text-white font-sans pb-24 selection:bg-[#c6ff34] selection:text-[#090D11] relative overflow-hidden">
+    <div className="min-h-screen bg-transparent text-white font-sans pb-24 selection:bg-sky-500/30 selection:text-white relative overflow-hidden">
       
       {/* Background Ambient Glows */}
       <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-[#c6ff34]/10 rounded-full blur-[160px] pointer-events-none -z-0" />
@@ -75,11 +75,11 @@ export default function OfflineAiCourse() {
       <section className="relative pt-28 pb-16 md:pt-36 md:pb-24 px-6 md:px-12 border-b border-white/10 overflow-hidden">
         <div className="max-w-[1200px] mx-auto space-y-6 relative z-10">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="bg-[#c6ff34]/15 text-[#c6ff34] text-xs font-black px-3.5 py-1.5 rounded-lg border border-[#c6ff34]/30 uppercase tracking-wider font-mono shadow-[0_0_15px_rgba(198,255,52,0.2)]">
+            <span className="bg-[#c6ff34]/15 text-white text-xs font-black px-3.5 py-1.5 rounded-lg border border-[#c6ff34]/30 uppercase tracking-wider font-mono shadow-[0_0_15px_rgba(198,255,52,0.2)]">
               In-Person Classroom Cohort
             </span>
-            <span className="bg-white/5 text-[#c6ff34] border border-white/10 text-xs font-mono font-bold px-3 py-1.5 rounded-lg">
-              📍 Campus Location — Kerala
+            <span className="bg-white/5 text-white border border-white/10 text-xs font-mono font-bold px-3 py-1.5 rounded-lg">
+              Campus Location — Kerala
             </span>
           </div>
 
@@ -108,7 +108,7 @@ export default function OfflineAiCourse() {
               href="tel:+919495957011"
               className="bg-white/5 hover:bg-white/10 text-white font-mono font-bold text-xs md:text-sm px-6 py-4 rounded-2xl border border-white/15 hover:border-white/30 transition-all"
             >
-              📞 Talk to Us: +91 949 595 7011
+              Talk to Us: +91 949 595 7011
             </a>
           </div>
         </div>
@@ -159,7 +159,7 @@ export default function OfflineAiCourse() {
           <div className="overflow-x-auto border border-white/10 rounded-3xl shadow-2xl bg-[#0D1318]/90 backdrop-blur-xl">
             <table className="w-full text-left border-collapse text-xs md:text-sm font-mono">
               <thead>
-                <tr className="bg-white/[0.05] text-[#c6ff34] uppercase tracking-wider border-b border-white/10">
+                <tr className="bg-white/[0.05] text-white uppercase tracking-wider border-b border-white/10">
                   <th className="p-4 md:p-5 w-1/3">Detail</th>
                   <th className="p-4 md:p-5">Info</th>
                 </tr>
@@ -185,7 +185,7 @@ export default function OfflineAiCourse() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {syllabus.map((m, idx) => (
               <div key={idx} className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/70 space-y-2">
-                <span className="text-[11px] font-mono font-black text-[#c6ff34] bg-[#c6ff34]/15 px-2.5 py-1 rounded border border-[#c6ff34]/30 inline-block">
+                <span className="text-[11px] font-mono font-black text-white bg-[#c6ff34]/15 px-2.5 py-1 rounded border border-[#c6ff34]/30 inline-block">
                   {m.month}
                 </span>
                 <h4 className="text-sm font-black uppercase text-white">{m.title}</h4>
@@ -199,7 +199,7 @@ export default function OfflineAiCourse() {
         <section className="space-y-6">
           <div className="border border-white/10 rounded-3xl p-6 md:p-10 bg-[#0D1318]/90 text-white shadow-2xl space-y-6 relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#c6ff34] to-transparent" />
-            <span className="bg-[#c6ff34]/15 text-[#c6ff34] text-xs font-black px-3 py-1 rounded-md uppercase font-mono tracking-wider border border-[#c6ff34]/30 inline-block">
+            <span className="bg-[#c6ff34]/15 text-white text-xs font-black px-3 py-1 rounded-md uppercase font-mono tracking-wider border border-[#c6ff34]/30 inline-block">
               In-Person Capstone
             </span>
             <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-white">
@@ -210,12 +210,12 @@ export default function OfflineAiCourse() {
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/10">
               <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
-                <span className="text-3xl md:text-4xl font-black text-[#c6ff34] font-mono">60%</span>
+                <span className="text-3xl md:text-4xl font-black text-white font-mono">60%</span>
                 <h4 className="text-base font-bold uppercase text-white">Capstone Project</h4>
                 <p className="text-xs text-slate-400 font-mono leading-relaxed">Presented live in the classroom to mentors and industry judges.</p>
               </div>
               <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
-                <span className="text-3xl md:text-4xl font-black text-[#c6ff34] font-mono">40%</span>
+                <span className="text-3xl md:text-4xl font-black text-white font-mono">40%</span>
                 <h4 className="text-base font-bold uppercase text-white">Theory Assessment</h4>
                 <p className="text-xs text-slate-400 font-mono leading-relaxed">Covering the full curriculum from programming foundations through Generative AI and MLOps.</p>
               </div>
@@ -261,7 +261,7 @@ export default function OfflineAiCourse() {
                   className="w-full text-left p-5 font-black uppercase tracking-tight text-sm md:text-base flex justify-between items-center gap-4 bg-white/[0.02] hover:bg-white/[0.05] text-white transition-colors cursor-pointer"
                 >
                   <span>{faq.q}</span>
-                  <span className="w-7 h-7 rounded-full bg-[#c6ff34]/20 border border-[#c6ff34]/30 text-[#c6ff34] flex items-center justify-center font-mono text-xs flex-shrink-0">
+                  <span className="w-7 h-7 rounded-full bg-[#c6ff34]/20 border border-[#c6ff34]/30 text-white flex items-center justify-center font-mono text-xs flex-shrink-0">
                     {openFAQs[index] ? "−" : "+"}
                   </span>
                 </button>
@@ -287,7 +287,7 @@ export default function OfflineAiCourse() {
         <section className="pt-8">
           <div className="bg-[#0D1318]/95 text-white rounded-3xl p-8 md:p-12 border border-white/15 shadow-2xl space-y-6 text-center md:text-left relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#c6ff34] to-transparent" />
-            <span className="bg-[#c6ff34]/15 text-[#c6ff34] text-xs font-black px-3.5 py-1.5 rounded-md uppercase font-mono tracking-wider inline-block border border-[#c6ff34]/30">
+            <span className="bg-[#c6ff34]/15 text-white text-xs font-black px-3.5 py-1.5 rounded-md uppercase font-mono tracking-wider inline-block border border-[#c6ff34]/30">
               In-Person Batch
             </span>
             <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-white max-w-3xl">
@@ -311,11 +311,11 @@ export default function OfflineAiCourse() {
               </Link>
             </div>
             <div className="pt-6 border-t border-white/10 flex flex-wrap items-center justify-center md:justify-start gap-6 text-xs font-mono text-slate-400">
-              <span>📞 +91 949 595 7011</span>
+              <span>+91 949 595 7011</span>
               <span>•</span>
-              <span>✉️ info@deepstaq.in</span>
+              <span>deepstackbyaleef@gmail.com</span>
               <span>•</span>
-              <span>📍 Kerala Campus</span>
+              <span>Kerala Campus</span>
             </div>
           </div>
         </section>

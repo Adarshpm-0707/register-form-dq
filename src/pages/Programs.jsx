@@ -790,11 +790,15 @@ export default function Programs() {
               experience to take the next step with confidence.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-              <span className="bg-[#090D11] text-[#c6ff34] px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
-                📍 Offline Training | Kannur
+              <span className="bg-[#090D11] text-[#c6ff34] px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg flex items-center gap-1.5">
+                <svg className="w-3.5 h-3.5 text-[#c6ff34]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>Offline Training | Kannur</span>
               </span>
               <span className="bg-white/80 text-[#090D11] border border-[#090D11]/20 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
-                🎯 Admissions Open | Limited Seats
+                Admissions Open | Limited Seats
               </span>
             </div>
           </div>

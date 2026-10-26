@@ -22,9 +22,36 @@ const WHY_AI_OPTIONS = [
 ];
 
 const MODE_OPTIONS = [
-  { value: "remote", label: "Remote / Online", icon: "💻", desc: "Learn from anywhere, flexible schedule" },
-  { value: "offline", label: "Offline / In-person", icon: "🏫", desc: "Attend live classes at our campus" },
-  { value: "hybrid", label: "Hybrid (Both)", icon: "🔀", desc: "Mix of online & in-person sessions" },
+  {
+    value: "remote",
+    label: "Remote / Online",
+    icon: (
+      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+    ),
+    desc: "Learn from anywhere, flexible schedule",
+  },
+  {
+    value: "offline",
+    label: "Offline / In-person",
+    icon: (
+      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+      </svg>
+    ),
+    desc: "Attend live classes at our campus",
+  },
+  {
+    value: "hybrid",
+    label: "Hybrid (Both)",
+    icon: (
+      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+      </svg>
+    ),
+    desc: "Mix of online & in-person sessions",
+  },
 ];
 
 export default function Consultation() {
@@ -113,7 +140,7 @@ export default function Consultation() {
 
   if (step === 2) {
     return (
-      <div className="min-h-screen bg-[#090D11] text-white flex items-center justify-center px-4 py-20 relative overflow-hidden">
+      <div className="min-h-screen bg-transparent text-white flex items-center justify-center px-4 py-20 relative overflow-hidden">
         {/* Glow */}
         <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-[#c6ff34]/10 rounded-full blur-[140px] pointer-events-none" />
 
@@ -122,7 +149,11 @@ export default function Consultation() {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center max-w-lg mx-auto space-y-8 relative z-10"
         >
-          <div className="text-7xl animate-bounce">🎉</div>
+          <div className="w-16 h-16 rounded-full bg-[#c6ff34] text-[#090D11] flex items-center justify-center mx-auto shadow-[0_0_25px_rgba(198,255,52,0.4)]">
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold uppercase tracking-tight text-white">
             Booking Confirmed,<br />
             <span className="text-[#090D11] bg-[#c6ff34] px-4 py-1 rounded-2xl inline-block mt-2 shadow-[0_0_25px_rgba(198,255,52,0.4)]">
@@ -130,16 +161,16 @@ export default function Consultation() {
             </span>
           </h1>
           <p className="text-slate-300 font-medium leading-relaxed">
-            Your free consultation request has been submitted. Our team will reach out to you on <strong className="text-white">{form.phone}</strong> within <strong className="text-[#c6ff34]">24 hours</strong>.
+            Your free consultation request has been submitted. Our team will reach out to you on <strong className="text-white">{form.phone}</strong> within <strong className="text-white">24 hours</strong>.
           </p>
 
           <div className="bg-[#0D1318] text-white rounded-3xl p-6 border border-white/10 shadow-2xl text-left space-y-3 text-sm">
-            <p className="text-[#c6ff34] font-mono font-bold text-xs uppercase tracking-widest mb-3">Your Submitted Details</p>
+            <p className="text-white font-mono font-bold text-xs uppercase tracking-widest mb-3">Your Submitted Details</p>
             <p><span className="text-slate-400">Name:</span> {form.name}</p>
             <p><span className="text-slate-400">Phone:</span> {form.phone}</p>
             <p><span className="text-slate-400">Address:</span> {form.address}</p>
             <p><span className="text-slate-400">Education:</span> {form.education}</p>
-            <p><span className="text-slate-400">Mode:</span> <span className="capitalize text-[#c6ff34] font-bold">{form.mode}</span></p>
+            <p><span className="text-slate-400">Mode:</span> <span className="capitalize text-white font-bold">{form.mode}</span></p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -166,12 +197,12 @@ export default function Consultation() {
   }
 
   return (
-    <div className="min-h-screen bg-[#090D11] text-white">
+    <div className="min-h-screen bg-transparent text-white">
       {/* Header */}
       <section className="bg-[#090D11] text-white px-6 sm:px-12 pt-28 sm:pt-32 pb-16 sm:pb-20 text-center relative overflow-hidden border-b border-white/10">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[350px] bg-[#c6ff34]/10 rounded-full blur-[140px] pointer-events-none -z-0" />
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 max-w-3xl mx-auto">
-          <span className="inline-block bg-[#c6ff34]/10 text-[#c6ff34] border border-[#c6ff34]/30 px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider mb-5">
+          <span className="inline-block bg-[#c6ff34]/10 text-white border border-[#c6ff34]/30 px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider mb-5">
             Free 1:1 Consultation
           </span>
           <h1 className="text-4xl sm:text-6xl font-extrabold uppercase tracking-tight leading-tight mb-4">
@@ -192,7 +223,7 @@ export default function Consultation() {
             {/* Personal Details */}
             <motion.div custom={0} variants={fadeUp} initial="hidden" animate="visible" className="space-y-6">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 bg-[#c6ff34]/15 border border-[#c6ff34]/30 text-[#c6ff34] rounded-lg flex items-center justify-center font-bold text-sm">1</div>
+                <div className="w-8 h-8 bg-[#c6ff34]/15 border border-[#c6ff34]/30 text-white rounded-lg flex items-center justify-center font-bold text-sm">1</div>
                 <h2 className="text-lg font-bold uppercase tracking-wider text-white">Personal Details</h2>
               </div>
 
@@ -302,7 +333,7 @@ export default function Consultation() {
             {/* Why AI */}
             <motion.div custom={1} variants={fadeUp} initial="hidden" animate="visible" className="space-y-5">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 bg-[#c6ff34]/15 border border-[#c6ff34]/30 text-[#c6ff34] rounded-lg flex items-center justify-center font-bold text-sm">2</div>
+                <div className="w-8 h-8 bg-[#c6ff34]/15 border border-[#c6ff34]/30 text-white rounded-lg flex items-center justify-center font-bold text-sm">2</div>
                 <h2 className="text-lg font-bold uppercase tracking-wider text-white">Why Are You Choosing AI?</h2>
               </div>
               <p className="text-xs text-slate-400 font-medium">Select all that apply</p>
@@ -349,7 +380,7 @@ export default function Consultation() {
             {/* Mode Preference */}
             <motion.div custom={2} variants={fadeUp} initial="hidden" animate="visible" className="space-y-5">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 bg-[#c6ff34]/15 border border-[#c6ff34]/30 text-[#c6ff34] rounded-lg flex items-center justify-center font-bold text-sm">3</div>
+                <div className="w-8 h-8 bg-[#c6ff34]/15 border border-[#c6ff34]/30 text-white rounded-lg flex items-center justify-center font-bold text-sm">3</div>
                 <h2 className="text-lg font-bold uppercase tracking-wider text-white">Which Mode Do You Prefer?</h2>
               </div>
 

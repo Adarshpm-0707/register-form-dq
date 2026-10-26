@@ -53,7 +53,7 @@ export default function OnlineAiCourse() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#090D11] text-white font-sans pb-24 selection:bg-[#c6ff34] selection:text-[#090D11] relative overflow-hidden">
+    <div className="min-h-screen bg-transparent text-white font-sans pb-24 selection:bg-sky-500/30 selection:text-white relative overflow-hidden">
       {/* AMBIENT GLOWS */}
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#c6ff34]/10 rounded-full blur-[150px] pointer-events-none -z-0" />
       <div className="absolute top-[600px] right-0 w-[500px] h-[300px] bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none -z-0" />
@@ -71,7 +71,7 @@ export default function OnlineAiCourse() {
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white leading-[1.08] max-w-5xl">
-            AI / ML & Generative AI — 6-Month Professional Diploma Programme <span className="text-[#c6ff34]">(Online)</span>
+            AI / ML & Generative AI — 6-Month Professional Diploma Programme <span className="text-white">(Online)</span>
           </h1>
 
           <p className="text-slate-300 text-base md:text-lg max-w-4xl leading-relaxed font-sans font-medium">
@@ -95,7 +95,7 @@ export default function OnlineAiCourse() {
               href="tel:+919495957011"
               className="bg-white/5 hover:bg-white/10 text-white font-mono font-bold text-xs md:text-sm px-6 py-4 rounded-2xl border border-white/15 hover:border-white/30 transition-all"
             >
-              📞 Talk to Us: +91 949 595 7011
+              Talk to Us: +91 949 595 7011
             </a>
           </div>
         </div>
@@ -107,7 +107,7 @@ export default function OnlineAiCourse() {
         {/* WHY THIS ISN'T A TYPICAL ONLINE COURSE */}
         <section className="space-y-6">
           <div className="space-y-2">
-            <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Remote Excellence</div>
+            <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">Remote Excellence</div>
             <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
               Why This Isn't a Typical Online Course
             </h2>
@@ -116,7 +116,7 @@ export default function OnlineAiCourse() {
             {onlineAdvantages.map((adv, idx) => (
               <div key={idx} className="p-6 rounded-2xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl shadow-xl space-y-2 hover:border-[#c6ff34]/30 transition-colors">
                 <div className="flex items-center gap-3">
-                  <span className="w-7 h-7 rounded-full bg-[#c6ff34]/15 text-[#c6ff34] font-mono text-xs font-black flex items-center justify-center border border-[#c6ff34]/30">✓</span>
+                  <span className="w-7 h-7 rounded-full bg-[#c6ff34]/15 text-white font-mono text-xs font-black flex items-center justify-center border border-[#c6ff34]/30">✓</span>
                   <h3 className="text-base font-black uppercase text-white">{adv.title}</h3>
                 </div>
                 <p className="text-slate-400 text-sm leading-relaxed pl-10 font-sans">{adv.desc}</p>
@@ -141,7 +141,7 @@ export default function OnlineAiCourse() {
         {/* FORMAT & STRUCTURE */}
         <section className="space-y-6">
           <div className="space-y-2">
-            <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Structure</div>
+            <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">Structure</div>
             <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
               Course Format & Structure
             </h2>
@@ -155,12 +155,12 @@ export default function OnlineAiCourse() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/10">
-                <tr className="hover:bg-white/[0.03]"><td className="p-4 md:p-5 font-bold text-[#c6ff34]">Format</td><td className="p-4 md:p-5 text-slate-300">Live online instructor-led sessions + digital collaborative labs</td></tr>
-                <tr className="hover:bg-white/[0.03]"><td className="p-4 md:p-5 font-bold text-[#c6ff34]">Duration</td><td className="p-4 md:p-5 text-slate-300">6 months core curriculum + ~2 weeks capstone</td></tr>
-                <tr className="hover:bg-white/[0.03]"><td className="p-4 md:p-5 font-bold text-[#c6ff34]">Schedule</td><td className="p-4 md:p-5 text-slate-300">3 sessions/week, 2 hours/session (6 hrs/week)</td></tr>
-                <tr className="hover:bg-white/[0.03]"><td className="p-4 md:p-5 font-bold text-[#c6ff34]">Total Instruction Time</td><td className="p-4 md:p-5 text-slate-300">~160 hours</td></tr>
-                <tr className="hover:bg-white/[0.03]"><td className="p-4 md:p-5 font-bold text-[#c6ff34]">Prerequisites</td><td className="p-4 md:p-5 text-slate-300">None — beginner-friendly</td></tr>
-                <tr className="hover:bg-white/[0.03]"><td className="p-4 md:p-5 font-bold text-[#c6ff34]">Final Assessment</td><td className="p-4 md:p-5 text-slate-300">60% Capstone Project + 40% Theory</td></tr>
+                <tr className="hover:bg-white/[0.03]"><td className="p-4 md:p-5 font-bold text-white">Format</td><td className="p-4 md:p-5 text-slate-300">Live online instructor-led sessions + digital collaborative labs</td></tr>
+                <tr className="hover:bg-white/[0.03]"><td className="p-4 md:p-5 font-bold text-white">Duration</td><td className="p-4 md:p-5 text-slate-300">6 months core curriculum + ~2 weeks capstone</td></tr>
+                <tr className="hover:bg-white/[0.03]"><td className="p-4 md:p-5 font-bold text-white">Schedule</td><td className="p-4 md:p-5 text-slate-300">3 sessions/week, 2 hours/session (6 hrs/week)</td></tr>
+                <tr className="hover:bg-white/[0.03]"><td className="p-4 md:p-5 font-bold text-white">Total Instruction Time</td><td className="p-4 md:p-5 text-slate-300">~160 hours</td></tr>
+                <tr className="hover:bg-white/[0.03]"><td className="p-4 md:p-5 font-bold text-white">Prerequisites</td><td className="p-4 md:p-5 text-slate-300">None — beginner-friendly</td></tr>
+                <tr className="hover:bg-white/[0.03]"><td className="p-4 md:p-5 font-bold text-white">Final Assessment</td><td className="p-4 md:p-5 text-slate-300">60% Capstone Project + 40% Theory</td></tr>
               </tbody>
             </table>
           </div>
@@ -169,7 +169,7 @@ export default function OnlineAiCourse() {
         {/* CURRICULUM MONTH BY MONTH */}
         <section className="space-y-6">
           <div className="space-y-2">
-            <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Roadmap</div>
+            <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">Roadmap</div>
             <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
               The Curriculum, Month by Month
             </h2>
@@ -177,7 +177,7 @@ export default function OnlineAiCourse() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {syllabus.map((m, idx) => (
               <div key={idx} className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl space-y-2 hover:border-[#c6ff34]/40 transition-colors">
-                <span className="text-[11px] font-mono font-black text-[#c6ff34] bg-[#c6ff34]/10 px-2.5 py-1 rounded border border-[#c6ff34]/30 inline-block">
+                <span className="text-[11px] font-mono font-black text-white bg-[#c6ff34]/10 px-2.5 py-1 rounded border border-[#c6ff34]/30 inline-block">
                   {m.month}
                 </span>
                 <h4 className="text-sm font-black uppercase text-white">{m.title}</h4>
@@ -190,7 +190,7 @@ export default function OnlineAiCourse() {
         {/* FAQS */}
         <section className="space-y-6 pt-6 border-t border-white/10">
           <div className="space-y-2">
-            <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Got Questions?</div>
+            <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">Got Questions?</div>
             <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
               Frequently Asked Questions
             </h2>
@@ -203,7 +203,7 @@ export default function OnlineAiCourse() {
                   className="w-full text-left p-5 font-black uppercase tracking-tight text-sm md:text-base flex justify-between items-center gap-4 bg-white/[0.02] hover:bg-white/[0.05] transition-colors"
                 >
                   <span className="text-white">{faq.q}</span>
-                  <span className="w-7 h-7 rounded-full bg-[#c6ff34]/15 text-[#c6ff34] border border-[#c6ff34]/30 flex items-center justify-center font-mono text-xs flex-shrink-0">
+                  <span className="w-7 h-7 rounded-full bg-[#c6ff34]/15 text-white border border-[#c6ff34]/30 flex items-center justify-center font-mono text-xs flex-shrink-0">
                     {openFAQs[index] ? "−" : "+"}
                   </span>
                 </button>
@@ -253,11 +253,11 @@ export default function OnlineAiCourse() {
               </Link>
             </div>
             <div className="pt-6 border-t border-white/10 flex flex-wrap items-center justify-center md:justify-start gap-6 text-xs font-mono text-slate-400">
-              <span>📞 +91 949 595 7011</span>
+              <span>+91 949 595 7011</span>
               <span>•</span>
-              <span>✉️ info@deepstaq.in</span>
+              <span>deepstackbyaleef@gmail.com</span>
               <span>•</span>
-              <span>🌐 www.deepstaq.in</span>
+              <span>www.deepstaq.in</span>
             </div>
           </div>
         </section>

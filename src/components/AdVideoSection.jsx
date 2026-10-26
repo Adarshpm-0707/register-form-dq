@@ -29,22 +29,26 @@ export default function AdVideoSection({
   const [isEnded, setIsEnded] = useState(false);
   const [isVideoActive, setIsVideoActive] = useState(false);
 
+  const containerRef = useRef(null);
   const iframeRef = useRef(null);
   const ytPlayerRef = useRef(null);
   const playStartRef = useRef(null);
   const registerTimerRef = useRef(null);
   const intervalRef = useRef(null);
+  const userPausedRef = useRef(false);
   const iframeId = `yt-player-${videoId}`;
 
   // Helper to send postMessage command to YouTube iframe
-  const postCmd = (func, args = "") => {
+  const postCmd = (func, args = []) => {
     const iframe = iframeRef.current;
     if (!iframe || !iframe.contentWindow) return;
     try {
-      iframe.contentWindow.postMessage(
-        JSON.stringify({ event: "command", func, args }),
-        "*"
-      );
+      const payload = {
+        event: "command",
+        func,
+        args: Array.isArray(args) ? args : (args !== undefined && args !== null && args !== "" ? [args] : [])
+      };
+      iframe.contentWindow.postMessage(JSON.stringify(payload), "*");
     } catch (e) {}
   };
 
@@ -77,8 +81,19 @@ export default function AdVideoSection({
         }
       } catch (e) {}
     }
-    postCmd("unMute");
+    postCmd("unMute", []);
     postCmd("setVolume", [100]);
+  };
+
+  // Pause video explicitly
+  const pauseVideo = () => {
+    if (ytPlayerRef.current && typeof ytPlayerRef.current.pauseVideo === "function") {
+      try {
+        ytPlayerRef.current.pauseVideo();
+      } catch (e) {}
+    }
+    postCmd("pauseVideo", []);
+    setIsPlaying(false);
   };
 
   // Play video explicitly
@@ -89,14 +104,35 @@ export default function AdVideoSection({
         ytPlayerRef.current.playVideo();
       } catch (e) {}
     }
-    postCmd("unMute");
-    postCmd("playVideo");
+    postCmd("unMute", []);
+    postCmd("playVideo", []);
     setIsPlaying(true);
+  };
+
+  // Toggle play/pause on click or touch
+  const togglePlayPause = (e) => {
+    if (e) {
+      if (typeof e.stopPropagation === "function") e.stopPropagation();
+      if (typeof e.preventDefault === "function" && e.type !== "click") e.preventDefault();
+    }
+
+    if (isEnded) {
+      handleReplay(e);
+      return;
+    }
+
+    if (isPlaying) {
+      userPausedRef.current = true;
+      pauseVideo();
+    } else {
+      userPausedRef.current = false;
+      playVideo();
+    }
   };
 
   // Replay video from start
   const handleReplay = (e) => {
-    if (e) e.stopPropagation();
+    if (e && typeof e.stopPropagation === "function") e.stopPropagation();
     setIsEnded(false);
     setShowRegisterOverlay(false);
     setCurrentTime(0);
@@ -109,8 +145,8 @@ export default function AdVideoSection({
       } catch (err) {}
     } else {
       postCmd("seekTo", [0, true]);
-      postCmd("playVideo");
-      postCmd("unMute");
+      postCmd("playVideo", []);
+      postCmd("unMute", []);
     }
 
     setIsPlaying(true);
@@ -130,6 +166,54 @@ export default function AdVideoSection({
       setShowRegisterOverlay(true);
     }, msUntilRegister);
   };
+
+  // Handle tab switching & window blur & unmount & scrolling out of view
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        pauseVideo();
+      }
+    };
+
+    const handleWindowBlur = () => {
+      if (document.hidden) {
+        pauseVideo();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("blur", handleWindowBlur);
+
+    // IntersectionObserver: pause if video container scrolls out of the visible page
+    let observer;
+    if ("IntersectionObserver" in window && containerRef.current) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) {
+              // Video is out of the screen/page view -> pause it
+              pauseVideo();
+            } else {
+              // Video came back into view -> resume only if user didn't manually pause it and tab is visible
+              if (!userPausedRef.current && !document.hidden) {
+                playVideo();
+              }
+            }
+          });
+        },
+        { threshold: 0.15 }
+      );
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleWindowBlur);
+      if (observer) observer.disconnect();
+      pauseVideo();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Setup official YouTube IFrame API and ensure automatic play + unmute
   useEffect(() => {
@@ -243,33 +327,36 @@ export default function AdVideoSection({
     // 4. Fallback start
     startPlaybackFallback(Date.now(), 0);
 
-    // 5. Automatic Voice Unmute on user presence / interaction (mousemove, scroll, touch, click, keydown)
-    const onUserPresence = () => {
+    // 5. One-time Voice Unmute on initial user interaction (respects manual pause)
+    let initialUnlocked = false;
+    const onFirstInteraction = () => {
+      if (initialUnlocked) return;
+      initialUnlocked = true;
       unmute();
-      playVideo();
+      if (!userPausedRef.current) {
+        playVideo();
+      }
+      presenceEvents.forEach((ev) =>
+        window.removeEventListener(ev, onFirstInteraction)
+      );
     };
 
     const presenceEvents = [
-      "mousemove",
-      "pointermove",
-      "scroll",
-      "wheel",
-      "touchstart",
-      "touchend",
       "pointerdown",
+      "touchstart",
       "click",
       "keydown",
     ];
 
     presenceEvents.forEach((ev) =>
-      window.addEventListener(ev, onUserPresence, { passive: true })
+      window.addEventListener(ev, onFirstInteraction, { passive: true })
     );
 
     return () => {
       clearInterval(intervalRef.current);
       clearTimeout(registerTimerRef.current);
       presenceEvents.forEach((ev) =>
-        window.removeEventListener(ev, onUserPresence)
+        window.removeEventListener(ev, onFirstInteraction)
       );
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -312,23 +399,24 @@ export default function AdVideoSection({
     <div
       onMouseMove={unmute}
       onMouseEnter={unmute}
-      onTouchStart={unmute}
-      onClick={unmute}
-      className="w-full flex flex-col items-center justify-center pt-1 sm:pt-3 md:pt-4 mb-8 sm:mb-12 relative px-2 sm:px-4 cursor-pointer"
+      className="w-full flex flex-col items-center justify-center pt-0 mb-0 relative px-0"
     >
       {/* Ambient background glow */}
-      <div className="absolute w-60 sm:w-80 md:w-96 h-60 sm:h-80 md:h-96 bg-gradient-to-tr from-[#c6ff34]/25 via-emerald-400/20 to-blue-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
+      <div className="absolute w-60 sm:w-80 md:w-96 h-60 sm:h-80 md:h-96 bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.18)_0%,transparent_70%)] rounded-full blur-3xl pointer-events-none -z-10" />
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.96, y: 15 }}
+        initial={{ opacity: 0, scale: 0.98, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-full flex flex-col items-center justify-center"
       >
-        {/* Smartphone mockup frame (fluid responsive 9:16 aspect ratio across mobile & laptop) */}
-        <div className="relative h-[min(70vh,600px)] aspect-[9/16] w-auto max-w-[calc(100vw-2rem)] bg-[#050521] rounded-[2rem] sm:rounded-[2.5rem] border-3 sm:border-4 border-[#050521] shadow-[0_20px_50px_rgba(5,5,33,0.3),0_10px_25px_rgba(198,255,52,0.18)] overflow-hidden mx-auto group/frame">
+        {/* Borderless video player container (responsive 9:16 aspect ratio) */}
+        <div
+          ref={containerRef}
+          className="relative h-[min(65vh,520px)] md:h-[min(65vh,500px)] lg:h-[min(70vh,560px)] xl:h-[min(72vh,580px)] aspect-[9/16] w-auto max-w-[calc(100vw-2rem)] md:max-w-full bg-black rounded-2xl sm:rounded-3xl border-0 shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden mx-auto group/frame"
+        >
 
-          {/* Instant High-Res Video Poster (prevents black screen while video buffers/loads) */}
+          {/* Instant High-Res Video Poster */}
           <div
             className={`absolute inset-0 z-10 transition-opacity duration-500 pointer-events-none ${
               isVideoActive ? "opacity-0" : "opacity-100"
@@ -344,10 +432,10 @@ export default function AdVideoSection({
               loading="eager"
             />
             {/* Shimmer loading badge */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#050521]/70 via-transparent to-transparent flex items-end justify-center pb-8">
-              <div className="flex items-center gap-2 bg-[#050521]/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#c6ff34]/40">
-                <span className="w-2 h-2 rounded-full bg-[#c6ff34] animate-ping" />
-                <span className="text-[10px] font-mono text-[#c6ff34] font-bold uppercase tracking-wider">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end justify-center pb-8">
+              <div className="flex items-center gap-2 bg-[#090D11]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-sky-400/30">
+                <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
+                <span className="text-[10px] font-mono text-sky-300 font-bold uppercase tracking-wider">
                   Loading Video...
                 </span>
               </div>
@@ -360,18 +448,69 @@ export default function AdVideoSection({
             id={iframeId}
             width="100%"
             height="100%"
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&controls=1&origin=${originParam}`}
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&controls=0&origin=${originParam}`}
             title={title}
             frameBorder="0"
             allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
             playsInline
             loading="eager"
-            className="w-full h-full block border-0"
+            className="w-full h-full block border-0 pointer-events-none"
             onLoad={handleIframeLoad}
           />
 
+          {/* Transparent Tap / Click Overlay to toggle Play / Pause */}
+          <div
+            onClick={togglePlayPause}
+            className="absolute inset-0 z-20 cursor-pointer flex items-center justify-center select-none touch-manipulation"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === " " || e.key === "Enter") {
+                togglePlayPause(e);
+              }
+            }}
+            aria-label={isPlaying ? "Pause video" : "Play video"}
+          >
+            {/* Paused state play button overlay */}
+            <AnimatePresence>
+              {!isPlaying && !isEnded && (
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex flex-col items-center gap-2 pointer-events-none"
+                >
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-slate-950/85 border border-sky-400/50 backdrop-blur-md flex items-center justify-center text-white shadow-[0_0_30px_rgba(56,189,248,0.5)] group-hover/frame:scale-105 transition-transform">
+                    <svg className="w-8 h-8 sm:w-10 sm:h-10 text-sky-400 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                  <span className="px-3 py-1 rounded-full bg-slate-950/80 border border-white/10 text-[11px] font-mono text-slate-200 backdrop-blur-sm shadow-md">
+                    Tap to play
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
+            {/* Subtle top indicator showing status */}
+            <div className="absolute top-3 right-3 pointer-events-none transition-opacity duration-300 opacity-70 group-hover/frame:opacity-100">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-mono text-slate-300">
+                {isPlaying ? (
+                  <>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Tap to pause</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                    <span>Paused</span>
+                  </>
+                )}
+              </span>
+            </div>
+          </div>
 
           {/* ================================================================ */}
           {/* REGISTER BUTTON OVERLAY — SHOWN IN THE VIDEO DURING LAST 5 SEC   */}
@@ -380,15 +519,16 @@ export default function AdVideoSection({
             {showRegisterOverlay && (
               <motion.div
                 key="register-overlay"
-                initial={{ opacity: 0, y: 40, scale: 0.9 }}
+                onClick={(e) => e.stopPropagation()}
+                initial={{ opacity: 0, y: 30, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 30, scale: 0.9 }}
-                transition={{ duration: 0.45, type: "spring", bounce: 0.25 }}
-                className="absolute bottom-3 sm:bottom-4 left-2 sm:left-3 right-2 sm:right-3 z-30 p-2.5 sm:p-3 bg-[#050521]/95 backdrop-blur-xl rounded-2xl border-2 border-[#c6ff34] shadow-[0_12px_35px_rgba(198,255,52,0.45)] text-center"
+                exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                transition={{ duration: 0.4, type: "spring", bounce: 0.2 }}
+                className="absolute bottom-3 sm:bottom-4 left-2 sm:left-3 right-2 sm:right-3 z-30 p-2.5 sm:p-3 bg-[#090D11]/95 backdrop-blur-xl rounded-2xl border border-sky-400/40 shadow-[0_12px_35px_rgba(56,189,248,0.3)] text-center"
               >
                 {/* Header status pill */}
-                <div className="text-[9px] sm:text-[10px] font-mono font-black uppercase text-[#c6ff34] tracking-wider mb-1 flex items-center justify-center gap-1.5">
-                  <span className="inline-block w-2 h-2 rounded-full bg-[#c6ff34] animate-ping" />
+                <div className="text-[9px] sm:text-[10px] font-mono font-bold uppercase text-sky-400 tracking-wider mb-1 flex items-center justify-center gap-1.5">
+                  <span className="inline-block w-2 h-2 rounded-full bg-sky-400 animate-ping" />
                   <span>{isEnded ? "PREVIEW COMPLETED" : "LIMITED SEATS AVAILABLE"}</span>
                 </div>
 
@@ -396,16 +536,17 @@ export default function AdVideoSection({
                 <button
                   type="button"
                   onClick={handleScrollToForm}
-                  className="w-full py-2 sm:py-2.5 px-2 sm:px-3 bg-[#c6ff34] hover:bg-[#b8f526] text-[#050521] rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 border-2 border-[#050521] shadow-[2px_2px_0px_0px_#ffffff] sm:shadow-[3px_3px_0px_0px_#ffffff] hover:shadow-[1px_1px_0px_0px_#ffffff] hover:translate-x-0.5 hover:translate-y-0.5 active:translate-y-1 flex items-center justify-between cursor-pointer group"
+                  className="w-full py-2.5 px-3 bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-slate-950 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 shadow-[0_4px_16px_rgba(56,189,248,0.35)] flex items-center justify-between cursor-pointer group"
                 >
-                  <div className="flex items-center gap-1 min-w-0">
-                    <span className="text-xs sm:text-sm group-hover:scale-125 transition-transform flex-shrink-0">🚀</span>
-                    <span className="font-extrabold truncate text-[10px] sm:text-xs md:text-sm">REGISTER NOW</span>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-950 flex-shrink-0 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                    </svg>
+                    <span className="font-extrabold truncate text-[11px] sm:text-xs">REGISTER FOR ₹{offerPrice}</span>
                   </div>
-                  <div className="flex items-center gap-1 font-mono flex-shrink-0">
-                    <span className="line-through text-slate-500 text-[9px] sm:text-[10px]">₹{originalPrice}</span>
-                    <span className="bg-[#050521] text-[#c6ff34] px-1 sm:px-1.5 py-0.5 rounded text-[9px] sm:text-xs font-black">₹{offerPrice}</span>
-                    <span className="text-[#050521] font-black group-hover:translate-y-0.5 transition-transform text-xs">↓</span>
+                  <div className="flex items-center gap-1.5 font-mono flex-shrink-0">
+                    <span className="line-through text-slate-700 text-[10px]">₹{originalPrice}</span>
+                    <span className="text-slate-950 font-black group-hover:translate-y-0.5 transition-transform text-xs">↓</span>
                   </div>
                 </button>
 
@@ -415,7 +556,7 @@ export default function AdVideoSection({
                   <button
                     type="button"
                     onClick={handleReplay}
-                    className="text-[#c6ff34] hover:underline flex items-center gap-0.5 flex-shrink-0 cursor-pointer font-bold"
+                    className="text-sky-400 hover:underline flex items-center gap-0.5 flex-shrink-0 cursor-pointer font-bold"
                   >
                     <span>↺ Replay</span>
                   </button>
@@ -428,37 +569,14 @@ export default function AdVideoSection({
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/40 z-20 overflow-hidden">
             {duration > 0 && (
               <div
-                className="h-full bg-[#c6ff34] transition-all duration-200 ease-linear"
+                className="h-full bg-gradient-to-r from-sky-400 to-blue-500 transition-all duration-200 ease-linear"
                 style={{ width: `${Math.min((currentTime / duration) * 100, 100)}%` }}
               />
             )}
           </div>
         </div>
 
-        {/* Secondary Register Button below video (visible during the last 5 seconds) */}
-        <AnimatePresence>
-          {showRegisterOverlay && (
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.35 }}
-              className="w-full max-w-[min(360px,calc(100vw-2rem))] mt-3.5 px-2"
-            >
-              <button
-                type="button"
-                onClick={handleScrollToForm}
-                className="w-full py-3 sm:py-3.5 px-4 sm:px-6 bg-[#c6ff34] hover:bg-[#b8f526] text-[#050521] rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 border-3 border-[#050521] shadow-[4px_4px_0px_0px_#050521] hover:shadow-[2px_2px_0px_0px_#050521] hover:translate-x-0.5 hover:translate-y-0.5 active:translate-y-1 flex items-center justify-between cursor-pointer group"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-base group-hover:scale-125 transition-transform">⚡</span>
-                  <span className="font-extrabold">REGISTER NOW • ₹{offerPrice}</span>
-                </div>
-                <span className="text-sm sm:text-base font-black group-hover:translate-x-1 transition-transform">↓</span>
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+
       </motion.div>
     </div>
   );

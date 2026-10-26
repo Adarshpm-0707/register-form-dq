@@ -21,22 +21,22 @@ const YEAR_SEM_SUGGESTIONS = [
 const AI_INTEREST_OPTIONS = [
   {
     id: "extreme",
-    label: "Yes, Extremely Interested! 🚀",
+    label: "Yes, Extremely Interested!",
     desc: "Passionate about building AI projects & career in AI",
   },
   {
     id: "learn",
-    label: "Yes, Want to Learn From Scratch 💡",
+    label: "Yes, Want to Learn From Scratch",
     desc: "Beginner eager to master AI tools & fundamentals",
   },
   {
     id: "curious",
-    label: "Curious / Exploring Opportunities 🔍",
+    label: "Curious / Exploring Opportunities",
     desc: "Want to see how AI applies to my field of study",
   },
   {
     id: "not_sure",
-    label: "Not Sure Yet, But Want to Know More 🤔",
+    label: "Not Sure Yet, But Want to Know More",
     desc: "Looking for guidance and workshop sessions",
   },
 ];
@@ -64,7 +64,7 @@ export default function AiBoosterProgram() {
     place: "",
     collegeOrSchool: "",
     yearOrSem: "",
-    interestedInAi: "Yes, Extremely Interested! 🚀",
+    interestedInAi: "Yes, Extremely Interested!",
   });
 
   const [errors, setErrors] = useState({});
@@ -299,7 +299,7 @@ export default function AiBoosterProgram() {
       place: "",
       collegeOrSchool: "",
       yearOrSem: "",
-      interestedInAi: "Yes, Extremely Interested! 🚀",
+      interestedInAi: "Yes, Extremely Interested!",
     });
     setErrors({});
     setSubmitError("");
@@ -335,13 +335,13 @@ export default function AiBoosterProgram() {
           {/* Quick Perks Badges with Price Highlight */}
           <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
             <span className="px-3 py-1 bg-white/[0.04] border border-white/10 rounded-full text-[11px] font-bold text-slate-300 shadow-sm flex items-center gap-1.5">
-              <span>🎯</span> School & College Students
+              School & College Students
             </span>
             <span className="px-3 py-1 bg-white/[0.04] border border-white/10 rounded-full text-[11px] font-bold text-slate-300 shadow-sm flex items-center gap-1.5">
-              <span>⚡</span> Beginner Friendly
+              Beginner Friendly
             </span>
             <span className="px-3 py-1 bg-[#c6ff34]/10 border border-[#c6ff34]/30 rounded-full text-[11px] font-bold text-[#c6ff34] shadow-sm flex items-center gap-1.5">
-              <span>🔥</span> Special Offer:{" "}
+              Special Offer:{" "}
               <span className="line-through text-slate-500 font-bold">₹{ORIGINAL_PRICE}</span>{" "}
               <span className="bg-[#c6ff34] text-[#090D11] px-2 py-0.5 rounded font-black">
                 ₹{OFFER_PRICE} ONLY
@@ -364,7 +364,7 @@ export default function AiBoosterProgram() {
               </div>
 
               <div className="inline-block px-3.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-mono font-bold uppercase tracking-wider mb-2 border border-emerald-500/30">
-                🎉 Registration & Payment Successful!
+                Registration & Payment Successful!
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">
@@ -436,7 +436,10 @@ export default function AiBoosterProgram() {
                   rel="noreferrer"
                   className="w-full sm:flex-1 py-3.5 px-6 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg"
                 >
-                  <span>💬 Join WhatsApp Community</span>
+                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
+                  </svg>
+                  <span>Join WhatsApp Community</span>
                 </a>
                 <button
                   type="button"
@@ -477,7 +480,9 @@ export default function AiBoosterProgram() {
 
               {submitError && (
                 <div className="mb-6 p-4 bg-red-500/15 border border-red-500/40 text-red-300 rounded-2xl text-xs font-bold flex items-center gap-3">
-                  <span className="text-xl">⚠️</span>
+                  <svg className="w-5 h-5 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
                   <span>{submitError}</span>
                 </div>
               )}
@@ -491,7 +496,9 @@ export default function AiBoosterProgram() {
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-base">{paymentNotice.type === "warning" ? "⚠️" : "❌"}</span>
+                    <svg className="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
                     <span>{paymentNotice.message}</span>
                   </div>
                   <button
@@ -735,8 +742,10 @@ export default function AiBoosterProgram() {
                       </div>
                     ) : (
                       <>
-                        <div className="flex items-center gap-2.5">
-                          <span className="text-xl">⚡</span>
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-[#090D11]" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                          </svg>
                           <span className="text-[#090D11] font-extrabold tracking-wide">
                             REGISTER NOW
                           </span>

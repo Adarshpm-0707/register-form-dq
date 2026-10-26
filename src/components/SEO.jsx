@@ -130,6 +130,12 @@ const STATIC_SEO_CONFIG = {
     keywords: "AI aptitude test, coding assessment, machine learning quiz, Deepstaq test",
     robots: "index, follow"
   },
+  "/aptitude-v2": {
+    title: "Deepstaq Aptitude Test V2 | 40 Questions Online Assessment",
+    description: "Take the Deepstaq Aptitude Test V2: 40 questions across Numerical, Logical, Analytical, and Computational reasoning. Instant score & section breakdown.",
+    keywords: "Deepstaq Aptitude Test V2, 40 questions aptitude test, AI admission test, numerical logical reasoning",
+    robots: "index, follow"
+  },
   "/consultation": {
     title: "Book Free Career Consultation | Deepstaq AI",
     description: "Schedule a 1-on-1 career consultation session with AI industry experts at Deepstaq to find the best learning path for you.",

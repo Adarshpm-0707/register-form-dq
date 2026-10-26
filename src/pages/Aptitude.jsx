@@ -621,7 +621,7 @@ export default function Aptitude() {
                         </div>
                         {isChecked && isLocked && (
                           <span className="text-[10px] font-black uppercase tracking-wider text-[#c6ff34] bg-[#c6ff34]/10 px-2.5 py-1 rounded-md border border-[#c6ff34]/30 shrink-0">
-                            🔒 Answer Locked
+                            Answer Locked
                           </span>
                         )}
                       </button>
@@ -704,10 +704,10 @@ export default function Aptitude() {
                 </div>
                 <p className="text-xs text-slate-300 font-sans leading-relaxed">
                   {result.percentage >= 70
-                    ? "🌟 Excellent Aptitude! You possess strong analytical and AI problem-solving fundamentals."
+                    ? "Excellent Aptitude! You possess strong analytical and AI problem-solving fundamentals."
                     : result.percentage >= 50
-                    ? "👍 Good Job! You have solid logical skills and great potential for our AI programs."
-                    : "💡 Great Start! DeepStaq's 6-month AI Builder diploma will build your foundations from zero."}
+                    ? "Good Job! You have solid logical skills and great potential for our AI programs."
+                    : "Great Start! DeepStaq's 6-month AI Builder diploma will build your foundations from zero."}
                 </p>
               </div>
 

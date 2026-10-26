@@ -12,11 +12,18 @@ module.exports = {
       },
       colors: {
         neon: {
-          lime: "#c6ff34",
-          emerald: "#10b981",
-          dark: "#090D11",
-          surface: "#0e151c",
+          lime: "#ffffff",
+          emerald: "#38bdf8",
+          dark: "#030a16",
+          surface: "#071731",
           border: "rgba(255, 255, 255, 0.08)",
+        },
+        navy: {
+          950: "#020712",
+          900: "#040d1a",
+          850: "#06152d",
+          800: "#082142",
+          700: "#0d3266",
         },
       },
       animation: {

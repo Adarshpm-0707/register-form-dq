@@ -37,7 +37,7 @@ const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 
 const PageFallback = () => (
   <div className="min-h-[70vh] flex items-center justify-center">
-    <div className="w-10 h-10 border-4 border-[#c6ff34] border-t-transparent rounded-full animate-spin"></div>
+    <div className="w-10 h-10 border-4 border-sky-400 border-t-transparent rounded-full animate-spin"></div>
   </div>
 );
 
@@ -47,7 +47,7 @@ const AppLayout = ({ children }) => {
   const isHome = location.pathname === "/";
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-[#090D11] text-white font-sans selection:bg-[#c6ff34] selection:text-[#090D11]">
+    <div className="relative min-h-screen flex flex-col bg-[#090D11] text-white font-sans selection:bg-sky-400 selection:text-slate-950">
       {!isAdmin && <Navbar />}
       {isHome && <LeadPopupModal />}
       <div className="flex-grow">

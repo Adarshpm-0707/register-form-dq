@@ -93,7 +93,7 @@ export default function AiCourse() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#090D11] text-white font-sans pb-24 selection:bg-[#c6ff34] selection:text-[#090D11] relative overflow-hidden">
+    <div className="min-h-screen bg-transparent text-white font-sans pb-24 selection:bg-sky-500/30 selection:text-white relative overflow-hidden">
       
       {/* Background Ambient Glows */}
       <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-[#c6ff34]/10 rounded-full blur-[160px] pointer-events-none -z-0" />
@@ -103,7 +103,7 @@ export default function AiCourse() {
       <section className="relative pt-28 pb-16 md:pt-36 md:pb-24 px-6 md:px-12 border-b border-white/10 overflow-hidden">
         <div className="max-w-[1200px] mx-auto space-y-6 relative z-10">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="bg-[#c6ff34]/15 text-[#c6ff34] text-xs font-black px-3.5 py-1.5 rounded-lg border border-[#c6ff34]/30 uppercase tracking-wider font-mono shadow-[0_0_15px_rgba(198,255,52,0.2)]">
+            <span className="bg-[#c6ff34]/15 text-white text-xs font-black px-3.5 py-1.5 rounded-lg border border-[#c6ff34]/30 uppercase tracking-wider font-mono shadow-[0_0_15px_rgba(198,255,52,0.2)]">
               6-Month Professional Diploma
             </span>
             <span className="bg-white/5 text-slate-300 text-xs font-mono font-bold px-3 py-1 rounded-md border border-white/10 uppercase">
@@ -136,7 +136,7 @@ export default function AiCourse() {
               href="tel:+919495957011"
               className="bg-white/5 hover:bg-white/10 text-white font-mono font-bold text-xs md:text-sm px-6 py-4 rounded-2xl border border-white/15 hover:border-white/30 transition-all flex items-center gap-2"
             >
-              📞 Talk to Us: +91 949 595 7011
+              Talk to Us: +91 949 595 7011
             </a>
           </div>
         </div>
@@ -160,13 +160,13 @@ export default function AiCourse() {
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
               <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
-                <h4 className="text-xs font-mono font-black uppercase text-[#c6ff34] tracking-wider">Our Mission</h4>
+                <h4 className="text-xs font-mono font-black uppercase text-white tracking-wider">Our Mission</h4>
                 <p className="text-slate-400 text-sm leading-relaxed">
                   Our mission is to make deep AI/ML knowledge accessible, structured, and actionable. Through a comprehensive, hands-on curriculum that takes learners from programming fundamentals all the way through to generative AI and agentic systems, we bridge the gap between theory and real-world practice. Every month builds on the last — with projects, industry-relevant tooling, and a final capstone that learners take into the world as proof of what they can build.
                 </p>
               </div>
               <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
-                <h4 className="text-xs font-mono font-black uppercase text-[#c6ff34] tracking-wider">Our Vision</h4>
+                <h4 className="text-xs font-mono font-black uppercase text-white tracking-wider">Our Vision</h4>
                 <p className="text-slate-400 text-sm leading-relaxed">
                   Our vision is to be the leading institute for practical AI education — producing professionals who don't just understand artificial intelligence, but build intelligent systems that solve real problems in the real world.
                 </p>
@@ -183,7 +183,7 @@ export default function AiCourse() {
           <div className="overflow-x-auto border border-white/10 rounded-3xl shadow-2xl bg-[#0D1318]/90 backdrop-blur-xl">
             <table className="w-full text-left border-collapse text-xs md:text-sm font-mono">
               <thead>
-                <tr className="bg-white/[0.05] text-[#c6ff34] uppercase tracking-wider border-b border-white/10">
+                <tr className="bg-white/[0.05] text-white uppercase tracking-wider border-b border-white/10">
                   <th className="p-4 md:p-5 w-1/3">Detail</th>
                   <th className="p-4 md:p-5">Info</th>
                 </tr>
@@ -230,7 +230,7 @@ export default function AiCourse() {
 
           <div className="border border-white/10 rounded-3xl p-6 md:p-8 bg-[#0D1318]/90 shadow-2xl backdrop-blur-xl space-y-3 relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#c6ff34] to-transparent" />
-            <span className="text-xs font-mono font-black text-[#c6ff34] uppercase tracking-widest">
+            <span className="text-xs font-mono font-black text-white uppercase tracking-widest">
               {syllabus[activeMonth].month}
             </span>
             <h3 className="text-xl md:text-2xl font-black uppercase text-white">
@@ -244,7 +244,7 @@ export default function AiCourse() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {syllabus.map((m, idx) => (
               <div key={idx} className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/70 space-y-2">
-                <span className="text-[11px] font-mono font-black text-[#c6ff34] bg-[#c6ff34]/15 px-2.5 py-1 rounded border border-[#c6ff34]/30 inline-block">
+                <span className="text-[11px] font-mono font-black text-white bg-[#c6ff34]/15 px-2.5 py-1 rounded border border-[#c6ff34]/30 inline-block">
                   {m.month}
                 </span>
                 <h4 className="text-sm font-black uppercase text-white">{m.title}</h4>
@@ -276,7 +276,7 @@ export default function AiCourse() {
         <section className="space-y-6">
           <div className="border border-white/10 rounded-3xl p-6 md:p-10 bg-[#0D1318]/90 text-white shadow-2xl space-y-6 relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#c6ff34] to-transparent" />
-            <span className="bg-[#c6ff34]/15 text-[#c6ff34] text-xs font-black px-3 py-1 rounded-md uppercase font-mono tracking-wider border border-[#c6ff34]/30 inline-block">
+            <span className="bg-[#c6ff34]/15 text-white text-xs font-black px-3 py-1 rounded-md uppercase font-mono tracking-wider border border-[#c6ff34]/30 inline-block">
               The Capstone Project
             </span>
             <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-white">
@@ -286,18 +286,18 @@ export default function AiCourse() {
               The programme culminates in an end-to-end capstone project: an original AI/ML build of your choosing. Choose from a classical ML pipeline, an NLP/deep learning model, or a domain-specific RAG application or fine-tuned LLM.
             </p>
             <div className="p-4 rounded-xl bg-white/[0.04] text-white font-mono text-xs md:text-sm font-bold border border-white/10">
-              ✨ You leave with something you actually built — not just a certificate.
+              You leave with something you actually built — not just a certificate.
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/10">
               <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
-                <span className="text-3xl md:text-4xl font-black text-[#c6ff34] font-mono">60%</span>
+                <span className="text-3xl md:text-4xl font-black text-white font-mono">60%</span>
                 <h4 className="text-base font-bold uppercase text-white">Capstone Project</h4>
                 <p className="text-xs text-slate-400 font-mono leading-relaxed">
                   Assessed on the end-to-end build, including data handling, model implementation, evaluation, and deployment or RAG/agent components.
                 </p>
               </div>
               <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
-                <span className="text-3xl md:text-4xl font-black text-[#c6ff34] font-mono">40%</span>
+                <span className="text-3xl md:text-4xl font-black text-white font-mono">40%</span>
                 <h4 className="text-base font-bold uppercase text-white">Theory</h4>
                 <p className="text-xs text-slate-400 font-mono leading-relaxed">
                   Assessed on conceptual understanding across the full curriculum, from programming foundations through to Generative AI and MLOps.
@@ -317,8 +317,8 @@ export default function AiCourse() {
           </p>
           <div className="flex flex-wrap gap-2.5">
             {careerRoles.map((role, idx) => (
-              <span key={idx} className="bg-white/[0.04] hover:bg-[#c6ff34]/15 hover:text-[#c6ff34] text-slate-300 text-xs font-mono font-bold px-4 py-2 rounded-xl border border-white/10 transition-colors">
-                💼 {role}
+              <span key={idx} className="bg-white/[0.04] hover:bg-[#c6ff34]/15 hover:text-white text-slate-300 text-xs font-mono font-bold px-4 py-2 rounded-xl border border-white/10 transition-colors">
+                {role}
               </span>
             ))}
           </div>
@@ -326,19 +326,19 @@ export default function AiCourse() {
             <h3 className="text-lg font-black uppercase text-white">Beyond a Traditional Job</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/80 shadow-xl space-y-2">
-                <h4 className="text-sm font-black uppercase text-white">🚀 Crack a global career</h4>
+                <h4 className="text-sm font-black uppercase text-white">Crack a global career</h4>
                 <p className="text-xs font-mono text-slate-400">AI/ML skills are in high global demand, equipping you for roles like ML Engineer, Data Scientist, GenAI Engineer, or MLOps Engineer worldwide.</p>
               </div>
               <div className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/80 shadow-xl space-y-2">
-                <h4 className="text-sm font-black uppercase text-white">🌍 Work remote</h4>
+                <h4 className="text-sm font-black uppercase text-white">Work remote</h4>
                 <p className="text-xs font-mono text-slate-400">AI/ML roles are increasingly remote-friendly, letting you work for companies anywhere without relocating.</p>
               </div>
               <div className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/80 shadow-xl space-y-2">
-                <h4 className="text-sm font-black uppercase text-white">💡 Become an AI entrepreneur</h4>
+                <h4 className="text-sm font-black uppercase text-white">Become an AI entrepreneur</h4>
                 <p className="text-xs font-mono text-slate-400">Hands-on experience building RAG apps, agents, and fine-tuned LLMs equips you to launch your own AI products or services.</p>
               </div>
               <div className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/80 shadow-xl space-y-2">
-                <h4 className="text-sm font-black uppercase text-white">⚡ Start freelancing & consulting</h4>
+                <h4 className="text-sm font-black uppercase text-white">Start freelancing & consulting</h4>
                 <p className="text-xs font-mono text-slate-400">Offer AI/ML services like model building, RAG pipelines, chatbots, and advisory work for businesses adopting AI.</p>
               </div>
             </div>
@@ -383,7 +383,7 @@ export default function AiCourse() {
                   className="w-full text-left p-5 font-black uppercase tracking-tight text-sm md:text-base flex justify-between items-center gap-4 bg-white/[0.02] hover:bg-white/[0.05] text-white transition-colors cursor-pointer"
                 >
                   <span>{faq.q}</span>
-                  <span className="w-7 h-7 rounded-full bg-[#c6ff34]/20 border border-[#c6ff34]/30 text-[#c6ff34] flex items-center justify-center font-mono text-xs flex-shrink-0">
+                  <span className="w-7 h-7 rounded-full bg-[#c6ff34]/20 border border-[#c6ff34]/30 text-white flex items-center justify-center font-mono text-xs flex-shrink-0">
                     {openFAQs[index] ? "−" : "+"}
                   </span>
                 </button>
@@ -409,7 +409,7 @@ export default function AiCourse() {
         <section className="pt-8">
           <div className="bg-[#0D1318]/95 text-white rounded-3xl p-8 md:p-12 border border-white/15 shadow-2xl space-y-6 text-center md:text-left relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#c6ff34] to-transparent" />
-            <span className="bg-[#c6ff34]/15 text-[#c6ff34] text-xs font-black px-3.5 py-1.5 rounded-md uppercase font-mono tracking-wider inline-block border border-[#c6ff34]/30">
+            <span className="bg-[#c6ff34]/15 text-white text-xs font-black px-3.5 py-1.5 rounded-md uppercase font-mono tracking-wider inline-block border border-[#c6ff34]/30">
               Admissions Open
             </span>
             <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-white max-w-3xl">
@@ -433,11 +433,11 @@ export default function AiCourse() {
               </Link>
             </div>
             <div className="pt-6 border-t border-white/10 flex flex-wrap items-center justify-center md:justify-start gap-6 text-xs font-mono text-slate-400">
-              <span>📞 +91 949 595 7011</span>
+              <span>+91 949 595 7011</span>
               <span>•</span>
-              <span>✉️ info@deepstaq.in</span>
+              <span>deepstackbyaleef@gmail.com</span>
               <span>•</span>
-              <span>🌐 www.deepstaq.in</span>
+              <span>www.deepstaq.in</span>
             </div>
           </div>
         </section>

@@ -6,7 +6,7 @@ export default function HeroVRSection() {
   return (
     <div className="relative w-full max-w-[480px] sm:max-w-[640px] lg:max-w-[850px] xl:max-w-[960px] aspect-square flex items-center justify-center select-none scale-110 sm:scale-115 lg:scale-120 xl:scale-125 transition-transform duration-300 mx-auto -my-2 sm:my-0">
       {/* Background Radial Neon Glow Aura */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-[#ff2a85]/25 via-[#00f0ff]/18 to-[#c6ff34]/22 rounded-full blur-2xl md:blur-3xl opacity-80 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-[#0284c7]/30 via-[#38bdf8]/25 to-[#00f0ff]/20 rounded-full blur-2xl md:blur-3xl opacity-80 pointer-events-none" />
 
       {/* One-time Page Reload Entrance Animation: Starts at screen bottom and slides up to fixed position */}
       <motion.div

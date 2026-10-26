@@ -442,7 +442,7 @@ export const COURSE_PAGES = [
     title: "AI / ML & Generative AI — 6-Month Professional Diploma Programme, In-Person",
     subtitle: "Free YouTube tutorials and self-paced online courses have a real problem: nobody's in the room when you get stuck. DeepStaq's AI course is built the other way — in-person, classroom-based, with instructors and industry mentors physically present, and a room full of peers hitting the same bugs and building alongside you.",
     tagline: "If you've tried learning AI online and stalled out somewhere around 'why doesn't my model converge,' this is the format built to actually get you unstuck.",
-    locationBadge: "📍 Campus Location — Kerala (Kannur)",
+    locationBadge: "Campus Location — Kerala (Kannur)",
     targetKeyword: "offline ai course",
     pageType: "Course / Landing Page (Local SEO)",
     metaTitle: "Offline AI Course in Kerala | In-Person AI/ML Diploma – DeepStaq",
@@ -567,7 +567,7 @@ export const COURSE_PAGES = [
     title: "AI / ML & Generative AI — 6-Month Professional Diploma Programme, Kannur",
     subtitle: "Looking for a serious, hands-on AI course in Kannur — not another link to a generic online video subscription? DeepStaq runs an in-person, instructor-led AI/ML diploma right here, built for people who want to actually build AI systems, not just watch someone else build them on a screen.",
     tagline: "No prior coding experience required. Open to students, engineers, career-switchers, and working professionals across Kannur and North Kerala.",
-    locationBadge: "📍 Kannur, Kerala Campus",
+    locationBadge: "Kannur, Kerala Campus",
     targetKeyword: "ai course kannur",
     pageType: "Course / Landing Page (Local SEO)",
     metaTitle: "AI Course in Kannur | 6-Month AI/ML & GenAI Diploma – DeepStaq",
@@ -867,7 +867,7 @@ If you're unsure whether you qualify, it's worth checking directly with the inst
 
 Where a specific course lands within this range depends on instructor-led hours, mentorship, GPU/cloud access, capstone guidance, and placement support.
 
-For Deepstaq's exact current fee structure and any active offers, it's best to check directly via www.deepstaq.in or contact +91 949 595 7011 / info@deepstaq.in — this article intentionally doesn't quote a number that could go out of date.`
+For Deepstaq's exact current fee structure and any active offers, it's best to check directly via www.deepstaq.in or contact +91 949 595 7011 / deepstackbyaleef@gmail.com — this article intentionally doesn't quote a number that could go out of date.`
       },
       {
         id: "skills-learned",

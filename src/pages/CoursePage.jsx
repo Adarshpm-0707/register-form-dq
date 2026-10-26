@@ -28,7 +28,7 @@ export default function CoursePage({ slugOverride }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#090D11] text-white font-sans pb-24 selection:bg-[#c6ff34] selection:text-[#090D11] relative overflow-hidden">
+    <div className="min-h-screen bg-transparent text-white font-sans pb-24 selection:bg-sky-500/30 selection:text-white relative overflow-hidden">
       {/* AMBIENT GLOWS */}
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#c6ff34]/10 rounded-full blur-[150px] pointer-events-none -z-0" />
       <div className="absolute top-[800px] right-0 w-[500px] h-[350px] bg-cyan-500/10 rounded-full blur-[150px] pointer-events-none -z-0" />
@@ -42,7 +42,7 @@ export default function CoursePage({ slugOverride }) {
               {pageData.badge || "DeepStaq Programme"}
             </span>
             {pageData.locationBadge && (
-              <span className="bg-white/10 text-[#c6ff34] border border-[#c6ff34]/30 text-xs font-mono font-bold px-3 py-1.5 rounded-lg">
+              <span className="bg-white/10 text-white border border-[#c6ff34]/30 text-xs font-mono font-bold px-3 py-1.5 rounded-lg">
                 {pageData.locationBadge}
               </span>
             )}
@@ -81,12 +81,12 @@ export default function CoursePage({ slugOverride }) {
               href="tel:+919495957011"
               className="bg-white/5 hover:bg-white/10 text-white font-mono font-bold text-xs md:text-sm px-6 py-4 rounded-2xl border border-white/15 hover:border-white/30 transition-all flex items-center gap-2"
             >
-              <span>📞 Talk to Us: +91 949 595 7011</span>
+              <span>Talk to Us: +91 949 595 7011</span>
             </a>
 
             <Link
               to="/consultation"
-              className="text-xs md:text-sm font-mono font-bold uppercase tracking-wider text-slate-300 hover:text-[#c6ff34] underline px-2 py-2 transition-colors"
+              className="text-xs md:text-sm font-mono font-bold uppercase tracking-wider text-slate-300 hover:text-white underline px-2 py-2 transition-colors"
             >
               Book Free 1:1 Consultation
             </Link>
@@ -101,31 +101,31 @@ export default function CoursePage({ slugOverride }) {
           <div className="flex items-center gap-6">
             {!pageData.isGuide && (
               <>
-                <button onClick={() => handleScrollTo("overview")} className="text-slate-300 hover:text-[#c6ff34] transition-colors">
+                <button onClick={() => handleScrollTo("overview")} className="text-slate-300 hover:text-white transition-colors">
                   Overview
                 </button>
-                <button onClick={() => handleScrollTo("format")} className="text-slate-300 hover:text-[#c6ff34] transition-colors">
+                <button onClick={() => handleScrollTo("format")} className="text-slate-300 hover:text-white transition-colors">
                   Format
                 </button>
-                <button onClick={() => handleScrollTo("syllabus")} className="text-slate-300 hover:text-[#c6ff34] transition-colors">
+                <button onClick={() => handleScrollTo("syllabus")} className="text-slate-300 hover:text-white transition-colors">
                   Syllabus
                 </button>
-                <button onClick={() => handleScrollTo("capstone")} className="text-slate-300 hover:text-[#c6ff34] transition-colors">
+                <button onClick={() => handleScrollTo("capstone")} className="text-slate-300 hover:text-white transition-colors">
                   Capstone
                 </button>
-                <button onClick={() => handleScrollTo("careers")} className="text-slate-300 hover:text-[#c6ff34] transition-colors">
+                <button onClick={() => handleScrollTo("careers")} className="text-slate-300 hover:text-white transition-colors">
                   Careers
                 </button>
               </>
             )}
             {pageData.isGuide && (
               <>
-                <button onClick={() => handleScrollTo("guide-content")} className="text-slate-300 hover:text-[#c6ff34] transition-colors">
+                <button onClick={() => handleScrollTo("guide-content")} className="text-slate-300 hover:text-white transition-colors">
                   Full Guide
                 </button>
               </>
             )}
-            <button onClick={() => handleScrollTo("faqs")} className="text-slate-300 hover:text-[#c6ff34] transition-colors">
+            <button onClick={() => handleScrollTo("faqs")} className="text-slate-300 hover:text-white transition-colors">
               FAQs
             </button>
           </div>
@@ -157,7 +157,7 @@ export default function CoursePage({ slugOverride }) {
               </p>
               {pageData.whyDeepStaq.mission && (
                 <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-2">
-                  <h4 className="text-xs font-mono font-black uppercase text-[#c6ff34] tracking-wider">
+                  <h4 className="text-xs font-mono font-black uppercase text-white tracking-wider">
                     Our Mission
                   </h4>
                   <p className="text-slate-300 text-sm leading-relaxed">
@@ -167,7 +167,7 @@ export default function CoursePage({ slugOverride }) {
               )}
               {pageData.whyDeepStaq.vision && (
                 <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-2">
-                  <h4 className="text-xs font-mono font-black uppercase text-[#c6ff34] tracking-wider">
+                  <h4 className="text-xs font-mono font-black uppercase text-white tracking-wider">
                     Our Vision
                   </h4>
                   <p className="text-slate-300 text-sm leading-relaxed">
@@ -183,7 +183,7 @@ export default function CoursePage({ slugOverride }) {
         {pageData.offlineAdvantages && (
           <section className="space-y-6">
             <div className="space-y-1">
-              <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Format Benefits</div>
+              <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">Format Benefits</div>
               <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
                 Why Choose This Format
               </h2>
@@ -195,7 +195,7 @@ export default function CoursePage({ slugOverride }) {
                   className="p-6 rounded-2xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl shadow-xl space-y-2 hover:border-[#c6ff34]/30 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="w-7 h-7 rounded-full bg-[#c6ff34]/15 text-[#c6ff34] font-mono text-xs font-black flex items-center justify-center border border-[#c6ff34]/30">
+                    <span className="w-7 h-7 rounded-full bg-[#c6ff34]/15 text-white font-mono text-xs font-black flex items-center justify-center border border-[#c6ff34]/30">
                       ✓
                     </span>
                     <h3 className="text-base font-black uppercase text-white">
@@ -215,7 +215,7 @@ export default function CoursePage({ slugOverride }) {
         {pageData.formatStructure && (
           <section id="format" className="scroll-mt-36 space-y-6">
             <div className="space-y-1">
-              <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Structure</div>
+              <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">Structure</div>
               <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
                 Course Format & Structure
               </h2>
@@ -232,7 +232,7 @@ export default function CoursePage({ slugOverride }) {
                 <tbody className="divide-y divide-white/10 font-mono">
                   {pageData.formatStructure.map((row, idx) => (
                     <tr key={idx} className="hover:bg-white/[0.03] transition-colors">
-                      <td className="p-4 md:p-5 font-bold text-[#c6ff34]">
+                      <td className="p-4 md:p-5 font-bold text-white">
                         {row.detail}
                       </td>
                       <td className="p-4 md:p-5 text-slate-300">
@@ -246,7 +246,7 @@ export default function CoursePage({ slugOverride }) {
 
             {pageData.guestSessionNote && (
               <div className="p-5 rounded-2xl bg-[#c6ff34]/10 border border-[#c6ff34]/30 text-xs md:text-sm font-mono text-white leading-relaxed">
-                💡 <strong className="text-[#c6ff34]">Monthly Industry Masterclasses:</strong> {pageData.guestSessionNote}
+                <strong className="text-white">Monthly Industry Masterclasses:</strong> {pageData.guestSessionNote}
               </div>
             )}
           </section>
@@ -256,7 +256,7 @@ export default function CoursePage({ slugOverride }) {
         {pageData.outcomesList && (
           <section className="space-y-6">
             <div className="space-y-1">
-              <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Learning Outcomes</div>
+              <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">Learning Outcomes</div>
               <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
                 What You'll Be Able to Do By the End
               </h2>
@@ -267,7 +267,7 @@ export default function CoursePage({ slugOverride }) {
                   key={idx}
                   className="p-4 rounded-xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl flex items-start gap-3 text-sm font-mono text-slate-300"
                 >
-                  <span className="text-[#c6ff34] font-black">✔</span>
+                  <span className="text-white font-black">✔</span>
                   <span>{item}</span>
                 </div>
               ))}
@@ -280,7 +280,7 @@ export default function CoursePage({ slugOverride }) {
           <section id="syllabus" className="scroll-mt-36 space-y-6">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-2">
               <div>
-                <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">
+                <span className="text-xs font-mono font-bold uppercase tracking-widest text-white">
                   Curriculum Breakdown
                 </span>
                 <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-white">
@@ -318,14 +318,14 @@ export default function CoursePage({ slugOverride }) {
             <div className="border border-white/10 rounded-3xl p-6 md:p-8 bg-[#0D1318]/90 backdrop-blur-xl shadow-2xl space-y-4">
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div>
-                  <span className="text-xs font-mono font-black text-[#c6ff34] uppercase tracking-widest">
+                  <span className="text-xs font-mono font-black text-white uppercase tracking-widest">
                     {pageData.syllabus[activeSyllabusMonth].month} Focus
                   </span>
                   <h3 className="text-xl md:text-2xl font-black uppercase text-white">
                     {pageData.syllabus[activeSyllabusMonth].title}
                   </h3>
                 </div>
-                <span className="hidden sm:inline-block px-3 py-1 rounded-full bg-white/5 border border-white/10 font-mono text-xs font-bold text-[#c6ff34]">
+                <span className="hidden sm:inline-block px-3 py-1 rounded-full bg-white/5 border border-white/10 font-mono text-xs font-bold text-white">
                   Hands-On Module
                 </span>
               </div>
@@ -342,7 +342,7 @@ export default function CoursePage({ slugOverride }) {
                   className="p-5 rounded-2xl border border-white/10 hover:border-[#c6ff34]/40 bg-[#0D1318]/90 backdrop-blur-xl transition-all space-y-2"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-mono font-black text-[#c6ff34] bg-[#c6ff34]/10 px-2.5 py-1 rounded border border-[#c6ff34]/30">
+                    <span className="text-[11px] font-mono font-black text-white bg-[#c6ff34]/10 px-2.5 py-1 rounded border border-[#c6ff34]/30">
                       {m.month}
                     </span>
                     <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">
@@ -365,7 +365,7 @@ export default function CoursePage({ slugOverride }) {
         {pageData.tools && (
           <section className="space-y-6">
             <div className="space-y-1">
-              <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Toolchain</div>
+              <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">Toolchain</div>
               <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
                 Tools & Technologies You'll Use
               </h2>
@@ -403,14 +403,14 @@ export default function CoursePage({ slugOverride }) {
                 {pageData.capstone.description}
               </p>
               <div className="p-4 rounded-xl bg-white/5 text-white font-mono text-xs md:text-sm font-bold border border-white/10">
-                ✨ {pageData.capstone.outcome}
+                {pageData.capstone.outcome}
               </div>
 
               {pageData.capstone.breakdown && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/10">
                   {pageData.capstone.breakdown.map((b, idx) => (
                     <div key={idx} className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-2">
-                      <span className="text-3xl md:text-4xl font-black text-[#c6ff34] font-mono">
+                      <span className="text-3xl md:text-4xl font-black text-white font-mono">
                         {b.percentage}
                       </span>
                       <h4 className="text-base font-bold uppercase text-white">
@@ -431,7 +431,7 @@ export default function CoursePage({ slugOverride }) {
         {pageData.careers && (
           <section id="careers" className="scroll-mt-36 space-y-6">
             <div className="space-y-1">
-              <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Future Proof</div>
+              <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">Future Proof</div>
               <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
                 {pageData.careers.title}
               </h2>
@@ -445,9 +445,9 @@ export default function CoursePage({ slugOverride }) {
               {pageData.careers.pathways.map((role, idx) => (
                 <span
                   key={idx}
-                  className="bg-white/5 hover:bg-[#c6ff34]/20 hover:text-[#c6ff34] text-slate-300 text-xs font-mono font-bold px-4 py-2 rounded-xl border border-white/10 transition-colors"
+                  className="bg-white/5 hover:bg-[#c6ff34]/20 hover:text-white text-slate-300 text-xs font-mono font-bold px-4 py-2 rounded-xl border border-white/10 transition-colors"
                 >
-                  💼 {role}
+                  {role}
                 </span>
               ))}
             </div>
@@ -464,8 +464,8 @@ export default function CoursePage({ slugOverride }) {
                       key={idx}
                       className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl shadow-xl space-y-2"
                     >
-                      <h4 className="text-sm font-black uppercase text-[#c6ff34]">
-                        🚀 {item.title}
+                      <h4 className="text-sm font-black uppercase text-white">
+                        {item.title}
                       </h4>
                       <p className="text-xs font-sans text-slate-400 leading-relaxed">
                         {item.desc}
@@ -482,7 +482,7 @@ export default function CoursePage({ slugOverride }) {
         {pageData.targetAudience && (
           <section className="space-y-6">
             <div className="space-y-1">
-              <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Eligibility</div>
+              <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">Eligibility</div>
               <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
                 Who This Course Is For
               </h2>
@@ -493,7 +493,7 @@ export default function CoursePage({ slugOverride }) {
                   key={idx}
                   className="p-5 rounded-2xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl flex items-start gap-3 shadow-xl"
                 >
-                  <span className="w-6 h-6 rounded-full bg-[#c6ff34]/15 text-[#c6ff34] border border-[#c6ff34]/30 font-mono text-xs font-black flex items-center justify-center flex-shrink-0">
+                  <span className="w-6 h-6 rounded-full bg-[#c6ff34]/15 text-white border border-[#c6ff34]/30 font-mono text-xs font-black flex items-center justify-center flex-shrink-0">
                     {idx + 1}
                   </span>
                   <p className="text-xs md:text-sm font-sans text-slate-300 leading-relaxed">
@@ -536,7 +536,7 @@ export default function CoursePage({ slugOverride }) {
                               <td
                                 key={ci}
                                 className={`p-4 ${
-                                  ci === 0 ? "font-bold text-[#c6ff34]" : "text-slate-300"
+                                  ci === 0 ? "font-bold text-white" : "text-slate-300"
                                 }`}
                               >
                                 {cell}
@@ -564,7 +564,7 @@ export default function CoursePage({ slugOverride }) {
           <section id="faqs" className="scroll-mt-36 space-y-6 pt-6 border-t border-white/10">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Questions Answered</div>
+                <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">Questions Answered</div>
                 <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
                   Frequently Asked Questions
                 </h2>
@@ -585,7 +585,7 @@ export default function CoursePage({ slugOverride }) {
                     className="w-full text-left p-5 font-black uppercase tracking-tight text-sm md:text-base flex justify-between items-center gap-4 bg-white/[0.02] hover:bg-white/[0.05] transition-colors"
                   >
                     <span className="text-white">{faq.q}</span>
-                    <span className="w-7 h-7 rounded-full bg-[#c6ff34]/15 text-[#c6ff34] border border-[#c6ff34]/30 flex items-center justify-center font-mono text-xs flex-shrink-0">
+                    <span className="w-7 h-7 rounded-full bg-[#c6ff34]/15 text-white border border-[#c6ff34]/30 flex items-center justify-center font-mono text-xs flex-shrink-0">
                       {openFAQs[index] ? "−" : "+"}
                     </span>
                   </button>
@@ -639,11 +639,11 @@ export default function CoursePage({ slugOverride }) {
 
             {/* Contact quick strip */}
             <div className="pt-6 border-t border-white/10 flex flex-wrap items-center justify-center md:justify-start gap-6 text-xs font-mono text-slate-400">
-              <span>📞 +91 949 595 7011</span>
+              <span>+91 949 595 7011</span>
               <span>•</span>
-              <span>✉️ info@deepstaq.in</span>
+              <span>deepstackbyaleef@gmail.com</span>
               <span>•</span>
-              <span>🌐 www.deepstaq.in</span>
+              <span>www.deepstaq.in</span>
             </div>
           </div>
         </section>

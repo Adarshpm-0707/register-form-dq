@@ -57,6 +57,12 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // Security for Aptitude Test V2 Submissions
+    match /aptitude_v2_submissions/{document} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
+    }
+
     // Security for Collected Contacts
     match /collected_contacts/{document} {
       allow create: if isStringOfSize(request.resource.data.ownerName, 100)

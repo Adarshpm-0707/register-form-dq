@@ -5,7 +5,7 @@ import * as THREE from "three";
 function Grid() {
   return (
     <gridHelper 
-      args={[100, 20, "#c6ff34", "#1e1e3f"]} 
+      args={[100, 20, "#38bdf8", "#0b1e3b"]} 
       position={[0, -10, 0]} 
       rotation={[0, 0, 0]} 
       onBeforeCompile={(shader) => {
@@ -48,7 +48,7 @@ function Nodes({ count = 20 }) {
       {nodes.map((node, i) => (
         <mesh key={i} position={node.position}>
           <octahedronGeometry args={[node.size, 0]} />
-          <meshBasicMaterial color="#c6ff34" wireframe transparent opacity={0.08} />
+          <meshBasicMaterial color="#38bdf8" wireframe transparent opacity={0.12} />
         </mesh>
       ))}
     </group>
@@ -103,9 +103,9 @@ function Particles({ count = 4000 }) {
       </bufferGeometry>
       <pointsMaterial
         size={0.08}
-        color="#c6ff34"
+        color="#38bdf8"
         transparent
-        opacity={0.15}
+        opacity={0.18}
         sizeAttenuation
         blending={THREE.AdditiveBlending}
       />

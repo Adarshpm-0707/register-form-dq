@@ -25,7 +25,7 @@ export default function BlogPost() {
   const nextPost = currentIndex < BLOG_POSTS.length - 1 ? BLOG_POSTS[currentIndex + 1] : null;
 
   return (
-    <div className="min-h-screen bg-[#090D11] text-white font-sans pb-24 relative overflow-hidden">
+    <div className="min-h-screen bg-transparent text-white font-sans pb-24 relative overflow-hidden">
       {/* Background glow highlights */}
       <div className="absolute top-24 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#c6ff34]/10 rounded-full blur-[150px] pointer-events-none"></div>
 
@@ -36,12 +36,12 @@ export default function BlogPost() {
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
               to="/blog"
-              className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 hover:text-[#c6ff34] flex items-center gap-1 transition-colors"
+              className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 hover:text-white flex items-center gap-1 transition-colors"
             >
               ← Back to Blog Hub
             </Link>
             <span className="text-white/20">•</span>
-            <span className="bg-[#c6ff34]/10 text-[#c6ff34] text-[11px] font-bold px-3 py-1 rounded-md border border-[#c6ff34]/30 uppercase tracking-wider font-mono">
+            <span className="bg-[#c6ff34]/10 text-white text-[11px] font-bold px-3 py-1 rounded-md border border-[#c6ff34]/30 uppercase tracking-wider font-mono">
               {post.category}
             </span>
             <span className="bg-white/10 text-white text-[11px] font-bold px-3 py-1 rounded-md uppercase tracking-wider font-mono border border-white/10">
@@ -61,7 +61,7 @@ export default function BlogPost() {
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-mono text-slate-400 pt-3 border-t border-white/10 w-full">
-            <span className="font-bold text-[#c6ff34]">By DeepStaq Editorial</span>
+            <span className="font-bold text-white">By DeepStaq Editorial</span>
             <span>•</span>
             <span>Published {post.publishDate}</span>
             <span>•</span>
@@ -89,7 +89,7 @@ export default function BlogPost() {
                 <div className="overflow-x-auto border border-white/10 rounded-2xl bg-white/[0.02] shadow-xl my-6">
                   <table className="w-full text-left border-collapse text-xs md:text-sm">
                     <thead>
-                      <tr className="bg-white/[0.05] text-[#c6ff34] font-mono uppercase tracking-wider">
+                      <tr className="bg-white/[0.05] text-white font-mono uppercase tracking-wider">
                         {sec.table.headers.map((h, hi) => (
                           <th key={hi} className="p-4 border-b border-white/10">
                             {h}
@@ -119,7 +119,7 @@ export default function BlogPost() {
 
           {/* DeepStaq Callout Box */}
           <div className="bg-[#0D1318]/90 text-white rounded-3xl p-8 border border-[#c6ff34]/30 shadow-[0_0_30px_rgba(198,255,52,0.15)] space-y-4">
-            <span className="bg-[#c6ff34]/10 text-[#c6ff34] text-xs font-mono font-bold px-3 py-1 rounded-md uppercase tracking-wider border border-[#c6ff34]/30">
+            <span className="bg-[#c6ff34]/10 text-white text-xs font-mono font-bold px-3 py-1 rounded-md uppercase tracking-wider border border-[#c6ff34]/30">
               Hands-on AI Academy
             </span>
             <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">

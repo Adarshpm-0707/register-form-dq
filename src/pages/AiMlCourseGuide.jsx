@@ -45,7 +45,7 @@ export default function AiMlCourseGuide() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#090D11] text-white font-sans pb-24 selection:bg-[#c6ff34] selection:text-[#090D11] relative overflow-hidden">
+    <div className="min-h-screen bg-transparent text-white font-sans pb-24 selection:bg-sky-500/30 selection:text-white relative overflow-hidden">
       {/* AMBIENT GLOWS */}
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#c6ff34]/10 rounded-full blur-[150px] pointer-events-none -z-0" />
       <div className="absolute top-[800px] right-0 w-[500px] h-[350px] bg-cyan-500/10 rounded-full blur-[150px] pointer-events-none -z-0" />
@@ -63,7 +63,7 @@ export default function AiMlCourseGuide() {
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white leading-[1.08] max-w-5xl">
-            AI & ML Course Guide: <span className="text-[#c6ff34]">Everything You Need to Know</span> Before You Enrol
+            AI & ML Course Guide: <span className="text-white">Everything You Need to Know</span> Before You Enrol
           </h1>
 
           <p className="text-slate-300 text-base md:text-lg max-w-4xl leading-relaxed font-sans font-medium">
@@ -83,7 +83,7 @@ export default function AiMlCourseGuide() {
               href="tel:+919495957011"
               className="bg-white/5 hover:bg-white/10 text-white font-mono font-bold text-xs md:text-sm px-6 py-4 rounded-2xl border border-white/15 hover:border-white/30 transition-all"
             >
-              📞 +91 949 595 7011
+              +91 949 595 7011
             </a>
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function AiMlCourseGuide() {
         {/* SECTION 1: WHAT IS AI & ML */}
         <section className="space-y-4">
           <div className="space-y-1">
-            <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">01 / Fundamentals</div>
+            <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">01 / Fundamentals</div>
             <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
               What is AI & ML?
             </h2>
@@ -107,7 +107,7 @@ export default function AiMlCourseGuide() {
             Machine Learning (ML) is a subset of AI. Instead of programming a computer with fixed rules, ML trains algorithms on data so they can identify patterns and make predictions on their own — like how Netflix recommends shows or how a bank flags fraudulent transactions.
           </p>
           <div className="p-6 rounded-2xl bg-[#0D1318]/90 border border-white/10 backdrop-blur-xl space-y-3 font-mono text-xs md:text-sm shadow-xl">
-            <h4 className="font-bold text-[#c6ff34]">Within AI/ML today, three areas matter most to job-seekers:</h4>
+            <h4 className="font-bold text-white">Within AI/ML today, three areas matter most to job-seekers:</h4>
             <p className="text-slate-300">• <strong className="text-white">Deep Learning</strong> — neural networks that power image recognition, speech, and recommendation systems.</p>
             <p className="text-slate-300">• <strong className="text-white">NLP (Natural Language Processing)</strong> — how machines understand and generate human language (chatbots, translation, sentiment analysis).</p>
             <p className="text-slate-300">• <strong className="text-white">Generative AI (GenAI)</strong> — the technology behind tools like ChatGPT and Claude, including large language models (LLMs), fine-tuning, and AI agents that can take actions on their own.</p>
@@ -120,7 +120,7 @@ export default function AiMlCourseGuide() {
         {/* SECTION 2: WHO SHOULD LEARN */}
         <section className="space-y-4 pt-6 border-t border-white/10">
           <div className="space-y-1">
-            <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">02 / Target Audience</div>
+            <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">02 / Target Audience</div>
             <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
               Who Should Learn AI & ML?
             </h2>
@@ -129,11 +129,11 @@ export default function AiMlCourseGuide() {
             AI/ML is one of the few tech fields genuinely open to a mixed audience. You should consider a course if you are:
           </p>
           <ul className="space-y-2.5 font-sans text-xs md:text-sm text-slate-300">
-            <li className="flex items-start gap-2"><span className="text-[#c6ff34] font-mono">→</span> A student or fresh graduate (engineering, science, commerce, or any stream) wanting a head start into a high-demand tech career.</li>
-            <li className="flex items-start gap-2"><span className="text-[#c6ff34] font-mono">→</span> A working professional in software, data, or analytics looking to upskill and move into ML/AI roles.</li>
-            <li className="flex items-start gap-2"><span className="text-[#c6ff34] font-mono">→</span> A career switcher from a non-tech background — business, marketing, finance, education — who wants to pivot into tech without starting a full degree over again.</li>
-            <li className="flex items-start gap-2"><span className="text-[#c6ff34] font-mono">→</span> An entrepreneur or freelancer who wants to build AI-powered products, chatbots, or automation tools for clients or your own business.</li>
-            <li className="flex items-start gap-2"><span className="text-[#c6ff34] font-mono">→</span> A business owner or marketer who wants to understand AI well enough to apply it — automating workflows, building simple tools, or making informed decisions about AI adoption.</li>
+            <li className="flex items-start gap-2"><span className="text-white font-mono">→</span> A student or fresh graduate (engineering, science, commerce, or any stream) wanting a head start into a high-demand tech career.</li>
+            <li className="flex items-start gap-2"><span className="text-white font-mono">→</span> A working professional in software, data, or analytics looking to upskill and move into ML/AI roles.</li>
+            <li className="flex items-start gap-2"><span className="text-white font-mono">→</span> A career switcher from a non-tech background — business, marketing, finance, education — who wants to pivot into tech without starting a full degree over again.</li>
+            <li className="flex items-start gap-2"><span className="text-white font-mono">→</span> An entrepreneur or freelancer who wants to build AI-powered products, chatbots, or automation tools for clients or your own business.</li>
+            <li className="flex items-start gap-2"><span className="text-white font-mono">→</span> A business owner or marketer who wants to understand AI well enough to apply it — automating workflows, building simple tools, or making informed decisions about AI adoption.</li>
           </ul>
           <p className="text-slate-400 text-sm leading-relaxed">
             You don't need a computer science degree or prior coding experience — most well-designed programmes (including Deepstaq's) start from Python fundamentals and build up from there.
@@ -143,7 +143,7 @@ export default function AiMlCourseGuide() {
         {/* SECTION 3: ELIGIBILITY */}
         <section className="space-y-4 pt-6 border-t border-white/10">
           <div className="space-y-1">
-            <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">03 / Requirements</div>
+            <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">03 / Requirements</div>
             <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
               AI & ML Course Eligibility
             </h2>
@@ -153,16 +153,16 @@ export default function AiMlCourseGuide() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-xs md:text-sm">
             <div className="p-4 rounded-xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl">
-              <strong className="text-[#c6ff34]">Educational background:</strong> <span className="text-slate-300">12th pass or a bachelor's degree in any discipline (engineering, science, commerce, arts) — no AI/CS degree required.</span>
+              <strong className="text-white">Educational background:</strong> <span className="text-slate-300">12th pass or a bachelor's degree in any discipline (engineering, science, commerce, arts) — no AI/CS degree required.</span>
             </div>
             <div className="p-4 rounded-xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl">
-              <strong className="text-[#c6ff34]">Prior coding experience:</strong> <span className="text-slate-300">Not mandatory for beginner-friendly programmes; helpful but not required if the course starts with a Python foundation module.</span>
+              <strong className="text-white">Prior coding experience:</strong> <span className="text-slate-300">Not mandatory for beginner-friendly programmes; helpful but not required if the course starts with a Python foundation module.</span>
             </div>
             <div className="p-4 rounded-xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl">
-              <strong className="text-[#c6ff34]">Math comfort:</strong> <span className="text-slate-300">Basic comfort with numbers and logical thinking helps — concepts are taught from scratch.</span>
+              <strong className="text-white">Math comfort:</strong> <span className="text-slate-300">Basic comfort with numbers and logical thinking helps — concepts are taught from scratch.</span>
             </div>
             <div className="p-4 rounded-xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl">
-              <strong className="text-[#c6ff34]">Devices:</strong> <span className="text-slate-300">A laptop capable of running Python/Jupyter notebooks (coursework runs seamlessly on cloud tools like Google Colab).</span>
+              <strong className="text-white">Devices:</strong> <span className="text-slate-300">A laptop capable of running Python/Jupyter notebooks (coursework runs seamlessly on cloud tools like Google Colab).</span>
             </div>
           </div>
         </section>
@@ -170,7 +170,7 @@ export default function AiMlCourseGuide() {
         {/* SECTION 4: DURATION */}
         <section className="space-y-4 pt-6 border-t border-white/10">
           <div className="space-y-1">
-            <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">04 / Timeline</div>
+            <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">04 / Timeline</div>
             <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
               AI & ML Course Duration
             </h2>
@@ -185,7 +185,7 @@ export default function AiMlCourseGuide() {
               </thead>
               <tbody className="divide-y divide-white/10">
                 <tr className="hover:bg-white/[0.03]"><td className="p-4 font-bold text-slate-300">Short certification (Coursera, Udemy-style)</td><td className="p-4 text-slate-400">4–12 weeks</td></tr>
-                <tr className="hover:bg-white/[0.03]"><td className="p-4 font-bold text-[#c6ff34]">Industry diploma / bootcamp (like Deepstaq)</td><td className="p-4 text-white font-bold">4–8 months</td></tr>
+                <tr className="hover:bg-white/[0.03]"><td className="p-4 font-bold text-white">Industry diploma / bootcamp (like Deepstaq)</td><td className="p-4 text-white font-bold">4–8 months</td></tr>
                 <tr className="hover:bg-white/[0.03]"><td className="p-4 font-bold text-slate-300">PG Diploma / Executive programme</td><td className="p-4 text-slate-400">6–12 months</td></tr>
                 <tr className="hover:bg-white/[0.03]"><td className="p-4 font-bold text-slate-300">Full-time degree (B.Tech/M.Tech/MSc in AI)</td><td className="p-4 text-slate-400">2–4 years</td></tr>
               </tbody>
@@ -199,7 +199,7 @@ export default function AiMlCourseGuide() {
         {/* SECTION 5: FEES */}
         <section className="space-y-4 pt-6 border-t border-white/10">
           <div className="space-y-1">
-            <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">05 / Investment</div>
+            <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">05 / Investment</div>
             <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
               AI & ML Course Fees
             </h2>
@@ -209,41 +209,41 @@ export default function AiMlCourseGuide() {
           </p>
           <ul className="space-y-2 font-mono text-xs md:text-sm text-slate-300">
             <li>• <strong className="text-white">Short online certifications:</strong> ₹1,000 – ₹40,000</li>
-            <li>• <strong className="text-[#c6ff34]">Industry diploma / bootcamp programmes (6 months, instructor-led):</strong> roughly ₹35,000 – ₹1,50,000</li>
+            <li>• <strong className="text-white">Industry diploma / bootcamp programmes (6 months, instructor-led):</strong> roughly ₹35,000 – ₹1,50,000</li>
             <li>• <strong className="text-white">PG-level executive certificates (IIT/IIM-affiliated):</strong> ₹1,00,000 – ₹3,00,000+</li>
             <li>• <strong className="text-white">Full degree programmes (B.Tech/M.Tech/MSc):</strong> ₹2,00,000 – ₹10,00,000+</li>
           </ul>
           <div className="p-5 rounded-2xl bg-[#0D1318]/90 border border-white/10 text-xs md:text-sm font-mono text-slate-300 backdrop-blur-xl">
-            For Deepstaq's exact current fee structure and any active scholarship offers, contact <strong className="text-[#c6ff34]">+91 949 595 7011</strong> or <strong className="text-[#c6ff34]">info@deepstaq.in</strong>.
+            For Deepstaq's exact current fee structure and any active scholarship offers, contact <strong className="text-white">+91 949 595 7011</strong> or <strong className="text-white">deepstackbyaleef@gmail.com</strong>.
           </div>
         </section>
 
         {/* SECTION 6: SKILLS LEARNED */}
         <section className="space-y-4 pt-6 border-t border-white/10">
           <div className="space-y-1">
-            <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">06 / Curriculum</div>
+            <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">06 / Curriculum</div>
             <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
               Skills You'll Learn
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-xs md:text-sm">
             <div className="p-4 rounded-xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl">
-              <strong className="text-[#c6ff34]">1. Programming Foundations (Python):</strong> <span className="text-slate-300">syntax, data structures, functions, recursion, asyncio.</span>
+              <strong className="text-white">1. Programming Foundations (Python):</strong> <span className="text-slate-300">syntax, data structures, functions, recursion, asyncio.</span>
             </div>
             <div className="p-4 rounded-xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl">
-              <strong className="text-[#c6ff34]">2. Math, Data & Visualisation:</strong> <span className="text-slate-300">probability & statistics, NumPy, Pandas, Matplotlib/Seaborn, data cleaning, feature engineering.</span>
+              <strong className="text-white">2. Math, Data & Visualisation:</strong> <span className="text-slate-300">probability & statistics, NumPy, Pandas, Matplotlib/Seaborn, data cleaning, feature engineering.</span>
             </div>
             <div className="p-4 rounded-xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl">
-              <strong className="text-[#c6ff34]">3. Machine Learning:</strong> <span className="text-slate-300">regression, classification, decision trees, random forests, KNN, SVM, gradient boosting, clustering, PCA, model evaluation.</span>
+              <strong className="text-white">3. Machine Learning:</strong> <span className="text-slate-300">regression, classification, decision trees, random forests, KNN, SVM, gradient boosting, clustering, PCA, model evaluation.</span>
             </div>
             <div className="p-4 rounded-xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl">
-              <strong className="text-[#c6ff34]">4. Deep Learning & NLP:</strong> <span className="text-slate-300">neural network fundamentals, CNNs, RNNs, LSTMs/GRUs, using TensorFlow/Keras/PyTorch.</span>
+              <strong className="text-white">4. Deep Learning & NLP:</strong> <span className="text-slate-300">neural network fundamentals, CNNs, RNNs, LSTMs/GRUs, using TensorFlow/Keras/PyTorch.</span>
             </div>
             <div className="p-4 rounded-xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl">
-              <strong className="text-[#c6ff34]">5. Generative AI & LLMs:</strong> <span className="text-slate-300">embeddings, transformers & attention, BERT/GPT family, fine-tuning (LoRA, QLoRA, PEFT).</span>
+              <strong className="text-white">5. Generative AI & LLMs:</strong> <span className="text-slate-300">embeddings, transformers & attention, BERT/GPT family, fine-tuning (LoRA, QLoRA, PEFT).</span>
             </div>
             <div className="p-4 rounded-xl border border-white/10 bg-[#0D1318]/90 backdrop-blur-xl">
-              <strong className="text-[#c6ff34]">6. MLOps & Advanced Topics:</strong> <span className="text-slate-300">vector databases, RAG, agentic AI & tool calling, Docker, FastAPI, CI/CD.</span>
+              <strong className="text-white">6. MLOps & Advanced Topics:</strong> <span className="text-slate-300">vector databases, RAG, agentic AI & tool calling, Docker, FastAPI, CI/CD.</span>
             </div>
           </div>
         </section>
@@ -251,7 +251,7 @@ export default function AiMlCourseGuide() {
         {/* SECTION 7: ONLINE VS OFFLINE */}
         <section className="space-y-4 pt-6 border-t border-white/10">
           <div className="space-y-1">
-            <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">07 / Modality</div>
+            <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">07 / Modality</div>
             <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
               Online vs Offline AI & ML Courses: Which Should You Choose?
             </h2>
@@ -266,12 +266,12 @@ export default function AiMlCourseGuide() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/10">
-                <tr className="hover:bg-white/[0.03]"><td className="p-4 font-bold text-[#c6ff34]">Flexibility</td><td className="p-4 text-slate-300">High — learn at your own pace</td><td className="p-4 text-slate-300">Fixed timings, structured routine</td></tr>
-                <tr className="hover:bg-white/[0.03]"><td className="p-4 font-bold text-[#c6ff34]">Networking</td><td className="p-4 text-slate-300">Community/Slack/Discord</td><td className="p-4 text-slate-300">Direct peer & mentor interaction</td></tr>
-                <tr className="hover:bg-white/[0.03]"><td className="p-4 font-bold text-[#c6ff34]">Doubt-clearing</td><td className="p-4 text-slate-300">Async or scheduled calls</td><td className="p-4 text-slate-300">Immediate, in-person support</td></tr>
-                <tr className="hover:bg-white/[0.03]"><td className="p-4 font-bold text-[#c6ff34]">Discipline required</td><td className="p-4 text-slate-300">High (self-driven)</td><td className="p-4 text-slate-300">Lower (structured accountability)</td></tr>
-                <tr className="hover:bg-white/[0.03]"><td className="p-4 font-bold text-[#c6ff34]">Lab / GPU access</td><td className="p-4 text-slate-300">Cloud tools provided</td><td className="p-4 text-slate-300">Direct hardware guidance</td></tr>
-                <tr className="hover:bg-white/[0.03]"><td className="p-4 font-bold text-[#c6ff34]">Best for</td><td className="p-4 text-slate-300">Working professionals</td><td className="p-4 text-slate-300">Students, career switchers</td></tr>
+                <tr className="hover:bg-white/[0.03]"><td className="p-4 font-bold text-white">Flexibility</td><td className="p-4 text-slate-300">High — learn at your own pace</td><td className="p-4 text-slate-300">Fixed timings, structured routine</td></tr>
+                <tr className="hover:bg-white/[0.03]"><td className="p-4 font-bold text-white">Networking</td><td className="p-4 text-slate-300">Community/Slack/Discord</td><td className="p-4 text-slate-300">Direct peer & mentor interaction</td></tr>
+                <tr className="hover:bg-white/[0.03]"><td className="p-4 font-bold text-white">Doubt-clearing</td><td className="p-4 text-slate-300">Async or scheduled calls</td><td className="p-4 text-slate-300">Immediate, in-person support</td></tr>
+                <tr className="hover:bg-white/[0.03]"><td className="p-4 font-bold text-white">Discipline required</td><td className="p-4 text-slate-300">High (self-driven)</td><td className="p-4 text-slate-300">Lower (structured accountability)</td></tr>
+                <tr className="hover:bg-white/[0.03]"><td className="p-4 font-bold text-white">Lab / GPU access</td><td className="p-4 text-slate-300">Cloud tools provided</td><td className="p-4 text-slate-300">Direct hardware guidance</td></tr>
+                <tr className="hover:bg-white/[0.03]"><td className="p-4 font-bold text-white">Best for</td><td className="p-4 text-slate-300">Working professionals</td><td className="p-4 text-slate-300">Students, career switchers</td></tr>
               </tbody>
             </table>
           </div>
@@ -282,7 +282,7 @@ export default function AiMlCourseGuide() {
           <div className="border border-white/10 rounded-3xl p-6 md:p-10 bg-[#0D1318]/90 backdrop-blur-xl shadow-2xl space-y-4 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-72 h-72 bg-[#c6ff34]/5 rounded-full blur-3xl pointer-events-none" />
             <div className="space-y-1">
-              <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">08 / DeepStaq Standard</div>
+              <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">08 / DeepStaq Standard</div>
               <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
                 Deepstaq's Programme: From Zero to AI Builder in Six Months
               </h2>
@@ -302,7 +302,7 @@ export default function AiMlCourseGuide() {
         {/* FAQS */}
         <section className="space-y-6 pt-6 border-t border-white/10">
           <div className="space-y-2">
-            <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#c6ff34]">Got Questions?</div>
+            <div className="text-xs font-mono font-bold uppercase tracking-widest text-white">Got Questions?</div>
             <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
               Frequently Asked Questions
             </h2>
@@ -315,7 +315,7 @@ export default function AiMlCourseGuide() {
                   className="w-full text-left p-5 font-black uppercase tracking-tight text-sm md:text-base flex justify-between items-center gap-4 bg-white/[0.02] hover:bg-white/[0.05] transition-colors"
                 >
                   <span className="text-white">{faq.q}</span>
-                  <span className="w-7 h-7 rounded-full bg-[#c6ff34]/15 text-[#c6ff34] border border-[#c6ff34]/30 flex items-center justify-center font-mono text-xs flex-shrink-0">
+                  <span className="w-7 h-7 rounded-full bg-[#c6ff34]/15 text-white border border-[#c6ff34]/30 flex items-center justify-center font-mono text-xs flex-shrink-0">
                     {openFAQs[index] ? "−" : "+"}
                   </span>
                 </button>
@@ -365,11 +365,11 @@ export default function AiMlCourseGuide() {
               </Link>
             </div>
             <div className="pt-6 border-t border-white/10 flex flex-wrap items-center justify-center md:justify-start gap-6 text-xs font-mono text-slate-400">
-              <span>📞 +91 949 595 7011</span>
+              <span>+91 949 595 7011</span>
               <span>•</span>
-              <span>✉️ info@deepstaq.in</span>
+              <span>deepstackbyaleef@gmail.com</span>
               <span>•</span>
-              <span>🌐 www.deepstaq.in</span>
+              <span>www.deepstaq.in</span>
             </div>
           </div>
         </section>

@@ -204,18 +204,18 @@ function Navbar() {
                 >
                   <Link
                     to={link.path}
-                    className={`relative text-xs font-black uppercase tracking-[0.25em] transition-all duration-300 group flex items-center gap-1.5 ${
-                      active ? "text-[#050521]" : "text-slate-700 hover:text-[#050521]"
+                    className={`relative text-xs sm:text-sm font-medium tracking-normal transition-all duration-200 group flex items-center gap-1.5 py-1 ${
+                      active || isBlogHovered ? "text-sky-400 font-semibold" : "text-white/80 hover:text-white"
                     }`}
                   >
                     <span>{link.name}</span>
                     <Icons.ChevronDown
                       className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                        isBlogHovered ? "rotate-180 text-[#050521]" : "text-slate-400"
+                        isBlogHovered ? "rotate-180 text-sky-400" : "text-slate-400"
                       }`}
                     />
                     <span
-                      className={`absolute -bottom-1 left-0 h-[2px] bg-[#c6ff34] transition-all duration-300 rounded-full ${
+                      className={`absolute -bottom-1 left-0 h-[2px] bg-gradient-to-r from-sky-400 to-blue-500 transition-all duration-300 rounded-full ${
                         active || isBlogHovered ? "w-full" : "w-0 group-hover:w-full"
                       }`}
                     />
@@ -229,19 +229,19 @@ function Navbar() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.96 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="absolute top-full left-1/2 -translate-x-1/2 w-[480px] lg:w-[560px] bg-white border-2 border-[#050521] rounded-3xl p-5 shadow-[8px_8px_0px_0px_#050521] z-50 mt-1"
+                        className="absolute top-full left-1/2 -translate-x-1/2 w-[480px] lg:w-[560px] bg-[#040d1a]/95 backdrop-blur-2xl border border-sky-500/20 rounded-3xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-50 mt-2 text-white"
                       >
-                        <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                        <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
                           <div className="flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 rounded-full bg-[#c6ff34] border border-[#050521]" />
-                            <span className="text-[11px] font-black uppercase tracking-widest text-[#050521] font-mono">
+                            <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
+                            <span className="text-[11px] font-bold uppercase tracking-widest text-slate-200 font-mono">
                               AI/ML Learning Guides (2026)
                             </span>
                           </div>
                           <Link
                             to="/blog"
                             onClick={() => setIsBlogHovered(false)}
-                            className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-700 hover:text-[#050521] underline"
+                            className="text-[10px] font-mono font-bold uppercase tracking-wider text-sky-400 hover:text-sky-300 transition-colors"
                           >
                             All Guides →
                           </Link>
@@ -254,17 +254,17 @@ function Navbar() {
                               key={post.id}
                               to={`/blog/${post.slug}`}
                               onClick={() => setIsBlogHovered(false)}
-                              className="group p-3 rounded-2xl bg-slate-50 hover:bg-[#c6ff34]/20 border border-slate-200/80 hover:border-[#050521] transition-all flex flex-col justify-between space-y-1.5 shadow-none hover:shadow-[3px_3px_0px_0px_#050521]"
+                              className="group p-3 rounded-2xl bg-white/[0.03] hover:bg-sky-400/10 border border-white/8 hover:border-sky-400/40 transition-all flex flex-col justify-between space-y-1.5"
                             >
                               <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-mono font-black text-[#050521] bg-white px-2 py-0.5 rounded border border-slate-300">
+                                <span className="text-[10px] font-mono font-bold text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-500/20">
                                   0{idx + 1}
                                 </span>
-                                <span className="text-[9px] font-mono font-bold text-slate-500 uppercase">
+                                <span className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-wider">
                                   {post.category}
                                 </span>
                               </div>
-                              <h4 className="text-xs font-black uppercase text-[#050521] line-clamp-2 leading-tight group-hover:text-[#050521]">
+                              <h4 className="text-xs font-bold text-slate-200 group-hover:text-white line-clamp-2 leading-tight transition-colors">
                                 {post.title.split(" (2026")[0].split(" (2026 Guide)")[0]}
                               </h4>
                             </Link>
@@ -272,16 +272,17 @@ function Navbar() {
                         </div>
 
                         {/* Footer Link */}
-                        <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between">
+                        <div className="pt-3 mt-3 border-t border-white/10 flex items-center justify-between">
                           <span className="text-[10px] font-mono text-slate-400">
                             6 Comprehensive Hands-On Guides
                           </span>
                           <Link
                             to="/blog"
                             onClick={() => setIsBlogHovered(false)}
-                            className="text-xs font-black uppercase text-[#050521] bg-[#c6ff34] px-3.5 py-1.5 rounded-lg border border-[#050521] shadow-[2px_2px_0px_0px_#050521] hover:translate-x-0.5 transition-all"
+                            className="text-xs font-bold px-4 py-2 rounded-xl bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-slate-950 shadow-[0_2px_12px_rgba(56,189,248,0.35)] transition-all flex items-center gap-1"
                           >
-                            Explore Blog Hub →
+                            <span>Explore Blog Hub</span>
+                            <span>→</span>
                           </Link>
                         </div>
                       </motion.div>
@@ -297,12 +298,12 @@ function Navbar() {
                 href={link.path}
                 onClick={(e) => handleNavClick(e, link.path)}
                 className={`relative text-xs sm:text-sm font-medium tracking-normal transition-all duration-200 group py-1 ${
-                  active ? "text-[#c6ff34] font-semibold" : "text-white/80 hover:text-white"
+                  active ? "text-sky-400 font-semibold" : "text-white/80 hover:text-white"
                 }`}
               >
                 {link.name}
                 <span
-                  className={`absolute -bottom-1 left-0 h-[2px] bg-[#c6ff34] transition-all duration-300 rounded-full ${
+                  className={`absolute -bottom-1 left-0 h-[2px] bg-gradient-to-r from-sky-400 to-blue-500 transition-all duration-300 rounded-full ${
                     active ? "w-full" : "w-0 group-hover:w-full"
                   }`}
                 />
@@ -321,7 +322,7 @@ function Navbar() {
           </Link>
           <Link
             to="/admission"
-            className="group relative px-4 py-2 rounded-full bg-[#c6ff34] hover:bg-[#b8f522] text-[#090D11] text-xs font-bold tracking-wide transition-all duration-200 shadow-[0_2px_12px_rgba(198,255,52,0.3)] hover:scale-105 active:scale-95 flex items-center gap-1.5"
+            className="group relative px-4 py-2 rounded-full bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-slate-950 text-xs font-bold tracking-wide transition-all duration-200 shadow-[0_2px_16px_rgba(56,189,248,0.35)] hover:scale-105 active:scale-95 flex items-center gap-1.5"
           >
             <span>Apply Now</span>
             <span className="transition-transform duration-200 group-hover:translate-x-0.5 font-bold">→</span>
@@ -337,7 +338,7 @@ function Navbar() {
             onClick={() => setIsOpen(!isOpen)}
             className={`p-2 rounded-full transition-all duration-300 border flex items-center justify-center ${
               isOpen
-                ? "bg-[#c6ff34] text-[#090D11] border-[#c6ff34] shadow-md"
+                ? "bg-sky-400 text-slate-950 border-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.4)]"
                 : "bg-white/10 hover:bg-white/20 text-white border-white/20"
             }`}
           >
@@ -353,14 +354,14 @@ function Navbar() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -16, scale: 0.97 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
-              className="absolute top-[calc(100%+10px)] left-0 w-full rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 lg:hidden z-50 flex flex-col gap-2 shadow-2xl border bg-[#0B1015]/95 backdrop-blur-2xl border-white/15 text-white max-h-[82vh] overflow-y-auto"
+              className="absolute top-[calc(100%+10px)] left-0 w-full rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 lg:hidden z-50 flex flex-col gap-2 shadow-2xl border bg-[#040d1a]/95 backdrop-blur-2xl border-white/15 text-white max-h-[82vh] overflow-y-auto"
             >
               {/* Menu Header in Tablet/Mobile */}
-              <div className="flex items-center justify-between pb-3 px-2 border-b border-slate-100">
-                <span className="text-[11px] font-mono font-black uppercase tracking-widest text-slate-500">
+              <div className="flex items-center justify-between pb-3 px-2 border-b border-white/10">
+                <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-slate-400">
                   Navigation Menu
                 </span>
-                <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                <span className="text-[10px] font-mono font-bold text-sky-400 bg-sky-950/60 px-2.5 py-0.5 rounded-full border border-sky-500/30">
                   DeepStaq AI Hub
                 </span>
               </div>
@@ -376,21 +377,21 @@ function Navbar() {
                         key={link.path}
                         className={`flex flex-col rounded-2xl border transition-all ${
                           active
-                            ? "bg-slate-50/80 border-slate-300"
-                            : "border-transparent hover:border-slate-200"
+                            ? "bg-sky-400/10 border-sky-500/30"
+                            : "border-transparent hover:border-white/10"
                         }`}
                       >
-                        <div className="flex items-center justify-between py-2.5 px-3 sm:px-4 rounded-2xl hover:bg-slate-50">
+                        <div className="flex items-center justify-between py-2.5 px-3 sm:px-4 rounded-2xl hover:bg-white/[0.04]">
                           <Link
                             to={link.path}
                             onClick={() => setIsOpen(false)}
-                            className={`text-sm sm:text-base font-black uppercase tracking-[0.2em] flex items-center gap-2 ${
-                              active ? "text-[#050521]" : "text-slate-800"
+                            className={`text-sm sm:text-base font-bold uppercase tracking-wider flex items-center gap-2 ${
+                              active ? "text-sky-400" : "text-white"
                             }`}
                           >
                             <span>{link.name}</span>
                             {active && (
-                              <span className="w-2 h-2 rounded-full bg-[#c6ff34] border border-[#050521]" />
+                              <span className="w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
                             )}
                           </Link>
                           <button
@@ -401,14 +402,14 @@ function Navbar() {
                               e.stopPropagation();
                               setMobileBlogExpanded(!mobileBlogExpanded);
                             }}
-                            className="p-2 rounded-xl bg-slate-100 hover:bg-[#c6ff34]/30 text-[#050521] border border-slate-200 transition-colors flex items-center gap-1"
+                            className="p-2 rounded-xl bg-white/5 hover:bg-sky-400/20 text-white border border-white/10 transition-colors flex items-center gap-1"
                           >
                             <span className="text-[10px] font-mono font-bold uppercase hidden sm:inline">
                               Guides
                             </span>
                             <Icons.ChevronDown
                               className={`w-4 h-4 transition-transform duration-200 ${
-                                mobileBlogExpanded ? "rotate-180" : ""
+                                mobileBlogExpanded ? "rotate-180 text-sky-400" : "text-slate-400"
                               }`}
                             />
                           </button>
@@ -424,15 +425,15 @@ function Navbar() {
                               transition={{ duration: 0.2 }}
                               className="overflow-hidden"
                             >
-                              <div className="p-3 mx-2 mb-2 grid grid-cols-1 sm:grid-cols-2 gap-2 bg-slate-50 rounded-xl border border-slate-200">
+                              <div className="p-3 mx-2 mb-2 grid grid-cols-1 sm:grid-cols-2 gap-2 bg-white/[0.02] rounded-xl border border-white/10">
                                 <div className="sm:col-span-2 flex items-center justify-between pb-1 px-1">
-                                  <span className="text-[10px] font-mono font-bold text-slate-500 uppercase">
+                                  <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">
                                     Learning Guides
                                   </span>
                                   <Link
                                     to="/blog"
                                     onClick={() => setIsOpen(false)}
-                                    className="text-[10px] font-mono font-bold text-emerald-700 hover:underline"
+                                    className="text-[10px] font-mono font-bold text-sky-400 hover:underline"
                                   >
                                     View All →
                                   </Link>
@@ -442,9 +443,9 @@ function Navbar() {
                                     key={post.id}
                                     to={`/blog/${post.slug}`}
                                     onClick={() => setIsOpen(false)}
-                                    className="text-xs font-mono font-bold text-[#050521] hover:text-emerald-700 p-2.5 rounded-lg bg-white hover:bg-[#c6ff34]/20 border border-slate-200 hover:border-[#050521] flex items-start gap-2 transition-all shadow-sm"
+                                    className="text-xs font-mono font-bold text-slate-200 hover:text-white p-2.5 rounded-lg bg-white/[0.03] hover:bg-sky-400/15 border border-white/8 hover:border-sky-400/40 flex items-start gap-2 transition-all shadow-sm"
                                   >
-                                    <span className="text-[10px] font-black bg-slate-100 px-1.5 py-0.5 rounded text-[#050521]">
+                                    <span className="text-[10px] font-black bg-sky-950/60 text-sky-400 border border-sky-500/20 px-1.5 py-0.5 rounded">
                                       0{idx + 1}
                                     </span>
                                     <span className="line-clamp-1 leading-snug">
@@ -466,21 +467,17 @@ function Navbar() {
                       href={link.path}
                       onClick={(e) => handleNavClick(e, link.path)}
                       className={`text-sm sm:text-base font-semibold py-2.5 sm:py-3 px-3 sm:px-4 transition-all flex items-center justify-between group rounded-2xl ${
-                        isHome
-                          ? active
-                            ? "bg-[#c6ff34]/20 text-[#c6ff34] border border-[#c6ff34]/30"
-                            : "text-white/90 hover:bg-white/10 hover:text-white"
-                          : active
-                            ? "bg-[#c6ff34]/30 text-[#050521] font-black border border-[#050521]/20"
-                            : "text-slate-800 hover:bg-slate-100 hover:text-[#050521]"
+                        active
+                          ? "bg-sky-400/15 text-sky-300 border border-sky-400/30 font-bold"
+                          : "text-white/80 hover:bg-white/5 hover:text-white"
                       }`}
                     >
                       <span className="flex items-center gap-2">{link.name}</span>
                       <span
                         className={`w-2 h-2 rounded-full transition-transform ${
                           active
-                            ? "bg-[#c6ff34] scale-100"
-                            : "bg-[#c6ff34] scale-0 group-hover:scale-100"
+                            ? "bg-sky-400 scale-100 shadow-[0_0_8px_rgba(56,189,248,0.6)]"
+                            : "bg-sky-400 scale-0 group-hover:scale-100"
                         }`}
                       />
                     </a>
@@ -488,25 +485,21 @@ function Navbar() {
                 })}
               </div>
 
-              <div className={`h-px w-full my-2 ${isHome ? "bg-white/10" : "bg-slate-200"}`} />
+              <div className="h-px w-full my-2 bg-white/10" />
               
               {/* Mobile Direct Action Buttons */}
               <div className="grid grid-cols-2 gap-2.5 pt-1">
                 <Link
                   to="/consultation"
                   onClick={() => setIsOpen(false)}
-                  className={`py-3 px-3 rounded-xl text-center text-xs font-semibold border transition-all ${
-                    isHome
-                      ? "bg-white/5 hover:bg-white/10 text-white border-white/15"
-                      : "bg-slate-100 hover:bg-slate-200 text-[#050521] border-slate-300"
-                  }`}
+                  className="py-3 px-3 rounded-xl text-center text-xs font-semibold border transition-all bg-white/5 hover:bg-white/10 text-white border-white/15 hover:border-white/30"
                 >
                   Free AI Class
                 </Link>
                 <Link
                   to="/admission"
                   onClick={() => setIsOpen(false)}
-                  className="py-3 px-3 rounded-xl text-center text-xs font-bold bg-[#c6ff34] hover:bg-[#b8f522] text-[#090D11] shadow-md flex items-center justify-center gap-1.5 transition-all"
+                  className="py-3 px-3 rounded-xl text-center text-xs font-bold bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-slate-950 shadow-[0_2px_12px_rgba(56,189,248,0.35)] flex items-center justify-center gap-1.5 transition-all"
                 >
                   <span>Apply Now</span>
                   <span className="font-bold">→</span>

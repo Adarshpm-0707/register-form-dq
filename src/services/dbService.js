@@ -280,6 +280,205 @@ export const saveAptitudeLead = async (formData) => {
 };
 
 /**
+ * Automatically saves student details when candidate starts Aptitude Test V2
+ */
+export const saveAptitudeV2Lead = async (formData) => {
+  const placeVal = String(formData.place || formData.city || formData.location || "N/A").trim().slice(0, 95);
+  const payload = {
+    fullName: String(formData.fullName || formData.name || "").trim().slice(0, 95),
+    phone: String(formData.phone || "").trim().slice(0, 19),
+    email: String(formData.email || "").trim().slice(0, 95),
+    place: placeVal,
+    city: placeVal,
+    location: placeVal,
+    institution: String(formData.institution || formData.college || "N/A").trim().slice(0, 150),
+    testDate: formData.testDate || new Date().toISOString().slice(0, 10),
+    status: "started",
+    testStatus: "in_progress",
+    testType: "DEEPSTAQ_APTITUDE_V2",
+    isAptitudeV2: true,
+    assessmentName: "Deepstaq Aptitude Test V2",
+    totalQuestions: 40,
+    score: null,
+    percentage: null,
+    createdAt: serverTimestamp(),
+    timestamp: serverTimestamp(),
+  };
+
+  try {
+    const docRef = await addDoc(collection(db, "aptitude_v2_submissions"), payload);
+    return { success: true, id: docRef.id };
+  } catch (err) {
+    console.warn("Primary save to aptitude_v2_submissions failed, trying aptitude_test_leads:", err);
+    try {
+      const fallbackRef = await addDoc(collection(db, "aptitude_test_leads"), payload);
+      return { success: true, id: fallbackRef.id };
+    } catch (fallbackErr) {
+      console.error("Error saving aptitude v2 lead:", fallbackErr);
+      try {
+        const localData = JSON.parse(localStorage.getItem("offline_aptitude_v2_submissions") || "[]");
+        const offlineId = `offline_v2_${Date.now()}`;
+        localData.push({ ...payload, id: offlineId });
+        localStorage.setItem("offline_aptitude_v2_submissions", JSON.stringify(localData));
+        return { success: true, id: offlineId, isOffline: true };
+      } catch (e) {
+        console.error("LocalStorage fallback failed:", e);
+      }
+      return { success: false, error: fallbackErr.message };
+    }
+  }
+};
+
+/**
+ * Saves completed Aptitude Test V2 submission (40 questions, 4 sections)
+ */
+export const saveAptitudeV2Submission = async (submissionData) => {
+  const placeVal = String(submissionData.place || submissionData.city || submissionData.location || "N/A").trim().slice(0, 95);
+  const payload = {
+    fullName: String(submissionData.fullName || submissionData.name || "").trim().slice(0, 95),
+    phone: String(submissionData.phone || "").trim().slice(0, 19),
+    email: String(submissionData.email || "").trim().slice(0, 95),
+    place: placeVal,
+    city: placeVal,
+    location: placeVal,
+    institution: String(submissionData.institution || submissionData.college || "N/A").trim().slice(0, 150),
+    testDate: submissionData.testDate || new Date().toISOString().slice(0, 10),
+    status: "completed",
+    testStatus: "completed",
+    testType: "DEEPSTAQ_APTITUDE_V2",
+    isAptitudeV2: true,
+    assessmentName: "Deepstaq Aptitude Test V2",
+    score: Number(submissionData.score) || 0,
+    totalQuestions: submissionData.totalQuestions || 40,
+    percentage: Number(submissionData.percentage) || 0,
+    performanceRating: submissionData.performanceRating || "Qualified",
+    sectionBreakdown: submissionData.sectionBreakdown || {},
+    detailedAnswers: submissionData.detailedAnswers || [],
+    isAutoSubmit: Boolean(submissionData.isAutoSubmit),
+    timeSpentSeconds: submissionData.timeSpentSeconds || 0,
+    completedAt: serverTimestamp(),
+    timestamp: serverTimestamp(),
+    createdAt: serverTimestamp(),
+  };
+
+  // If a lead doc ID was created earlier, attempt updateDoc/setDoc on it
+  if (submissionData.leadDocId && !String(submissionData.leadDocId).startsWith("offline_")) {
+    try {
+      const v2DocRef = doc(db, "aptitude_v2_submissions", submissionData.leadDocId);
+      await setDoc(v2DocRef, payload, { merge: true });
+      return { success: true, id: submissionData.leadDocId };
+    } catch (e) {
+      console.warn("Update by leadDocId on aptitude_v2_submissions failed:", e);
+      try {
+        const leadRef = doc(db, "aptitude_test_leads", submissionData.leadDocId);
+        await setDoc(leadRef, payload, { merge: true });
+        return { success: true, id: submissionData.leadDocId };
+      } catch (errLead) {
+        console.warn("Update by leadDocId on aptitude_test_leads failed:", errLead);
+      }
+    }
+  }
+
+  try {
+    const docRef = await addDoc(collection(db, "aptitude_v2_submissions"), payload);
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.warn("Primary save to aptitude_v2_submissions failed, trying aptitude_test_leads:", error);
+    try {
+      const fallbackRef = await addDoc(collection(db, "aptitude_test_leads"), payload);
+      return { success: true, id: fallbackRef.id };
+    } catch (fallbackError) {
+      console.error("Error saving aptitude v2 submission:", fallbackError);
+      try {
+        const localData = JSON.parse(localStorage.getItem("offline_aptitude_v2_submissions") || "[]");
+        const offlineId = `offline_v2_${Date.now()}`;
+        localData.push({ ...payload, id: offlineId });
+        localStorage.setItem("offline_aptitude_v2_submissions", JSON.stringify(localData));
+        return { success: true, id: offlineId, isOffline: true };
+      } catch (e) {
+        console.error("LocalStorage fallback failed:", e);
+      }
+      throw error;
+    }
+  }
+};
+
+/**
+ * Fetches all Aptitude Test V2 submissions and leads
+ */
+export const getAptitudeV2Submissions = async () => {
+  try {
+    const [v2Snapshot, leadsSnapshot] = await Promise.allSettled([
+      getDocs(collection(db, "aptitude_v2_submissions")),
+      getDocs(collection(db, "aptitude_test_leads")),
+    ]);
+
+    let data = [];
+    if (v2Snapshot.status === "fulfilled" && v2Snapshot.value) {
+      const items = v2Snapshot.value.docs.map((d) => ({ id: d.id, ...d.data(), _sourceCol: "aptitude_v2_submissions" }));
+      data = data.concat(items);
+    }
+    if (leadsSnapshot.status === "fulfilled" && leadsSnapshot.value) {
+      const leads = leadsSnapshot.value.docs
+        .map((d) => ({ id: d.id, ...d.data(), _sourceCol: "aptitude_test_leads" }))
+        .filter((item) => item.testType === "DEEPSTAQ_APTITUDE_V2" || item.isAptitudeV2 === true || (item.totalQuestions === 40));
+      data = data.concat(leads);
+    }
+
+    try {
+      const localData = JSON.parse(localStorage.getItem("offline_aptitude_v2_submissions") || "[]");
+      data = data.concat(localData);
+    } catch (e) {}
+
+    // Deduplicate by ID
+    const seen = new Set();
+    const unique = data.filter((item) => {
+      if (!item.id) return true;
+      if (seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    });
+
+    return unique.sort((a, b) => {
+      const timeA = a.completedAt?.seconds || a.timestamp?.seconds || a.createdAt?.seconds || 0;
+      const timeB = b.completedAt?.seconds || b.timestamp?.seconds || b.createdAt?.seconds || 0;
+      return timeB - timeA;
+    });
+  } catch (error) {
+    console.error("Error fetching Aptitude Test V2 submissions:", error);
+    return [];
+  }
+};
+
+/**
+ * Deletes an Aptitude Test V2 record from Firestore / localStorage
+ */
+export const deleteAptitudeV2Submission = async (id, sourceCol = null) => {
+  if (sourceCol) {
+    try {
+      await deleteDoc(doc(db, sourceCol, id));
+    } catch (e) {
+      console.warn(`Delete from ${sourceCol} failed:`, e);
+    }
+  } else {
+    try {
+      await deleteDoc(doc(db, "aptitude_v2_submissions", id));
+    } catch (e) {
+      try {
+        await deleteDoc(doc(db, "aptitude_test_leads", id));
+      } catch (err2) {}
+    }
+  }
+
+  try {
+    const localData = JSON.parse(localStorage.getItem("offline_aptitude_v2_submissions") || "[]");
+    const filtered = localData.filter((item) => item.id !== id);
+    localStorage.setItem("offline_aptitude_v2_submissions", JSON.stringify(filtered));
+  } catch (e) {}
+  return { success: true };
+};
+
+/**
  * Saves consultation booking to Firestore
  */
 /**
@@ -743,42 +942,73 @@ export const saveAdmissionRegistration = async (formData, files) => {
     const cloudName = "dfn6pdbz";
     const uploadPreset = "firebase_upload";
     
-    // Upload files to Cloudinary if they exist
-    for (const [key, file] of Object.entries(files)) {
-      if (file) {
-        const data = new FormData();
-        data.append("file", file);
-        data.append("upload_preset", uploadPreset);
+    // Upload files to Cloudinary if they exist (optional)
+    if (files && typeof files === "object") {
+      for (const [key, file] of Object.entries(files)) {
+        if (file) {
+          try {
+            const data = new FormData();
+            data.append("file", file);
+            data.append("upload_preset", uploadPreset);
 
-        // Upload all documents as 'image' resource type to support download transformations (like fl_attachment)
-        const response = await fetch(
-          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-          {
-            method: "POST",
-            body: data,
+            // Upload document (try auto first, fallback to image)
+            let response = await fetch(
+              `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
+              {
+                method: "POST",
+                body: data,
+              }
+            );
+
+            if (!response.ok) {
+              response = await fetch(
+                `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+                {
+                  method: "POST",
+                  body: data,
+                }
+              );
+            }
+
+            if (response.ok) {
+              const result = await response.json();
+              documentURLs[key] = result.secure_url;
+            } else {
+              console.warn(`Cloudinary file upload returned non-OK status for ${key}`);
+            }
+          } catch (uploadErr) {
+            console.warn(`File upload skipped or failed for ${key}, continuing process:`, uploadErr);
           }
-        );
-
-        if (!response.ok) {
-          const errData = await response.json();
-          throw new Error(errData.error?.message || "Failed to upload file to Cloudinary");
         }
-
-        const result = await response.json();
-        documentURLs[key] = result.secure_url;
       }
     }
     
-    // Add documents URL back into form data
+    // Add documents URL back into form data with sanitization for Firestore security rules
     const submissionData = {
       ...formData,
+      fullName: String(formData.fullName || "").replace(/[<>]/g, "").trim().slice(0, 150),
+      phone: String(formData.phone || "").replace(/[^\d+ -]/g, "").trim().slice(0, 20),
       documents: documentURLs,
       type: "ADMISSION",
+      status: formData.status || "Submitted",
       timestamp: serverTimestamp()
     };
     
-    const docRef = await addDoc(collection(db, "student_admissions"), submissionData);
-    return { success: true, id: docRef.id };
+    try {
+      const docRef = await addDoc(collection(db, "student_admissions"), submissionData);
+      return { success: true, id: docRef.id };
+    } catch (fsErr) {
+      console.warn("Primary Firestore write for admission failed, storing offline backup:", fsErr);
+      const offlineId = "offline_adm_" + Date.now();
+      const localAdmissions = JSON.parse(localStorage.getItem("offline_student_admissions") || "[]");
+      localAdmissions.unshift({
+        ...submissionData,
+        id: offlineId,
+        timestamp: { seconds: Math.floor(Date.now() / 1000) }
+      });
+      localStorage.setItem("offline_student_admissions", JSON.stringify(localAdmissions.slice(0, 50)));
+      return { success: true, id: offlineId, isOffline: true };
+    }
   } catch (error) {
     console.error("Error saving admission registration:", error);
     throw error;
@@ -792,11 +1022,27 @@ export const getAdmissionRegistrations = async () => {
   try {
     const querySnapshot = await getDocs(collection(db, "student_admissions"));
     const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Include offline fallback admissions if any exist
+    try {
+      const offlineAdmissions = JSON.parse(localStorage.getItem("offline_student_admissions") || "[]");
+      offlineAdmissions.forEach(off => {
+        if (!data.some(d => d.id === off.id)) {
+          data.push(off);
+        }
+      });
+    } catch (e) {}
+
     // Sort by timestamp descending
     return data.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
   } catch (error) {
     console.error("Error fetching admission registrations:", error);
-    throw error;
+    try {
+      const offlineAdmissions = JSON.parse(localStorage.getItem("offline_student_admissions") || "[]");
+      return offlineAdmissions;
+    } catch (e) {
+      throw error;
+    }
   }
 };
 
@@ -1039,26 +1285,34 @@ export const updateScholarshipApplication = async (id, updateData) => {
 };
 
 /**
- * Saves or updates interactive popup lead step data to Firestore
- * Progressively stores Name -> Phone -> Email -> Purpose
+ * Saves or updates interactive popup lead data to Firestore
+ * Stores Name, Phone (+ countryCode), Selected Programme/Career Goal
  */
-export const savePopupLeadStep = async (stepData, existingId = null) => {
+export const savePopupLead = async (stepData, existingId = null) => {
   const sanitize = (str, max = 500) => String(str || "").replace(/[<>]/g, "").trim().slice(0, max);
   
+  const prog = sanitize(stepData.programme || stepData.program || stepData.purpose || "", 200);
+
   const payload = {
     type: "POPUP_LEAD",
-    step: Number(stepData.step || 2),
-    completed: Boolean(stepData.completed),
-    status: stepData.status || (stepData.completed ? "Completed" : `In Progress (Step ${stepData.step || 2})`),
+    leadType: "CAREER_GOAL_POPUP",
+    step: Number(stepData.step || 1),
+    completed: stepData.completed !== undefined ? Boolean(stepData.completed) : true,
+    status: stepData.status || "New Lead",
+    leadStatus: stepData.leadStatus || "New Lead",
   };
 
   if (stepData.fullName !== undefined) payload.fullName = sanitize(stepData.fullName, 120);
   if (stepData.phone !== undefined) payload.phone = sanitize(stepData.phone, 30);
   if (stepData.countryCode !== undefined) payload.countryCode = sanitize(stepData.countryCode, 10);
+  if (prog) {
+    payload.programme = prog;
+    payload.program = prog;
+    payload.purpose = prog;
+  }
   if (stepData.email !== undefined) payload.email = sanitize(stepData.email, 120).toLowerCase();
-  if (stepData.purpose !== undefined) payload.purpose = sanitize(stepData.purpose, 200);
   if (stepData.purposeOther !== undefined) payload.purposeOther = sanitize(stepData.purposeOther, 300);
-  if (stepData.leadSource !== undefined) payload.leadSource = sanitize(stepData.leadSource, 100);
+  if (stepData.leadSource !== undefined) payload.leadSource = sanitize(stepData.leadSource, 150);
 
   // If existing doc ID provided, merge updates
   if (existingId && !existingId.startsWith("offline_")) {
@@ -1116,6 +1370,8 @@ export const savePopupLeadStep = async (stepData, existingId = null) => {
   }
 };
 
+export const savePopupLeadStep = savePopupLead;
+
 /**
  * Fetches all popup leads from Firestore and local fallback
  */
@@ -1125,7 +1381,13 @@ export const getPopupLeads = async () => {
     const querySnapshot = await getDocs(collection(db, "popup_leads"));
     data = querySnapshot.docs
       .map((d) => ({ id: d.id, ...d.data() }))
-      .filter((item) => item.type !== "AI_FOR_EVERYONE" && item.type !== "AI_EASY_AYI" && !item.isAiForEveryone && !item.isAiEasyAyi && item.program !== "AI For Everyone" && item.program !== "AI easy Ayi");
+      .filter((item) => {
+        // Exclude dedicated paid course registrations that belong to the AI For Everyone collection/tab
+        if ((item.type === "AI_FOR_EVERYONE" || item.type === "AI_EASY_AYI") && item.isAiForEveryone) {
+          return false;
+        }
+        return true;
+      });
   } catch (error) {
     console.error("Error fetching popup leads from Firestore:", error);
   }
