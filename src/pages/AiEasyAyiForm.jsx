@@ -4,6 +4,8 @@ import {
   saveAiEasyAyiRegistration,
   updateAiEasyAyiRegistration,
 } from "../services/dbService";
+import LimitedSeatsSection from "../components/LimitedSeatsSection";
+import { useSeatsCountdown } from "../hooks/useSeatsCountdown";
 import logo from "../assets/Asset 1@4x.png";
 
 const QUALIFICATION_OPTIONS = [
@@ -244,6 +246,7 @@ export default function AiEasyAyiForm() {
   const [showForm, setShowForm] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const seatsLeft = useSeatsCountdown(10, 3);
 
   // Live countdown timer state (resets dynamically every Saturday at 5:00 PM)
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft);
@@ -995,7 +998,9 @@ export default function AiEasyAyiForm() {
                       </div>
 
                       {/* Submission & Payment Button */}
-                      <div className="pt-2">
+                      <div className="pt-2 space-y-3">
+                        <LimitedSeatsSection seatsLeft={seatsLeft} lang="en" variant="form" />
+
                         <button
                           type="submit"
                           disabled={loading}

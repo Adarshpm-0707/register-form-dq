@@ -21,6 +21,7 @@ export default function AdVideoSection({
   originalPrice = 899,
   offerPrice = 99,
   onGoToForm,
+  seatsLeft,
 }) {
   const [showRegisterOverlay, setShowRegisterOverlay] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -529,7 +530,13 @@ export default function AdVideoSection({
                 {/* Header status pill */}
                 <div className="text-[9px] sm:text-[10px] font-mono font-bold uppercase text-sky-400 tracking-wider mb-1 flex items-center justify-center gap-1.5">
                   <span className="inline-block w-2 h-2 rounded-full bg-sky-400 animate-ping" />
-                  <span>{isEnded ? "PREVIEW COMPLETED" : "LIMITED SEATS AVAILABLE"}</span>
+                  <span>
+                    {isEnded
+                      ? "PREVIEW COMPLETED"
+                      : seatsLeft
+                      ? `LIMITED SEATS • ONLY ${seatsLeft} SEATS LEFT`
+                      : "LIMITED SEATS AVAILABLE"}
+                  </span>
                 </div>
 
                 {/* Primary Register Button */}

@@ -158,7 +158,6 @@ function Navbar() {
   const navLinks = isHome
     ? [
         { name: "Programs", path: "#programs" },
-        { name: "Learning Experience", path: "#experience" },
         { name: "Projects", path: "#projects" },
         { name: "Events", path: "#events" },
         { name: "About", path: "#about" },

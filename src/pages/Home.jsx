@@ -3,11 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 
 
-// Learning Experience Photos
-import offlineClassroomImg from "../assets/learning/offline_classroom.jpg";
-import handsOnCodingImg from "../assets/learning/hands_on_coding.jpg";
-import mentorGuidanceImg from "../assets/learning/mentor_guidance.jpg";
-import realWorldProjectsImg from "../assets/learning/real_world_projects.jpg";
 
 // Real Event Photos from Deepstaq Archive
 import event1Img from "../assets/events/event (1).webp";
@@ -87,39 +82,6 @@ const programsData = [
   },
 ];
 
-/* ─────────────────────────────────────────────
-   LEARNING EXPERIENCE CARDS
-───────────────────────────────────────────── */
-const experienceCards = [
-  {
-    id: 1,
-    title: "Offline Classes at Kannur",
-    desc: "Daily live classes at our institute with a focused learning environment.",
-    img: offlineClassroomImg,
-    badge: "Campus Immersion",
-  },
-  {
-    id: 2,
-    title: "Hands-on Practice",
-    desc: "Learn by doing with real tools, datasets and projects.",
-    img: handsOnCodingImg,
-    badge: "100% Practical",
-  },
-  {
-    id: 3,
-    title: "Mentor Guidance",
-    desc: "Get guidance from experienced mentors throughout your journey.",
-    img: mentorGuidanceImg,
-    badge: "1:1 Support",
-  },
-  {
-    id: 4,
-    title: "Real-world Projects",
-    desc: "Build practical projects to strengthen your portfolio.",
-    img: realWorldProjectsImg,
-    badge: "Portfolio Ready",
-  },
-];
 
 /* ─────────────────────────────────────────────
    EVENT HIGHLIGHTS CARDS
@@ -788,70 +750,6 @@ export default function Home() {
         </section>
 
 
-        {/* ══════════════════════════════════════════════════════════
-            4. OUR LEARNING EXPERIENCE (Matching Screenshot)
-           ══════════════════════════════════════════════════════════ */}
-        <section id="experience" className="py-16 sm:py-24 px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1440px] mx-auto">
-          
-          {/* Header with Navigation Arrows */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
-            <div className="space-y-2">
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white">
-                OUR LEARNING EXPERIENCE
-              </div>
-              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
-                More Than Just Classes. <br />A Complete Learning Journey.
-              </h2>
-            </div>
-
-            <div className="flex items-center gap-4 md:max-w-md">
-              <p className="text-sm text-slate-400 font-normal leading-relaxed">
-                A practical, mentor-led experience designed to help you build skills, confidence and a career in AI.
-              </p>
-            </div>
-          </div>
-
-          {/* 4 Cards with Real Photo Thumbnails */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {experienceCards.map((exp) => (
-              <div
-                key={exp.id}
-                className="group rounded-3xl overflow-hidden bg-white/[0.03] border border-white/10 hover:border-white/25 transition-all duration-300 flex flex-col justify-between shadow-lg"
-              >
-                {/* Photo Frame */}
-                <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-900">
-                  <img
-                    src={exp.img}
-                    alt={exp.title}
-                    className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                  />
-                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#090D11]/80 backdrop-blur-md border border-white/15 text-[10px] font-semibold text-white">
-                    {exp.badge}
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-5 flex flex-col justify-between flex-1">
-                  <div>
-                    <h3 className="text-base sm:text-lg font-bold text-white mb-1.5 group-hover:text-white transition-colors">
-                      {exp.title}
-                    </h3>
-                    <p className="text-xs text-slate-400 leading-relaxed">
-                      {exp.desc}
-                    </p>
-                  </div>
-
-                  <div className="pt-4 flex justify-end">
-                    <span className="w-8 h-8 rounded-full bg-white/10 group-hover:bg-sky-400 text-white group-hover:text-slate-950 flex items-center justify-center text-xs font-bold transition-all">
-                      →
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-        </section>
 
 
         {/* ══════════════════════════════════════════════════════════
@@ -884,7 +782,7 @@ export default function Home() {
                 className="relative aspect-video max-w-2xl mx-auto rounded-2xl overflow-hidden border-2 border-white/20 cursor-pointer group shadow-2xl mt-8"
               >
                 <img
-                  src={offlineClassroomImg}
+                  src={event1Img}
                   alt="Deepstaq Campus Tour Video"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
@@ -1230,7 +1128,7 @@ export default function Home() {
 
               <div className="relative aspect-video rounded-2xl overflow-hidden bg-black flex items-center justify-center border border-white/10">
                 <img
-                  src={offlineClassroomImg}
+                  src={event1Img}
                   alt="Deepstaq Campus Walkthrough"
                   className="w-full h-full object-cover"
                 />
