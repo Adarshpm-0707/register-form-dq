@@ -445,13 +445,6 @@ const getBatchDateTime = () => {
   return target;
 };
 
-const getNextSaturdayFormatted = (lang = "ml") => {
-  if (lang === "ml") {
-    return "നവംബർ 7";
-  }
-  return "Nov 7th";
-};
-
 const getFullSessionDateFormatted = (lang = "ml") => {
   const target = getBatchDateTime();
   const year = target.getFullYear();
@@ -459,27 +452,6 @@ const getFullSessionDateFormatted = (lang = "ml") => {
     return `നവംബർ 7, ${year}`;
   }
   return `November 7th, ${year}`;
-};
-
-const calculateTimeLeft = () => {
-  const target = getBatchDateTime();
-  const diff = target.getTime() - Date.now();
-
-  if (diff <= 0) {
-    return { days: "00", hours: "00", minutes: "00", seconds: "00" };
-  }
-
-  const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-  const m = Math.floor((diff / (1000 * 60)) % 60);
-  const s = Math.floor((diff / 1000) % 60);
-
-  return {
-    days: String(d).padStart(2, "0"),
-    hours: String(h).padStart(2, "0"),
-    minutes: String(m).padStart(2, "0"),
-    seconds: String(s).padStart(2, "0"),
-  };
 };
 
 export default function AiEasyAyi() {
@@ -516,15 +488,6 @@ export default function AiEasyAyi() {
     });
   };
 
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -541,7 +504,6 @@ export default function AiEasyAyi() {
   const [paymentNotice, setPaymentNotice] = useState(null);
   const [pendingRegId, setPendingRegId] = useState(null);
 
-  const eventDateFormatted = getNextSaturdayFormatted(lang);
   const fullSessionDateFormatted = getFullSessionDateFormatted(lang);
 
   useEffect(() => {
@@ -886,7 +848,7 @@ export default function AiEasyAyi() {
                     href="https://chat.whatsapp.com/KxVV7ep74TV0GHy5SU2FXl"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full py-4 px-6 rounded-full bg-gradient-to-r from-[#f90058] to-[#184cef] hover:from-[#ff1a6c] hover:to-[#2e62ff] text-white font-bold text-sm tracking-wide flex items-center justify-center gap-2 transition-all shadow-[0_4px_28px_rgba(249,0,88,0.4)]"
+                    className="w-full py-4 px-6 rounded-full bg-[#fa0058] hover:bg-[#e0004f] text-white font-bold text-sm tracking-wide flex items-center justify-center gap-2 transition-all shadow-[0_4px_28px_rgba(250,0,88,0.45)]"
                   >
                     <span>{t.receiptJoinCommunity}</span>
                     <span>→</span>
@@ -925,11 +887,7 @@ export default function AiEasyAyi() {
                   HERO SECTION (RESPONSIVE: MOBILE STACKED, TABLET/LAPTOP 2-COLUMN)
                  ══════════════════════════════════════════════════════════ */}
               <section className="relative w-full max-w-3xl md:max-w-5xl lg:max-w-6xl xl:max-w-7xl mx-auto pt-2 sm:pt-4 md:pt-6">
-                
-                {/* Subtle Centered Background Radial Glow */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] sm:w-[750px] lg:w-[1050px] h-[350px] sm:h-[450px] bg-[radial-gradient(ellipse_at_center,rgba(24,76,239,0.25)_0%,rgba(249,0,88,0.18)_45%,transparent_70%)] blur-[110px] pointer-events-none -z-10" />
-
-                <div className="grid grid-cols-1 md:grid-cols-12 md:grid-rows-[repeat(6,auto)] gap-y-6 sm:gap-y-8 md:gap-y-4 lg:gap-y-5 md:gap-x-6 lg:gap-x-12 xl:gap-x-16 items-center">
+                <div className="grid grid-cols-1 md:grid-cols-12 md:grid-rows-[repeat(5,auto)] gap-y-6 sm:gap-y-8 md:gap-y-4 lg:gap-y-5 md:gap-x-6 lg:gap-x-12 xl:gap-x-16 items-center">
 
                   {/* 1. Category Badge & Language Toggle (Row 1 on left) */}
                   <div className="order-1 col-span-1 md:col-start-1 md:col-span-7 md:row-start-1 flex flex-wrap items-center justify-center md:justify-start gap-3">
@@ -977,7 +935,7 @@ export default function AiEasyAyi() {
                   >
                     <h1 className="text-4xl sm:text-5xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-[-0.03em] leading-[1.08] text-white">
                       {t.heroTitleLine1} <br />
-                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#f90058] via-fuchsia-200 to-[#184cef] drop-shadow-[0_0_28px_rgba(249,0,88,0.4)]">
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#f90058] via-fuchsia-200 to-[#184cef]">
                         {t.heroTitleHighlight}
                       </span>
                     </h1>
@@ -998,7 +956,7 @@ export default function AiEasyAyi() {
                     initial={{ opacity: 0, scale: 0.98, y: 16 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.25 }}
-                    className="order-4 col-span-1 md:col-start-8 md:col-span-5 md:row-start-1 md:row-end-7 flex justify-center items-center my-1 sm:my-2 md:my-0 relative md:self-center"
+                    className="order-4 col-span-1 md:col-start-8 md:col-span-5 md:row-start-1 md:row-end-6 flex justify-center items-center my-1 sm:my-2 md:my-0 relative md:self-center"
                   >
                     <div className="absolute inset-0 bg-gradient-to-tr from-[#184cef]/30 to-[#f90058]/25 blur-3xl rounded-full pointer-events-none hidden md:block -z-10" />
                     <AdVideoSection
@@ -1012,130 +970,48 @@ export default function AiEasyAyi() {
                     />
                   </motion.div>
 
-                  {/* 5. Cohort Date & Countdown Timer (Row 4 on left) */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 14 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.28 }}
-                    className="order-5 col-span-1 md:col-start-1 md:col-span-7 md:row-start-4 flex flex-col items-center md:items-start justify-center space-y-3 pt-1"
-                  >
-                    {/* Cohort Date Info */}
-                    <div className="text-xs sm:text-sm text-slate-300 font-mono text-center md:text-left flex items-center justify-center md:justify-start gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
-                      <span>
-                        {t.nextBatchLabel}{" "}
-                        <strong className="text-white font-semibold">{eventDateFormatted}</strong>{" "}
-                        • {t.batchTime}
-                      </span>
-                    </div>
-
-                    {/* Countdown Timer (2x2 on mobile, 4 in row on laptop) */}
-                    <div className="text-center md:text-left space-y-2 pt-1 w-full">
-                      <span className="text-xs sm:text-sm font-semibold text-slate-200 tracking-wide block text-center md:text-left">
-                        {t.timerHeading || "Register In Next"}
-                      </span>
-                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 max-w-[270px] sm:max-w-[290px] lg:max-w-md mx-auto md:mx-0 text-center font-sans">
-                        {/* Days */}
-                        <div className="bg-[#dcdcdc] border border-slate-300/80 rounded-2xl overflow-hidden shadow-sm flex flex-col">
-                          <div className="py-2.5 sm:py-3 px-2 flex items-center justify-center">
-                            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-none font-mono tracking-tight">
-                              {timeLeft.days}
-                            </span>
-                          </div>
-                          <div className="border-t border-slate-300 bg-slate-300/40 py-1.5 px-2 flex items-center justify-center">
-                            <span className="text-xs sm:text-sm font-semibold text-slate-800 block leading-tight">
-                              {t.timerDays || "Days"}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Hours */}
-                        <div className="bg-[#dcdcdc] border border-slate-300/80 rounded-2xl overflow-hidden shadow-sm flex flex-col">
-                          <div className="py-2.5 sm:py-3 px-2 flex items-center justify-center">
-                            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-none font-mono tracking-tight">
-                              {timeLeft.hours}
-                            </span>
-                          </div>
-                          <div className="border-t border-slate-300 bg-slate-300/40 py-1.5 px-2 flex items-center justify-center">
-                            <span className="text-xs sm:text-sm font-semibold text-slate-800 block leading-tight">
-                              {t.timerHours || "Hours"}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Minutes */}
-                        <div className="bg-[#dcdcdc] border border-slate-300/80 rounded-2xl overflow-hidden shadow-sm flex flex-col">
-                          <div className="py-2.5 sm:py-3 px-2 flex items-center justify-center">
-                            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-none font-mono tracking-tight">
-                              {timeLeft.minutes}
-                            </span>
-                          </div>
-                          <div className="border-t border-slate-300 bg-slate-300/40 py-1.5 px-2 flex items-center justify-center">
-                            <span className="text-xs sm:text-sm font-semibold text-slate-800 block leading-tight">
-                              {t.timerMinutes || "Minutes"}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Seconds */}
-                        <div className="bg-[#dcdcdc] border border-slate-300/80 rounded-2xl overflow-hidden shadow-sm flex flex-col">
-                          <div className="py-2.5 sm:py-3 px-2 flex items-center justify-center">
-                            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-none font-mono tracking-tight">
-                              {timeLeft.seconds}
-                            </span>
-                          </div>
-                          <div className="border-t border-slate-300 bg-slate-300/40 py-1.5 px-2 flex items-center justify-center">
-                            <span className="text-xs sm:text-sm font-semibold text-slate-800 block leading-tight">
-                              {t.timerSeconds || "Seconds"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  {/* 6. Feature Badges (Row 5 on left) */}
+                  {/* 5. Feature Badges (Row 4 on left) */}
                   <motion.div
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.3 }}
-                    className="order-6 col-span-1 md:col-start-1 md:col-span-7 md:row-start-5 flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-3 pt-1"
+                    className="order-5 col-span-1 md:col-start-1 md:col-span-7 md:row-start-4 flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-3 pt-1"
                   >
                     {t.heroPills.map((pill, idx) => (
                       <span
                         key={idx}
-                        className="inline-flex items-center gap-2 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-full bg-gradient-to-r from-[#f90058]/15 via-white/[0.07] to-[#184cef]/15 border border-[#f90058]/35 hover:border-[#184cef]/50 text-xs sm:text-sm font-semibold text-white backdrop-blur-md shadow-[0_0_20px_rgba(249,0,88,0.2)] hover:shadow-[0_0_28px_rgba(24,76,239,0.35)] transition-all duration-300"
+                        className="inline-flex items-center gap-2 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-full bg-white/[0.05] border border-white/15 hover:border-white/30 text-xs sm:text-sm font-semibold text-white backdrop-blur-md transition-all duration-300"
                       >
-                        <span className="w-2 h-2 rounded-full bg-[#f90058] shadow-[0_0_10px_rgba(249,0,88,0.9)] animate-pulse" />
+                        <span className="w-2 h-2 rounded-full bg-[#fa0058] animate-pulse" />
                         <span>{pill}</span>
                       </span>
                     ))}
                   </motion.div>
 
-                  {/* 7. CTA Actions & Limited Seats (Row 6 on left) */}
+                  {/* 6. CTA Actions & Limited Seats (Row 5 on left) */}
                   <motion.div
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.35 }}
-                    className="order-7 col-span-1 md:col-start-1 md:col-span-7 md:row-start-6 flex flex-col items-center md:items-start justify-center gap-3 pt-1 w-full"
+                    className="order-6 col-span-1 md:col-start-1 md:col-span-7 md:row-start-5 flex flex-col items-center md:items-start justify-center gap-3 pt-1 w-full"
                   >
                     {/* Limited Seats Live Section */}
                     <div className="w-full max-w-md lg:max-w-lg">
                       <LimitedSeatsSection seatsLeft={seatsLeft} lang={lang} variant="hero" />
                     </div>
 
-                    <div className="flex items-center justify-center md:justify-start gap-3 sm:gap-4 w-full sm:w-auto">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center md:justify-start gap-2.5 sm:gap-4 w-full sm:w-auto">
                       {/* Primary CTA */}
                       <button
                         type="button"
                         onClick={handleScrollToForm}
-                        className="flex-1 sm:flex-initial px-7 lg:px-8 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-[#f90058] to-[#184cef] hover:from-[#ff1a6c] hover:to-[#2e62ff] text-white font-bold text-sm sm:text-base tracking-wide shadow-[0_4px_28px_rgba(249,0,88,0.4)] flex items-center justify-center gap-2.5 cursor-pointer transition-all hover:scale-[1.02] group whitespace-nowrap"
+                        className="w-full sm:w-auto px-5 sm:px-8 py-3.5 sm:py-4 rounded-full bg-[#fa0058] hover:bg-[#e0004f] active:scale-95 text-white font-bold text-sm sm:text-base tracking-wide flex items-center justify-center gap-2 sm:gap-2.5 cursor-pointer transition-all hover:scale-[1.02] group shadow-[0_4px_20px_rgba(250,0,88,0.4)]"
                       >
-                        <span>{t.heroCtaPrimary}</span>
-                        <span className="font-mono text-white/70 line-through text-xs">
+                        <span className="text-center">{t.heroCtaPrimary}</span>
+                        <span className="font-mono text-white/70 line-through text-xs shrink-0">
                           {t.heroOriginalPrice}
                         </span>
-                        <span className="font-bold transition-transform duration-200 group-hover:translate-x-1">
+                        <span className="font-bold transition-transform duration-200 group-hover:translate-x-1 shrink-0">
                           →
                         </span>
                       </button>
@@ -1146,12 +1022,12 @@ export default function AiEasyAyi() {
                         target="_blank"
                         rel="noopener noreferrer"
                         title="Chat on WhatsApp"
-                        className="px-5 lg:px-6 py-3.5 sm:py-4 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 hover:border-emerald-400 text-emerald-400 hover:text-emerald-300 font-semibold text-xs sm:text-sm tracking-wide transition-all duration-200 backdrop-blur-md flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_28px_rgba(16,185,129,0.4)] hover:scale-[1.02] cursor-pointer whitespace-nowrap flex-shrink-0"
+                        className="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-4 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 hover:border-emerald-400 text-emerald-400 hover:text-emerald-300 font-semibold text-xs sm:text-sm tracking-wide transition-all duration-200 backdrop-blur-md flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_28px_rgba(16,185,129,0.4)] hover:scale-[1.02] cursor-pointer"
                       >
                         <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
                         </svg>
-                        <span>Chat on</span>
+                        <span>{lang === "ml" ? "WhatsApp വഴി സംസാരിക്കാം" : "Chat on WhatsApp"}</span>
                       </a>
                     </div>
                   </motion.div>
@@ -1298,7 +1174,7 @@ export default function AiEasyAyi() {
                                 }}
                                 className={`py-2.5 px-3 rounded-xl border text-xs font-semibold transition-all text-center cursor-pointer ${
                                   isSelected
-                                    ? "bg-gradient-to-r from-[#f90058] to-[#184cef] text-white font-bold border-[#f90058]/60 shadow-[0_2px_14px_rgba(249,0,88,0.35)]"
+                                    ? "bg-[#fa0058] text-white font-bold border-[#fa0058] shadow-[0_2px_14px_rgba(250,0,88,0.35)]"
                                     : "bg-white/[0.03] text-slate-300 border-white/10 hover:border-white/25 hover:bg-white/[0.06]"
                                 }`}
                               >
@@ -1334,7 +1210,7 @@ export default function AiEasyAyi() {
                           className={`w-full py-4 px-6 rounded-2xl text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${
                             loading
                               ? "bg-slate-800 text-slate-500 cursor-not-allowed"
-                              : "bg-gradient-to-r from-[#f90058] to-[#184cef] hover:from-[#ff1a6c] hover:to-[#2e62ff] text-white shadow-[0_4px_28px_rgba(249,0,88,0.4)] hover:scale-[1.01]"
+                              : "bg-[#fa0058] hover:bg-[#e0004f] text-white shadow-[0_4px_28px_rgba(250,0,88,0.45)] hover:scale-[1.01]"
                           }`}
                         >
                           {loading ? (
@@ -1429,7 +1305,7 @@ export default function AiEasyAyi() {
                   <button
                     type="button"
                     onClick={handleScrollToForm}
-                    className="px-6 py-2.5 rounded-full bg-gradient-to-r from-[#f90058] to-[#184cef] hover:from-[#ff1a6c] hover:to-[#2e62ff] text-white font-bold text-xs uppercase tracking-wider transition-all shadow-[0_2px_16px_rgba(249,0,88,0.35)] cursor-pointer whitespace-nowrap flex-shrink-0 hover:scale-105"
+                    className="px-6 py-2.5 rounded-full bg-[#fa0058] hover:bg-[#e0004f] text-white font-bold text-xs uppercase tracking-wider transition-all shadow-[0_2px_16px_rgba(250,0,88,0.4)] cursor-pointer whitespace-nowrap flex-shrink-0 hover:scale-105"
                   >
                     ₹99 Pass →
                   </button>
@@ -1440,13 +1316,10 @@ export default function AiEasyAyi() {
                   2. HOW IT WORKS (3 Simple Steps)
                  ══════════════════════════════════════════════════════════ */}
               <section className="space-y-6 pt-2 max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto">
-                <div className="border-b border-white/10 pb-4 flex items-baseline justify-between">
+                <div className="border-b border-white/10 pb-4">
                   <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight">
                     {t.stepsTitle}
                   </h2>
-                  <span className="text-xs font-mono text-[#ff337d] uppercase tracking-widest">
-                    {t.stepsBadge}
-                  </span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
@@ -1480,52 +1353,46 @@ export default function AiEasyAyi() {
                   3. 90 MINUTES OF EASY AI FOR WORKING PROFESSIONALS (5 OUTCOMES)
                  ══════════════════════════════════════════════════════════ */}
               <section className="space-y-6 max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto">
-                <div className="border-b border-white/10 pb-4 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
-                  <div>
-                    <span className="text-xs font-mono text-[#ff337d] uppercase tracking-widest block mb-1">
-                      {t.outcomesBadge}
-                    </span>
-                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
-                      {t.outcomesTitle}
-                    </h2>
-                    <p className="text-xs sm:text-sm lg:text-base text-slate-300 mt-1 font-medium">
-                      {t.outcomesSubtitle}
-                    </p>
-                  </div>
-                  <span className="text-xs font-mono text-emerald-400 font-semibold px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 whitespace-nowrap self-start sm:self-auto">
-                    ⚡ 5 Practical Outcomes
+                <div className="border-b border-white/10 pb-4">
+                  <span className="text-xs font-mono text-[#ff337d] uppercase tracking-widest block mb-1">
+                    {t.outcomesBadge}
                   </span>
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+                    {t.outcomesTitle}
+                  </h2>
+                  <p className="text-xs sm:text-sm lg:text-base text-slate-300 mt-1 font-medium">
+                    {t.outcomesSubtitle}
+                  </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                <div className="flex flex-wrap justify-center gap-4 lg:gap-6">
                   {t.outcomes.map((card, idx) => {
                     const isRoleCard = idx === 2; // Outcome 3 has teachers/doctors breakdown
                     return (
                       <div
                         key={idx}
-                        className={`p-6 lg:p-7 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:border-[#184cef]/50 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.3)] group space-y-3 hover:-translate-y-1 ${
-                          isRoleCard
-                            ? "md:col-span-2 lg:col-span-2 bg-gradient-to-br from-white/[0.04] to-[#184cef]/10 border-[#184cef]/30"
-                            : ""
-                        }`}
+                        className="w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] p-6 lg:p-7 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:border-[#fa0058]/40 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.3)] group space-y-3 hover:-translate-y-1 flex flex-col justify-between"
                       >
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-mono font-bold text-[#5480ff] px-2.5 py-1 rounded-md bg-[#184cef]/15 border border-[#184cef]/30">
-                            {card.number}
-                          </span>
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#f90058] group-hover:scale-125 transition-transform" />
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-mono font-bold text-amber-300 px-2.5 py-1 rounded-lg bg-amber-400/10 border border-amber-400/20 inline-flex items-center gap-1.5 shadow-sm">
+                              <span className="text-sm">🏆</span>
+                              <span className="uppercase tracking-wider">{card.number}</span>
+                            </span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#fa0058] group-hover:scale-125 transition-transform" />
+                          </div>
+
+                          <h3 className="text-base lg:text-lg font-bold text-white group-hover:text-blue-300 transition-colors">
+                            {card.title}
+                          </h3>
+
+                          <p className="text-xs sm:text-sm lg:text-base text-slate-300 leading-relaxed font-normal">
+                            {card.desc}
+                          </p>
                         </div>
 
-                        <h3 className="text-base lg:text-lg font-bold text-white group-hover:text-blue-300 transition-colors">
-                          {card.title}
-                        </h3>
-
-                        <p className="text-xs sm:text-sm lg:text-base text-slate-300 leading-relaxed font-normal">
-                          {card.desc}
-                        </p>
-
                         {isRoleCard && (
-                          <div className="flex flex-wrap gap-2 pt-1.5">
+                          <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
                             <span className="px-2.5 py-1 rounded-lg bg-pink-500/15 border border-pink-500/30 text-[11px] font-mono text-pink-300">
                               👩‍🏫 Teachers
                             </span>
@@ -1547,18 +1414,13 @@ export default function AiEasyAyi() {
                   TARGET AUDIENCE (WHO IS THIS FOR)
                  ══════════════════════════════════════════════════════════ */}
               <section className="space-y-5 max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto">
-                <div className="border-b border-white/10 pb-4 flex items-baseline justify-between">
-                  <div>
-                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight">
-                      {t.audienceTitle}
-                    </h2>
-                    <p className="text-xs sm:text-sm lg:text-base text-slate-400 mt-1">
-                      {t.audienceSubtitle}
-                    </p>
-                  </div>
-                  <span className="text-xs font-mono text-[#ff337d] uppercase tracking-widest hidden sm:inline">
-                    {t.audienceBadge}
-                  </span>
+                <div className="border-b border-white/10 pb-4">
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight">
+                    {t.audienceTitle}
+                  </h2>
+                  <p className="text-xs sm:text-sm lg:text-base text-slate-400 mt-1">
+                    {t.audienceSubtitle}
+                  </p>
                 </div>
 
                 <div className="flex flex-wrap gap-2.5 sm:gap-3 lg:gap-3.5">
@@ -1612,60 +1474,38 @@ export default function AiEasyAyi() {
               transition={{ duration: 0.25, ease: "easeOut" }}
               className="fixed bottom-3 sm:bottom-5 left-0 right-0 z-40 px-2.5 sm:px-4 md:px-6 pointer-events-none"
             >
-              <div className="w-full max-w-xl sm:max-w-2xl md:max-w-3xl mx-auto pointer-events-auto bg-[#090D11]/95 border border-white/15 backdrop-blur-2xl rounded-2xl sm:rounded-full p-2 px-3 sm:p-2.5 sm:px-5 flex items-center justify-between gap-2 sm:gap-4 shadow-[0_16px_50px_rgba(0,0,0,0.75)]">
+              <div className="w-full max-w-xl sm:max-w-2xl md:max-w-3xl mx-auto pointer-events-auto bg-[#090D11]/95 border border-white/15 backdrop-blur-2xl rounded-2xl sm:rounded-full p-2 px-3 sm:p-2.5 sm:px-5 flex items-center justify-between gap-1.5 sm:gap-4 shadow-[0_16px_50px_rgba(0,0,0,0.75)]">
                 
-                {/* Left Side: Title, Pricing & Date */}
-                <div className="min-w-0 flex-1 flex flex-col justify-center">
-                  {/* Top Line: Title & Pricing + Limited Seats Badge */}
-                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                    <span className="text-xs sm:text-sm font-extrabold text-white tracking-tight whitespace-nowrap">
-                      {t.stickyTitle}
+                {/* Left Side: Title, Pricing & Seats */}
+                <div className="min-w-0 flex-1 flex items-center gap-1.5 sm:gap-2.5 flex-nowrap overflow-hidden">
+                  <span className="text-xs sm:text-sm font-extrabold text-white tracking-tight whitespace-nowrap shrink-0">
+                    {t.stickyTitle}
+                  </span>
+                  <span className="inline-flex items-center gap-1 font-mono shrink-0">
+                    <span className="text-[#ff337d] font-extrabold text-xs sm:text-xs whitespace-nowrap">
+                      {t.stickyPriceNote}
                     </span>
-                    <span className="inline-flex items-center gap-1 font-mono">
-                      <span className="text-[#ff337d] font-extrabold text-xs sm:text-xs whitespace-nowrap">
-                        {t.stickyPriceNote}
-                      </span>
-                      <span className="line-through text-slate-500 text-[10px] sm:text-[11px] whitespace-nowrap">
-                        {t.stickyOriginal}
-                      </span>
+                    <span className="line-through text-slate-500 text-[10px] sm:text-[11px] whitespace-nowrap hidden min-[360px]:inline">
+                      {t.stickyOriginal}
                     </span>
+                  </span>
 
-                    {/* Live Limited Seats Pill in Sticky Bar */}
+                  {/* Live Limited Seats Pill in Sticky Bar */}
+                  <div className="shrink-0">
                     <LimitedSeatsSection seatsLeft={seatsLeft} lang={lang} variant="sticky" />
                   </div>
-
-                  {/* Bottom Line: Batch Schedule (Mobile vs Laptop Responsive Text) */}
-                  <p className="text-[10px] sm:text-xs font-mono text-slate-300 truncate">
-                    <span className="hidden sm:inline">{t.stickySat}</span>
-                    <span className="sm:hidden">{t.stickySatMobile || t.stickySat}</span>
-                  </p>
                 </div>
 
-                {/* Right Side: Responsive Language Toggle + Primary CTA Button */}
+                {/* Right Side: Primary CTA Button */}
                 <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
-                  {/* Inline Language Quick-Toggle (Visible & Responsive on BOTH mobile & laptop!) */}
-                  <button
-                    type="button"
-                    onClick={toggleLanguage}
-                    title={t.translateBtnTooltip}
-                    className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.14] border border-white/15 hover:border-[#f90058]/40 text-[10px] sm:text-xs font-bold text-slate-200 hover:text-white transition-all cursor-pointer whitespace-nowrap flex-shrink-0"
-                    aria-label={t.translateBtnTooltip}
-                  >
-                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fuchsia-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                    </svg>
-                    <span className="hidden sm:inline">{t.translateBtnLabel}</span>
-                    <span className="sm:hidden">{lang === "ml" ? "EN" : "മല"}</span>
-                  </button>
-
-                  {/* Primary Action Button (Guaranteed whitespace-nowrap, never wraps onto multiple lines!) */}
+                  {/* Primary Action Button */}
                   <button
                     type="button"
                     onClick={handleScrollToForm}
-                    className="py-2 px-3.5 sm:px-6 bg-gradient-to-r from-[#f90058] to-[#184cef] hover:from-[#ff1a6c] hover:to-[#2e62ff] active:scale-95 text-white font-black text-xs sm:text-xs uppercase tracking-wider rounded-full transition-all shadow-[0_2px_16px_rgba(249,0,88,0.35)] cursor-pointer whitespace-nowrap flex-shrink-0"
+                    className="py-2 px-3 sm:px-5 bg-[#fa0058] hover:bg-[#e0004f] active:scale-95 text-white font-black text-xs sm:text-xs uppercase tracking-wider rounded-full transition-all shadow-[0_2px_16px_rgba(250,0,88,0.4)] cursor-pointer whitespace-nowrap flex-shrink-0"
                   >
-                    <span className="hidden min-[380px]:inline">{t.stickyBtn}</span>
-                    <span className="min-[380px]:hidden">{t.stickyBtnMobile || t.stickyBtn}</span>
+                    <span className="hidden sm:inline">{t.stickyBtn}</span>
+                    <span className="sm:hidden">{t.stickyBtnMobile || (lang === "ml" ? "രജിസ്റ്റർ" : "Register")}</span>
                   </button>
                 </div>
 

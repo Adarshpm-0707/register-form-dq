@@ -54,28 +54,40 @@ export default function LimitedSeatsSection({
   if (variant === "sticky") {
     return (
       <span
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-mono text-[10px] sm:text-xs font-bold transition-all ${
+        className={`inline-flex items-center gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full font-mono text-[9px] sm:text-xs font-bold transition-all shrink-0 ${
           isCritical
             ? "bg-rose-500/20 border border-rose-500/40 text-rose-300 shadow-[0_0_12px_rgba(244,63,94,0.35)]"
             : "bg-[#f90058]/15 border border-[#f90058]/35 text-amber-300 shadow-[0_0_10px_rgba(249,0,88,0.25)]"
         } ${className}`}
       >
-        <span className="relative flex h-2 w-2 flex-shrink-0">
+        <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2 flex-shrink-0">
           <span
             className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
               isCritical ? "bg-rose-400" : "bg-[#f90058]"
             }`}
           />
           <span
-            className={`relative inline-flex rounded-full h-2 w-2 ${
+            className={`relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 ${
               isCritical ? "bg-rose-500" : "bg-[#f90058]"
             }`}
           />
         </span>
-        <span className="whitespace-nowrap">
-          {text.only}{" "}
-          <strong className="text-white font-black">{seatsLeft}</strong>{" "}
-          {text.seatsLeft.replace("!", "")}
+        <span className="whitespace-nowrap text-[9px] sm:text-xs">
+          {isMl ? (
+            <>
+              <span className="hidden sm:inline">ഇനി </span>
+              <strong className="text-white font-black">{seatsLeft}</strong>{" "}
+              <span className="hidden sm:inline">സീറ്റുകൾ മാത്രം ബാക്കി</span>
+              <span className="sm:hidden">സീറ്റ് ബാക്കി</span>
+            </>
+          ) : (
+            <>
+              <span className="hidden sm:inline">{text.only} </span>
+              <strong className="text-white font-black">{seatsLeft}</strong>{" "}
+              <span className="hidden sm:inline">{text.seatsLeft.replace("!", "")}</span>
+              <span className="sm:hidden">left</span>
+            </>
+          )}
         </span>
       </span>
     );
@@ -111,7 +123,7 @@ export default function LimitedSeatsSection({
                     animate={{ y: 0, opacity: 1, scale: 1 }}
                     exit={{ y: 6, opacity: 0, scale: 0.8 }}
                     transition={{ duration: 0.25 }}
-                    className="inline-block px-1.5 py-0.2 rounded bg-white/[0.08] border border-amber-300/40 text-amber-300 font-mono font-black"
+                    className="inline-block px-1.5 py-0.2 rounded bg-white/[0.08] border border-white/20 text-white font-mono font-black"
                   >
                     {seatsLeft}
                   </motion.span>
@@ -157,11 +169,7 @@ export default function LimitedSeatsSection({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className={`w-full rounded-2xl p-3.5 sm:p-4 border transition-all duration-300 backdrop-blur-xl ${
-        isCritical
-          ? "bg-gradient-to-r from-rose-950/35 via-purple-950/25 to-slate-900/40 border-rose-500/45 shadow-[0_0_30px_rgba(244,63,94,0.25)]"
-          : "bg-gradient-to-r from-[#f90058]/15 via-white/[0.04] to-[#184cef]/15 border-[#f90058]/35 shadow-[0_0_24px_rgba(249,0,88,0.2)]"
-      } ${className}`}
+      className={`w-full rounded-2xl p-3.5 sm:p-4 border border-white/10 bg-slate-900/60 backdrop-blur-xl transition-all duration-300 ${className}`}
     >
       {/* Top Header Pill Row */}
       <div className="flex items-center justify-between gap-2">
@@ -203,7 +211,7 @@ export default function LimitedSeatsSection({
           </span>
 
           {/* Animated Number Badge */}
-          <div className="relative inline-flex items-center justify-center min-w-[2.4rem] px-2 py-0.5 rounded-xl bg-slate-950/80 border border-[#f90058]/60 shadow-[0_0_16px_rgba(249,0,88,0.4)]">
+          <div className="relative inline-flex items-center justify-center min-w-[2.4rem] px-2 py-0.5 rounded-xl bg-slate-950/80 border border-white/20">
             <AnimatePresence mode="popLayout">
               <motion.span
                 key={seatsLeft}
@@ -211,11 +219,7 @@ export default function LimitedSeatsSection({
                 animate={{ y: 0, opacity: 1, scale: 1 }}
                 exit={{ y: 10, opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.3 }}
-                className={`text-lg sm:text-xl font-extrabold font-mono text-transparent bg-clip-text ${
-                  isCritical
-                    ? "bg-gradient-to-r from-rose-400 via-amber-200 to-rose-300"
-                    : "bg-gradient-to-r from-[#ff337d] via-amber-200 to-[#5480ff]"
-                }`}
+                className="text-lg sm:text-xl font-extrabold font-mono text-white"
               >
                 {seatsLeft}
               </motion.span>
@@ -239,8 +243,8 @@ export default function LimitedSeatsSection({
         <motion.div
           className={`h-full rounded-full transition-all duration-700 ease-out ${
             isCritical
-              ? "bg-gradient-to-r from-[#184cef] via-amber-400 to-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.9)]"
-              : "bg-gradient-to-r from-[#184cef] via-[#f90058] to-amber-300 shadow-[0_0_10px_rgba(249,0,88,0.7)]"
+              ? "bg-gradient-to-r from-[#184cef] via-amber-400 to-rose-500"
+              : "bg-gradient-to-r from-[#184cef] via-[#f90058] to-amber-300"
           }`}
           style={{ width: `${bookedPercent}%` }}
         />

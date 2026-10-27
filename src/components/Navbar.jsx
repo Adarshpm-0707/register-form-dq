@@ -361,7 +361,7 @@ function Navbar() {
             to="/admission"
             className={`group relative px-4 py-2 rounded-full text-xs font-bold tracking-wide transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-1.5 ${
               isAiEasyAyiPage
-                ? "bg-gradient-to-r from-[#f90058] to-[#184cef] hover:from-[#ff1a6c] hover:to-[#2e62ff] text-white shadow-[0_2px_16px_rgba(249,0,88,0.4)]"
+                ? "bg-[#fa0058] hover:bg-[#e0004f] text-white shadow-[0_2px_16px_rgba(250,0,88,0.4)]"
                 : "bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-slate-950 shadow-[0_2px_16px_rgba(56,189,248,0.35)]"
             }`}
           >
@@ -380,7 +380,7 @@ function Navbar() {
             className={`p-2 rounded-full transition-all duration-300 border flex items-center justify-center ${
               isOpen
                 ? isAiEasyAyiPage
-                  ? "bg-[#f90058] text-white border-[#f90058] shadow-[0_0_15px_rgba(249,0,88,0.4)]"
+                  ? "bg-[#fa0058] text-white border-[#fa0058] shadow-[0_0_15px_rgba(250,0,88,0.4)]"
                   : "bg-sky-400 text-slate-950 border-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.4)]"
                 : isAiEasyAyiPage
                 ? "bg-white/[0.08] backdrop-blur-md hover:bg-white/[0.16] text-white border-white/20"
@@ -399,19 +399,12 @@ function Navbar() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -16, scale: 0.97 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
-              className={`absolute top-[calc(100%+10px)] left-0 w-full rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 lg:hidden z-50 flex flex-col gap-2 shadow-2xl border text-white max-h-[82vh] overflow-y-auto ${
-                isAiEasyAyiPage
-                  ? "bg-white/[0.08] backdrop-blur-3xl backdrop-saturate-150 border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.25)]"
-                  : "bg-[#040d1a]/95 backdrop-blur-2xl border-white/15"
-              }`}
+              className="absolute top-[calc(100%+10px)] left-0 w-full rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 lg:hidden z-50 flex flex-col gap-2 shadow-2xl border border-white/15 text-white max-h-[82vh] overflow-y-auto bg-[#07090e] shadow-[0_25px_60px_rgba(0,0,0,0.98)]"
             >
               {/* Menu Header in Tablet/Mobile */}
               <div className="flex items-center justify-between pb-3 px-2 border-b border-white/10">
-                <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-slate-400">
+                <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-white">
                   Navigation Menu
-                </span>
-                <span className="text-[10px] font-mono font-bold text-sky-400 bg-sky-950/60 px-2.5 py-0.5 rounded-full border border-sky-500/30">
-                  DeepStaq AI Hub
                 </span>
               </div>
 
@@ -426,21 +419,25 @@ function Navbar() {
                         key={link.path}
                         className={`flex flex-col rounded-2xl border transition-all ${
                           active
-                            ? "bg-sky-400/10 border-sky-500/30"
+                            ? isAiEasyAyiPage
+                              ? "bg-[#fa0058]/15 border-[#fa0058]/40"
+                              : "bg-sky-400/10 border-sky-500/30"
                             : "border-transparent hover:border-white/10"
                         }`}
                       >
-                        <div className="flex items-center justify-between py-2.5 px-3 sm:px-4 rounded-2xl hover:bg-white/[0.04]">
+                        <div className="flex items-center justify-between py-2.5 px-3 sm:px-4 rounded-2xl hover:bg-white/[0.06]">
                           <Link
                             to={link.path}
                             onClick={() => setIsOpen(false)}
-                            className={`text-sm sm:text-base font-bold uppercase tracking-wider flex items-center gap-2 ${
-                              active ? "text-sky-400" : "text-white"
-                            }`}
+                            className="text-sm sm:text-base font-bold uppercase tracking-wider flex items-center gap-2 text-white"
                           >
-                            <span>{link.name}</span>
+                            <span className="text-white">{link.name}</span>
                             {active && (
-                              <span className="w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
+                              <span className={`w-2 h-2 rounded-full ${
+                                isAiEasyAyiPage
+                                  ? "bg-[#fa0058] shadow-[0_0_8px_rgba(250,0,88,0.6)]"
+                                  : "bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]"
+                              }`} />
                             )}
                           </Link>
                           <button
@@ -451,14 +448,14 @@ function Navbar() {
                               e.stopPropagation();
                               setMobileBlogExpanded(!mobileBlogExpanded);
                             }}
-                            className="p-2 rounded-xl bg-white/5 hover:bg-sky-400/20 text-white border border-white/10 transition-colors flex items-center gap-1"
+                            className="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-white border border-white/15 transition-colors flex items-center gap-1"
                           >
-                            <span className="text-[10px] font-mono font-bold uppercase hidden sm:inline">
+                            <span className="text-[10px] font-mono font-bold uppercase hidden sm:inline text-white">
                               Guides
                             </span>
                             <Icons.ChevronDown
-                              className={`w-4 h-4 transition-transform duration-200 ${
-                                mobileBlogExpanded ? "rotate-180 text-sky-400" : "text-slate-400"
+                              className={`w-4 h-4 transition-transform duration-200 text-white ${
+                                mobileBlogExpanded ? "rotate-180" : ""
                               }`}
                             />
                           </button>
@@ -476,13 +473,13 @@ function Navbar() {
                             >
                               <div className="p-3 mx-2 mb-2 grid grid-cols-1 sm:grid-cols-2 gap-2 bg-white/[0.02] rounded-xl border border-white/10">
                                 <div className="sm:col-span-2 flex items-center justify-between pb-1 px-1">
-                                  <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">
+                                  <span className="text-[10px] font-mono font-bold text-white uppercase">
                                     Learning Guides
                                   </span>
                                   <Link
                                     to="/blog"
                                     onClick={() => setIsOpen(false)}
-                                    className="text-[10px] font-mono font-bold text-sky-400 hover:underline"
+                                    className="text-[10px] font-mono font-bold text-white hover:underline"
                                   >
                                     View All →
                                   </Link>
@@ -492,12 +489,16 @@ function Navbar() {
                                     key={post.id}
                                     to={`/blog/${post.slug}`}
                                     onClick={() => setIsOpen(false)}
-                                    className="text-xs font-mono font-bold text-slate-200 hover:text-white p-2.5 rounded-lg bg-white/[0.03] hover:bg-sky-400/15 border border-white/8 hover:border-sky-400/40 flex items-start gap-2 transition-all shadow-sm"
+                                    className="text-xs font-mono font-bold text-white hover:text-white p-2.5 rounded-lg bg-white/[0.05] hover:bg-white/15 border border-white/10 hover:border-white/30 flex items-start gap-2 transition-all shadow-sm"
                                   >
-                                    <span className="text-[10px] font-black bg-sky-950/60 text-sky-400 border border-sky-500/20 px-1.5 py-0.5 rounded">
+                                    <span className={`text-[10px] font-black border px-1.5 py-0.5 rounded ${
+                                      isAiEasyAyiPage
+                                        ? "bg-[#fa0058]/20 text-white border-[#fa0058]/40"
+                                        : "bg-sky-950/80 text-white border-sky-500/30"
+                                    }`}>
                                       0{idx + 1}
                                     </span>
-                                    <span className="line-clamp-1 leading-snug">
+                                    <span className="line-clamp-1 leading-snug text-white">
                                       {post.title.split(" (2026")[0]}
                                     </span>
                                   </Link>
@@ -515,18 +516,22 @@ function Navbar() {
                       key={link.path}
                       href={link.path}
                       onClick={(e) => handleNavClick(e, link.path)}
-                      className={`text-sm sm:text-base font-semibold py-2.5 sm:py-3 px-3 sm:px-4 transition-all flex items-center justify-between group rounded-2xl ${
+                      className={`text-sm sm:text-base font-bold py-2.5 sm:py-3 px-3 sm:px-4 transition-all flex items-center justify-between group rounded-2xl text-white ${
                         active
-                          ? "bg-sky-400/15 text-sky-300 border border-sky-400/30 font-bold"
-                          : "text-white/80 hover:bg-white/5 hover:text-white"
+                          ? isAiEasyAyiPage
+                            ? "bg-[#fa0058]/20 text-white border border-[#fa0058]/50"
+                            : "bg-white/10 text-white border border-white/25"
+                          : "text-white hover:bg-white/10 hover:text-white"
                       }`}
                     >
-                      <span className="flex items-center gap-2">{link.name}</span>
+                      <span className="flex items-center gap-2 text-white font-bold">{link.name}</span>
                       <span
                         className={`w-2 h-2 rounded-full transition-transform ${
                           active
-                            ? "bg-sky-400 scale-100 shadow-[0_0_8px_rgba(56,189,248,0.6)]"
-                            : "bg-sky-400 scale-0 group-hover:scale-100"
+                            ? isAiEasyAyiPage
+                              ? "bg-[#fa0058] scale-100 shadow-[0_0_8px_rgba(250,0,88,0.8)]"
+                              : "bg-white scale-100 shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+                            : "bg-white scale-0 group-hover:scale-100"
                         }`}
                       />
                     </a>
@@ -541,17 +546,21 @@ function Navbar() {
                 <Link
                   to="/consultation"
                   onClick={() => setIsOpen(false)}
-                  className="py-3 px-3 rounded-xl text-center text-xs font-semibold border transition-all bg-white/5 hover:bg-white/10 text-white border-white/15 hover:border-white/30"
+                  className="py-3 px-3 rounded-xl text-center text-xs font-bold border transition-all bg-white/10 hover:bg-white/20 text-white border-white/20 hover:border-white/40"
                 >
                   Free AI Class
                 </Link>
                 <Link
                   to="/admission"
                   onClick={() => setIsOpen(false)}
-                  className="py-3 px-3 rounded-xl text-center text-xs font-bold bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-slate-950 shadow-[0_2px_12px_rgba(56,189,248,0.35)] flex items-center justify-center gap-1.5 transition-all"
+                  className={`py-3 px-3 rounded-xl text-center text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+                    isAiEasyAyiPage
+                      ? "bg-[#fa0058] hover:bg-[#e0004f] text-white shadow-[0_2px_12px_rgba(250,0,88,0.4)]"
+                      : "bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-white shadow-[0_2px_12px_rgba(56,189,248,0.35)]"
+                  }`}
                 >
-                  <span>Apply Now</span>
-                  <span className="font-bold">→</span>
+                  <span className="text-white font-bold">Apply Now</span>
+                  <span className="font-bold text-white">→</span>
                 </Link>
               </div>
             </motion.div>

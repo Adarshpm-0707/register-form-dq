@@ -91,7 +91,7 @@ function Contact() {
               </div>
               <div className="min-w-0 overflow-hidden">
                 <p className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-[0.2em] text-[#c6ff34] mb-0.5">Email</p>
-                <p className="text-white font-medium text-sm md:text-base break-all md:break-normal">deepstackbyaleef@gmail.com</p>
+                <p className="text-white font-medium text-sm md:text-base break-all md:break-normal">info@deepstaq.in</p>
               </div>
             </div>
             
