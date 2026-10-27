@@ -125,6 +125,11 @@ function Navbar() {
   };
 
   const isHome = location.pathname === "/";
+  const isAiEasyAyiPage =
+    location.pathname === "/aieasyayi" ||
+    location.pathname === "/ai-easy-ayi" ||
+    location.pathname === "/ai-for-everyone" ||
+    location.pathname.startsWith("/ai-easy-ayi");
 
   const navLinks = isHome
     ? [
@@ -171,7 +176,11 @@ function Navbar() {
     >
       <nav
         ref={navContainerRef}
-        className="w-full max-w-7xl flex items-center justify-between px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-full pointer-events-auto transition-all duration-300 relative bg-[#090D11]/85 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+        className={`w-full max-w-7xl flex items-center justify-between px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-full pointer-events-auto transition-all duration-300 relative ${
+          isAiEasyAyiPage
+            ? "bg-gradient-to-b from-white/[0.12] to-white/[0.04] backdrop-blur-2xl backdrop-saturate-150 border border-white/25 shadow-[0_8px_32px_rgba(0,0,0,0.37),inset_0_1px_1px_rgba(255,255,255,0.3)]"
+            : "bg-[#090D11]/85 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+        }`}
       >
         {/* LOGO */}
         <Link
@@ -322,7 +331,11 @@ function Navbar() {
           </Link>
           <Link
             to="/admission"
-            className="group relative px-4 py-2 rounded-full bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-slate-950 text-xs font-bold tracking-wide transition-all duration-200 shadow-[0_2px_16px_rgba(56,189,248,0.35)] hover:scale-105 active:scale-95 flex items-center gap-1.5"
+            className={`group relative px-4 py-2 rounded-full text-xs font-bold tracking-wide transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-1.5 ${
+              isAiEasyAyiPage
+                ? "bg-gradient-to-r from-[#f90058] to-[#184cef] hover:from-[#ff1a6c] hover:to-[#2e62ff] text-white shadow-[0_2px_16px_rgba(249,0,88,0.4)]"
+                : "bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-slate-950 shadow-[0_2px_16px_rgba(56,189,248,0.35)]"
+            }`}
           >
             <span>Apply Now</span>
             <span className="transition-transform duration-200 group-hover:translate-x-0.5 font-bold">→</span>
@@ -338,7 +351,11 @@ function Navbar() {
             onClick={() => setIsOpen(!isOpen)}
             className={`p-2 rounded-full transition-all duration-300 border flex items-center justify-center ${
               isOpen
-                ? "bg-sky-400 text-slate-950 border-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.4)]"
+                ? isAiEasyAyiPage
+                  ? "bg-[#f90058] text-white border-[#f90058] shadow-[0_0_15px_rgba(249,0,88,0.4)]"
+                  : "bg-sky-400 text-slate-950 border-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.4)]"
+                : isAiEasyAyiPage
+                ? "bg-white/[0.08] backdrop-blur-md hover:bg-white/[0.16] text-white border-white/20"
                 : "bg-white/10 hover:bg-white/20 text-white border-white/20"
             }`}
           >
@@ -354,7 +371,11 @@ function Navbar() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -16, scale: 0.97 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
-              className="absolute top-[calc(100%+10px)] left-0 w-full rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 lg:hidden z-50 flex flex-col gap-2 shadow-2xl border bg-[#040d1a]/95 backdrop-blur-2xl border-white/15 text-white max-h-[82vh] overflow-y-auto"
+              className={`absolute top-[calc(100%+10px)] left-0 w-full rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 lg:hidden z-50 flex flex-col gap-2 shadow-2xl border text-white max-h-[82vh] overflow-y-auto ${
+                isAiEasyAyiPage
+                  ? "bg-white/[0.08] backdrop-blur-3xl backdrop-saturate-150 border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.25)]"
+                  : "bg-[#040d1a]/95 backdrop-blur-2xl border-white/15"
+              }`}
             >
               {/* Menu Header in Tablet/Mobile */}
               <div className="flex items-center justify-between pb-3 px-2 border-b border-white/10">
