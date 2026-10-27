@@ -132,9 +132,6 @@ export default function Footer() {
               <span className="text-[11px] font-mono font-bold tracking-widest text-sky-400 uppercase">
                 Explore DeepStaq
               </span>
-              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">
-                Navbar Links
-              </span>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5">
@@ -174,10 +171,10 @@ export default function Footer() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 <a
-                  href="mailto:deepstackbyaleef@gmail.com"
+                  href="mailto:info@deepstaq.in"
                   className="text-slate-200 hover:text-sky-400 break-all transition-colors underline decoration-white/20 underline-offset-2"
                 >
-                  deepstackbyaleef@gmail.com
+                  info@deepstaq.in
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
@@ -297,10 +294,10 @@ export default function Footer() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 <a
-                  href="mailto:deepstackbyaleef@gmail.com"
+                  href="mailto:info@deepstaq.in"
                   className="text-slate-300 hover:text-sky-400 transition-colors break-all leading-snug"
                 >
-                  deepstackbyaleef@gmail.com
+                  info@deepstaq.in
                 </a>
               </div>
 

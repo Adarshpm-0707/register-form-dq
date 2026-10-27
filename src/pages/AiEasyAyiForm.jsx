@@ -220,7 +220,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What is your refund policy?",
-    a: "We offer a 100% no-questions-asked refund guarantee. If you attend the 2-hour masterclass and feel it didn't give you practical clarity to save hours each week, simply email deepstackbyaleef@gmail.com and your ₹99 will be refunded promptly.",
+    a: "We offer a 100% no-questions-asked refund guarantee. If you attend the 2-hour masterclass and feel it didn't give you practical clarity to save hours each week, simply email info@deepstaq.in and your ₹99 will be refunded promptly.",
   },
 ];
 

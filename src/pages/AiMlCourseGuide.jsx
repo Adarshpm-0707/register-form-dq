@@ -214,7 +214,7 @@ export default function AiMlCourseGuide() {
             <li>• <strong className="text-white">Full degree programmes (B.Tech/M.Tech/MSc):</strong> ₹2,00,000 – ₹10,00,000+</li>
           </ul>
           <div className="p-5 rounded-2xl bg-[#0D1318]/90 border border-white/10 text-xs md:text-sm font-mono text-slate-300 backdrop-blur-xl">
-            For Deepstaq's exact current fee structure and any active scholarship offers, contact <strong className="text-white">+91 949 595 7011</strong> or <strong className="text-white">deepstackbyaleef@gmail.com</strong>.
+            For Deepstaq's exact current fee structure and any active scholarship offers, contact <strong className="text-white">+91 949 595 7011</strong> or <strong className="text-white">info@deepstaq.in</strong>.
           </div>
         </section>
 
@@ -367,7 +367,7 @@ export default function AiMlCourseGuide() {
             <div className="pt-6 border-t border-white/10 flex flex-wrap items-center justify-center md:justify-start gap-6 text-xs font-mono text-slate-400">
               <span>+91 949 595 7011</span>
               <span>•</span>
-              <span>deepstackbyaleef@gmail.com</span>
+              <span>info@deepstaq.in</span>
               <span>•</span>
               <span>www.deepstaq.in</span>
             </div>

@@ -404,7 +404,7 @@ function Admission() {
     doc.setFontSize(8);
     doc.setTextColor(140, 140, 150);
     doc.text("DEEPSTAQ ACADEMY • DIVE DEEP INTO AI", 20, 269);
-    doc.text("deepstackbyaleef@gmail.com  •  +91 94959 57011", 190, 269, { align: "right" });
+    doc.text("info@deepstaq.in  •  +91 94959 57011", 190, 269, { align: "right" });
 
     return doc;
   };

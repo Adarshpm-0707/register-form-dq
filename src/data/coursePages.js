@@ -867,7 +867,7 @@ If you're unsure whether you qualify, it's worth checking directly with the inst
 
 Where a specific course lands within this range depends on instructor-led hours, mentorship, GPU/cloud access, capstone guidance, and placement support.
 
-For Deepstaq's exact current fee structure and any active offers, it's best to check directly via www.deepstaq.in or contact +91 949 595 7011 / deepstackbyaleef@gmail.com — this article intentionally doesn't quote a number that could go out of date.`
+For Deepstaq's exact current fee structure and any active offers, it's best to check directly via www.deepstaq.in or contact +91 949 595 7011 / info@deepstaq.in — this article intentionally doesn't quote a number that could go out of date.`
       },
       {
         id: "skills-learned",

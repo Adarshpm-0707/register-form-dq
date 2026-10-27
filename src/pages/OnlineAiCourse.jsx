@@ -255,7 +255,7 @@ export default function OnlineAiCourse() {
             <div className="pt-6 border-t border-white/10 flex flex-wrap items-center justify-center md:justify-start gap-6 text-xs font-mono text-slate-400">
               <span>+91 949 595 7011</span>
               <span>•</span>
-              <span>deepstackbyaleef@gmail.com</span>
+              <span>info@deepstaq.in</span>
               <span>•</span>
               <span>www.deepstaq.in</span>
             </div>
