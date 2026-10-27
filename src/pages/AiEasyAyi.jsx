@@ -5,7 +5,10 @@ import {
   updateAiEasyAyiRegistration,
 } from "../services/dbService";
 import AdVideoSection from "../components/AdVideoSection";
+import LimitedSeatsSection from "../components/LimitedSeatsSection";
+import { useSeatsCountdown } from "../hooks/useSeatsCountdown";
 import logo from "../assets/Asset 1@4x.png";
+import easyAiImg from "../assets/easyai.png";
 
 /* ─────────────────────────────────────────────
    BILINGUAL CONTENT DICTIONARY
@@ -44,7 +47,7 @@ const TRANSLATIONS = {
     // Highlights Strip (Home theme 4-column)
     highlights: [
       { prefix: "എല്ലാവർക്കും എളുപ്പത്തിൽ", highlight: "തുടങ്ങാം" },
-      { prefix: "2 മണിക്കൂർ കൊണ്ട്", highlight: "നേരിട്ട് ചെയ്തു പഠിക്കാം" },
+      { prefix: "90 മിനിറ്റ് കൊണ്ട്", highlight: "നേരിട്ട് ചെയ്തു പഠിക്കാം" },
       { prefix: "ലളിതമായ മലയാളത്തിൽ", highlight: "സംശയങ്ങൾക്ക് മറുപടി" },
       { prefix: "സൗജന്യ ബോണസ്", highlight: "സ്റ്റഡി ഗൈഡുകൾ" },
     ],
@@ -53,45 +56,75 @@ const TRANSLATIONS = {
     videoHeading: "2 മിനിറ്റ് പ്രിവ്യൂ വീഡിയോ കാണൂ",
     videoSubheading: "ഈ മാസ്റ്റർക്ലാസ്സിൽ എന്തൊക്കെയാണ് നിങ്ങൾ പഠിക്കുന്നതെന്ന് നേരിട്ട് കണ്ട് മനസ്സിലാക്കൂ.",
 
+    // Perspective Shifts (Hard Truths)
+    perspectiveBadge: "സത്യങ്ങൾ മനസ്സിലാക്കാം",
+    perspectiveHeading: "ആരും നിങ്ങളോട് ഇത് പറഞ്ഞു തരില്ല. അതുകൊണ്ട് ഞാൻ പറയാം.",
+    perspectiveCards: [
+      {
+        myth: "ഇമെയിലുകൾക്കും നോട്ടുകൾക്കും പേപ്പർവർക്കുകൾക്കുമായി മണിക്കൂറുകൾ ചെലവഴിക്കുന്നത് ആത്മാർത്ഥതയല്ല.",
+        truth: "അത് AI വഴി നിങ്ങൾക്ക് തിരികെ ലഭിക്കേണ്ട വിലപ്പെട്ട സമയമാണ്.",
+      },
+      {
+        myth: "\"AI ടെക്നോളജി അറിയാവുന്നവർക്ക് മാത്രമുള്ളതാണ്\" എന്നത് മുൻകരുതലല്ല.",
+        truth: "ഓരോ മാസവും നിങ്ങൾക്കും മറ്റുള്ളവർക്കും ഇടയിൽ വർദ്ധിച്ചുവരുന്ന വലിയൊരു വിടവാണ്.",
+      },
+      {
+        myth: "\"എനിക്ക് സാങ്കേതികവിദ്യ വലിയ വശമില്ല\" എന്നത് ഒരു പരിമിതിയല്ല.",
+        truth: "ഇതുവരെ ആരും ലളിതമായി പഠിപ്പിച്ചു തരാത്ത ഒരു സ്കിൽ മാത്രമാണത്.",
+      },
+    ],
+    perspectiveCallout: "നല്ല വാർത്ത: നിങ്ങൾ സാങ്കേതിക വിദഗ്ദ്ധനാകേണ്ടതില്ല. നിങ്ങൾക്ക് വേണ്ടത് Easy AI ആണ്.",
+
     // Steps (How it works)
-    stepsBadge: "എങ്ങനെ തുടങ്ങാം",
-    stepsTitle: "3 ലളിതമായ ഘട്ടങ്ങൾ",
+    stepsBadge: "HOW IT WORKS",
+    stepsTitle: "➡️ എങ്ങനെ പ്രവർത്തിക്കുന്നു",
     steps: [
       {
-        step: "01",
-        title: "₹99 അടച്ച് രജിസ്റ്റർ ചെയ്യൂ",
-        desc: "Confirmation ഉം ഔദ്യോഗിക Zoom meeting ലിങ്കും നിങ്ങളുടെ ഫോണിൽ ഉടൻ എത്തും.",
+        step: "1",
+        title: "₹99 അടച്ച് രജിസ്റ്റർ ചെയ്യൂ.",
+        desc: "",
       },
       {
-        step: "02",
-        title: "നവംബർ 7 ശനിയാഴ്ച Live ജോയിൻ ചെയ്യൂ",
-        desc: "ഫോണോ ലാപ്ടോപ്പോ വഴി തത്സമയം ഒപ്പം ചെയ്തു കണ്ട് പരിശീലിക്കാം.",
+        step: "2",
+        title: "Zoom വഴി Live ജോയിൻ ചെയ്യൂ.",
+        desc: "നോൺ-ടെക് പ്രൊഫഷണലുകൾക്കായി തയ്യാറാക്കിയ 90 മിനിറ്റ് ഹാൻഡ്‌സ്-ഓൺ AI ബേസിക്സ്. സാങ്കേതിക പദങ്ങളോ മുൻകൂട്ടി റെക്കോർഡ് ചെയ്ത ക്ലാസുകളോ ഇല്ല.",
       },
       {
-        step: "03",
-        title: "AI ഉപയോഗിച്ച് തുടങ്ങൂ",
-        desc: "അന്നുതന്നെ നിങ്ങളുടെ ജോലിയിലും പഠനത്തിലും ദൈനംദിന ജീവിതത്തിലും AI ഉപയോഗിക്കാം.",
+        step: "3",
+        title: "നാളെ മുതൽ പ്രയോഗിക്കാവുന്ന പുതിയ സ്കിൽസ്.",
+        desc: "റെഡി-ടു-യൂസ് പ്രോംപ്റ്റുകളും എളുപ്പത്തിൽ തുടങ്ങാനുള്ള ലളിതമായ വഴികളും.",
       },
     ],
 
-    // Curriculum
-    curriculumBadge: "സിലബസ്",
-    curriculumTitle: "2 മണിക്കൂറിൽ നിങ്ങൾ പഠിക്കുന്നത്",
-    curriculumItems: [
+    // 90 Minutes of Easy AI for Working Professionals (5 Outcomes)
+    outcomesBadge: "5 പ്രധാന നേട്ടങ്ങൾ",
+    outcomesTitle: "ജോലിക്കാർക്കായി 90 മിനിറ്റ് Easy AI",
+    outcomesSubtitle: "Start Simple. Save Time. Use AI With Confidence.",
+    outcomes: [
       {
-        number: "01",
-        title: "AI എന്താണ്? (അടിസ്ഥാനങ്ങൾ)",
-        subtitle: "സാങ്കേതിക പദങ്ങളില്ലാതെ ലളിതമായ ഭാഷയിൽ AI യുടെ അടിസ്ഥാനങ്ങൾ മനസ്സിലാക്കാം.",
+        number: "Outcome 1",
+        title: "AI സാധ്യതകളും പരിമിതികളും",
+        desc: "Understand what AI can and can't do, without the hype. അനാവശ്യ ഹൈപ്പുകളോ തെറ്റിദ്ധാരണകളോ ഇല്ലാതെ AI കൊണ്ട് എന്തൊക്കെ ചെയ്യാൻ കഴിയും, എന്തൊക്കെ കഴിയില്ല എന്ന് വ്യക്തമായി മനസ്സിലാക്കാം.",
       },
       {
-        number: "02",
-        title: "ദൈനംദിന ജീവിതത്തിൽ AI പ്രയോഗിക്കാം",
-        subtitle: "പഠനം, ഓഫീസ് ജോലി, ഇമെയിലുകൾ, പ്രസന്റേഷൻ, ട്രാവൽ പ്ലാനിംഗ് എന്നിവയിൽ AI ഉപയോഗിക്കാം.",
+        number: "Outcome 2",
+        title: "ഫലപ്രദമായ പ്രോംപ്റ്റിംഗ് രീതികൾ",
+        desc: "Write prompts that give useful answers the first time. ആദ്യശ്രമത്തിൽ തന്നെ ഏറ്റവും മികച്ചതും കൃത്യവുമായ ഉത്തരങ്ങൾ നൽകുന്ന പ്രോംപ്റ്റുകൾ എഴുതാൻ പഠിക്കാം.",
       },
       {
-        number: "03",
-        title: "സുരക്ഷിതമായി സ്മാർട്ടായി ഉപയോഗിക്കാം",
-        subtitle: "ഡാറ്റ പ്രൈവസി കാത്തുസൂക്ഷിക്കാനും ഏറ്റവും മികച്ച ഫലങ്ങൾ നേടാനുമുള്ള വഴികൾ.",
+        number: "Outcome 3",
+        title: "വിവിധ തൊഴിൽ മേഖലകൾക്ക് അനുയോജ്യമായ വഴികൾ",
+        desc: "Teachers: plan lessons, create worksheets and save grading time. Doctors: draft patient communication and documentation faster. Other professionals: handle emails, reports and research.",
+      },
+      {
+        number: "Outcome 4",
+        title: "ഏറ്റവും മികച്ച 2–3 സുരക്ഷിത ടൂളുകൾ",
+        desc: "Know which 2-3 AI tools are worth your time, and use them safely. നിങ്ങളുടെ സമയം ലാഭിക്കാൻ ഉപകരിക്കുന്ന ഏറ്റവും മികച്ച 2-3 AI ടൂളുകൾ സുരക്ഷിതമായി ഉപയോഗിക്കാം.",
+      },
+      {
+        number: "Outcome 5",
+        title: "അടുത്ത ദിവസം തന്നെ തുടങ്ങാവുന്ന AI റൂട്ടീൻ",
+        desc: "Leave with your first AI routine, ready to start the next day. അടുത്ത ദിവസം തന്നെ നിങ്ങളുടെ ജോലിയിൽ പ്രാവർത്തികമാക്കാവുന്ന വ്യക്തമായ ഒരു AI വർക്ക്‌ഫ്ലോയുമായി ക്ലാസ്സ് അവസാനിപ്പിക്കാം.",
       },
     ],
 
@@ -126,7 +159,7 @@ const TRANSLATIONS = {
     ],
     formCustomPlaceholder: "വിശദമാക്കുക (ഉദാ: വീട്ടമ്മ, അധ്യാപകൻ, ഡോക്ടർ)",
     formSubmitBtn: "₹99 അടച്ച് കൺഫേം ചെയ്യൂ",
-    formSubmitHint: "ഔദ്യോഗിക രജിസ്ട്രേഷൻ • 2 മണിക്കൂർ ലൈവ് + സ്റ്റഡി ഗൈഡുകൾ",
+    formSubmitHint: "ഔദ്യോഗിക രജിസ്ട്രേഷൻ • 90 മിനിറ്റ് ലൈവ് + സ്റ്റഡി ഗൈഡുകൾ",
     formSaving: "വിവരങ്ങൾ സേവ് ചെയ്യുന്നു...",
     formGateway: "Razorpay തുറക്കുന്നു...",
     formVerifying: "പരിശോധിക്കുന്നു...",
@@ -214,7 +247,7 @@ const TRANSLATIONS = {
     // Highlights Strip (Home theme 4-column)
     highlights: [
       { prefix: "Accessible for all", highlight: "Absolute Beginners" },
-      { prefix: "2-Hour Intensive", highlight: "Practical Live Class" },
+      { prefix: "90-Minute Live", highlight: "Hands-On Workshop" },
       { prefix: "Simple Explanations", highlight: "Live Q&A Support" },
       { prefix: "Free Bonus", highlight: "Prompt Cheat Sheets" },
     ],
@@ -223,45 +256,75 @@ const TRANSLATIONS = {
     videoHeading: "Watch the 2-Minute Preview",
     videoSubheading: "Discover everything you will experience and build during the interactive masterclass.",
 
+    // Perspective Shifts (Hard Truths)
+    perspectiveBadge: "HARD TRUTHS",
+    perspectiveHeading: "Nobody Is Going to Tell You This. So I Will.",
+    perspectiveCards: [
+      {
+        myth: "Spending hours on emails, notes and paperwork isn't dedication.",
+        truth: "It's time AI could give back to you.",
+      },
+      {
+        myth: "“AI is for tech people” isn't caution.",
+        truth: "It's a gap that grows every month.",
+      },
+      {
+        myth: "“I'm not good with technology” isn't a limit.",
+        truth: "It's just a skill nobody taught you yet.",
+      },
+    ],
+    perspectiveCallout: "Good news: You don't need to be technical. You need Easy AI.",
+
     // Steps (How it works)
     stepsBadge: "HOW IT WORKS",
-    stepsTitle: "3 Simple Steps to Start",
+    stepsTitle: "➡️ How it works",
     steps: [
       {
-        step: "01",
-        title: "Register for just ₹99",
-        desc: "Instant booking confirmation and your official Zoom link sent straight to your phone.",
+        step: "1",
+        title: "Register for ₹99.",
+        desc: "",
       },
       {
-        step: "02",
-        title: "Join Live on Saturday, Nov 7th",
-        desc: "Connect seamlessly on your smartphone or laptop and follow live interactive demos.",
+        step: "2",
+        title: "Join live on Zoom.",
+        desc: "90 minutes of hands on AI basics, built for non-tech professionals. No jargon, no pre-recorded content.",
       },
       {
-        step: "03",
-        title: "Start Using AI Daily",
-        desc: "Apply your newly acquired AI workflows immediately in your job, studies, and daily tasks.",
+        step: "3",
+        title: "Leave with skills you can use tomorrow.",
+        desc: "Ready to use prompts and a simple way to start.",
       },
     ],
 
-    // Curriculum
-    curriculumBadge: "CURRICULUM",
-    curriculumTitle: "What You Will Master in 2 Hours",
-    curriculumItems: [
+    // 90 Minutes of Easy AI for Working Professionals (5 Outcomes)
+    outcomesBadge: "5 CONCRETE OUTCOMES",
+    outcomesTitle: "90 Minutes of Easy AI for Working Professionals",
+    outcomesSubtitle: "Start Simple. Save Time. Use AI With Confidence.",
+    outcomes: [
       {
-        number: "01",
-        title: "What is AI? (Foundations)",
-        subtitle: "Clear, practical explanations without confusing jargon or unnecessary tech theory.",
+        number: "Outcome 1",
+        title: "No-Hype AI Understanding",
+        desc: "Understand what AI can and can't do, without the hype.",
       },
       {
-        number: "02",
-        title: "Real-World Everyday AI Use Cases",
-        subtitle: "Effortless shortcuts for study notes, office work, email replies, presentations, and travel planning.",
+        number: "Outcome 2",
+        title: "First-Time-Right Prompts",
+        desc: "Write prompts that give useful answers the first time.",
       },
       {
-        number: "03",
-        title: "Safe & Productive Best Practices",
-        subtitle: "Essential rules for privacy protection, accuracy verification, and responsible AI usage.",
+        number: "Outcome 3",
+        title: "Workflows for Teachers, Doctors & Professionals",
+        desc: "Teachers: plan lessons, create worksheets and save grading time. Doctors: draft patient communication and documentation faster. Other professionals: handle emails, reports and research.",
+      },
+      {
+        number: "Outcome 4",
+        title: "2–3 Safe & Proven Tools",
+        desc: "Know which 2-3 AI tools are worth your time, and use them safely.",
+      },
+      {
+        number: "Outcome 5",
+        title: "Your First Daily AI Routine",
+        desc: "Leave with your first AI routine, ready to start the next day.",
       },
     ],
 
@@ -296,7 +359,7 @@ const TRANSLATIONS = {
     ],
     formCustomPlaceholder: "Please specify (e.g. Homemaker, Teacher, Doctor)",
     formSubmitBtn: "Confirm & Pay ₹99",
-    formSubmitHint: "Official DeepStaq Registration • 2 Hours Live + Study Guides",
+    formSubmitHint: "Official DeepStaq Registration • 90 Minutes Live + Study Guides",
     formSaving: "Saving details...",
     formGateway: "Opening Razorpay...",
     formVerifying: "Verifying payment...",
@@ -423,6 +486,7 @@ export default function AiEasyAyi() {
   const formRef = useRef(null);
   const [showForm, setShowForm] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const seatsLeft = useSeatsCountdown(10, 3);
 
   // Language state: 'ml' (Malayalam) or 'en' (English)
   const [lang, setLang] = useState(() => {
@@ -609,7 +673,7 @@ export default function AiEasyAyi() {
         amount: 9900,
         currency: "INR",
         name: "DeepStaq Academy",
-        description: "AI easy Ayi - 2 Hrs Live Class (5:00 PM - 7:00 PM IST)",
+        description: "AI easy Ayi - 90 Mins Live Class (5:00 PM - 6:30 PM IST)",
         image: logo,
         prefill: {
           name: formData.fullName.trim(),
@@ -944,6 +1008,7 @@ export default function AiEasyAyi() {
                       originalPrice={899}
                       offerPrice={99}
                       onGoToForm={handleScrollToForm}
+                      seatsLeft={seatsLeft}
                     />
                   </motion.div>
 
@@ -1047,41 +1112,48 @@ export default function AiEasyAyi() {
                     ))}
                   </motion.div>
 
-                  {/* 7. CTA Actions (Row 6 on left) */}
+                  {/* 7. CTA Actions & Limited Seats (Row 6 on left) */}
                   <motion.div
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.35 }}
-                    className="order-7 col-span-1 md:col-start-1 md:col-span-7 md:row-start-6 flex items-center justify-center md:justify-start gap-3 sm:gap-4 pt-1 w-full sm:w-auto"
+                    className="order-7 col-span-1 md:col-start-1 md:col-span-7 md:row-start-6 flex flex-col items-center md:items-start justify-center gap-3 pt-1 w-full"
                   >
-                    {/* Primary CTA */}
-                    <button
-                      type="button"
-                      onClick={handleScrollToForm}
-                      className="flex-1 sm:flex-initial px-7 lg:px-8 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-[#f90058] to-[#184cef] hover:from-[#ff1a6c] hover:to-[#2e62ff] text-white font-bold text-sm sm:text-base tracking-wide shadow-[0_4px_28px_rgba(249,0,88,0.4)] flex items-center justify-center gap-2.5 cursor-pointer transition-all hover:scale-[1.02] group whitespace-nowrap"
-                    >
-                      <span>{t.heroCtaPrimary}</span>
-                      <span className="font-mono text-white/70 line-through text-xs">
-                        {t.heroOriginalPrice}
-                      </span>
-                      <span className="font-bold transition-transform duration-200 group-hover:translate-x-1">
-                        →
-                      </span>
-                    </button>
+                    {/* Limited Seats Live Section */}
+                    <div className="w-full max-w-md lg:max-w-lg">
+                      <LimitedSeatsSection seatsLeft={seatsLeft} lang={lang} variant="hero" />
+                    </div>
 
-                    {/* Secondary WhatsApp Button */}
-                    <a
-                      href={whatsappUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="Chat on WhatsApp"
-                      className="px-5 lg:px-6 py-3.5 sm:py-4 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 hover:border-emerald-400 text-emerald-400 hover:text-emerald-300 font-semibold text-xs sm:text-sm tracking-wide transition-all duration-200 backdrop-blur-md flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_28px_rgba(16,185,129,0.4)] hover:scale-[1.02] cursor-pointer whitespace-nowrap flex-shrink-0"
-                    >
-                      <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
-                      </svg>
-                      <span>Chat on</span>
-                    </a>
+                    <div className="flex items-center justify-center md:justify-start gap-3 sm:gap-4 w-full sm:w-auto">
+                      {/* Primary CTA */}
+                      <button
+                        type="button"
+                        onClick={handleScrollToForm}
+                        className="flex-1 sm:flex-initial px-7 lg:px-8 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-[#f90058] to-[#184cef] hover:from-[#ff1a6c] hover:to-[#2e62ff] text-white font-bold text-sm sm:text-base tracking-wide shadow-[0_4px_28px_rgba(249,0,88,0.4)] flex items-center justify-center gap-2.5 cursor-pointer transition-all hover:scale-[1.02] group whitespace-nowrap"
+                      >
+                        <span>{t.heroCtaPrimary}</span>
+                        <span className="font-mono text-white/70 line-through text-xs">
+                          {t.heroOriginalPrice}
+                        </span>
+                        <span className="font-bold transition-transform duration-200 group-hover:translate-x-1">
+                          →
+                        </span>
+                      </button>
+
+                      {/* Secondary WhatsApp Button */}
+                      <a
+                        href={whatsappUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Chat on WhatsApp"
+                        className="px-5 lg:px-6 py-3.5 sm:py-4 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 hover:border-emerald-400 text-emerald-400 hover:text-emerald-300 font-semibold text-xs sm:text-sm tracking-wide transition-all duration-200 backdrop-blur-md flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_28px_rgba(16,185,129,0.4)] hover:scale-[1.02] cursor-pointer whitespace-nowrap flex-shrink-0"
+                      >
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
+                        </svg>
+                        <span>Chat on</span>
+                      </a>
+                    </div>
                   </motion.div>
 
                 </div>
@@ -1252,7 +1324,10 @@ export default function AiEasyAyi() {
                       </div>
 
                       {/* Submit */}
-                      <div className="pt-3">
+                      <div className="pt-3 space-y-3">
+                        {/* Limited Seats Section in Registration Form */}
+                        <LimitedSeatsSection seatsLeft={seatsLeft} lang={lang} variant="form" />
+
                         <button
                           type="submit"
                           disabled={loading}
@@ -1290,7 +1365,79 @@ export default function AiEasyAyi() {
               </AnimatePresence>
 
               {/* ══════════════════════════════════════════════════════════
-                  3 EASY STEPS (HOW IT WORKS)
+                  1. PERSPECTIVE SHIFTS: NOBODY IS GOING TO TELL YOU THIS
+                 ══════════════════════════════════════════════════════════ */}
+              <section className="space-y-6 pt-2 max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto">
+                <div className="border-b border-white/10 pb-4 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+                  <div>
+                    <span className="text-xs font-mono text-[#ff337d] uppercase tracking-widest block mb-1">
+                      {t.perspectiveBadge || "HARD TRUTHS"}
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+                      {t.perspectiveHeading}
+                    </h2>
+                  </div>
+                  <span className="text-xs font-mono text-slate-400 hidden sm:inline">
+                    DeepStaq AI easy Ayi
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+                  {t.perspectiveCards.map((card, idx) => (
+                    <div
+                      key={idx}
+                      className="p-6 lg:p-7 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:border-[#f90058]/50 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.3)] flex flex-col justify-between hover:-translate-y-1 group relative overflow-hidden"
+                    >
+                      <div className="space-y-4">
+                        {/* Top: The common misconception */}
+                        <div className="flex items-start gap-3">
+                          <span className="w-6 h-6 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                            ✕
+                          </span>
+                          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+                            {card.myth}
+                          </p>
+                        </div>
+
+                        <div className="w-full border-t border-white/10" />
+
+                        {/* Bottom: The liberating truth */}
+                        <div className="flex items-start gap-3">
+                          <span className="w-6 h-6 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5 shadow-[0_0_10px_rgba(16,185,129,0.3)]">
+                            ✓
+                          </span>
+                          <p className="text-sm sm:text-base font-bold text-white group-hover:text-fuchsia-200 transition-colors leading-snug">
+                            {card.truth}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Callout Conclusion Banner */}
+                <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-[#f90058]/15 via-white/[0.04] to-[#184cef]/15 border border-[#f90058]/40 backdrop-blur-xl shadow-[0_0_30px_rgba(249,0,88,0.2)] flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#f90058] to-[#184cef] flex items-center justify-center text-white text-lg shadow-[0_0_16px_rgba(249,0,88,0.5)] flex-shrink-0">
+                      ✨
+                    </div>
+                    <p className="text-sm sm:text-base lg:text-lg font-extrabold text-white">
+                      {t.perspectiveCallout}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleScrollToForm}
+                    className="px-6 py-2.5 rounded-full bg-gradient-to-r from-[#f90058] to-[#184cef] hover:from-[#ff1a6c] hover:to-[#2e62ff] text-white font-bold text-xs uppercase tracking-wider transition-all shadow-[0_2px_16px_rgba(249,0,88,0.35)] cursor-pointer whitespace-nowrap flex-shrink-0 hover:scale-105"
+                  >
+                    ₹99 Pass →
+                  </button>
+                </div>
+              </section>
+
+              {/* ══════════════════════════════════════════════════════════
+                  2. HOW IT WORKS (3 Simple Steps)
                  ══════════════════════════════════════════════════════════ */}
               <section className="space-y-6 pt-2 max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto">
                 <div className="border-b border-white/10 pb-4 flex items-baseline justify-between">
@@ -1306,21 +1453,23 @@ export default function AiEasyAyi() {
                   {t.steps.map((item, idx) => (
                     <div
                       key={idx}
-                      className="p-6 lg:p-8 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:border-[#f90058]/40 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.3)] group flex flex-col justify-between hover:-translate-y-1"
+                      className="p-6 lg:p-8 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:border-[#f90058]/40 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.3)] group flex flex-col justify-between hover:-translate-y-1 h-full min-h-[170px]"
                     >
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="w-9 h-9 rounded-xl bg-[#f90058]/15 border border-[#f90058]/30 text-[#ff4382] font-mono font-bold text-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <span className="w-10 h-10 rounded-xl bg-[#f90058]/15 border border-[#f90058]/30 text-[#ff4382] font-mono font-black text-base flex items-center justify-center group-hover:scale-110 transition-transform shadow-[0_0_12px_rgba(249,0,88,0.25)]">
                             {item.step}
                           </span>
-                          <span className="w-2 h-2 rounded-full bg-[#184cef]/50 group-hover:bg-[#f90058] transition-colors" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#184cef]/50 group-hover:bg-[#f90058] transition-colors" />
                         </div>
-                        <h3 className="text-base lg:text-lg font-bold text-white group-hover:text-pink-300 transition-colors">
+                        <h3 className="text-base lg:text-lg font-bold text-white group-hover:text-pink-300 transition-colors leading-snug">
                           {item.title}
                         </h3>
-                        <p className="text-xs sm:text-sm lg:text-base text-slate-400 leading-relaxed font-normal">
-                          {item.desc}
-                        </p>
+                        {item.desc && (
+                          <p className="text-xs sm:text-sm lg:text-base text-slate-300 leading-relaxed font-normal">
+                            {item.desc}
+                          </p>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -1328,38 +1477,69 @@ export default function AiEasyAyi() {
               </section>
 
               {/* ══════════════════════════════════════════════════════════
-                  WHAT YOU WILL LEARN (CURRICULUM)
+                  3. 90 MINUTES OF EASY AI FOR WORKING PROFESSIONALS (5 OUTCOMES)
                  ══════════════════════════════════════════════════════════ */}
               <section className="space-y-6 max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto">
-                <div className="border-b border-white/10 pb-4 flex items-baseline justify-between">
-                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight">
-                    {t.curriculumTitle}
-                  </h2>
-                  <span className="text-xs font-mono text-[#ff337d] uppercase tracking-widest">
-                    {t.curriculumBadge}
+                <div className="border-b border-white/10 pb-4 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+                  <div>
+                    <span className="text-xs font-mono text-[#ff337d] uppercase tracking-widest block mb-1">
+                      {t.outcomesBadge}
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+                      {t.outcomesTitle}
+                    </h2>
+                    <p className="text-xs sm:text-sm lg:text-base text-slate-300 mt-1 font-medium">
+                      {t.outcomesSubtitle}
+                    </p>
+                  </div>
+                  <span className="text-xs font-mono text-emerald-400 font-semibold px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 whitespace-nowrap self-start sm:self-auto">
+                    ⚡ 5 Practical Outcomes
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
-                  {t.curriculumItems.map((card, idx) => (
-                    <div
-                      key={idx}
-                      className="p-6 lg:p-8 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:border-[#184cef]/40 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.3)] group space-y-2.5 hover:-translate-y-1"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-mono font-bold text-[#5480ff] px-2.5 py-1 rounded-md bg-[#184cef]/15 border border-[#184cef]/30">
-                          {card.number}
-                        </span>
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#f90058]" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                  {t.outcomes.map((card, idx) => {
+                    const isRoleCard = idx === 2; // Outcome 3 has teachers/doctors breakdown
+                    return (
+                      <div
+                        key={idx}
+                        className={`p-6 lg:p-7 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:border-[#184cef]/50 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.3)] group space-y-3 hover:-translate-y-1 ${
+                          isRoleCard
+                            ? "md:col-span-2 lg:col-span-2 bg-gradient-to-br from-white/[0.04] to-[#184cef]/10 border-[#184cef]/30"
+                            : ""
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-mono font-bold text-[#5480ff] px-2.5 py-1 rounded-md bg-[#184cef]/15 border border-[#184cef]/30">
+                            {card.number}
+                          </span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#f90058] group-hover:scale-125 transition-transform" />
+                        </div>
+
+                        <h3 className="text-base lg:text-lg font-bold text-white group-hover:text-blue-300 transition-colors">
+                          {card.title}
+                        </h3>
+
+                        <p className="text-xs sm:text-sm lg:text-base text-slate-300 leading-relaxed font-normal">
+                          {card.desc}
+                        </p>
+
+                        {isRoleCard && (
+                          <div className="flex flex-wrap gap-2 pt-1.5">
+                            <span className="px-2.5 py-1 rounded-lg bg-pink-500/15 border border-pink-500/30 text-[11px] font-mono text-pink-300">
+                              👩‍🏫 Teachers
+                            </span>
+                            <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-[11px] font-mono text-emerald-300">
+                              👨‍⚕️ Doctors
+                            </span>
+                            <span className="px-2.5 py-1 rounded-lg bg-sky-500/15 border border-sky-500/30 text-[11px] font-mono text-sky-300">
+                              💼 Working Professionals
+                            </span>
+                          </div>
+                        )}
                       </div>
-                      <h3 className="text-base lg:text-lg font-bold text-white group-hover:text-blue-300 transition-colors">
-                        {card.title}
-                      </h3>
-                      <p className="text-xs sm:text-sm lg:text-base text-slate-400 leading-relaxed">
-                        {card.subtitle}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
 
@@ -1397,42 +1577,22 @@ export default function AiEasyAyi() {
 
 
               {/* ══════════════════════════════════════════════════════════
-                  BOTTOM CALLOUT (Matching Home.jsx CTA card)
+                  EASY AI BRANDING / LOGO SHOWCASE
                  ══════════════════════════════════════════════════════════ */}
-              <section className="relative rounded-3xl p-8 sm:p-12 lg:p-16 bg-white/[0.03] backdrop-blur-2xl border border-white/15 text-center space-y-6 lg:space-y-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto">
-                
-                {/* Background glow behind CTA */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[600px] lg:w-[800px] h-[250px] sm:h-[350px] bg-[radial-gradient(ellipse_at_center,rgba(249,0,88,0.28)_0%,rgba(24,76,239,0.22)_50%,transparent_70%)] blur-[100px] pointer-events-none -z-10" />
+              <section className="relative py-12 sm:py-16 lg:py-20 px-4 flex flex-col items-center justify-center text-center">
+                {/* Background ambient glow */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[500px] lg:w-[650px] h-[250px] sm:h-[350px] bg-[radial-gradient(ellipse_at_center,rgba(249,0,88,0.25)_0%,rgba(24,76,239,0.2)_50%,transparent_70%)] blur-[100px] pointer-events-none -z-10" />
 
-                <div className="space-y-2">
-                  <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
-                    {t.ctaTitle}
-                  </h3>
-                  <p className="text-xs sm:text-sm lg:text-base text-fuchsia-200 font-mono">
-                    {t.ctaSubtitle}
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-center gap-3 sm:gap-4 max-w-md sm:max-w-lg mx-auto">
-                  <button
-                    type="button"
-                    onClick={handleScrollToForm}
-                    className="flex-1 sm:flex-initial px-8 lg:px-10 py-3.5 sm:py-4 lg:py-4.5 bg-gradient-to-r from-[#f90058] to-[#184cef] hover:from-[#ff1a6c] hover:to-[#2e62ff] text-white font-bold text-xs sm:text-sm lg:text-base uppercase tracking-wider rounded-full transition-all shadow-[0_4px_28px_rgba(249,0,88,0.4)] hover:scale-[1.02] cursor-pointer whitespace-nowrap"
-                  >
-                    {t.ctaBtn}
-                  </button>
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Chat on WhatsApp"
-                    className="w-auto px-6 lg:px-8 py-3.5 sm:py-4 lg:py-4.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 hover:border-emerald-400 text-emerald-400 hover:text-emerald-300 font-semibold text-xs sm:text-sm lg:text-base tracking-wide transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.25)] hover:shadow-[0_0_28px_rgba(16,185,129,0.45)] hover:scale-[1.02] cursor-pointer whitespace-nowrap flex items-center justify-center gap-2 flex-shrink-0"
-                  >
-                    <svg className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
-                    </svg>
-                    <span>Chat on</span>
-                  </a>
+                <div
+                  onClick={handleScrollToForm}
+                  className="relative group cursor-pointer transition-transform duration-300 hover:scale-105"
+                  title="Click to register"
+                >
+                  <img
+                    src={easyAiImg}
+                    alt="എ.ഐ ഈസി ആയി - Easyai by deepstaq"
+                    className="w-72 sm:w-88 md:w-[420px] lg:w-[480px] max-w-full h-auto object-contain mx-auto drop-shadow-[0_15px_45px_rgba(249,0,88,0.35)] group-hover:drop-shadow-[0_20px_55px_rgba(249,0,88,0.55)] transition-all duration-300"
+                  />
                 </div>
               </section>
             </>
@@ -1456,7 +1616,7 @@ export default function AiEasyAyi() {
                 
                 {/* Left Side: Title, Pricing & Date */}
                 <div className="min-w-0 flex-1 flex flex-col justify-center">
-                  {/* Top Line: Title & Pricing */}
+                  {/* Top Line: Title & Pricing + Limited Seats Badge */}
                   <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                     <span className="text-xs sm:text-sm font-extrabold text-white tracking-tight whitespace-nowrap">
                       {t.stickyTitle}
@@ -1469,6 +1629,9 @@ export default function AiEasyAyi() {
                         {t.stickyOriginal}
                       </span>
                     </span>
+
+                    {/* Live Limited Seats Pill in Sticky Bar */}
+                    <LimitedSeatsSection seatsLeft={seatsLeft} lang={lang} variant="sticky" />
                   </div>
 
                   {/* Bottom Line: Batch Schedule (Mobile vs Laptop Responsive Text) */}
