@@ -224,6 +224,22 @@ export default function Aptitude() {
     };
   }, [step]);
 
+  // Hide Navbar during examination mode (Step 2)
+  useEffect(() => {
+    if (step === 2) {
+      document.body.classList.add("in-exam-mode");
+      window.dispatchEvent(new CustomEvent("deepstaq:exam-mode", { detail: { inExam: true } }));
+    } else {
+      document.body.classList.remove("in-exam-mode");
+      window.dispatchEvent(new CustomEvent("deepstaq:exam-mode", { detail: { inExam: false } }));
+    }
+
+    return () => {
+      document.body.classList.remove("in-exam-mode");
+      window.dispatchEvent(new CustomEvent("deepstaq:exam-mode", { detail: { inExam: false } }));
+    };
+  }, [step]);
+
   // Handle auto-submit on timer expiration (00:00)
   useEffect(() => {
     if (step === 2 && timeLeft === 0 && !submitting) {

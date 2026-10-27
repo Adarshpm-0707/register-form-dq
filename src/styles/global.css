@@ -269,3 +269,12 @@ input, button, select, textarea, a {
   pointer-events: none;
   z-index: 2;
 }
+
+/* Hide Navbar during active examination mode */
+body.in-exam-mode [data-navbar="true"],
+body.in-exam-mode nav,
+body.in-exam-mode header {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
