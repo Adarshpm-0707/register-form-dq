@@ -8,11 +8,20 @@ import {
   gradeAptitudeV2Submission,
 } from "../data/aptitudeV2Questions";
 import {
+  checkAptitudeCandidateExists,
   saveAptitudeV2Lead,
   saveAptitudeV2Submission,
 } from "../services/dbService";
 
 export default function AptitudeV2() {
+  const getTodayFormattedDate = () => {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, "0");
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const year = today.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
   const [step, setStep] = useState(1); // 1: Registration, 2: Test, 3: Result
   const [formData, setFormData] = useState({
     fullName: "",
@@ -20,11 +29,13 @@ export default function AptitudeV2() {
     phone: "",
     place: "",
     institution: "",
-    testDate: new Date().toISOString().slice(0, 10),
+    testDate: getTodayFormattedDate(),
   });
   const [formErrors, setFormErrors] = useState({});
   const [leadDocId, setLeadDocId] = useState(null);
   const [savingLead, setSavingLead] = useState(false);
+  const [checkingDuplicate, setCheckingDuplicate] = useState(false);
+  const [duplicateError, setDuplicateError] = useState("");
 
   // Test state
   const [currentQIndex, setCurrentQIndex] = useState(0); // 0-39
@@ -34,10 +45,8 @@ export default function AptitudeV2() {
   const [result, setResult] = useState(null);
   const [showReview, setShowReview] = useState(false);
   const [reviewSectionFilter, setReviewSectionFilter] = useState("ALL");
-  const [paletteOpen, setPaletteOpen] = useState(false);
 
   // Exam Security & Fullscreen states
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [screenCaptureBlocked, setScreenCaptureBlocked] = useState(false);
   const [securityWarning, setSecurityWarning] = useState("");
 
@@ -70,99 +79,198 @@ export default function AptitudeV2() {
     } catch (_) {}
   };
 
-  // Track Fullscreen status
+  // Ensure test date is automatically updated to current date
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
-      setIsFullscreen(isFs);
-    };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
-    };
+    const todayFormatted = getTodayFormattedDate();
+    setFormData((prev) => (prev.testDate === todayFormatted ? prev : { ...prev, testDate: todayFormatted }));
   }, []);
 
-  // Anti-Screenshot & Exam Integrity Enforcement (Active during Step 2)
+  // Hide Navbar during examination mode (Step 2)
   useEffect(() => {
-    if (step !== 2) return;
+    if (step === 2) {
+      document.body.classList.add("in-exam-mode");
+      window.dispatchEvent(new CustomEvent("deepstaq:exam-mode", { detail: { inExam: true } }));
+    } else {
+      document.body.classList.remove("in-exam-mode");
+      window.dispatchEvent(new CustomEvent("deepstaq:exam-mode", { detail: { inExam: false } }));
+    }
 
-    // 1. Intercept keyboard shortcuts: PrintScreen, DevTools, Print, Copy, Save, View-source
+    return () => {
+      document.body.classList.remove("in-exam-mode");
+      window.dispatchEvent(new CustomEvent("deepstaq:exam-mode", { detail: { inExam: false } }));
+    };
+  }, [step]);
+
+  // Anti-Screenshot & Exam Integrity Enforcement Across Laptop, Mobile & Tablet (Step 2)
+  useEffect(() => {
+    if (step !== 2) {
+      document.body.classList.remove("screen-capture-blocked");
+      return;
+    }
+
+    const purgeClipboard = () => {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText("").catch(() => {});
+        }
+      } catch (_) {}
+    };
+
+    const triggerSecurityBlock = (reason) => {
+      document.body.classList.add("screen-capture-blocked");
+      setScreenCaptureBlocked(true);
+      setSecurityWarning(reason);
+      purgeClipboard();
+    };
+
+    // 1. Hardware & Keyboard Shortcut Interception (Laptop & Desktop)
     const handleKeyDown = (e) => {
-      // PrintScreen Key
+      // PrintScreen key (any modifier or standalone)
       if (e.key === "PrintScreen" || e.keyCode === 44) {
         e.preventDefault();
-        try {
-          navigator.clipboard?.writeText("");
-        } catch (_) {}
-        setSecurityWarning("⚠️ Screenshots are strictly prohibited during the examination.");
-        setScreenCaptureBlocked(true);
+        e.stopPropagation();
+        triggerSecurityBlock("⚠️ Screenshots are strictly prohibited during the assessment.");
         return false;
       }
 
-      // Windows + Shift + S / Cmd + Shift + 4 / Ctrl + P / Ctrl + S / Ctrl + U / Ctrl + C
+      // Windows Snipping Tool (Win + Shift + S), Mac Screen Capture (Cmd + Shift + 3/4/5), Browser Capture (Ctrl + Shift + S)
+      if (
+        e.shiftKey &&
+        (e.metaKey || e.ctrlKey) &&
+        ["s", "S", "3", "4", "5", "6"].includes(e.key)
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        triggerSecurityBlock("⚠️ Screen capture shortcut detected. Screenshots are prohibited.");
+        return false;
+      }
+
+      // Combined Alt+PrintScreen or Win+PrintScreen
+      if ((e.altKey || e.metaKey || e.ctrlKey) && (e.key === "PrintScreen" || e.keyCode === 44)) {
+        e.preventDefault();
+        e.stopPropagation();
+        triggerSecurityBlock("⚠️ Screenshot shortcut blocked.");
+        return false;
+      }
+
+      // Print, Save, View Source, Copy, Select All
       if (
         (e.ctrlKey || e.metaKey) &&
-        (e.key === "p" || e.key === "P" || e.key === "s" || e.key === "S" || e.key === "u" || e.key === "U" || e.key === "c" || e.key === "C")
+        ["p", "P", "s", "S", "u", "U", "c", "C", "a", "A", "x", "X"].includes(e.key)
       ) {
         e.preventDefault();
-        setSecurityWarning("⚠️ Keyboard shortcuts, print, and copy actions are disabled.");
+        e.stopPropagation();
+        triggerSecurityBlock("⚠️ Shortcuts and copy/save actions are disabled during the exam.");
         return false;
       }
 
-      // DevTools: F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
+      // DevTools (F12, Ctrl/Cmd + Shift + I/J/C/K)
       if (
         e.key === "F12" ||
-        ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j" || e.key === "C" || e.key === "c"))
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && ["I", "i", "J", "j", "C", "c", "K", "k"].includes(e.key))
       ) {
         e.preventDefault();
-        setSecurityWarning("⚠️ Developer tools and inspection are blocked.");
+        e.stopPropagation();
+        triggerSecurityBlock("⚠️ Developer tools and inspection are blocked.");
         return false;
       }
     };
 
     const handleKeyUp = (e) => {
-      if (e.key === "PrintScreen" || e.keyCode === 44) {
-        try {
-          navigator.clipboard?.writeText("");
-        } catch (_) {}
-        setSecurityWarning("⚠️ Screenshots are strictly prohibited during the examination.");
-        setScreenCaptureBlocked(true);
+      if (
+        e.key === "PrintScreen" ||
+        e.keyCode === 44 ||
+        (e.shiftKey && (e.metaKey || e.ctrlKey) && (e.key === "s" || e.key === "S"))
+      ) {
+        triggerSecurityBlock("⚠️ Screenshot attempt detected.");
       }
     };
 
-    // 2. Window blur & visibility change (Triggers when Snipping Tool opens or window loses focus)
-    const handleBlur = () => {
-      setScreenCaptureBlocked(true);
-      setSecurityWarning("⚠️ Window out of focus / screen capture attempt detected.");
+    // 2. Window Blur, Pagehide & Visibility (Fires on Snipping Tool, Screenshot toolbar, Mobile hardware buttons, App switch)
+    const handleWindowBlur = () => {
+      triggerSecurityBlock("⚠️ Window lost focus / screen capture attempt detected.");
     };
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        setScreenCaptureBlocked(true);
-        setSecurityWarning("⚠️ Window out of focus / screen capture attempt detected.");
+        triggerSecurityBlock("⚠️ Examination tab hidden or minimized.");
       }
     };
 
-    // 3. Prevent right-click context menu
-    const handleContextMenu = (e) => {
+    // 3. Fullscreen Exit Interception across Laptop, Mobile & Tablet
+    const handleFullscreenChange = () => {
+      const isCurrentlyFullscreen = Boolean(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement
+      );
+      if (!isCurrentlyFullscreen && step === 2) {
+        triggerSecurityBlock("⚠️ Fullscreen mode exited. Fullscreen is mandatory for exam integrity.");
+      }
+    };
+
+    // 4. Mobile & Tablet Multi-Finger Gesture Interception (e.g., 3-finger swipe screenshot)
+    const handleTouchStart = (e) => {
+      if (e.touches && e.touches.length >= 3) {
+        e.preventDefault();
+        e.stopPropagation();
+        triggerSecurityBlock("⚠️ Multi-finger screenshot gesture blocked.");
+        return false;
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (e.touches && e.touches.length >= 3) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    };
+
+    // 5. Prevent Context Menu, Drag, Copy, Selection
+    const handlePrevent = (e) => {
       e.preventDefault();
       return false;
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-    window.addEventListener("blur", handleBlur);
+    window.addEventListener("keydown", handleKeyDown, true);
+    window.addEventListener("keyup", handleKeyUp, true);
+    window.addEventListener("blur", handleWindowBlur);
+    window.addEventListener("focusout", handleWindowBlur);
+    window.addEventListener("pagehide", handleWindowBlur);
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("contextmenu", handleContextMenu);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
+    window.addEventListener("touchstart", handleTouchStart, { passive: false });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("contextmenu", handlePrevent);
+    window.addEventListener("selectstart", handlePrevent);
+    window.addEventListener("dragstart", handlePrevent);
+    window.addEventListener("copy", handlePrevent);
+    window.addEventListener("cut", handlePrevent);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-      window.removeEventListener("blur", handleBlur);
+      document.body.classList.remove("screen-capture-blocked");
+      window.removeEventListener("keydown", handleKeyDown, true);
+      window.removeEventListener("keyup", handleKeyUp, true);
+      window.removeEventListener("blur", handleWindowBlur);
+      window.removeEventListener("focusout", handleWindowBlur);
+      window.removeEventListener("pagehide", handleWindowBlur);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("contextmenu", handleContextMenu);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("contextmenu", handlePrevent);
+      window.removeEventListener("selectstart", handlePrevent);
+      window.removeEventListener("dragstart", handlePrevent);
+      window.removeEventListener("copy", handlePrevent);
+      window.removeEventListener("cut", handlePrevent);
     };
   }, [step]);
 
@@ -210,9 +318,13 @@ export default function AptitudeV2() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    if (name === "testDate") return; // locked against manual alteration
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (formErrors[name]) {
       setFormErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+    if (duplicateError) {
+      setDuplicateError("");
     }
   };
 
@@ -233,24 +345,64 @@ export default function AptitudeV2() {
     return Object.keys(errors).length === 0;
   };
 
-  // STEP 1 -> STEP 2: Auto-save candidate details, trigger FULLSCREEN & start test
+  // STEP 1 -> STEP 2: Enforce Single Student Attempt, auto-save details, trigger FULLSCREEN & start test
   const handleStartTest = async (e) => {
     e.preventDefault();
+    setDuplicateError("");
     if (!validateRegistration()) return;
 
-    // Immediately trigger fullscreen on direct user click gesture
-    enterFullscreen();
-
     setSavingLead(true);
+    setCheckingDuplicate(true);
+
     try {
+      // 1. Verify candidate has not already registered or taken the test (1 student = 1 registration/attempt)
+      const duplicateCheck = await checkAptitudeCandidateExists({
+        phone: formData.phone,
+        email: formData.email,
+      });
+
+      if (duplicateCheck && duplicateCheck.exists) {
+        setSavingLead(false);
+        setCheckingDuplicate(false);
+        setDuplicateError(duplicateCheck.message);
+        if (duplicateCheck.matchedField === "phone") {
+          setFormErrors((prev) => ({
+            ...prev,
+            phone: "This phone number is already registered. Each candidate is permitted only 1 attempt.",
+          }));
+        } else if (duplicateCheck.matchedField === "email") {
+          setFormErrors((prev) => ({
+            ...prev,
+            email: "This email address is already registered. Each candidate is permitted only 1 attempt.",
+          }));
+        }
+        return;
+      }
+
+      // 2. Candidate is unique: save lead record
       const res = await saveAptitudeV2Lead(formData);
+      if (res && res.alreadyExists) {
+        setSavingLead(false);
+        setCheckingDuplicate(false);
+        setDuplicateError(res.message);
+        return;
+      }
+
       if (res && res.id) {
         setLeadDocId(res.id);
       }
-    } catch (err) {
-      console.warn("Auto-save lead error (continuing with test):", err);
-    } finally {
+
+      // Enter fullscreen and begin test
+      enterFullscreen();
       setSavingLead(false);
+      setCheckingDuplicate(false);
+      setStep(2);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err) {
+      console.warn("Auto-save lead error:", err);
+      enterFullscreen();
+      setSavingLead(false);
+      setCheckingDuplicate(false);
       setStep(2);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -334,13 +486,11 @@ export default function AptitudeV2() {
     <div
       className={`min-h-screen bg-transparent text-white ${
         step === 2
-          ? isFullscreen
-            ? "pt-6 sm:pt-8 md:pt-10 pb-14 px-3 sm:px-6"
-            : "pt-28 sm:pt-36 md:pt-40 pb-16 px-3.5 sm:px-6"
-          : "pt-36 sm:pt-44 md:pt-52 lg:pt-56 pb-24 px-4 sm:px-6 lg:px-8"
+          ? "pt-14 sm:pt-20 md:pt-24 pb-16 px-3.5 sm:px-6"
+          : "pt-16 sm:pt-20 md:pt-24 pb-16 px-4 sm:px-6 lg:px-8"
       } font-sans relative overflow-x-hidden selection:bg-sky-500/30 selection:text-white`}
     >
-      {/* Print-Blocking CSS: Prevents printing or saving questions to PDF */}
+      {/* Print-Blocking & Exam Mode CSS */}
       <style>{`
         @media print {
           html, body, #root, * {
@@ -348,11 +498,35 @@ export default function AptitudeV2() {
             visibility: hidden !important;
           }
         }
+        body.in-exam-mode [data-navbar="true"],
+        body.in-exam-mode nav,
+        body.in-exam-mode header {
+          display: none !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
+        }
+        body.screen-capture-blocked .exam-protected-content {
+          filter: blur(60px) brightness(0) !important;
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+          user-select: none !important;
+        }
+        .exam-secure-zone,
+        .exam-secure-zone * {
+          -webkit-touch-callout: none !important;
+          -webkit-user-select: none !important;
+          -khtml-user-select: none !important;
+          -moz-user-select: none !important;
+          -ms-user-select: none !important;
+          user-select: none !important;
+          -webkit-user-drag: none !important;
+        }
       `}</style>
 
       {/* Floating Security Violation Alert Toast */}
       {securityWarning && (
-        <div className="fixed top-24 sm:top-28 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl bg-red-600/95 text-white text-xs font-bold shadow-2xl backdrop-blur-md flex items-center gap-2 border border-red-400/50 animate-bounce">
+        <div className="fixed top-24 sm:top-28 left-1/2 -translate-x-1/2 z-[1000000] px-5 py-3 rounded-2xl bg-red-600/95 text-white text-xs font-bold shadow-2xl backdrop-blur-md flex items-center gap-2 border border-red-400/50 animate-bounce">
           <span>🛡️</span>
           <span>{securityWarning}</span>
         </div>
@@ -360,25 +534,32 @@ export default function AptitudeV2() {
 
       {/* Anti-Screenshot / Window Inactivity Solid Security Blackout Overlay */}
       {step === 2 && screenCaptureBlocked && (
-        <div className="fixed inset-0 z-50 bg-[#090D11] flex flex-col items-center justify-center p-6 text-center space-y-4">
-          <div className="w-16 h-16 rounded-3xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-3xl shadow-[0_0_30px_rgba(239,68,68,0.3)]">
+        <div className="fixed inset-0 z-[999999] bg-[#090D11] flex flex-col items-center justify-center p-6 text-center space-y-4 select-none">
+          <div className="w-16 h-16 rounded-3xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-3xl shadow-[0_0_30px_rgba(239,68,68,0.3)] animate-pulse">
             🛡️
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 max-w-lg">
+            <span className="text-[11px] font-bold text-red-400 uppercase tracking-widest block">
+              Integrity Violation Detected
+            </span>
             <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
-              Screen Capture & Window Switching Prohibited
+              Screen Capture & Window Switching Blocked
             </h2>
-            <p className="text-slate-400 text-xs sm:text-sm max-w-md mx-auto leading-relaxed">
-              Screenshots, Snipping Tool, screen recording software, and window switching are prohibited during the assessment to maintain test integrity.
+            <p className="text-slate-400 text-xs sm:text-sm mx-auto leading-relaxed">
+              Screenshots, Snipping Tool, screen recording, multi-finger gestures, and window switching are strictly prohibited across all devices (laptop, mobile & tablet) to protect exam confidentiality.
             </p>
+            <div className="pt-2 text-[11px] text-slate-500 font-mono">
+              Candidate: <span className="text-slate-300 font-semibold">{formData.fullName}</span> • {formData.phone}
+            </div>
           </div>
           <button
             type="button"
             onClick={() => {
+              document.body.classList.remove("screen-capture-blocked");
               setScreenCaptureBlocked(false);
               enterFullscreen();
             }}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-slate-950 font-extrabold uppercase text-xs tracking-wider shadow-[0_4px_20px_rgba(56,189,248,0.35)] cursor-pointer"
+            className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 active:scale-[0.99] text-slate-950 font-extrabold uppercase text-xs tracking-wider shadow-[0_4px_20px_rgba(56,189,248,0.35)] cursor-pointer transition-all"
           >
             Resume Assessment (Fullscreen) →
           </button>
@@ -399,7 +580,7 @@ export default function AptitudeV2() {
 
         {/* Global Header (ONLY DISPLAYED ON STEP 1 AND STEP 3 — REMOVED FROM TEST SCREEN) */}
         {step !== 2 && (
-          <div className="text-center mb-10 sm:mb-14 md:mb-16 space-y-5 sm:space-y-6 pt-4 sm:pt-8 md:pt-10 relative">
+          <div className="text-center mb-6 sm:mb-8 space-y-3 sm:space-y-4 pt-0 sm:pt-1 relative">
             {/* Subtle Centered Background Glow matching Home Hero */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.16)_0%,transparent_70%)] blur-[90px] pointer-events-none -z-10" />
 
@@ -610,40 +791,71 @@ export default function AptitudeV2() {
                     />
                   </div>
 
-                  {/* Test Date */}
+                  {/* Test Date (Auto-updated daily, Selection removed & Locked) */}
                   <div>
-                    <label className="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-                      Test Date
-                    </label>
-                    <input
-                      type="date"
-                      name="testDate"
-                      value={formData.testDate}
-                      onChange={handleInputChange}
-                      onPaste={(e) => e.preventDefault()}
-                      onCopy={(e) => e.preventDefault()}
-                      onCut={(e) => e.preventDefault()}
-                      onDrop={(e) => e.preventDefault()}
-                      className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400/40 transition-all text-xs sm:text-sm [color-scheme:dark]"
-                    />
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-300">
+                        Test Date
+                      </label>
+                     
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        id="testDate"
+                        name="testDate"
+                        value={formData.testDate}
+                        readOnly
+                        disabled
+                        tabIndex={-1}
+                        aria-readonly="true"
+                        className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-slate-200 font-semibold cursor-not-allowed select-none text-xs sm:text-sm tracking-wide shadow-inner focus:outline-none"
+                      />
+                      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[11px] font-medium flex items-center gap-1 select-none">
+                        <span>📅</span>
+                        <span>Today</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
+
+                {/* Duplicate Registration Error Banner */}
+                {duplicateError && (
+                  <div className="p-4 rounded-xl sm:rounded-2xl bg-red-500/10 border border-red-500/40 flex items-start gap-3 text-left">
+                    <span className="text-xl sm:text-2xl shrink-0 mt-0.5">🚫</span>
+                    <div className="space-y-1">
+                      <h4 className="text-xs sm:text-sm font-bold text-red-400 uppercase tracking-wide">
+                        Registration Blocked: Single Attempt Policy
+                      </h4>
+                      <p className="text-xs text-red-200/90 leading-relaxed font-medium">
+                        {duplicateError}
+                      </p>
+                      <p className="text-[11px] text-slate-400 mt-1">
+                        Each student is permitted strictly <strong>one registration and attempt</strong>. Duplicate entries using the same phone number or email are blocked by system policy.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Submit / Start Button (Launches Fullscreen Exam) */}
                 <button
                   type="submit"
-                  disabled={savingLead}
+                  disabled={savingLead || checkingDuplicate}
                   className="w-full py-3.5 sm:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 active:scale-[0.99] text-slate-950 font-extrabold uppercase tracking-wide sm:tracking-wider text-xs sm:text-sm md:text-base shadow-[0_4px_24px_rgba(56,189,248,0.35)] hover:shadow-[0_6px_30px_rgba(56,189,248,0.5)] transition-all flex items-center justify-center gap-2 sm:gap-3 cursor-pointer disabled:opacity-50 min-h-[48px] sm:min-h-[52px]"
                 >
-                  {savingLead ? (
+                  {checkingDuplicate ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin shrink-0" />
+                      <span className="truncate">Verifying Registration Status...</span>
+                    </>
+                  ) : savingLead ? (
                     <>
                       <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin shrink-0" />
                       <span className="truncate">Saving Student Details...</span>
                     </>
                   ) : (
                     <>
-                      <span className="inline sm:hidden">Start Aptitude Test V2 (Fullscreen)</span>
-                      <span className="hidden sm:inline">Start Aptitude Test V2 (Fullscreen Exam)</span>
+                      <span>Start Aptitude Test</span>
                       <span className="text-base sm:text-lg shrink-0">→</span>
                     </>
                   )}
@@ -656,6 +868,7 @@ export default function AptitudeV2() {
                     <span>Important Examination Rules</span>
                   </div>
                   <ul className="list-disc list-inside space-y-1 text-slate-400 leading-relaxed text-[11px] sm:text-xs">
+                    <li><strong>Single Submission Policy:</strong> One student can register only once. Re-registering with the same phone number or email is prohibited.</li>
                     <li>The exam starts immediately in <strong>Fullscreen Mode</strong>.</li>
                     <li><strong>Answers are permanently locked on first selection</strong> and cannot be modified.</li>
                     <li><strong>Screenshots, screen recording, and tab/window switching are prohibited</strong> and trigger security locks.</li>
@@ -686,8 +899,8 @@ export default function AptitudeV2() {
                           <span className="text-[11px] font-semibold text-sky-400 uppercase tracking-wider">
                             {sec.title}
                           </span>
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-sky-400/10 text-sky-300 border border-sky-400/20">
-                            {sec.marks}M
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-sky-400/10 text-sky-300 border border-sky-400/20 select-none">
+                            15 Mts
                           </span>
                         </div>
                         <h3 className="text-xs font-bold text-white mt-1">
@@ -713,154 +926,78 @@ export default function AptitudeV2() {
           {step === 2 && (
             <motion.div
               key="step2"
-              initial={{ opacity: 0, scale: 0.99 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="space-y-4 select-none"
+              className="select-none"
               onContextMenu={(e) => e.preventDefault()}
               onCopy={(e) => e.preventDefault()}
               onCut={(e) => e.preventDefault()}
               onPaste={(e) => e.preventDefault()}
               onDragStart={(e) => e.preventDefault()}
             >
-              {/* Minimalist Exam Top Bar: ONLY TIMER, QUESTION PROGRESS & SUBMIT BUTTON */}
+              {/* UNIFIED QUESTION SECTION WITH INTEGRATED TOP BAR */}
               <div
-                className={`sticky ${
-                  isFullscreen ? "top-3 sm:top-4" : "top-20 sm:top-24"
-                } z-30 bg-[#090D11]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-3 sm:p-4 shadow-[0_8px_30px_rgba(0,0,0,0.6)] transition-all`}
-              >
-                <div className="flex items-center justify-between gap-2 sm:gap-4 flex-wrap">
-                  {/* Left: Question Counter & Progress */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-white">
-                      Question <span className="text-sky-400">{currentQIndex + 1}</span> of 40
-                    </span>
-                    <span className="text-[10px] sm:text-xs font-medium text-slate-400 hidden sm:inline">
-                      • {answeredCount} Locked
-                    </span>
-                  </div>
-
-                  {/* Center: The Countdown Timer */}
-                  <div
-                    className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl border flex items-center gap-2 font-bold tabular-nums text-sm sm:text-lg ${
-                      timeLeft < 300
-                        ? "bg-red-500/20 border-red-500/60 text-red-400 animate-pulse"
-                        : timeLeft < 900
-                        ? "bg-amber-500/10 border-amber-500/40 text-amber-300"
-                        : "bg-sky-500/10 border-sky-400/40 text-sky-400"
-                    }`}
-                  >
-                    <span>⏱️</span>
-                    <span>{formatTime(timeLeft)}</span>
-                  </div>
-
-                  {/* Right: Fullscreen / Grid Toggle & Submit Exam */}
-                  <div className="flex items-center gap-1.5 sm:gap-2.5">
-                    {/* Fullscreen Toggle */}
-                    <button
-                      type="button"
-                      onClick={() => (isFullscreen ? exitFullscreen() : enterFullscreen())}
-                      className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
-                      title="Toggle Fullscreen"
-                    >
-                      <span>⛶</span>
-                      <span className="hidden sm:inline">{isFullscreen ? "Exit" : "Full"}</span>
-                    </button>
-
-                    {/* Question Palette Toggle */}
-                    <button
-                      type="button"
-                      onClick={() => setPaletteOpen((prev) => !prev)}
-                      className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
-                      title="Jump Palette"
-                    >
-                      <span>🔢</span>
-                      <span className="hidden sm:inline">Grid</span>
-                    </button>
-
-                    {/* Submit Exam Button */}
-                    <button
-                      type="button"
-                      onClick={() => handleSubmitTest(false)}
-                      disabled={submitting}
-                      className="px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-xl bg-rose-500/90 hover:bg-rose-500 active:scale-95 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(244,63,94,0.35)] cursor-pointer disabled:opacity-50"
-                    >
-                      {submitting ? "Submitting..." : "Submit Exam"}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="w-full bg-white/10 rounded-full h-1 sm:h-1.5 overflow-hidden mt-2.5">
-                  <div
-                    className="h-full bg-gradient-to-r from-sky-400 via-sky-300 to-blue-500 transition-all duration-300 rounded-full shadow-[0_0_12px_rgba(56,189,248,0.5)]"
-                    style={{ width: `${progressPct}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Collapsible 40-Question Quick Jump Palette */}
-              {paletteOpen && (
-                <div className="p-3.5 sm:p-4 bg-[#090D11]/95 border border-white/10 rounded-2xl backdrop-blur-xl animate-in fade-in duration-200 shadow-2xl">
-                  <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
-                    <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-300">
-                      Question Palette (Jump to Any Question)
-                    </span>
-                    <div className="flex items-center gap-3 text-[11px] sm:text-xs font-medium">
-                      <span className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded bg-sky-400 inline-block" /> Locked ({answeredCount})
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded bg-white/10 inline-block" /> Unanswered ({40 - answeredCount})
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-20 gap-1.5 sm:gap-2">
-                    {aptitudeV2Questions.map((q, idx) => {
-                      const isAnswered = Boolean(userAnswers[q.id]);
-                      const isCurrent = idx === currentQIndex;
-
-                      return (
-                        <button
-                          key={q.id}
-                          type="button"
-                          onClick={() => {
-                            setCurrentQIndex(idx);
-                            window.scrollTo({ top: 0, behavior: "smooth" });
-                          }}
-                          className={`h-8 sm:h-9 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer border ${
-                            isCurrent
-                              ? "bg-gradient-to-r from-sky-400 to-blue-500 text-slate-950 border-sky-400 ring-2 ring-sky-400/50 font-black scale-105 shadow-[0_0_15px_rgba(56,189,248,0.4)]"
-                              : isAnswered
-                              ? "bg-sky-500/20 text-sky-300 border-sky-400/35 hover:bg-sky-500/30"
-                              : "bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white"
-                          }`}
-                        >
-                          {q.id}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* MAIN QUESTION DISPLAY CARD */}
-              <div
-                className="bg-white/[0.03] border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-8 md:p-10 backdrop-blur-2xl shadow-[0_16px_40px_rgba(0,0,0,0.4)] relative select-none"
+                className="bg-white/[0.03] border border-white/10 rounded-2xl sm:rounded-3xl backdrop-blur-2xl shadow-[0_16px_40px_rgba(0,0,0,0.4)] relative select-none overflow-hidden exam-secure-zone exam-protected-content transition-all duration-150"
                 onContextMenu={(e) => e.preventDefault()}
                 onCopy={(e) => e.preventDefault()}
                 onCut={(e) => e.preventDefault()}
                 onPaste={(e) => e.preventDefault()}
               >
+                {/* Dynamic Security Anti-Leak Watermark Grid */}
+                <div
+                  className="absolute inset-0 pointer-events-none select-none overflow-hidden z-20 flex flex-wrap items-center justify-around opacity-[0.045] text-white font-mono text-[10px] sm:text-xs font-bold uppercase tracking-widest leading-loose rotate-[-15deg] scale-125"
+                  aria-hidden="true"
+                >
+                  {Array.from({ length: 32 }).map((_, idx) => (
+                    <span key={idx} className="p-4 whitespace-nowrap">
+                      DEEPSTAQ EXAM • {formData.fullName || "CANDIDATE"} • {formData.phone || "VERIFIED"} • {formData.testDate}
+                    </span>
+                  ))}
+                </div>
+
+                {/* QUESTION SECTION TOP POSITION: FULLY CENTRALIZED QUESTION COUNTER & TIMER */}
+                <div className="bg-[#090D11]/90 border-b border-white/10 px-4 py-5 sm:py-6 text-center flex flex-col items-center justify-center gap-3">
+                  {/* Centered Question Counter & Locked Badge */}
+                  <div className="inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs font-bold uppercase tracking-wider text-white">
+                    <span>Question <strong className="text-sky-400">{currentQIndex + 1}</strong> of 40</span>
+                    <span className="text-slate-500 font-normal">•</span>
+                    <span className="text-slate-300 font-medium">{answeredCount} Locked</span>
+                  </div>
+
+                  {/* Centered Countdown Timer Badge */}
+                  <div
+                    className={`px-6 sm:px-8 py-2 sm:py-2.5 rounded-2xl border flex items-center justify-center gap-2.5 font-black tabular-nums text-base sm:text-xl shadow-lg transition-all ${
+                      timeLeft < 300
+                        ? "bg-red-500/20 border-red-500/60 text-red-400 animate-pulse"
+                        : timeLeft < 900
+                        ? "bg-amber-500/10 border-amber-500/40 text-amber-300"
+                        : "bg-sky-500/10 border-sky-400/40 text-sky-400 shadow-[0_0_20px_rgba(56,189,248,0.25)]"
+                    }`}
+                  >
+                    <span className="text-lg">⏱️</span>
+                    <span className="tracking-widest">{formatTime(timeLeft)}</span>
+                  </div>
+
+                  {/* Centered Progress Bar */}
+                  <div className="w-full max-w-md mx-auto bg-white/10 rounded-full h-1.5 overflow-hidden mt-1">
+                    <div
+                      className="h-full bg-gradient-to-r from-sky-400 via-sky-300 to-blue-500 transition-all duration-300 rounded-full shadow-[0_0_12px_rgba(56,189,248,0.5)]"
+                      style={{ width: `${progressPct}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Question Body Content */}
+                <div className="p-4 sm:p-8 md:p-10">
                 {/* Context Table for Section C (Q21 - Q24) */}
                 {currentQ.hasTable && (
-                  <div className="mb-5 sm:mb-6 p-3.5 sm:p-5 bg-white/[0.02] border border-sky-400/30 rounded-xl sm:rounded-2xl">
-                    <div className="flex items-center gap-2 text-[11px] sm:text-xs font-bold text-sky-400 uppercase tracking-wider mb-2">
+                  <div className="mb-6 p-3.5 sm:p-5 bg-white/[0.02] border border-sky-400/30 rounded-xl sm:rounded-2xl max-w-2xl mx-auto text-center">
+                    <div className="flex items-center justify-center gap-2 text-[11px] sm:text-xs font-bold text-sky-400 uppercase tracking-wider mb-2">
                       <span>📊</span>
                       <span>Weekly Sales Data Table (Refer for Questions 21–24)</span>
                     </div>
-                    <p className="text-xs text-slate-400 mb-3">
+                    <p className="text-xs text-slate-400 mb-3 text-center">
                       Number of units sold by a business across 5 consecutive weekdays:
                     </p>
                     <div className="overflow-x-auto -mx-1 sm:mx-0">
@@ -890,16 +1027,16 @@ export default function AptitudeV2() {
                   </div>
                 )}
 
-                {/* Question Content */}
-                <div className="mb-6 sm:mb-8">
-                  <h2 className="text-base sm:text-xl font-bold text-white leading-relaxed whitespace-pre-line tracking-normal select-none">
-                    <span className="text-sky-400 font-bold mr-1.5 sm:mr-2">{currentQ.id}.</span>
+                {/* Question Content (Fully Centralized) */}
+                <div className="mb-6 sm:mb-8 text-center max-w-3xl mx-auto">
+                  <h2 className="text-base sm:text-xl md:text-2xl font-bold text-white leading-relaxed whitespace-pre-line tracking-normal select-none">
+                    <span className="text-sky-400 font-extrabold mr-2">{currentQ.id}.</span>
                     {currentQ.question}
                   </h2>
                 </div>
 
                 {/* Options Grid (A, B, C, D) — LOCKED ON FIRST CLICK */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 mb-4 select-none">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 mb-6 max-w-3xl mx-auto select-none">
                   {currentQ.options.map((opt) => {
                     const isSelected = userAnswers[currentQ.id] === opt.key;
                     const isLocked = Boolean(userAnswers[currentQ.id]);
@@ -944,65 +1081,51 @@ export default function AptitudeV2() {
                   })}
                 </div>
 
-                {/* Answer Lock Status Notice */}
-                <div className="mb-6 px-4 py-2.5 rounded-xl border text-xs font-semibold flex items-center justify-between select-none">
+                {/* Answer Lock Status Notice (Fully Centralized) */}
+                <div className="mb-6 px-4 py-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center text-center max-w-3xl mx-auto select-none">
                   {userAnswers[currentQ.id] ? (
-                    <span className="text-sky-300 flex items-center gap-1.5">
+                    <span className="text-sky-300 flex items-center justify-center gap-1.5">
                       <span>🔒</span>
                       <span>Answer Locked: Choice ({userAnswers[currentQ.id]}) permanently registered for Question {currentQ.id}.</span>
                     </span>
                   ) : (
-                    <span className="text-amber-300/90 flex items-center gap-1.5">
+                    <span className="text-amber-300/90 flex items-center justify-center gap-1.5">
                       <span>⚠️</span>
                       <span>Choose carefully — your answer locks permanently on the first click!</span>
                     </span>
                   )}
                 </div>
 
-                {/* Question Bottom Actions */}
-                <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 pt-5 sm:pt-6 border-t border-white/10 select-none">
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
-                    {/* Previous Button */}
+                {/* Question Bottom Action (Fully Centralized) */}
+                <div className="flex items-center justify-center pt-6 border-t border-white/10 max-w-3xl mx-auto select-none">
+                  {currentQIndex < aptitudeV2Questions.length - 1 ? (
                     <button
                       type="button"
-                      disabled={currentQIndex === 0}
-                      onClick={() => setCurrentQIndex((prev) => Math.max(0, prev - 1))}
-                      className="flex-1 sm:flex-initial px-5 py-2.5 sm:py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-bold transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer text-center min-h-[44px]"
+                      onClick={() =>
+                        setCurrentQIndex((prev) =>
+                          Math.min(aptitudeV2Questions.length - 1, prev + 1)
+                        )
+                      }
+                      className="w-full sm:w-auto min-w-[220px] px-8 py-3.5 rounded-xl bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 active:scale-[0.99] text-slate-950 text-xs sm:text-sm font-extrabold uppercase tracking-wider transition-all shadow-[0_4px_20px_rgba(56,189,248,0.3)] cursor-pointer flex items-center justify-center gap-2 min-h-[48px]"
                     >
-                      ← Previous Question
+                      <span>Next Question</span>
+                      <span>→</span>
                     </button>
-                  </div>
-
-                  <div className="w-full sm:w-auto">
-                    {/* Next Question / Finish Button */}
-                    {currentQIndex < aptitudeV2Questions.length - 1 ? (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setCurrentQIndex((prev) =>
-                            Math.min(aptitudeV2Questions.length - 1, prev + 1)
-                          )
-                        }
-                        className="w-full sm:w-auto px-6 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 active:scale-[0.99] text-slate-950 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all shadow-[0_4px_20px_rgba(56,189,248,0.3)] cursor-pointer flex items-center justify-center gap-2 min-h-[44px]"
-                      >
-                        <span>Next Question</span>
-                        <span>→</span>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => handleSubmitTest(false)}
-                        disabled={submitting}
-                        className="w-full sm:w-auto px-6 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 hover:from-sky-300 hover:to-blue-500 active:scale-[0.99] text-slate-950 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all shadow-[0_4px_24px_rgba(56,189,248,0.4)] cursor-pointer disabled:opacity-50 flex items-center justify-center min-h-[44px]"
-                      >
-                        {submitting ? "Finalizing Submission..." : "Review & Submit Exam"}
-                      </button>
-                    )}
-                  </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleSubmitTest(false)}
+                      disabled={submitting}
+                      className="w-full sm:w-auto min-w-[220px] px-8 py-3.5 rounded-xl bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 hover:from-sky-300 hover:to-blue-500 active:scale-[0.99] text-slate-950 text-xs sm:text-sm font-extrabold uppercase tracking-wider transition-all shadow-[0_4px_24px_rgba(56,189,248,0.4)] cursor-pointer disabled:opacity-50 flex items-center justify-center min-h-[48px]"
+                    >
+                      {submitting ? "Finalizing Submission..." : "Finish Assessment →"}
+                    </button>
+                  )}
                 </div>
               </div>
-            </motion.div>
-          )}
+            </div>
+          </motion.div>
+        )}
 
           {/* ========================================================================= */}
           {/* STEP 3: RESULT & SUCCESS CELEBRATION SCREEN                               */}

@@ -280,9 +280,121 @@ export const saveAptitudeLead = async (formData) => {
 };
 
 /**
- * Automatically saves student details when candidate starts Aptitude Test V2
+ * Checks if a candidate with the given phone number or email is already registered/saved
+ * Ensures one student's data can only be saved once (especially by phone number and email)
+ */
+export const checkAptitudeCandidateExists = async ({ phone, email }) => {
+  const normPhone = normalizePhone(phone);
+  const normEmail = String(email || "").trim().toLowerCase();
+
+  if (!normPhone && !normEmail) {
+    return { exists: false };
+  }
+
+  // 1. Check local storage cache
+  try {
+    const localData = JSON.parse(localStorage.getItem("offline_aptitude_v2_submissions") || "[]");
+    const localMatch = localData.find((item) => {
+      const pMatch = normPhone && normalizePhone(item.phone) === normPhone;
+      const eMatch = normEmail && String(item.email || "").trim().toLowerCase() === normEmail;
+      return pMatch || eMatch;
+    });
+    if (localMatch) {
+      const isPhone = normPhone && normalizePhone(localMatch.phone) === normPhone;
+      return {
+        exists: true,
+        matchedField: isPhone ? "phone" : "email",
+        message: isPhone
+          ? `Candidate with phone number ${localMatch.phone} is already registered. Each student can only attempt the test once.`
+          : `Candidate with email ${localMatch.email} is already registered. Each student can only attempt the test once.`,
+        candidate: localMatch,
+      };
+    }
+  } catch (_) {}
+
+  // 2. Check primary Firestore collection: aptitude_v2_submissions
+  try {
+    const snapV2 = await getDocs(collection(db, "aptitude_v2_submissions"));
+    for (const docSnap of snapV2.docs) {
+      const data = docSnap.data();
+      const itemPhone = normalizePhone(data.phone);
+      const itemEmail = String(data.email || "").trim().toLowerCase();
+      if (normPhone && itemPhone && itemPhone === normPhone) {
+        return {
+          exists: true,
+          matchedField: "phone",
+          message: `Phone number ${data.phone} is already registered. Each student can only attempt the test once.`,
+          id: docSnap.id,
+          candidate: data,
+        };
+      }
+      if (normEmail && itemEmail && itemEmail === normEmail) {
+        return {
+          exists: true,
+          matchedField: "email",
+          message: `Email address ${data.email} is already registered. Each student can only attempt the test once.`,
+          id: docSnap.id,
+          candidate: data,
+        };
+      }
+    }
+  } catch (err) {
+    console.warn("Check aptitude_v2_submissions duplicate check error:", err);
+  }
+
+  // 3. Check fallback collection: aptitude_test_leads
+  try {
+    const snapLeads = await getDocs(collection(db, "aptitude_test_leads"));
+    for (const docSnap of snapLeads.docs) {
+      const data = docSnap.data();
+      const itemPhone = normalizePhone(data.phone);
+      const itemEmail = String(data.email || "").trim().toLowerCase();
+      if (normPhone && itemPhone && itemPhone === normPhone) {
+        return {
+          exists: true,
+          matchedField: "phone",
+          message: `Phone number ${data.phone} is already registered. Each student can only attempt the test once.`,
+          id: docSnap.id,
+          candidate: data,
+        };
+      }
+      if (normEmail && itemEmail && itemEmail === normEmail) {
+        return {
+          exists: true,
+          matchedField: "email",
+          message: `Email address ${data.email} is already registered. Each student can only attempt the test once.`,
+          id: docSnap.id,
+          candidate: data,
+        };
+      }
+    }
+  } catch (err) {
+    console.warn("Check aptitude_test_leads duplicate check error:", err);
+  }
+
+  return { exists: false };
+};
+
+/**
+ * Automatically saves student details when candidate starts Aptitude Test V2.
+ * Enforces single submission per student (especially by phone number and email).
  */
 export const saveAptitudeV2Lead = async (formData) => {
+  // Prevent duplicate student registration
+  const duplicateCheck = await checkAptitudeCandidateExists({
+    phone: formData.phone,
+    email: formData.email,
+  });
+  if (duplicateCheck.exists) {
+    return {
+      success: false,
+      alreadyExists: true,
+      matchedField: duplicateCheck.matchedField,
+      message: duplicateCheck.message,
+      id: duplicateCheck.id,
+    };
+  }
+
   const placeVal = String(formData.place || formData.city || formData.location || "N/A").trim().slice(0, 95);
   const payload = {
     fullName: String(formData.fullName || formData.name || "").trim().slice(0, 95),
@@ -376,6 +488,22 @@ export const saveAptitudeV2Submission = async (submissionData) => {
       } catch (errLead) {
         console.warn("Update by leadDocId on aptitude_test_leads failed:", errLead);
       }
+    }
+  }
+
+  // If no leadDocId, check by normalized phone to merge into existing document instead of creating duplicate
+  const normPhone = normalizePhone(submissionData.phone);
+  if (normPhone) {
+    try {
+      const snap = await getDocs(collection(db, "aptitude_v2_submissions"));
+      const match = snap.docs.find((d) => normalizePhone(d.data().phone) === normPhone);
+      if (match) {
+        const v2DocRef = doc(db, "aptitude_v2_submissions", match.id);
+        await setDoc(v2DocRef, payload, { merge: true });
+        return { success: true, id: match.id };
+      }
+    } catch (findErr) {
+      console.warn("Lookup existing submission by phone failed:", findErr);
     }
   }
 

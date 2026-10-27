@@ -61,11 +61,35 @@ function Navbar() {
   const navContainerRef = useRef(null);
   const location = useLocation();
 
-  // Close menus on route change
+  // Test Mode State: Completely hides navbar during exam
+  const [inExamMode, setInExamMode] = useState(() => {
+    if (typeof document !== "undefined") {
+      return document.body.classList.contains("in-exam-mode");
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const handleExamMode = (e) => {
+      setInExamMode(Boolean(e.detail?.inExam));
+    };
+    window.addEventListener("deepstaq:exam-mode", handleExamMode);
+    return () => window.removeEventListener("deepstaq:exam-mode", handleExamMode);
+  }, []);
+
+  // Close menus on route change and reset exam mode if navigated away
   useEffect(() => {
     setIsOpen(false);
     setIsBlogHovered(false);
     setMobileBlogExpanded(false);
+    if (
+      document.body.classList.contains("in-exam-mode") &&
+      location.pathname !== "/aptitude-v2" &&
+      location.pathname !== "/aptitude"
+    ) {
+      document.body.classList.remove("in-exam-mode");
+      setInExamMode(false);
+    }
   }, [location.pathname]);
 
   // Handle click outside & escape key to close menu on tablet & mobile
@@ -167,8 +191,13 @@ function Navbar() {
     return location.pathname.startsWith(path);
   };
 
+  if (inExamMode) {
+    return null;
+  }
+
   return (
     <motion.div
+      data-navbar="true"
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: showNavbar ? 0 : -120, opacity: showNavbar ? 1 : 0 }}
       transition={{ duration: 0.4, ease: "easeInOut" }}
