@@ -368,12 +368,12 @@ export default function AptitudeV2() {
         if (duplicateCheck.matchedField === "phone") {
           setFormErrors((prev) => ({
             ...prev,
-            phone: "This phone number is already registered. Each candidate is permitted only 1 attempt.",
+            phone: "This phone number is already registered for the Scholarship Test. Each candidate is permitted only 1 attempt.",
           }));
         } else if (duplicateCheck.matchedField === "email") {
           setFormErrors((prev) => ({
             ...prev,
-            email: "This email address is already registered. Each candidate is permitted only 1 attempt.",
+            email: "This email address is already registered for the Scholarship Test. Each candidate is permitted only 1 attempt.",
           }));
         }
         return;
@@ -587,25 +587,23 @@ export default function AptitudeV2() {
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md shadow-[0_2px_12px_rgba(0,0,0,0.3)] mx-auto mb-1">
               <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse shrink-0" />
               <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-[#E0E7EC]">
-                Deepstaq Assessment • V2
+                Deepstaq Scholarship Test
               </span>
             </div>
 
             <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.03em] uppercase text-white leading-tight">
-              Deepstaq Aptitude Test{" "}
+              Deepstaq <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-sky-300 to-blue-400 drop-shadow-[0_0_16px_rgba(56,189,248,0.35)]">
-                V2
+                Scholarship Test
               </span>
             </h1>
 
-            <p className="text-slate-300 text-xs sm:text-sm max-w-2xl mx-auto font-normal leading-relaxed px-2">
-              Duration: 60 minutes | Questions: 40 | Sections: 4 | Total marks: 40 (1 mark each • No negative marking)
-            </p>
+          
 
             {/* Key test specs badge strip */}
             <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 pt-2 text-[11px] sm:text-xs font-medium text-slate-300">
               <span className="px-3.5 py-1.5 bg-white/[0.04] border border-white/10 rounded-full">
-                ⏱️ 60 Mins
+                ⏱️ 60 Minutes
               </span>
               <span className="px-3.5 py-1.5 bg-white/[0.04] border border-white/10 rounded-full">
                 🎯 40 Marks
@@ -837,11 +835,11 @@ export default function AptitudeV2() {
                   </div>
                 )}
 
-                {/* Submit / Start Button (Launches Fullscreen Exam) */}
+                {/* Submit / Start Button (Launches Fullscreen Exam) - Fully Responsive */}
                 <button
                   type="submit"
                   disabled={savingLead || checkingDuplicate}
-                  className="w-full py-3.5 sm:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 active:scale-[0.99] text-slate-950 font-extrabold uppercase tracking-wide sm:tracking-wider text-xs sm:text-sm md:text-base shadow-[0_4px_24px_rgba(56,189,248,0.35)] hover:shadow-[0_6px_30px_rgba(56,189,248,0.5)] transition-all flex items-center justify-center gap-2 sm:gap-3 cursor-pointer disabled:opacity-50 min-h-[48px] sm:min-h-[52px]"
+                  className="w-full py-3.5 sm:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-sky-400 via-sky-300 to-blue-500 hover:from-sky-300 hover:to-blue-400 active:scale-[0.99] text-slate-950 font-extrabold uppercase tracking-wide text-xs sm:text-sm md:text-base shadow-[0_4px_24px_rgba(56,189,248,0.35)] hover:shadow-[0_6px_30px_rgba(56,189,248,0.5)] transition-all flex items-center justify-center gap-2 sm:gap-3 cursor-pointer disabled:opacity-50 min-h-[48px] sm:min-h-[52px] group"
                 >
                   {checkingDuplicate ? (
                     <>
@@ -855,8 +853,8 @@ export default function AptitudeV2() {
                     </>
                   ) : (
                     <>
-                      <span>Start Aptitude Test</span>
-                      <span className="text-base sm:text-lg shrink-0">→</span>
+                      <span className="leading-tight">Start Scholarship Test</span>
+                      <span className="text-base sm:text-lg shrink-0 font-bold group-hover:translate-x-0.5 transition-transform">→</span>
                     </>
                   )}
                 </button>
@@ -892,25 +890,25 @@ export default function AptitudeV2() {
                   {APTITUDE_SECTIONS.map((sec) => (
                     <div
                       key={sec.id}
-                      className="p-3 sm:p-3.5 bg-white/[0.02] border border-white/10 rounded-xl sm:rounded-2xl flex flex-col justify-between hover:border-sky-400/30 transition-all duration-200"
+                      className="p-3.5 sm:p-4 bg-white/[0.02] border border-white/10 rounded-xl sm:rounded-2xl flex flex-col justify-between hover:border-sky-400/30 transition-all duration-200"
                     >
                       <div>
-                        <div className="flex items-center justify-between gap-1">
+                        <div className="flex items-center justify-between gap-1.5">
                           <span className="text-[11px] font-semibold text-sky-400 uppercase tracking-wider">
                             {sec.title}
                           </span>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-sky-400/10 text-sky-300 border border-sky-400/20 select-none">
-                            15 Mts
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-sky-400/10 text-sky-300 border border-sky-400/20 select-none shrink-0">
+                            15 Minutes
                           </span>
                         </div>
-                        <h3 className="text-xs font-bold text-white mt-1">
+                        <h3 className="text-xs sm:text-sm font-bold text-white mt-1">
                           {sec.name}
                         </h3>
-                        <p className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                        <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
                           {sec.description}
                         </p>
                       </div>
-                      <span className="text-[11px] font-medium text-slate-400 block mt-2.5 pt-2 border-t border-white/5">
+                      <span className="text-[11px] font-medium text-slate-400 block mt-3 pt-2.5 border-t border-white/5">
                         {sec.questionRange} · {sec.suggestedTime}
                       </span>
                     </div>
@@ -951,7 +949,7 @@ export default function AptitudeV2() {
                 >
                   {Array.from({ length: 32 }).map((_, idx) => (
                     <span key={idx} className="p-4 whitespace-nowrap">
-                      DEEPSTAQ EXAM • {formData.fullName || "CANDIDATE"} • {formData.phone || "VERIFIED"} • {formData.testDate}
+                      DEEPSTAQ SCHOLARSHIP TEST • {formData.fullName || "CANDIDATE"} • {formData.phone || "VERIFIED"} • {formData.testDate}
                     </span>
                   ))}
                 </div>
@@ -1145,13 +1143,13 @@ export default function AptitudeV2() {
 
                 <div className="space-y-2">
                   <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-widest text-sky-400 block">
-                    Assessment Completed
+                    Scholarship Test Completed
                   </span>
                   <h2 className="text-xl sm:text-3xl md:text-4xl font-black uppercase text-white tracking-tight">
                     Congratulations, {formData.fullName}!
                   </h2>
                   <p className="text-slate-400 text-xs sm:text-sm font-normal max-w-lg mx-auto leading-relaxed px-2">
-                    Your responses have been successfully recorded in the Deepstaq database. Here is your comprehensive performance scorecard.
+                    Your responses have been successfully recorded in the Deepstaq database. Here is your comprehensive performance scorecard for the Deepstaq Scholarship Test.
                   </p>
                 </div>
 

@@ -516,7 +516,7 @@ export default function Aptitude() {
                     type="submit"
                     className="w-full py-4 bg-[#c6ff34] text-[#090D11] font-black text-sm uppercase tracking-widest rounded-xl hover:shadow-[0_0_30px_rgba(198,255,52,0.4)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
                   >
-                    Start Assessment (15 Questions · 20 Mins) →
+                    Start Assessment (15 Questions · 20 Minutes) →
                   </button>
                 </div>
               </form>
