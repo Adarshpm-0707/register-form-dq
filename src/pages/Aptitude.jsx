@@ -612,7 +612,11 @@ export default function Aptitude() {
                         key={opt.key}
                         type="button"
                         disabled={isLocked}
-                        onClick={() => handleSelectOption(currentQ.id, opt.key)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleSelectOption(currentQ.id, opt.key);
+                        }}
                         className={`w-full text-left p-4 sm:p-5 rounded-2xl border transition-all flex items-center justify-between gap-4 ${
                           isChecked
                             ? "bg-[#c6ff34]/15 text-white border-[#c6ff34] shadow-[0_0_20px_rgba(198,255,52,0.15)] translate-x-1"

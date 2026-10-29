@@ -342,11 +342,15 @@ export const checkAptitudeCandidateExists = async ({ phone, email }) => {
     console.warn("Check aptitude_v2_submissions duplicate check error:", err);
   }
 
-  // 3. Check fallback collection: aptitude_test_leads
+  // 3. Check fallback collection: aptitude_test_leads (ONLY for Aptitude V2 records)
   try {
     const snapLeads = await getDocs(collection(db, "aptitude_test_leads"));
     for (const docSnap of snapLeads.docs) {
       const data = docSnap.data();
+      // Only check if record explicitly belongs to Aptitude V2
+      if (data.testType !== "DEEPSTAQ_APTITUDE_V2" && !data.isAptitudeV2) {
+        continue;
+      }
       const itemPhone = normalizePhone(data.phone);
       const itemEmail = String(data.email || "").trim().toLowerCase();
       if (normPhone && itemPhone && itemPhone === normPhone) {
@@ -579,30 +583,79 @@ export const getAptitudeV2Submissions = async () => {
 };
 
 /**
- * Deletes an Aptitude Test V2 record from Firestore / localStorage
+ * Deletes an Aptitude Test V2 record from Firestore (both collections) and localStorage
  */
 export const deleteAptitudeV2Submission = async (id, sourceCol = null) => {
-  if (sourceCol) {
-    try {
-      await deleteDoc(doc(db, sourceCol, id));
-    } catch (e) {
-      console.warn(`Delete from ${sourceCol} failed:`, e);
-    }
-  } else {
-    try {
-      await deleteDoc(doc(db, "aptitude_v2_submissions", id));
-    } catch (e) {
+  const collectionsToDelete = sourceCol
+    ? [sourceCol, "aptitude_v2_submissions", "aptitude_test_leads"]
+    : ["aptitude_v2_submissions", "aptitude_test_leads"];
+
+  await Promise.allSettled(
+    collectionsToDelete.map(async (col) => {
       try {
-        await deleteDoc(doc(db, "aptitude_test_leads", id));
-      } catch (err2) {}
-    }
-  }
+        await deleteDoc(doc(db, col, id));
+      } catch (e) {
+        console.warn(`Delete ${id} from ${col} failed:`, e);
+      }
+    })
+  );
 
   try {
     const localData = JSON.parse(localStorage.getItem("offline_aptitude_v2_submissions") || "[]");
+    const targetItem = localData.find((item) => item.id === id);
     const filtered = localData.filter((item) => item.id !== id);
     localStorage.setItem("offline_aptitude_v2_submissions", JSON.stringify(filtered));
+
+    if (targetItem?.phone) {
+      const cleanPhone = normalizePhone(targetItem.phone);
+      localStorage.removeItem(`deepstaq_blocked_${cleanPhone}`);
+      localStorage.removeItem(`deepstaq_blocked_${targetItem.phone}`);
+    }
   } catch (e) {}
+
+  return { success: true };
+};
+
+/**
+ * Deletes ALL Aptitude Test V2 records from Firestore and localStorage
+ */
+export const deleteAllAptitudeV2Submissions = async (records = []) => {
+  await Promise.allSettled(
+    records.map(async (item) => {
+      const collections = item._sourceCol
+        ? [item._sourceCol, "aptitude_v2_submissions", "aptitude_test_leads"]
+        : ["aptitude_v2_submissions", "aptitude_test_leads"];
+      await Promise.allSettled(
+        collections.map(async (col) => {
+          try {
+            await deleteDoc(doc(db, col, item.id));
+          } catch (e) {}
+        })
+      );
+    })
+  );
+
+  clearAllAptitudeV2Data();
+  return { success: true };
+};
+
+/**
+ * Completely clears all Aptitude V2 cached data and local blocks
+ */
+export const clearAllAptitudeV2Data = async () => {
+  try {
+    localStorage.removeItem("offline_aptitude_v2_submissions");
+    Object.keys(localStorage).forEach((key) => {
+      if (
+        key.startsWith("deepstaq_blocked_") ||
+        key.startsWith("aptitude_v2_") ||
+        key.includes("aptitude_v2")
+      ) {
+        localStorage.removeItem(key);
+      }
+    });
+    sessionStorage.removeItem("aptitude_v2_blocked");
+  } catch (_) {}
   return { success: true };
 };
 

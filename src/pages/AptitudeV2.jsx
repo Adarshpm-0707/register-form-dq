@@ -48,7 +48,10 @@ export default function AptitudeV2() {
 
   // Exam Security & Fullscreen states
   const [screenCaptureBlocked, setScreenCaptureBlocked] = useState(false);
+  const [isExamBlocked, setIsExamBlocked] = useState(false);
+  const [blockedReason, setBlockedReason] = useState("");
   const [securityWarning, setSecurityWarning] = useState("");
+  const examBlockedRef = useRef(false);
 
   const timerRef = useRef(null);
   const startTimeRef = useRef(null);
@@ -85,6 +88,23 @@ export default function AptitudeV2() {
     setFormData((prev) => (prev.testDate === todayFormatted ? prev : { ...prev, testDate: todayFormatted }));
   }, []);
 
+  // Ensure Aptitude V2 starts completely fresh by wiping previous local test/block cache
+  useEffect(() => {
+    try {
+      localStorage.removeItem("offline_aptitude_v2_submissions");
+      Object.keys(localStorage).forEach((key) => {
+        if (
+          key.startsWith("deepstaq_blocked_") ||
+          key.startsWith("aptitude_v2_") ||
+          key.includes("aptitude_v2")
+        ) {
+          localStorage.removeItem(key);
+        }
+      });
+      sessionStorage.removeItem("aptitude_v2_blocked");
+    } catch (_) {}
+  }, []);
+
   // Hide Navbar during examination mode (Step 2)
   useEffect(() => {
     if (step === 2) {
@@ -117,10 +137,60 @@ export default function AptitudeV2() {
     };
 
     const triggerSecurityBlock = (reason) => {
-      document.body.classList.add("screen-capture-blocked");
+      if (examBlockedRef.current) return;
+      examBlockedRef.current = true;
+      setIsExamBlocked(true);
       setScreenCaptureBlocked(true);
+      setBlockedReason(reason);
       setSecurityWarning(reason);
+      document.body.classList.add("screen-capture-blocked");
+
+      // Stop timer immediately
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+
+      // Purge clipboard immediately
       purgeClipboard();
+
+      // Exit fullscreen
+      exitFullscreen();
+
+      // Automatically persist disqualification record to prevent re-entry
+      try {
+        const timeSpent = startTimeRef.current
+          ? Math.floor((Date.now() - startTimeRef.current) / 1000)
+          : 3600 - timeLeft;
+        const gradeResult = gradeAptitudeV2Submission(userAnswers);
+        const payload = {
+          leadDocId,
+          fullName: formData.fullName.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          place: formData.place.trim(),
+          institution: formData.institution.trim() || "N/A",
+          testDate: formData.testDate,
+          score: gradeResult.score,
+          totalQuestions: gradeResult.totalQuestions,
+          percentage: gradeResult.percentage,
+          performanceRating: "Disqualified (Screen Capture Violation)",
+          status: "disqualified_security_violation",
+          testStatus: "disqualified",
+          disqualificationReason: reason,
+          sectionBreakdown: gradeResult.sectionBreakdown,
+          detailedAnswers: gradeResult.detailedAnswers,
+          timeSpentSeconds: timeSpent,
+          isAutoSubmit: true,
+        };
+        saveAptitudeV2Submission(payload).catch((err) =>
+          console.warn("Disqualification record save warning:", err)
+        );
+        if (formData.phone) {
+          localStorage.setItem(`deepstaq_blocked_${formData.phone}`, "true");
+        }
+      } catch (e) {
+        console.warn("Block persistence warning:", e);
+      }
     };
 
     // 1. Hardware & Keyboard Shortcut Interception (Laptop & Desktop)
@@ -188,12 +258,18 @@ export default function AptitudeV2() {
 
     // 2. Window Blur, Pagehide & Visibility (Fires on Snipping Tool, Screenshot toolbar, Mobile hardware buttons, App switch)
     const handleWindowBlur = () => {
-      triggerSecurityBlock("⚠️ Window lost focus / screen capture attempt detected.");
+      // Small timeout to allow document.hasFocus() to settle after internal DOM focus shifts (e.g. clicking/locking an option)
+      setTimeout(() => {
+        if (typeof document !== "undefined" && document.hasFocus && document.hasFocus()) {
+          return;
+        }
+        triggerSecurityBlock("⚠️ Screen capture attempt or window lost focus. Exam screen locked.");
+      }, 50);
     };
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        triggerSecurityBlock("⚠️ Examination tab hidden or minimized.");
+        triggerSecurityBlock("⚠️ Examination tab hidden or minimized. Exam screen locked.");
       }
     };
 
@@ -237,7 +313,6 @@ export default function AptitudeV2() {
     window.addEventListener("keydown", handleKeyDown, true);
     window.addEventListener("keyup", handleKeyUp, true);
     window.addEventListener("blur", handleWindowBlur);
-    window.addEventListener("focusout", handleWindowBlur);
     window.addEventListener("pagehide", handleWindowBlur);
     document.addEventListener("visibilitychange", handleVisibilityChange);
     document.addEventListener("fullscreenchange", handleFullscreenChange);
@@ -257,7 +332,6 @@ export default function AptitudeV2() {
       window.removeEventListener("keydown", handleKeyDown, true);
       window.removeEventListener("keyup", handleKeyUp, true);
       window.removeEventListener("blur", handleWindowBlur);
-      window.removeEventListener("focusout", handleWindowBlur);
       window.removeEventListener("pagehide", handleWindowBlur);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
@@ -272,6 +346,7 @@ export default function AptitudeV2() {
       window.removeEventListener("copy", handlePrevent);
       window.removeEventListener("cut", handlePrevent);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
   // Auto-dismiss warning toast after 3 seconds
@@ -355,6 +430,15 @@ export default function AptitudeV2() {
     setCheckingDuplicate(true);
 
     try {
+      // 0. Verify candidate has not been disqualified/blocked
+      const cleanPhone = formData.phone.replace(/\D/g, "");
+      if (cleanPhone && localStorage.getItem(`deepstaq_blocked_${cleanPhone}`) === "true") {
+        setSavingLead(false);
+        setCheckingDuplicate(false);
+        setDuplicateError("This candidate has been permanently blocked from the examination due to a screen capture policy violation.");
+        return;
+      }
+
       // 1. Verify candidate has not already registered or taken the test (1 student = 1 registration/attempt)
       const duplicateCheck = await checkAptitudeCandidateExists({
         phone: formData.phone,
@@ -532,37 +616,45 @@ export default function AptitudeV2() {
         </div>
       )}
 
-      {/* Anti-Screenshot / Window Inactivity Solid Security Blackout Overlay */}
-      {step === 2 && screenCaptureBlocked && (
+      {/* Anti-Screenshot / Permanent Disqualification Security Lock Overlay (No Re-Entry) */}
+      {step === 2 && (screenCaptureBlocked || isExamBlocked) && (
         <div className="fixed inset-0 z-[999999] bg-[#090D11] flex flex-col items-center justify-center p-6 text-center space-y-4 select-none">
-          <div className="w-16 h-16 rounded-3xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-3xl shadow-[0_0_30px_rgba(239,68,68,0.3)] animate-pulse">
-            🛡️
+          <div className="w-20 h-20 rounded-3xl bg-red-500/20 border border-red-500/50 flex items-center justify-center text-4xl shadow-[0_0_40px_rgba(239,68,68,0.4)] animate-pulse">
+            🚫
           </div>
-          <div className="space-y-2 max-w-lg">
-            <span className="text-[11px] font-bold text-red-400 uppercase tracking-widest block">
-              Integrity Violation Detected
-            </span>
-            <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
-              Screen Capture & Window Switching Blocked
+          <div className="space-y-3 max-w-lg">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-500/15 border border-red-500/40 text-[10px] sm:text-[11px] font-black text-red-400 uppercase tracking-widest">
+              <span>⚠️</span>
+              <span>Integrity Violation • Exam Permanently Blocked</span>
+            </div>
+            <h2 className="text-xl sm:text-3xl font-black text-white uppercase tracking-tight">
+              Exam Blocked • Cannot Re-Enter
             </h2>
+            <div className="p-3.5 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs sm:text-sm font-semibold leading-relaxed">
+              {blockedReason || securityWarning || "Screen capture or screenshot shortcut was detected during the assessment."}
+            </div>
             <p className="text-slate-400 text-xs sm:text-sm mx-auto leading-relaxed">
-              Screenshots, Snipping Tool, screen recording, multi-finger gestures, and window switching are strictly prohibited across all devices (laptop, mobile & tablet) to protect exam confidentiality.
+              Screenshots, Snipping Tool, screen recording, multi-finger gestures, and window switching are strictly prohibited during the assessment. Your examination has been terminated and disqualified. <strong>Under examination integrity rules, you cannot re-enter or resume this exam.</strong>
             </p>
-            <div className="pt-2 text-[11px] text-slate-500 font-mono">
-              Candidate: <span className="text-slate-300 font-semibold">{formData.fullName}</span> • {formData.phone}
+            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 text-[11px] sm:text-xs text-slate-400 font-mono space-y-1">
+              <div>Candidate: <span className="text-white font-bold">{formData.fullName}</span></div>
+              <div>Phone: <span className="text-slate-300">{formData.phone}</span> • Date: <span className="text-slate-300">{formData.testDate}</span></div>
+              <div>Status: <span className="text-red-400 font-extrabold uppercase">Disqualified (Security Violation)</span></div>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              document.body.classList.remove("screen-capture-blocked");
-              setScreenCaptureBlocked(false);
-              enterFullscreen();
-            }}
-            className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 active:scale-[0.99] text-slate-950 font-extrabold uppercase text-xs tracking-wider shadow-[0_4px_20px_rgba(56,189,248,0.35)] cursor-pointer transition-all"
-          >
-            Resume Assessment (Fullscreen) →
-          </button>
+          <div className="pt-2">
+            <Link
+              to="/"
+              onClick={() => {
+                document.body.classList.remove("screen-capture-blocked");
+                document.body.classList.remove("in-exam-mode");
+                window.dispatchEvent(new CustomEvent("deepstaq:exam-mode", { detail: { inExam: false } }));
+              }}
+              className="inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 text-white font-bold uppercase text-xs tracking-wider transition-all cursor-pointer shadow-lg hover:border-white/30"
+            >
+              Exit to Homepage →
+            </Link>
+          </div>
         </div>
       )}
 
@@ -869,7 +961,7 @@ export default function AptitudeV2() {
                     <li><strong>Single Submission Policy:</strong> One student can register only once. Re-registering with the same phone number or email is prohibited.</li>
                     <li>The exam starts immediately in <strong>Fullscreen Mode</strong>.</li>
                     <li><strong>Answers are permanently locked on first selection</strong> and cannot be modified.</li>
-                    <li><strong>Screenshots, screen recording, and tab/window switching are prohibited</strong> and trigger security locks.</li>
+                    <li><strong>Screenshots, screen recording, and tab/window switching are strictly prohibited</strong> and will permanently block the examination with re-entry strictly prohibited.</li>
                     <li>Copying and pasting are disabled across all questions.</li>
                     <li>The 60-minute timer counts down continuously until final submission.</li>
                   </ul>
@@ -1044,7 +1136,11 @@ export default function AptitudeV2() {
                         key={opt.key}
                         type="button"
                         disabled={isLocked}
-                        onClick={() => handleSelectOption(currentQ.id, opt.key)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleSelectOption(currentQ.id, opt.key);
+                        }}
                         className={`p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all duration-200 flex items-start gap-2.5 sm:gap-3 min-h-[52px] ${
                           isSelected
                             ? "bg-sky-500/20 border-sky-400 text-white shadow-[0_0_24px_rgba(56,189,248,0.25)] ring-1 ring-sky-400 cursor-default"

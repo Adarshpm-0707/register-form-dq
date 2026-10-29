@@ -13,6 +13,7 @@ import {
   getAptitudeSubmissions, 
   getAptitudeV2Submissions,
   deleteAptitudeV2Submission,
+  deleteAllAptitudeV2Submissions,
   getCollectedContacts, 
   getUploadedContactFiles, 
   getWebinarRegistrations, 
@@ -2769,8 +2770,18 @@ function AdminDashboard() {
     );
   }
 
-  const handleDeleteRecord = async (id, candidateName = "this record") => {
+  const handleDeleteRecord = async (id, candidateName = "this record", sourceCol = null) => {
     if (!window.confirm(`Are you sure you want to delete the record for "${candidateName}"?`)) {
+      return;
+    }
+
+    if (activeTab === "aptitude_v2") {
+      try {
+        await deleteAptitudeV2Submission(id, sourceCol);
+      } catch (err) {
+        console.warn("Delete aptitude v2 error:", err);
+      }
+      setAptitudeV2Data((prev) => prev.filter((item) => item.id !== id));
       return;
     }
 
@@ -2836,14 +2847,6 @@ function AdminDashboard() {
       } catch (e) {}
     }
 
-    if (activeTab === "aptitude_v2") {
-      try {
-        await deleteAptitudeV2Submission(id);
-      } catch (err) {
-        console.warn("Delete aptitude v2 error:", err);
-      }
-    }
-
     // Remove from local offline storage if present
     try {
       const localAdm = JSON.parse(localStorage.getItem("offline_student_admissions") || "[]");
@@ -2891,6 +2894,26 @@ function AdminDashboard() {
     setConsultationData((prev) => prev.filter((item) => item.id !== id));
     setAiForEveryoneData((prev) => prev.filter((item) => item.id !== id));
     setAiBoosterProgramData((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const handleClearAllAptitudeV2 = async () => {
+    if (aptitudeV2Data.length === 0) {
+      alert("No Aptitude V2 records to delete.");
+      return;
+    }
+    const confirmClear = window.confirm(
+      `Are you sure you want to permanently delete ALL ${aptitudeV2Data.length} Aptitude Test V2 records? This cannot be undone.`
+    );
+    if (!confirmClear) return;
+
+    try {
+      await deleteAllAptitudeV2Submissions(aptitudeV2Data);
+      setAptitudeV2Data([]);
+      alert("All Aptitude Test V2 records have been permanently deleted.");
+    } catch (err) {
+      console.error("Error clearing all Aptitude V2 data:", err);
+      alert("Error clearing some records. Please refresh and check.");
+    }
   };
 
   const renderCards = (data) => {
@@ -3749,6 +3772,28 @@ function AdminDashboard() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            {activeTab === "aptitude_v2" && (
+              <>
+                <button
+                  type="button"
+                  onClick={downloadCSV}
+                  className="py-2.5 px-4 bg-[#c6ff34] hover:bg-[#b0f51e] text-[#050521] border border-[#050521]/10 rounded-xl text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>Export CSV</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClearAllAptitudeV2}
+                  disabled={aptitudeV2Data.length === 0}
+                  className="py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  <span>Clear All V2 Records</span>
+                </button>
+              </>
+            )}
             <button
               type="button"
               onClick={fetchData}
@@ -3772,15 +3817,27 @@ function AdminDashboard() {
                 {searchQuery ? `Showing ${getFilteredData().length} of ${getActiveData().length} records` : `${getActiveData().length} records found`}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={fetchData}
-              disabled={loadingData}
-              className="p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black shadow-sm cursor-pointer"
-              title="Refresh data"
-            >
-              <span className={loadingData ? "inline-block animate-spin" : ""}>↻</span>
-            </button>
+            <div className="flex items-center gap-2">
+              {activeTab === "aptitude_v2" && aptitudeV2Data.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClearAllAptitudeV2}
+                  className="px-3 py-2 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm cursor-pointer"
+                  title="Clear All V2 Records"
+                >
+                  Clear All
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={fetchData}
+                disabled={loadingData}
+                className="p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black shadow-sm cursor-pointer"
+                title="Refresh data"
+              >
+                <span className={loadingData ? "inline-block animate-spin" : ""}>↻</span>
+              </button>
+            </div>
           </div>
 
           {/* Quick Metrics Banner for Popup Leads */}
