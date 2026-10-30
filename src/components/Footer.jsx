@@ -379,7 +379,7 @@ export default function Footer() {
            ══════════════════════════════════════════════════════════ */}
         <div className="pt-6 sm:pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-400 text-center md:text-left">
           <div>
-            © {currentYear} <strong className="text-slate-200 font-semibold">Deepstaq Technologies</strong>. All rights reserved.
+            © {currentYear} <strong className="text-slate-200 font-semibold">Deepstaq</strong>. All rights reserved.
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 font-medium text-slate-400">
             <Link to="/contact" className="hover:text-sky-400 transition-colors">

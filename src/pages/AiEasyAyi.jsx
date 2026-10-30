@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { jsPDF } from "jspdf";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   saveAiEasyAyiRegistration,
@@ -193,18 +195,30 @@ const TRANSLATIONS = {
     ctaWhatsApp: "WhatsApp",
 
     // Success receipt
-    receiptBadge: "രജിസ്ട്രേഷൻ വിജയകരം",
-    receiptTitle: "AI Easy Ayi-ലേക്ക് സ്വാഗതം",
+    receiptBadge: "രജിസ്ട്രേഷൻ & പേയ്‌മെന്റ് വിജയകരം",
+    receiptTitle: "AI Easy Ayi-ലേക്ക് സ്വാഗതം!",
     receiptThankYou: "നന്ദി",
     receiptReservedMsg: "നിങ്ങളുടെ സീറ്റ് വിജയകരമായി ബുക്ക് ചെയ്തിട്ടുണ്ട്.",
     receiptRefId: "റഫറൻസ് ഐഡി",
+    receiptPaymentId: "പേയ്‌മെന്റ് ഐഡി",
+    receiptPhone: "മൊബൈൽ നമ്പർ",
+    receiptPlace: "സ്ഥലം",
+    receiptQualification: "പശ്ചാത്തലം",
     receiptStatus: "പേയ്‌മെന്റ് സ്റ്റാറ്റസ്",
     receiptPaidText: "₹99 അടച്ചു (സ്ഥിരീകരിച്ചു)",
     receiptSession: "സെഷൻ തിയതി",
     receiptTime: "സമയം",
+    receiptFormat: "ക്ലാസ്സ് രീതി",
+    receiptFormatVal: "Zoom വഴി Live ഇന്ററാക്ടീവ് ക്ലാസ്സ്",
     receiptJoinCommunity: "ഔദ്യോഗിക WhatsApp ഗ്രൂപ്പിൽ ചേരുക",
-    receiptNeedSupport: "സഹായം വേണോ?",
-    receiptNewReg: "പുതിയ രജിസ്ട്രേഷൻ",
+    receiptJoinCommunitySub: "Zoom ലിങ്ക്, പ്രോംപ്റ്റ് ഗൈഡുകൾ, അപ്‌ഡേറ്റുകൾ എന്നിവ ഇവിടെ ലഭിക്കും",
+    receiptDownloadPdf: "രസീത് ഡൗൺലോഡ് ചെയ്യുക (PDF)",
+    receiptDownloadPdfLoading: "രസീത് തയ്യാറാക്കുന്നു...",
+    receiptDownloadPdfSub: "ഔദ്യോഗിക ഇൻവോയ്സും വർക്ക്‌ഷോപ്പ് പാസും",
+    receiptExplorePrograms: "മറ്റ് AI പ്രോഗ്രാമുകൾ കാണുക",
+    receiptExploreProgramsSub: "DeepStaq-ന്റെ 6-Month AI/ML ഡിപ്ലോമ & ബൂസ്റ്റർ കോഴ്സുകൾ",
+    receiptNeedSupport: "സഹായം വേണോ? (WhatsApp)",
+    receiptNewReg: "മറ്റൊരാളെ രജിസ്റ്റർ ചെയ്യുക",
 
     // Sticky bar
     stickyTitle: "AI Easy Ayi",
@@ -393,18 +407,30 @@ const TRANSLATIONS = {
     ctaWhatsApp: "WhatsApp",
 
     // Success receipt
-    receiptBadge: "REGISTRATION CONFIRMED",
-    receiptTitle: "Welcome to AI Easy Ayi",
+    receiptBadge: "REGISTRATION & PAYMENT CONFIRMED",
+    receiptTitle: "Welcome to AI Easy Ayi!",
     receiptThankYou: "Thank you",
     receiptReservedMsg: "Your masterclass seat has been successfully reserved.",
     receiptRefId: "Reference ID",
+    receiptPaymentId: "Payment ID",
+    receiptPhone: "Mobile Number",
+    receiptPlace: "Place / City",
+    receiptQualification: "Background",
     receiptStatus: "Payment Status",
     receiptPaidText: "₹99 Paid (Confirmed)",
     receiptSession: "Session Date",
     receiptTime: "Time",
+    receiptFormat: "Class Format",
+    receiptFormatVal: "Live Interactive Workshop on Zoom",
     receiptJoinCommunity: "Join Official WhatsApp Community",
-    receiptNeedSupport: "Need Support?",
-    receiptNewReg: "New Registration",
+    receiptJoinCommunitySub: "Zoom meeting link, prompt guides & bonus materials will be shared here",
+    receiptDownloadPdf: "Download Payment Receipt (PDF)",
+    receiptDownloadPdfLoading: "Generating Receipt...",
+    receiptDownloadPdfSub: "Official tax invoice & workshop admission pass",
+    receiptExplorePrograms: "Explore Other AI Programs",
+    receiptExploreProgramsSub: "DeepStaq's 6-Month AI/ML Diploma & AI Booster courses",
+    receiptNeedSupport: "Need Support? (WhatsApp)",
+    receiptNewReg: "Register Another Person",
 
     // Sticky bar
     stickyTitle: "AI Easy Ayi",
@@ -455,9 +481,11 @@ const getFullSessionDateFormatted = (lang = "ml") => {
 };
 
 export default function AiEasyAyi() {
+  const navigate = useNavigate();
   const formRef = useRef(null);
   const [showForm, setShowForm] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const seatsLeft = useSeatsCountdown(10, 3);
 
   // Language state: 'ml' (Malayalam) or 'en' (English)
@@ -505,6 +533,169 @@ export default function AiEasyAyi() {
   const [pendingRegId, setPendingRegId] = useState(null);
 
   const fullSessionDateFormatted = getFullSessionDateFormatted(lang);
+
+  const handleExplorePrograms = (path = "/programs") => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    navigate(path);
+  };
+
+  const generateReceiptPDF = () => {
+    if (!submittedData) return;
+    try {
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      // 1. Accent Top Banner
+      doc.setFillColor(250, 0, 88); // #fa0058 DeepStaq Neon Magenta
+      doc.rect(0, 0, 210, 6, "F");
+
+      // 2. Brand Header (Logo & Company Title)
+      try {
+        doc.addImage(logo, "PNG", 20, 16, 16, 16);
+      } catch (e) {
+        doc.setTextColor(29, 0, 88);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(20);
+        doc.text("DEEPSTAQ", 20, 26);
+      }
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor(20, 25, 45);
+      doc.text("DEEPSTAQ ACADEMY", 40, 23);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 105, 120);
+      doc.text("AI & Machine Learning Institute • https://deepstaq.in", 40, 28);
+
+      // Receipt Top Right Info
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(250, 0, 88);
+      doc.text("WORKSHOP PASS & RECEIPT", 190, 21, { align: "right" });
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 105, 120);
+      doc.text(`Receipt No: ${submittedData.id || "AYI-REG"}`, 190, 27, { align: "right" });
+      doc.text(`Issue Date: ${new Date().toLocaleDateString("en-IN")}`, 190, 32, { align: "right" });
+
+      // Divider line
+      doc.setDrawColor(230, 232, 240);
+      doc.setLineWidth(0.5);
+      doc.line(20, 38, 190, 38);
+
+      // 3. Status Banner
+      doc.setFillColor(235, 253, 243); // soft emerald tint
+      doc.roundedRect(20, 44, 170, 12, 2, 2, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9.5);
+      doc.setTextColor(16, 120, 64);
+      doc.text("STATUS: PAYMENT CONFIRMED & SEAT RESERVED (PAID INR 99.00)", 25, 51.5);
+
+      // 4. Registration Details Box
+      doc.setDrawColor(220, 224, 235);
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(20, 62, 170, 98, 3, 3, "D");
+
+      // Box Header
+      doc.setFillColor(247, 248, 252);
+      doc.roundedRect(20.5, 62.5, 169, 12, 3, 3, "F");
+      doc.rect(20.5, 68.5, 169, 6, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(60, 65, 80);
+      doc.text("PARTICIPANT & WORKSHOP DETAILS", 26, 70);
+
+      const fields = [
+        { label: "Participant Name", value: submittedData.fullName || "Participant" },
+        { label: "Contact Phone", value: `+91 ${submittedData.phone || ""}` },
+        { label: "Place / District", value: submittedData.place || "Kerala, India" },
+        { label: "Background / Role", value: submittedData.qualification || "Working Professional" },
+        { label: "Program", value: "AI Easy Ayi (90-Min Live Interactive Masterclass)" },
+        { label: "Class Schedule", value: `${fullSessionDateFormatted} • 5:00 PM – 7:00 PM IST` },
+        { label: "Delivery Mode", value: "Online Live via Zoom (Interactive)" },
+        { label: "Reference ID", value: submittedData.id || "AYI-REG" },
+        { label: "Transaction / Payment ID", value: submittedData.paymentId || "Razorpay Confirmed" },
+        { label: "Total Amount Paid", value: "INR 99.00 (Inclusive of All Taxes)" },
+      ];
+
+      let fieldY = 81;
+      fields.forEach((field, index) => {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8.5);
+        doc.setTextColor(110, 115, 130);
+        doc.text(field.label, 26, fieldY);
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(20, 25, 40);
+        doc.text(String(field.value), 82, fieldY);
+
+        if (index < fields.length - 1) {
+          doc.setDrawColor(242, 244, 248);
+          doc.setLineWidth(0.3);
+          doc.line(26, fieldY + 3, 184, fieldY + 3);
+        }
+        fieldY += 7.5;
+      });
+
+      // 5. Next Steps / Instructions Box
+      doc.setDrawColor(230, 235, 245);
+      doc.setFillColor(249, 250, 254);
+      doc.roundedRect(20, 168, 170, 48, 2, 2, "FD");
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9.5);
+      doc.setTextColor(250, 0, 88);
+      doc.text("IMPORTANT INSTRUCTIONS FOR PARTICIPANTS:", 26, 176);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(60, 65, 80);
+      doc.text("1. Join the Official WhatsApp Community immediately for the Zoom meeting link and updates.", 26, 183);
+      doc.text("2. Meeting credentials and access guides will be posted in the community 2 hours before session.", 26, 189);
+      doc.text("3. Keep a laptop or smartphone with internet connection ready for hands-on activities.", 26, 195);
+      doc.text("4. Prompt templates and summary cheat sheets will be distributed directly after the class.", 26, 201);
+      doc.text("5. For any inquiries or support, contact +91 9495957011 or email admissions@deepstaq.in.", 26, 207);
+
+      // 6. Security & Verification Footer
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(140, 145, 160);
+      doc.text("Authorized Computer-Generated Receipt • No Signature Required • DeepStaq Academy", 105, 258, { align: "center" });
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(160, 165, 180);
+      doc.text("DeepStaq Academy, Kannur & Kochi, Kerala | Support: +91 9495957011 | https://deepstaq.in", 105, 263, { align: "center" });
+
+      // Save PDF
+      doc.save(`DeepStaq_Receipt_${submittedData.id || "AI_Easy_Ayi"}.pdf`);
+    } catch (err) {
+      console.error("Failed to generate PDF receipt:", err);
+      window.print();
+    }
+  };
+
+  const handleDownloadReceipt = () => {
+    setIsGeneratingPdf(true);
+    setTimeout(() => {
+      generateReceiptPDF();
+      setIsGeneratingPdf(false);
+    }, 200);
+  };
+
+  // Meta Pixel PageView tracking
+  useEffect(() => {
+    if (typeof window !== "undefined" && typeof window.fbq === "function") {
+      window.fbq("track", "PageView");
+    }
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -618,6 +809,15 @@ export default function AiEasyAyi() {
         setPendingRegId(regId);
       }
 
+      // Meta Pixel Lead tracking
+      if (typeof window !== "undefined" && typeof window.fbq === "function") {
+        window.fbq("track", "Lead", {
+          content_name: "AI Easy Ayi Registration",
+          value: 99,
+          currency: "INR",
+        });
+      }
+
       setLoadingStep("gateway");
       const isScriptLoaded = await loadRazorpayScript();
       if (!isScriptLoaded) {
@@ -684,6 +884,15 @@ export default function AiEasyAyi() {
             });
 
             window.scrollTo({ top: 0, behavior: "smooth" });
+
+            // Meta Pixel Purchase tracking
+            if (typeof window !== "undefined" && typeof window.fbq === "function") {
+              window.fbq("track", "Purchase", {
+                content_name: "AI Easy Ayi Live Workshop",
+                value: 99,
+                currency: "INR",
+              });
+            }
           } catch (updateErr) {
             console.error("Payment status update error:", updateErr);
             setSubmittedData({
@@ -700,6 +909,15 @@ export default function AiEasyAyi() {
               }),
             });
             window.scrollTo({ top: 0, behavior: "smooth" });
+
+            // Meta Pixel Purchase tracking fallback
+            if (typeof window !== "undefined" && typeof window.fbq === "function") {
+              window.fbq("track", "Purchase", {
+                content_name: "AI Easy Ayi Live Workshop",
+                value: 99,
+                currency: "INR",
+              });
+            }
           } finally {
             setLoading(false);
           }
@@ -795,17 +1013,22 @@ export default function AiEasyAyi() {
           <AnimatePresence>
             {submittedData && (
               <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                className="bg-white/[0.03] border border-white/15 rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] max-w-3xl mx-auto"
+                initial={{ opacity: 0, scale: 0.96, y: 18 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="bg-[#090D11]/90 border border-white/20 rounded-3xl p-6 sm:p-8 md:p-10 backdrop-blur-2xl shadow-[0_25px_60px_rgba(0,0,0,0.7)] max-w-3xl mx-auto relative overflow-hidden"
               >
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-[#f90058]/15 border border-[#f90058]/35 flex items-center justify-center text-[#ff337d] text-xl font-bold shadow-[0_0_20px_rgba(249,0,88,0.3)]">
+                {/* Accent top gradient stripe */}
+                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#184cef] via-[#fa0058] to-[#c6ff34]" />
+
+                {/* Header Badge & Title */}
+                <div className="flex items-center gap-4 mb-5 pt-2">
+                  <div className="w-12 h-12 rounded-2xl bg-[#25D366]/20 border border-[#25D366]/40 flex items-center justify-center text-[#25D366] text-2xl font-black shadow-[0_0_24px_rgba(37,211,102,0.4)] shrink-0">
                     ✓
                   </div>
                   <div>
-                    <span className="text-[11px] font-mono tracking-widest text-[#ff337d] uppercase block">
+                    <span className="text-[11px] font-mono tracking-widest text-[#25D366] uppercase font-bold block">
                       {t.receiptBadge}
                     </span>
                     <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
@@ -814,7 +1037,7 @@ export default function AiEasyAyi() {
                   </div>
                 </div>
 
-                <p className="text-base text-slate-300 leading-relaxed mb-6">
+                <p className="text-sm sm:text-base text-slate-300 leading-relaxed mb-6">
                   {t.receiptThankYou}{" "}
                   <strong className="text-white font-semibold">
                     {submittedData.fullName}
@@ -822,57 +1045,183 @@ export default function AiEasyAyi() {
                   . {t.receiptReservedMsg}
                 </p>
 
-                {/* Minimal Ticket Meta */}
-                <div className="rounded-2xl bg-white/[0.02] border border-white/10 p-5 my-6 space-y-3 text-xs sm:text-sm font-mono">
-                  <div className="flex justify-between items-center text-slate-400 pb-2 border-b border-white/5">
-                    <span>{t.receiptRefId}</span>
-                    <span className="text-white font-semibold">{submittedData.id}</span>
+                {/* Registration Details Grid */}
+                <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-4 sm:p-5 my-6 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm font-mono">
+                  <div className="flex flex-col gap-0.5 border-b border-white/5 sm:border-b-0 pb-2 sm:pb-0">
+                    <span className="text-[10px] uppercase text-slate-400 font-bold">{t.receiptRefId}</span>
+                    <span className="text-white font-bold text-sm text-[#ff337d]">{submittedData.id}</span>
                   </div>
-                  <div className="flex justify-between items-center text-slate-400 pb-2 border-b border-white/5">
-                    <span>{t.receiptStatus}</span>
-                    <span className="text-fuchsia-300 font-semibold">{t.receiptPaidText}</span>
+                  <div className="flex flex-col gap-0.5 border-b border-white/5 sm:border-b-0 pb-2 sm:pb-0">
+                    <span className="text-[10px] uppercase text-slate-400 font-bold">{t.receiptStatus}</span>
+                    <span className="text-emerald-400 font-bold">{t.receiptPaidText}</span>
                   </div>
-                  <div className="flex justify-between items-center text-slate-400 pb-2 border-b border-white/5">
-                    <span>{t.receiptSession}</span>
-                    <span className="text-white">{fullSessionDateFormatted}</span>
+                  <div className="flex flex-col gap-0.5 border-b border-white/5 sm:border-b-0 pb-2 sm:pb-0">
+                    <span className="text-[10px] uppercase text-slate-400 font-bold">{t.receiptSession}</span>
+                    <span className="text-white font-semibold">{fullSessionDateFormatted}</span>
                   </div>
-                  <div className="flex justify-between items-center text-slate-400">
-                    <span>{t.receiptTime}</span>
-                    <span className="text-white">5:00 PM – 7:00 PM IST (Zoom)</span>
+                  <div className="flex flex-col gap-0.5 border-b border-white/5 sm:border-b-0 pb-2 sm:pb-0">
+                    <span className="text-[10px] uppercase text-slate-400 font-bold">{t.receiptTime}</span>
+                    <span className="text-white font-semibold">5:00 PM – 7:00 PM IST</span>
+                  </div>
+                  <div className="flex flex-col gap-0.5 border-b border-white/5 sm:border-b-0 pb-2 sm:pb-0">
+                    <span className="text-[10px] uppercase text-slate-400 font-bold">{t.receiptFormat}</span>
+                    <span className="text-sky-300 font-semibold">{t.receiptFormatVal}</span>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[10px] uppercase text-slate-400 font-bold">{t.receiptPaymentId}</span>
+                    <span className="text-slate-300 font-mono truncate">{submittedData.paymentId || "Confirmed"}</span>
                   </div>
                 </div>
 
-                {/* Actions: WhatsApp Community & Reset */}
-                <div className="space-y-3 pt-2">
+                {/* PRIMARY ACTIONS */}
+                <div className="space-y-3 pt-1">
+                  {/* 1. Official WhatsApp Community Button */}
                   <a
                     href="https://chat.whatsapp.com/KxVV7ep74TV0GHy5SU2FXl"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full py-4 px-6 rounded-full bg-[#fa0058] hover:bg-[#e0004f] text-white font-bold text-sm tracking-wide flex items-center justify-center gap-2 transition-all shadow-[0_4px_28px_rgba(250,0,88,0.45)]"
+                    className="w-full py-4 px-5 sm:px-6 rounded-2xl bg-[#25D366] hover:bg-[#20ba59] active:scale-[0.99] text-white font-bold text-sm tracking-wide flex items-center justify-between gap-3 transition-all shadow-[0_8px_30px_rgba(37,211,102,0.4)] group"
                   >
-                    <span>{t.receiptJoinCommunity}</span>
-                    <span>→</span>
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
+                        </svg>
+                      </div>
+                      <div className="text-left min-w-0">
+                        <div className="font-extrabold text-sm sm:text-base text-white leading-tight">
+                          {t.receiptJoinCommunity}
+                        </div>
+                        <div className="text-xs text-white/90 font-normal truncate sm:whitespace-normal">
+                          {t.receiptJoinCommunitySub}
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-xl group-hover:translate-x-1.5 transition-transform shrink-0">→</span>
                   </a>
 
-                  <div className="flex gap-3">
-                    <a
-                      href={`https://wa.me/918075727195?text=${encodeURIComponent(
-                        `Hi DeepStaq! I registered and paid ₹99 for AI easy Ayi. Name: ${submittedData.fullName} (Ref: ${submittedData.id})`
-                      )}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 py-3 text-center text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 rounded-xl transition-colors"
-                    >
-                      {t.receiptNeedSupport}
-                    </a>
+                  {/* 2. Download Official PDF Receipt Button */}
+                  <button
+                    type="button"
+                    onClick={handleDownloadReceipt}
+                    disabled={isGeneratingPdf}
+                    className="w-full py-4 px-5 sm:px-6 rounded-2xl bg-white/[0.05] hover:bg-white/[0.10] border border-white/20 hover:border-[#fa0058]/50 text-white font-bold text-sm tracking-wide flex items-center justify-between gap-3 transition-all shadow-lg hover:shadow-[0_0_30px_rgba(250,0,88,0.25)] cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-11 h-11 rounded-xl bg-[#fa0058]/20 border border-[#fa0058]/40 flex items-center justify-center shrink-0 text-[#ff337d]">
+                        {isGeneratingPdf ? (
+                          <div className="w-5 h-5 border-2 border-[#ff337d] border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="text-left min-w-0">
+                        <div className="font-extrabold text-sm sm:text-base text-white leading-tight">
+                          {isGeneratingPdf ? t.receiptDownloadPdfLoading : t.receiptDownloadPdf}
+                        </div>
+                        <div className="text-xs text-slate-300 font-normal truncate sm:whitespace-normal">
+                          {t.receiptDownloadPdfSub}
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-xl text-[#ff337d] group-hover:translate-y-0.5 transition-transform shrink-0">↓</span>
+                  </button>
+                </div>
+
+                {/* 3. EXPLORE OTHER PROGRAMS SECTION */}
+                <div className="mt-8 pt-6 border-t border-white/10 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <span className="text-[10px] font-mono tracking-widest text-[#184cef] uppercase font-bold block">
+                        NEXT LEVEL CAREER PATHWAYS
+                      </span>
+                      <h3 className="text-base sm:text-lg font-extrabold text-white">
+                        {t.receiptExplorePrograms}
+                      </h3>
+                      <p className="text-xs text-slate-400">
+                        {t.receiptExploreProgramsSub}
+                      </p>
+                    </div>
                     <button
                       type="button"
-                      onClick={resetForm}
-                      className="flex-1 py-3 text-center text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 rounded-xl transition-colors cursor-pointer"
+                      onClick={() => handleExplorePrograms("/programs")}
+                      className="py-2.5 px-5 bg-gradient-to-r from-[#184cef] to-[#fa0058] hover:opacity-95 active:scale-95 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-[0_4px_20px_rgba(24,76,239,0.35)] flex items-center justify-center gap-2 cursor-pointer shrink-0 self-start sm:self-auto"
                     >
-                      {t.receiptNewReg}
+                      <span>{lang === "ml" ? "എല്ലാ പ്രോഗ്രാമുകളും" : "View All Programs"}</span>
+                      <span>→</span>
                     </button>
                   </div>
+
+                  {/* Program Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div 
+                      onClick={() => handleExplorePrograms("/ai-course")}
+                      className="p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 hover:border-[#184cef]/50 transition-all cursor-pointer group flex flex-col justify-between space-y-3"
+                    >
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] font-mono font-bold text-sky-400 uppercase tracking-wider">
+                          6-Month Diploma • Online & Offline
+                        </span>
+                        <h4 className="text-sm font-bold text-white group-hover:text-sky-300 transition-colors">
+                          AI & Machine Learning Builder
+                        </h4>
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                          From Python fundamentals to Agentic AI, RAG & LLMs. Live classroom / online with industry mentorship.
+                        </p>
+                      </div>
+                      <div className="text-xs font-bold text-sky-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                        <span>{lang === "ml" ? "വിശദാംശങ്ങൾ കാണുക" : "Explore Program"}</span>
+                        <span>→</span>
+                      </div>
+                    </div>
+
+                    <div 
+                      onClick={() => handleExplorePrograms("/ai-booster-program")}
+                      className="p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 hover:border-[#fa0058]/50 transition-all cursor-pointer group flex flex-col justify-between space-y-3"
+                    >
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] font-mono font-bold text-[#ff337d] uppercase tracking-wider">
+                          Advanced Fast-Track Cohort
+                        </span>
+                        <h4 className="text-sm font-bold text-white group-hover:text-pink-300 transition-colors">
+                          AI Booster Program
+                        </h4>
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                          Accelerate productivity with cutting-edge GenAI workflows, automations, and enterprise AI tools.
+                        </p>
+                      </div>
+                      <div className="text-xs font-bold text-[#ff337d] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                        <span>{lang === "ml" ? "വിശദാംശങ്ങൾ കാണുക" : "Explore Program"}</span>
+                        <span>→</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. SECONDARY ACTIONS */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-white/10 mt-6">
+                  <a
+                    href={`https://wa.me/918075727195?text=${encodeURIComponent(
+                      `Hi DeepStaq! I registered and paid ₹99 for AI easy Ayi. Name: ${submittedData.fullName} (Ref: ${submittedData.id})`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 py-3 px-4 text-center text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 rounded-xl transition-colors flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-4 h-4 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
+                    </svg>
+                    <span>{t.receiptNeedSupport}</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="flex-1 py-3 px-4 text-center text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 rounded-xl transition-colors cursor-pointer"
+                  >
+                    {t.receiptNewReg}
+                  </button>
                 </div>
               </motion.div>
             )}
@@ -1506,7 +1855,7 @@ export default function AiEasyAyi() {
                   >
                     <span className="hidden sm:inline">{t.stickyBtn}</span>
                     <span className="sm:hidden">{t.stickyBtnMobile || (lang === "ml" ? "രജിസ്റ്റർ" : "Register")}</span>
-                  </button>
+                   </button>
                 </div>
 
               </div>

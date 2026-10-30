@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { jsPDF } from "jspdf";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   saveAiEasyAyiRegistration,
@@ -225,6 +227,7 @@ const FAQ_ITEMS = [
 ];
 
 export default function AiEasyAyiForm() {
+  const navigate = useNavigate();
   const formRef = useRef(null);
 
   const [formData, setFormData] = useState({
@@ -246,11 +249,173 @@ export default function AiEasyAyiForm() {
   const [showForm, setShowForm] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const seatsLeft = useSeatsCountdown(10, 3);
 
   // Live countdown timer state (resets dynamically every Saturday at 5:00 PM)
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft);
   const eventDateFormatted = getNextSaturdayFormatted();
+
+  const handleExplorePrograms = (path = "/programs") => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    navigate(path);
+  };
+
+  const generateReceiptPDF = () => {
+    if (!submittedData) return;
+    try {
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      // 1. Accent Top Banner
+      doc.setFillColor(250, 0, 88);
+      doc.rect(0, 0, 210, 6, "F");
+
+      // 2. Brand Header
+      try {
+        doc.addImage(logo, "PNG", 20, 16, 16, 16);
+      } catch (e) {
+        doc.setTextColor(29, 0, 88);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(20);
+        doc.text("DEEPSTAQ", 20, 26);
+      }
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor(20, 25, 45);
+      doc.text("DEEPSTAQ ACADEMY", 40, 23);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 105, 120);
+      doc.text("AI & Machine Learning Institute • https://deepstaq.in", 40, 28);
+
+      // Receipt Top Right Info
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(250, 0, 88);
+      doc.text("WORKSHOP PASS & RECEIPT", 190, 21, { align: "right" });
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 105, 120);
+      doc.text(`Receipt No: ${submittedData.id || "AYI-REG"}`, 190, 27, { align: "right" });
+      doc.text(`Issue Date: ${new Date().toLocaleDateString("en-IN")}`, 190, 32, { align: "right" });
+
+      // Divider line
+      doc.setDrawColor(230, 232, 240);
+      doc.setLineWidth(0.5);
+      doc.line(20, 38, 190, 38);
+
+      // 3. Status Banner
+      doc.setFillColor(235, 253, 243);
+      doc.roundedRect(20, 44, 170, 12, 2, 2, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9.5);
+      doc.setTextColor(16, 120, 64);
+      doc.text("STATUS: PAYMENT CONFIRMED & SEAT RESERVED (PAID INR 99.00)", 25, 51.5);
+
+      // 4. Registration Details Box
+      doc.setDrawColor(220, 224, 235);
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(20, 62, 170, 98, 3, 3, "D");
+
+      doc.setFillColor(247, 248, 252);
+      doc.roundedRect(20.5, 62.5, 169, 12, 3, 3, "F");
+      doc.rect(20.5, 68.5, 169, 6, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(60, 65, 80);
+      doc.text("PARTICIPANT & WORKSHOP DETAILS", 26, 70);
+
+      const fields = [
+        { label: "Participant Name", value: submittedData.fullName || "Participant" },
+        { label: "Contact Phone", value: `+91 ${submittedData.phone || ""}` },
+        { label: "Place / District", value: submittedData.place || "Kerala, India" },
+        { label: "Background / Role", value: submittedData.qualification || "Working Professional" },
+        { label: "Program", value: "AI Easy Ayi (2 Hrs Online Masterclass)" },
+        { label: "Class Schedule", value: `${eventDateFormatted} • 5:00 PM – 7:00 PM IST` },
+        { label: "Delivery Mode", value: "Online Live via Zoom (Interactive)" },
+        { label: "Reference ID", value: submittedData.id || "AYI-REG" },
+        { label: "Transaction / Payment ID", value: submittedData.paymentId || "Razorpay Confirmed" },
+        { label: "Total Amount Paid", value: "INR 99.00 (Inclusive of All Taxes)" },
+      ];
+
+      let fieldY = 81;
+      fields.forEach((field, index) => {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8.5);
+        doc.setTextColor(110, 115, 130);
+        doc.text(field.label, 26, fieldY);
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(20, 25, 40);
+        doc.text(String(field.value), 82, fieldY);
+
+        if (index < fields.length - 1) {
+          doc.setDrawColor(242, 244, 248);
+          doc.setLineWidth(0.3);
+          doc.line(26, fieldY + 3, 184, fieldY + 3);
+        }
+        fieldY += 7.5;
+      });
+
+      // 5. Next Steps Box
+      doc.setDrawColor(230, 235, 245);
+      doc.setFillColor(249, 250, 254);
+      doc.roundedRect(20, 168, 170, 48, 2, 2, "FD");
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9.5);
+      doc.setTextColor(250, 0, 88);
+      doc.text("IMPORTANT INSTRUCTIONS FOR PARTICIPANTS:", 26, 176);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(60, 65, 80);
+      doc.text("1. Join the Official WhatsApp Community immediately for meeting links and session materials.", 26, 183);
+      doc.text("2. Zoom link and login guidelines will be posted in the community before the session.", 26, 189);
+      doc.text("3. Keep a laptop or smartphone with internet connection ready for interactive activities.", 26, 195);
+      doc.text("4. Prompt cheat sheets and reference guides will be distributed directly after the class.", 26, 201);
+      doc.text("5. For any support or inquiries, contact +91 9495957011 or email admissions@deepstaq.in.", 26, 207);
+
+      // 6. Footer
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(140, 145, 160);
+      doc.text("Authorized Computer-Generated Receipt • No Signature Required • DeepStaq Academy", 105, 258, { align: "center" });
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(160, 165, 180);
+      doc.text("DeepStaq Academy, Kannur & Kochi, Kerala | Support: +91 9495957011 | https://deepstaq.in", 105, 263, { align: "center" });
+
+      doc.save(`DeepStaq_Receipt_${submittedData.id || "AI_Easy_Ayi"}.pdf`);
+    } catch (err) {
+      console.error("Failed to generate PDF receipt:", err);
+      window.print();
+    }
+  };
+
+  const handleDownloadReceipt = () => {
+    setIsGeneratingPdf(true);
+    setTimeout(() => {
+      generateReceiptPDF();
+      setIsGeneratingPdf(false);
+    }, 200);
+  };
+
+  // Meta Pixel PageView tracking
+  useEffect(() => {
+    if (typeof window !== "undefined" && typeof window.fbq === "function") {
+      window.fbq("track", "PageView");
+    }
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -386,6 +551,15 @@ export default function AiEasyAyiForm() {
         setPendingRegId(regId);
       }
 
+      // Meta Pixel Lead tracking
+      if (typeof window !== "undefined" && typeof window.fbq === "function") {
+        window.fbq("track", "Lead", {
+          content_name: "AI Easy Ayi Registration",
+          value: 99,
+          currency: "INR",
+        });
+      }
+
       // 2. Load Razorpay SDK
       setLoadingStep("gateway");
       const isScriptLoaded = await loadRazorpayScript();
@@ -447,6 +621,15 @@ export default function AiEasyAyiForm() {
             });
 
             window.scrollTo({ top: 0, behavior: "smooth" });
+
+            // Meta Pixel Purchase tracking
+            if (typeof window !== "undefined" && typeof window.fbq === "function") {
+              window.fbq("track", "Purchase", {
+                content_name: "AI Easy Ayi Live Workshop",
+                value: 99,
+                currency: "INR",
+              });
+            }
           } catch (updateErr) {
             console.error("Payment status update error:", updateErr);
             setSubmittedData({
@@ -463,6 +646,15 @@ export default function AiEasyAyiForm() {
               }),
             });
             window.scrollTo({ top: 0, behavior: "smooth" });
+
+            // Meta Pixel Purchase tracking fallback
+            if (typeof window !== "undefined" && typeof window.fbq === "function") {
+              window.fbq("track", "Purchase", {
+                content_name: "AI Easy Ayi Live Workshop",
+                value: 99,
+                currency: "INR",
+              });
+            }
           } finally {
             setLoading(false);
           }
@@ -571,7 +763,7 @@ export default function AiEasyAyiForm() {
               </div>
 
               {/* WhatsApp Community CTA */}
-              <div className="bg-[#25D366]/10 border border-[#25D366]/40 rounded-2xl p-4 mb-5">
+              <div className="bg-[#25D366]/10 border border-[#25D366]/40 rounded-2xl p-4 mb-4">
                 <p className="text-xs text-white font-bold mb-3">
                   Join the official candidate community for meeting links, session guides, and bonuses:
                 </p>
@@ -579,11 +771,87 @@ export default function AiEasyAyiForm() {
                   href="https://chat.whatsapp.com/KxVV7ep74TV0GHy5SU2FXl"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-3 sm:py-3.5 px-4 sm:px-5 bg-[#25D366] hover:bg-[#20ba59] text-white rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(37,211,102,0.4)] transition-all"
+                  className="w-full py-3.5 px-5 bg-[#25D366] hover:bg-[#20ba59] active:scale-[0.99] text-white rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-between shadow-[0_0_20px_rgba(37,211,102,0.4)] transition-all group"
                 >
-                  <span>Join WhatsApp Community</span>
-                  <span>→</span>
+                  <div className="flex items-center gap-2.5">
+                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
+                    </svg>
+                    <span>Join Official WhatsApp Community</span>
+                  </div>
+                  <span className="text-base group-hover:translate-x-1 transition-transform">→</span>
                 </a>
+              </div>
+
+              {/* Download Official PDF Receipt Button */}
+              <div className="mb-6">
+                <button
+                  type="button"
+                  onClick={handleDownloadReceipt}
+                  disabled={isGeneratingPdf}
+                  className="w-full py-3.5 px-5 bg-white/[0.05] hover:bg-white/[0.10] border border-white/20 hover:border-[#c6ff34]/50 text-white rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-between transition-all shadow-lg hover:shadow-[0_0_25px_rgba(198,255,52,0.2)] cursor-pointer group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    {isGeneratingPdf ? (
+                      <div className="w-4 h-4 border-2 border-[#c6ff34] border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <svg className="w-5 h-5 text-[#c6ff34]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    )}
+                    <span>{isGeneratingPdf ? "Generating PDF Receipt..." : "Download Official Payment Receipt (PDF)"}</span>
+                  </div>
+                  <span className="text-base text-[#c6ff34] group-hover:translate-y-0.5 transition-transform">↓</span>
+                </button>
+              </div>
+
+              {/* Explore Other Programs Section */}
+              <div className="pt-5 border-t border-white/10 mb-6 text-left">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                  <div>
+                    <span className="text-[10px] font-mono tracking-widest text-[#c6ff34] uppercase font-bold block">
+                      NEXT LEVEL CAREER PATHWAYS
+                    </span>
+                    <h3 className="text-sm sm:text-base font-extrabold text-white">
+                      Explore Other DeepStaq AI Programs
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleExplorePrograms("/programs")}
+                    className="py-2 px-4 bg-gradient-to-r from-emerald-500 to-[#c6ff34] text-slate-950 font-black text-[11px] uppercase tracking-wider rounded-lg transition-all shadow-[0_0_15px_rgba(198,255,52,0.3)] hover:opacity-95 cursor-pointer shrink-0 self-start sm:self-auto"
+                  >
+                    View All Programs →
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div
+                    onClick={() => handleExplorePrograms("/ai-course")}
+                    className="p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.06] border border-white/10 hover:border-emerald-400/40 transition-all cursor-pointer group"
+                  >
+                    <span className="text-[9px] font-mono font-bold text-emerald-400 uppercase">6-Month Diploma</span>
+                    <div className="text-xs font-bold text-white group-hover:text-emerald-300">
+                      AI & Machine Learning Builder
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1 line-clamp-2">
+                      Python to Agentic AI, RAG & LLMs. Hands-on projects with 100% placement support.
+                    </p>
+                  </div>
+
+                  <div
+                    onClick={() => handleExplorePrograms("/ai-booster-program")}
+                    className="p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.06] border border-white/10 hover:border-[#c6ff34]/40 transition-all cursor-pointer group"
+                  >
+                    <span className="text-[9px] font-mono font-bold text-[#c6ff34] uppercase">Fast-Track Cohort</span>
+                    <div className="text-xs font-bold text-white group-hover:text-[#c6ff34]">
+                      AI Booster Program
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1 line-clamp-2">
+                      Master modern GenAI workflows and automation for business and technical roles.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Secondary Actions */}

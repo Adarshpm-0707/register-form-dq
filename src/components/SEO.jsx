@@ -124,6 +124,30 @@ const STATIC_SEO_CONFIG = {
     keywords: "AI course admission, enroll machine learning, Deepstaq application",
     robots: "index, follow"
   },
+  "/ai-easy-ayi": {
+    title: "AI Easy Ayi | Live Interactive AI Masterclass – DeepStaq",
+    description: "Learn practical AI basics in simple Malayalam. 90-minute live interactive workshop for working professionals, teachers, students, and everyone. Register for ₹99.",
+    keywords: "AI Easy Ayi, AI for beginners Malayalam, AI masterclass Kerala, DeepStaq AI workshop",
+    robots: "index, follow"
+  },
+  "/aieasyayi": {
+    title: "AI Easy Ayi | Live Interactive AI Masterclass – DeepStaq",
+    description: "Learn practical AI basics in simple Malayalam. 90-minute live interactive workshop for working professionals, teachers, students, and everyone. Register for ₹99.",
+    keywords: "AI Easy Ayi, AI for beginners Malayalam, AI masterclass Kerala, DeepStaq AI workshop",
+    robots: "index, follow"
+  },
+  "/ai-for-everyone": {
+    title: "AI for Everyone | Live Interactive AI Masterclass – DeepStaq",
+    description: "Learn practical AI basics in simple Malayalam. 90-minute live interactive workshop for working professionals, teachers, students, and everyone. Register for ₹99.",
+    keywords: "AI for everyone, AI workshop Malayalam, DeepStaq",
+    robots: "index, follow"
+  },
+  "/ai-easy-ayi-form": {
+    title: "Register for AI Easy Ayi | DeepStaq Live Masterclass",
+    description: "Secure your seat for the AI Easy Ayi 90-minute live interactive workshop. Learn AI without technical background.",
+    keywords: "AI Easy Ayi registration, DeepStaq workshop pass",
+    robots: "index, follow"
+  },
   "/aptitude": {
     title: "AI Aptitude Test & Assessment | Deepstaq",
     description: "Evaluate your readiness for advanced AI & Machine Learning programs with Deepstaq's comprehensive aptitude test.",

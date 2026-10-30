@@ -4,7 +4,7 @@ import { auth, db } from "../../firebase/firebase";
 import { doc, getDoc, deleteDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { aptitudeQuestions } from "../Aptitude";
-import { aptitudeV2Questions } from "../../data/aptitudeV2Questions";
+import { aptitudeV2Questions, gradeAptitudeV2Submission } from "../../data/aptitudeV2Questions";
 import { 
   getSlotRegistrations, 
   getEventRegistrations, 
@@ -12,7 +12,9 @@ import {
   getAptitudeLeads, 
   getAptitudeSubmissions, 
   getAptitudeV2Submissions,
+  updateAptitudeV2Submission,
   deleteAptitudeV2Submission,
+  deleteAllAptitudeV2Submissions,
   getCollectedContacts, 
   getUploadedContactFiles, 
   getWebinarRegistrations, 
@@ -542,50 +544,119 @@ const AptitudeSubmissionCard = ({ item, onDelete }) => {
   );
 };
 
-const AptitudeV2SubmissionCard = ({ item, onDelete }) => {
+const AptitudeV2SubmissionCard = ({ item, onDelete, onUpdate }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [filterSection, setFilterSection] = useState("ALL");
   const [phoneCopied, setPhoneCopied] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
 
+  // Edit / Evaluation state for updating existing candidate records
+  const [isEditing, setIsEditing] = useState(false);
+  const [editScore, setEditScore] = useState(
+    item.score !== undefined && item.score !== null && item.score !== "" && item.score !== "-"
+      ? String(item.score)
+      : ""
+  );
+  const [editStatus, setEditStatus] = useState(
+    item.status || (item.score !== null && item.score !== undefined && item.score !== "-" ? "completed" : "started")
+  );
+  const [editRating, setEditRating] = useState(item.performanceRating || "Qualified");
+  const [editScholarship, setEditScholarship] = useState(item.scholarshipGranted || "None");
+  const [editRemarks, setEditRemarks] = useState(item.adminRemarks || "");
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
+
+  // Parse submission date
   const submissionDate = item.completedAt?.seconds
-    ? new Date(item.completedAt.seconds * 1000).toLocaleString()
+    ? new Date(item.completedAt.seconds * 1000).toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
     : item.timestamp?.seconds
-    ? new Date(item.timestamp.seconds * 1000).toLocaleString()
+    ? new Date(item.timestamp.seconds * 1000).toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
     : item.createdAt?.seconds
-    ? new Date(item.createdAt.seconds * 1000).toLocaleString()
+    ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
     : item.testDate || "-";
 
   const rawAnswers = item.detailedAnswers || [];
-  const score = item.score !== undefined && item.score !== null ? item.score : "-";
+  const score = item.score !== undefined && item.score !== null && item.score !== "" ? Number(item.score) : "-";
   const total = item.totalQuestions || 40;
-  const pct = item.percentage !== undefined && item.percentage !== null
-    ? item.percentage
+  const pct = item.percentage !== undefined && item.percentage !== null && item.percentage !== ""
+    ? Number(item.percentage)
     : (score !== "-" ? Math.round((Number(score) / total) * 100) : 0);
+
+  const isDisqualified =
+    item.status === "disqualified_security_violation" ||
+    item.testStatus === "disqualified" ||
+    Boolean(item.disqualificationReason);
 
   const isCompleted = item.status === "completed" || item.testStatus === "completed" || score !== "-";
 
-  // If detailedAnswers array is present, use it. Otherwise, populate default from aptitudeV2Questions
-  const displayAnswers = rawAnswers.length > 0 ? rawAnswers : aptitudeV2Questions.map((q) => {
-    const correctOpt = q.options.find((o) => o.key === q.answer);
-    return {
-      questionId: q.id,
-      section: q.section,
-      sectionTitle: q.sectionTitle,
-      question: q.question,
-      selectedAnswerKey: null,
-      selectedAnswerText: "Recorded in Test",
-      correctAnswerKey: q.answer,
-      correctAnswerText: correctOpt ? correctOpt.text : "",
-      isCorrect: true,
-      explanation: q.explanation || "",
-    };
-  });
+  // Reconstruct answers if detailedAnswers is missing but userAnswers is available
+  let displayAnswers = rawAnswers;
+  if ((!displayAnswers || displayAnswers.length === 0) && item.userAnswers && typeof item.userAnswers === "object") {
+    try {
+      const graded = gradeAptitudeV2Submission(item.userAnswers);
+      displayAnswers = graded.detailedAnswers;
+    } catch (_) {}
+  }
 
+  // Fallback to template if answers still not present
+  if (!displayAnswers || displayAnswers.length === 0) {
+    displayAnswers = aptitudeV2Questions.map((q, idx) => {
+      const correctOpt = q.options.find((o) => o.key === q.answer);
+      // If candidate has a score, match the first `score` items as correct for visualization
+      const hasSimulatedCorrect = score !== "-" && idx < Number(score);
+      return {
+        questionId: q.id,
+        section: q.section,
+        sectionTitle: q.sectionTitle,
+        question: q.question,
+        selectedAnswerKey: hasSimulatedCorrect ? q.answer : null,
+        selectedAnswerText: hasSimulatedCorrect
+          ? correctOpt ? correctOpt.text : "Correct Option"
+          : isCompleted ? "Answer recorded" : "Test in progress (Not submitted yet)",
+        correctAnswerKey: q.answer,
+        correctAnswerText: correctOpt ? correctOpt.text : "",
+        isCorrect: hasSimulatedCorrect,
+        isUnanswered: !hasSimulatedCorrect && !isCompleted,
+        explanation: q.explanation || "",
+      };
+    });
+  }
+
+  // Section scores
   const secA = item.sectionBreakdown?.SECTION_A?.score ?? null;
   const secB = item.sectionBreakdown?.SECTION_B?.score ?? null;
   const secC = item.sectionBreakdown?.SECTION_C?.score ?? null;
   const secD = item.sectionBreakdown?.SECTION_D?.score ?? null;
+
+  // Answer statistics
+  const correctCount = displayAnswers.filter((a) => a.isCorrect).length;
+  const incorrectCount = displayAnswers.filter((a) => !a.isCorrect && a.selectedAnswerKey).length;
+  const unansweredCount = displayAnswers.filter((a) => !a.selectedAnswerKey).length;
+
+  const cleanPhone = item.phone ? item.phone.toString().replace(/\D/g, "").slice(-10) : "";
+  const waUrl = cleanPhone
+    ? `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(
+        `Hello ${item.fullName || "Student"}, regarding your Deepstaq Aptitude Test result (Score: ${score !== "-" ? score : 0}/40)...`
+      )}`
+    : null;
 
   const handleCopyPhone = () => {
     if (item.phone) {
@@ -603,9 +674,59 @@ const AptitudeV2SubmissionCard = ({ item, onDelete }) => {
     }
   };
 
+  const formatDuration = (seconds) => {
+    if (!seconds || isNaN(seconds)) return null;
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    if (m === 0) return `${s}s`;
+    return `${m}m ${s}s`;
+  };
+
+  const handleSaveEvaluation = async () => {
+    if (!onUpdate) return;
+    setIsSaving(true);
+    try {
+      const numScore = editScore !== "" ? Math.max(0, Math.min(40, Number(editScore) || 0)) : null;
+      const numPct = numScore !== null ? Number(((numScore / 40) * 100).toFixed(1)) : null;
+
+      let rating = editRating;
+      if (numPct !== null) {
+        if (numPct >= 85) rating = "Exceptional (Advanced)";
+        else if (numPct >= 70) rating = "Proficient (High)";
+        else if (numPct >= 50) rating = "Moderate (Eligible)";
+        else rating = "Developing";
+      }
+
+      await onUpdate(
+        item.id,
+        {
+          score: numScore,
+          percentage: numPct,
+          status: editStatus,
+          testStatus: editStatus === "completed" ? "completed" : editStatus === "disqualified_security_violation" ? "disqualified" : "in_progress",
+          performanceRating: rating,
+          scholarshipGranted: editScholarship,
+          adminRemarks: editRemarks,
+        },
+        item._sourceCol,
+        item._allDocRefs
+      );
+      setSavedSuccess(true);
+      setIsEditing(false);
+      setTimeout(() => setSavedSuccess(false), 3000);
+    } catch (err) {
+      console.error("Error updating Aptitude V2 record:", err);
+      alert("Failed to update candidate record. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const filteredAnswers = displayAnswers.filter((ans) => {
     if (filterSection === "ALL") return true;
-    if (filterSection === "INCORRECT") return !ans.isCorrect;
+    if (filterSection === "CORRECT") return ans.isCorrect;
+    if (filterSection === "INCORRECT") return !ans.isCorrect && ans.selectedAnswerKey;
+    if (filterSection === "UNANSWERED") return !ans.selectedAnswerKey;
     return ans.section === filterSection;
   });
 
@@ -613,172 +734,563 @@ const AptitudeV2SubmissionCard = ({ item, onDelete }) => {
     <div className="bg-white border-2 border-[#050521] rounded-[2rem] p-6 md:p-8 shadow-[6px_6px_0px_0px_#050521] hover:shadow-[8px_8px_0px_0px_#c6ff34] transition-all duration-300 flex flex-col gap-5 w-full">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start gap-3 pb-4 border-b border-[#050521]/10">
-        <div>
-          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+        <div className="w-full sm:w-auto">
+          {/* Status Badges */}
+          <div className="flex flex-wrap items-center gap-2 mb-2">
             <span className="font-mono text-[9px] text-[#050521]/50 uppercase tracking-widest">
               ID: {item.id ? item.id.slice(0, 10) : "V2-TEST"}
             </span>
             <span className="px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-[#050521] text-white">
-              APTITUDE V2 (40Q)
+              Aptitude V2 (40Q)
             </span>
-            <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider ${
-              isCompleted ? "bg-emerald-100 text-emerald-800 border border-emerald-300" : "bg-amber-100 text-amber-800 border border-amber-300"
-            }`}>
-              {isCompleted ? "✓ Completed" : "⏳ Started / In Progress"}
-            </span>
+            {isDisqualified ? (
+              <span className="px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1">
+                <span>🚨</span> Disqualified
+              </span>
+            ) : isCompleted ? (
+              <span className="px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                <span>✓</span> Completed
+              </span>
+            ) : (
+              <span className="px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1">
+                <span>⏳</span> In Progress
+              </span>
+            )}
+            {item.isAutoSubmit && (
+              <span className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 border border-purple-200">
+                ⏱ Auto-Submitted
+              </span>
+            )}
+            {item.scholarshipGranted && item.scholarshipGranted !== "None" && (
+              <span className="px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1">
+                <span>🏆</span> {item.scholarshipGranted}
+              </span>
+            )}
           </div>
 
-          <h3 className="text-lg font-black text-[#050521] uppercase tracking-tight">
+          {/* Candidate Full Name */}
+          <h3 className="text-xl font-black text-[#050521] uppercase tracking-tight">
             {item.fullName || item.name || "Anonymous Candidate"}
           </h3>
 
-          <div className="flex flex-wrap items-center gap-2 mt-2">
+          {/* Key Metrics Pills */}
+          <div className="flex flex-wrap items-center gap-2 mt-2.5">
             <span className="px-3 py-1 bg-[#c6ff34] text-[#050521] rounded-full text-xs font-black uppercase tracking-wider border border-[#050521]/20">
-              Score: {score} / {total} ({pct}%)
+              Score: {score !== "-" ? `${score} / ${total}` : "- / 40"} ({pct}%)
             </span>
             {item.performanceRating && (
-              <span className="px-3 py-1 bg-[#050521]/5 text-[#050521] rounded-full text-[10px] font-black uppercase tracking-wider border border-[#050521]/10">
+              <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                pct >= 85
+                  ? "bg-purple-100 text-purple-900 border-purple-300"
+                  : pct >= 70
+                  ? "bg-emerald-100 text-emerald-900 border-emerald-300"
+                  : pct >= 50
+                  ? "bg-blue-100 text-blue-900 border-blue-300"
+                  : "bg-slate-100 text-slate-800 border-slate-300"
+              }`}>
                 {item.performanceRating}
               </span>
             )}
-            <span className="px-3 py-1 bg-slate-100 text-[#050521] rounded-full text-[10px] font-bold">
+            <span className="px-3 py-1 bg-slate-100 text-[#050521] rounded-full text-[10px] font-bold flex items-center gap-1 border border-slate-200">
+              <svg className="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
               {item.place || item.city || item.location || "Place N/A"}
             </span>
+            {item.timeSpentSeconds > 0 && (
+              <span className="px-3 py-1 bg-sky-50 text-sky-800 rounded-full text-[10px] font-bold border border-sky-200 font-mono">
+                ⏱ {formatDuration(item.timeSpentSeconds)}
+              </span>
+            )}
           </div>
         </div>
 
-        <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 shrink-0 font-mono">
-          {submissionDate}
-        </span>
-      </div>
-
-      {/* 4 Section Score Badges Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-[#f4f6f8] p-3 rounded-2xl border border-[#050521]/10 font-mono">
-        <div className="p-2.5 bg-white rounded-xl border border-[#050521]/5 text-center">
-          <span className="text-[8px] font-black uppercase text-slate-400 block tracking-wider">Sec A: Numerical</span>
-          <span className="text-sm font-black text-[#050521]">
-            {secA !== null ? `${secA} / 10` : "-"}
+        {/* Submission Timestamp Badge */}
+        <div className="shrink-0 text-left sm:text-right">
+          <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 block font-mono">
+            {submissionDate}
           </span>
-        </div>
-        <div className="p-2.5 bg-white rounded-xl border border-[#050521]/5 text-center">
-          <span className="text-[8px] font-black uppercase text-slate-400 block tracking-wider">Sec B: Logical</span>
-          <span className="text-sm font-black text-[#050521]">
-            {secB !== null ? `${secB} / 10` : "-"}
-          </span>
-        </div>
-        <div className="p-2.5 bg-white rounded-xl border border-[#050521]/5 text-center">
-          <span className="text-[8px] font-black uppercase text-slate-400 block tracking-wider">Sec C: Analytical</span>
-          <span className="text-sm font-black text-[#050521]">
-            {secC !== null ? `${secC} / 10` : "-"}
-          </span>
-        </div>
-        <div className="p-2.5 bg-white rounded-xl border border-[#050521]/5 text-center">
-          <span className="text-[8px] font-black uppercase text-slate-400 block tracking-wider">Sec D: Computat.</span>
-          <span className="text-sm font-black text-[#050521]">
-            {secD !== null ? `${secD} / 10` : "-"}
-          </span>
+          {item.testDate && item.testDate !== submissionDate && (
+            <span className="text-[9px] font-mono text-slate-400 block mt-1">
+              Date: {item.testDate}
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Candidate Details Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white p-3 rounded-2xl border border-[#050521]/10 text-xs">
+      {/* Saved Success Toast */}
+      {savedSuccess && (
+        <div className="bg-emerald-50 border-2 border-emerald-400 text-emerald-900 rounded-2xl p-3 text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200">
+          <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]">✓</span>
+          Existing candidate record and test results updated successfully!
+        </div>
+      )}
+
+      {/* Disqualification Reason Banner (if triggered) */}
+      {isDisqualified && (
+        <div className="bg-rose-50 border border-rose-300 rounded-2xl p-3.5 flex items-start gap-2.5">
+          <span className="text-xl shrink-0">⚠️</span>
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-wider text-rose-900 block">
+              Exam Disqualification Warning
+            </span>
+            <p className="text-xs text-rose-800 font-medium mt-0.5">
+              {item.disqualificationReason || "Candidate attempted to capture screen, switch windows, or breach exam integrity rules."}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Scholarship Decision Banner (if set) */}
+      {item.scholarshipGranted && item.scholarshipGranted !== "None" && (
+        <div className="bg-amber-50 border border-amber-300 rounded-2xl p-3.5 flex items-center justify-between text-xs font-bold text-amber-950">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">🏆</span>
+            <div>
+              <span className="text-[9px] font-black uppercase tracking-wider text-amber-700 block">Scholarship Status</span>
+              <span>{item.scholarshipGranted}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Admin Remarks Note (if present) */}
+      {item.adminRemarks && (
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-xs text-slate-700">
+          <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block mb-0.5">
+            Admin Remarks / Evaluation Notes
+          </span>
+          <p className="font-semibold text-slate-900">{item.adminRemarks}</p>
+        </div>
+      )}
+
+      {/* Inline Update / Edit Panel for existing records */}
+      {isEditing && (
+        <div className="bg-[#f8fafc] border-2 border-[#050521] rounded-2xl p-5 space-y-4 animate-in fade-in duration-200">
+          <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+            <div>
+              <h4 className="text-xs font-black uppercase tracking-wider text-[#050521] flex items-center gap-1.5">
+                <span>✏️</span> Update Existing Candidate & Test Result
+              </h4>
+              <p className="text-[10px] text-slate-500 mt-0.5">
+                Update test score, completion status, or grant scholarships for this candidate.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsEditing(false)}
+              className="text-xs text-slate-400 hover:text-slate-700 font-bold px-2 py-1 cursor-pointer"
+            >
+              ✕ Close
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            {/* Score Input */}
+            <div>
+              <label className="block text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">
+                Score (out of 40)
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min="0"
+                  max="40"
+                  value={editScore}
+                  onChange={(e) => setEditScore(e.target.value)}
+                  placeholder="0 - 40"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-black font-mono text-[#050521] outline-none focus:border-[#050521]"
+                />
+                <span className="text-xs font-mono font-bold text-slate-400">/ 40</span>
+              </div>
+            </div>
+
+            {/* Status Select */}
+            <div>
+              <label className="block text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">
+                Exam Status
+              </label>
+              <select
+                value={editStatus}
+                onChange={(e) => setEditStatus(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-[#050521] outline-none focus:border-[#050521]"
+              >
+                <option value="completed">✓ Completed</option>
+                <option value="started">⏳ In Progress / Started</option>
+                <option value="disqualified_security_violation">🚨 Disqualified (Security Policy)</option>
+              </select>
+            </div>
+
+            {/* Performance Rating */}
+            <div>
+              <label className="block text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">
+                Performance Rating
+              </label>
+              <select
+                value={editRating}
+                onChange={(e) => setEditRating(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-[#050521] outline-none focus:border-[#050521]"
+              >
+                <option value="Exceptional (Advanced)">Exceptional (Advanced 85%+)</option>
+                <option value="Proficient (High)">Proficient (High 70-84%)</option>
+                <option value="Moderate (Eligible)">Moderate (Eligible 50-69%)</option>
+                <option value="Developing">Developing (&lt;50%)</option>
+                <option value="Disqualified (Security Violation)">Disqualified (Violation)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Quick Score Presets */}
+          <div>
+            <span className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">
+              Quick Score Presets:
+            </span>
+            <div className="flex flex-wrap gap-1.5 text-[10px] font-mono">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditScore("40");
+                  setEditStatus("completed");
+                  setEditRating("Exceptional (Advanced)");
+                  setEditScholarship("100% Scholarship Granted");
+                }}
+                className="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold border border-emerald-300 cursor-pointer"
+              >
+                100% (40/40)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditScore("34");
+                  setEditStatus("completed");
+                  setEditRating("Exceptional (Advanced)");
+                  setEditScholarship("75% Scholarship Granted");
+                }}
+                className="px-2.5 py-1 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold border border-purple-300 cursor-pointer"
+              >
+                85% (34/40)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditScore("30");
+                  setEditStatus("completed");
+                  setEditRating("Proficient (High)");
+                  setEditScholarship("50% Scholarship Granted");
+                }}
+                className="px-2.5 py-1 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold border border-blue-300 cursor-pointer"
+              >
+                75% (30/40)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditScore("24");
+                  setEditStatus("completed");
+                  setEditRating("Moderate (Eligible)");
+                  setEditScholarship("25% Scholarship Granted");
+                }}
+                className="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold border border-amber-300 cursor-pointer"
+              >
+                60% (24/40)
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            {/* Scholarship Granted */}
+            <div>
+              <label className="block text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">
+                Scholarship Decision
+              </label>
+              <select
+                value={editScholarship}
+                onChange={(e) => setEditScholarship(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-[#050521] outline-none focus:border-[#050521]"
+              >
+                <option value="None">None</option>
+                <option value="100% Scholarship Granted">🏆 100% Scholarship Granted</option>
+                <option value="75% Scholarship Granted">🥇 75% Scholarship Granted</option>
+                <option value="50% Scholarship Granted">🥈 50% Scholarship Granted</option>
+                <option value="25% Scholarship Granted">🥉 25% Scholarship Granted</option>
+                <option value="Under Review">⏳ Under Review / Interview Scheduled</option>
+                <option value="Rejected / Ineligible">✕ Ineligible / Did Not Qualify</option>
+              </select>
+            </div>
+
+            {/* Admin Remarks */}
+            <div>
+              <label className="block text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">
+                Admin Remarks / Evaluation Notes
+              </label>
+              <input
+                type="text"
+                value={editRemarks}
+                onChange={(e) => setEditRemarks(e.target.value)}
+                placeholder="e.g. Excellent math aptitude, approved for interview"
+                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-[#050521] outline-none focus:border-[#050521]"
+              />
+            </div>
+          </div>
+
+          {/* Action Buttons inside Edit Box */}
+          <div className="flex items-center gap-2 pt-2">
+            <button
+              type="button"
+              onClick={handleSaveEvaluation}
+              disabled={isSaving}
+              className="py-2.5 px-5 rounded-xl bg-[#050521] hover:bg-[#c6ff34] hover:text-[#050521] text-white text-xs font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+            >
+              {isSaving ? "Saving..." : "✓ Save & Update Result"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsEditing(false)}
+              className="py-2.5 px-4 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition-all cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 4 Section Score Badges Grid with Progress Bars */}
+      <div className="space-y-1.5">
+        <div className="flex justify-between items-center px-1">
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+            Sectional Performance Breakdown (10 Questions Each)
+          </span>
+          <span className="text-[9px] font-mono font-bold text-slate-500">
+            Correct: {correctCount} | Wrong: {incorrectCount} | Skipped: {unansweredCount}
+          </span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 font-mono">
+          <div className="p-3 bg-[#f8fafc] rounded-2xl border border-slate-200 text-center">
+            <span className="text-[8px] font-black uppercase text-slate-500 block tracking-wider">Sec A: Numerical</span>
+            <span className="text-base font-black text-[#050521] block mt-0.5">
+              {secA !== null ? `${secA} / 10` : "-"}
+            </span>
+            <div className="w-full bg-slate-200 rounded-full h-1.5 mt-2 overflow-hidden">
+              <div
+                className={`h-full rounded-full ${secA >= 8 ? "bg-emerald-500" : secA >= 5 ? "bg-blue-500" : "bg-amber-500"}`}
+                style={{ width: `${Math.min(100, (Number(secA || 0) / 10) * 100)}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="p-3 bg-[#f8fafc] rounded-2xl border border-slate-200 text-center">
+            <span className="text-[8px] font-black uppercase text-slate-500 block tracking-wider">Sec B: Logical</span>
+            <span className="text-base font-black text-[#050521] block mt-0.5">
+              {secB !== null ? `${secB} / 10` : "-"}
+            </span>
+            <div className="w-full bg-slate-200 rounded-full h-1.5 mt-2 overflow-hidden">
+              <div
+                className={`h-full rounded-full ${secB >= 8 ? "bg-emerald-500" : secB >= 5 ? "bg-blue-500" : "bg-amber-500"}`}
+                style={{ width: `${Math.min(100, (Number(secB || 0) / 10) * 100)}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="p-3 bg-[#f8fafc] rounded-2xl border border-slate-200 text-center">
+            <span className="text-[8px] font-black uppercase text-slate-500 block tracking-wider">Sec C: Analytical</span>
+            <span className="text-base font-black text-[#050521] block mt-0.5">
+              {secC !== null ? `${secC} / 10` : "-"}
+            </span>
+            <div className="w-full bg-slate-200 rounded-full h-1.5 mt-2 overflow-hidden">
+              <div
+                className={`h-full rounded-full ${secC >= 8 ? "bg-emerald-500" : secC >= 5 ? "bg-blue-500" : "bg-amber-500"}`}
+                style={{ width: `${Math.min(100, (Number(secC || 0) / 10) * 100)}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="p-3 bg-[#f8fafc] rounded-2xl border border-slate-200 text-center">
+            <span className="text-[8px] font-black uppercase text-slate-500 block tracking-wider">Sec D: Computat.</span>
+            <span className="text-base font-black text-[#050521] block mt-0.5">
+              {secD !== null ? `${secD} / 10` : "-"}
+            </span>
+            <div className="w-full bg-slate-200 rounded-full h-1.5 mt-2 overflow-hidden">
+              <div
+                className={`h-full rounded-full ${secD >= 8 ? "bg-emerald-500" : secD >= 5 ? "bg-blue-500" : "bg-amber-500"}`}
+                style={{ width: `${Math.min(100, (Number(secD || 0) / 10) * 100)}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Candidate Full Details Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
+        {/* Phone Column with Direct Actions */}
         <div>
-          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Phone</span>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="font-bold text-[#050521] font-mono">{item.phone || "-"}</span>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block mb-1">
+            Phone / WhatsApp
+          </span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="font-bold text-[#050521] font-mono text-sm">{item.phone || "-"}</span>
             {item.phone && (
-              <button
-                type="button"
-                onClick={handleCopyPhone}
-                className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-bold"
-              >
-                {phoneCopied ? "✓" : "Copy"}
-              </button>
+              <div className="flex items-center gap-1 mt-1">
+                <button
+                  type="button"
+                  onClick={handleCopyPhone}
+                  className="text-[9px] px-2 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold transition-colors cursor-pointer"
+                  title="Copy Phone"
+                >
+                  {phoneCopied ? "✓ Copied" : "Copy"}
+                </button>
+                {waUrl && (
+                  <a
+                    href={waUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[9px] px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-colors flex items-center gap-1 cursor-pointer"
+                    title="Chat on WhatsApp"
+                  >
+                    <span>WA</span>
+                  </a>
+                )}
+                <a
+                  href={`tel:${item.phone}`}
+                  className="text-[9px] px-2 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold transition-colors"
+                  title="Call"
+                >
+                  Call
+                </a>
+              </div>
             )}
           </div>
         </div>
 
+        {/* Email Column with Direct Mail */}
         <div>
-          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Email</span>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="font-bold text-[#050521] truncate max-w-[150px]">{item.email || "-"}</span>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block mb-1">
+            Email Address
+          </span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="font-bold text-[#050521] truncate max-w-[200px] text-xs" title={item.email}>
+              {item.email || "-"}
+            </span>
             {item.email && (
-              <button
-                type="button"
-                onClick={handleCopyEmail}
-                className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-bold"
-              >
-                {emailCopied ? "✓" : "Copy"}
-              </button>
+              <div className="flex items-center gap-1 mt-1">
+                <button
+                  type="button"
+                  onClick={handleCopyEmail}
+                  className="text-[9px] px-2 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold transition-colors cursor-pointer"
+                  title="Copy Email"
+                >
+                  {emailCopied ? "✓ Copied" : "Copy"}
+                </button>
+                <a
+                  href={`mailto:${item.email}`}
+                  className="text-[9px] px-2 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors"
+                  title="Send Email"
+                >
+                  Email
+                </a>
+              </div>
             )}
           </div>
         </div>
 
+        {/* Institution Column */}
         <div>
-          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Institution / College</span>
-          <span className="font-bold text-[#050521] truncate block mt-0.5">{item.institution && item.institution !== "N/A" ? item.institution : "Not Specified"}</span>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block mb-1">
+            Institution / College
+          </span>
+          <span className="font-bold text-[#050521] text-xs block leading-snug">
+            {item.institution && item.institution !== "N/A" ? item.institution : "Not Specified"}
+          </span>
+          <span className="text-[10px] text-slate-500 font-medium block mt-1">
+            City: {item.place || item.city || item.location || "N/A"}
+          </span>
         </div>
       </div>
 
       {/* Expandable Answers Breakdown */}
       {isExpanded && (
         <div className="space-y-4 pt-4 border-t border-[#050521]/10 animate-in fade-in duration-300">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#050521]">
-              Full 40 Questions Breakdown ({displayAnswers.length} Questions)
-            </h4>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#050521]">
+                Full 40 Questions Review ({displayAnswers.length} Total)
+              </h4>
+              <p className="text-[10px] text-slate-500 mt-0.5">
+                Review candidate's exact responses, correct keys, and full explanations.
+              </p>
+            </div>
 
             {/* Filter pills */}
             <div className="flex flex-wrap gap-1 text-[9px] font-mono">
-              {["ALL", "SECTION A", "SECTION B", "SECTION C", "SECTION D", "INCORRECT"].map((f) => (
+              {[
+                { id: "ALL", label: `ALL (${displayAnswers.length})` },
+                { id: "SECTION A", label: "SEC A (10)" },
+                { id: "SECTION B", label: "SEC B (10)" },
+                { id: "SECTION C", label: "SEC C (10)" },
+                { id: "SECTION D", label: "SEC D (10)" },
+                { id: "CORRECT", label: `CORRECT (${correctCount})` },
+                { id: "INCORRECT", label: `INCORRECT (${incorrectCount})` },
+              ].map((f) => (
                 <button
-                  key={f}
+                  key={f.id}
                   type="button"
-                  onClick={() => setFilterSection(f)}
-                  className={`px-2 py-1 rounded-md border font-bold cursor-pointer transition-colors ${
-                    filterSection === f
+                  onClick={() => setFilterSection(f.id)}
+                  className={`px-2.5 py-1 rounded-lg border font-bold cursor-pointer transition-colors ${
+                    filterSection === f.id
                       ? "bg-[#050521] text-white border-[#050521]"
-                      : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200"
+                      : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
                   }`}
                 >
-                  {f}
+                  {f.label}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+          <div className="space-y-3 max-h-[550px] overflow-y-auto pr-1">
             {filteredAnswers.map((ans, idx) => (
               <div
                 key={ans.questionId || idx}
-                className={`p-3.5 rounded-2xl border text-left transition-all ${
+                className={`p-4 rounded-2xl border text-left transition-all ${
                   ans.isCorrect
                     ? "bg-green-50/70 border-green-200"
+                    : !ans.selectedAnswerKey
+                    ? "bg-amber-50/70 border-amber-200"
                     : "bg-red-50/70 border-red-200"
                 }`}
               >
-                <div className="flex justify-between items-start gap-2 mb-1.5">
-                  <span className="text-[9px] font-black uppercase tracking-wider text-[#050521]/60 font-mono">
+                <div className="flex justify-between items-start gap-2 mb-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-[#050521]/70 font-mono">
                     Q{ans.questionId}. [{ans.section || "SECTION"} · {ans.sectionTitle || ""}]
                   </span>
                   <span
-                    className={`text-[8px] font-black uppercase px-2 py-0.5 rounded font-mono ${
+                    className={`text-[9px] font-black uppercase px-2.5 py-0.5 rounded font-mono ${
                       ans.isCorrect
                         ? "bg-green-600 text-white"
+                        : !ans.selectedAnswerKey
+                        ? "bg-amber-500 text-white"
                         : "bg-red-600 text-white"
                     }`}
                   >
-                    {ans.isCorrect ? "✓ Correct" : "✕ Incorrect"}
+                    {ans.isCorrect ? "✓ Correct" : !ans.selectedAnswerKey ? "○ Unanswered" : "✕ Incorrect"}
                   </span>
                 </div>
 
-                <p className="text-xs font-black text-[#050521] mb-2 leading-relaxed whitespace-pre-line">
+                <p className="text-xs font-black text-[#050521] mb-2.5 leading-relaxed whitespace-pre-line">
                   {ans.question}
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px] font-mono">
-                  <div className={`p-2 rounded-xl border ${ans.isCorrect ? "bg-green-100/60 border-green-300" : "bg-red-100/60 border-red-300"}`}>
-                    <span className="block text-[8px] font-black uppercase tracking-wider text-slate-500">
+                  <div
+                    className={`p-2.5 rounded-xl border ${
+                      ans.isCorrect
+                        ? "bg-green-100/60 border-green-300"
+                        : !ans.selectedAnswerKey
+                        ? "bg-amber-100/60 border-amber-300"
+                        : "bg-red-100/60 border-red-300"
+                    }`}
+                  >
+                    <span className="block text-[8px] font-black uppercase tracking-wider text-slate-500 mb-0.5">
                       Selected Answer:
                     </span>
                     <span className="font-bold">
@@ -786,8 +1298,8 @@ const AptitudeV2SubmissionCard = ({ item, onDelete }) => {
                     </span>
                   </div>
 
-                  <div className="p-2 rounded-xl border bg-white border-green-300">
-                    <span className="block text-[8px] font-black uppercase tracking-wider text-green-700">
+                  <div className="p-2.5 rounded-xl border bg-white border-green-300">
+                    <span className="block text-[8px] font-black uppercase tracking-wider text-green-700 mb-0.5">
                       Correct Answer:
                     </span>
                     <span className="font-bold text-green-800">
@@ -797,7 +1309,7 @@ const AptitudeV2SubmissionCard = ({ item, onDelete }) => {
                 </div>
 
                 {ans.explanation && (
-                  <p className="text-[10px] font-mono text-slate-600 mt-2 pt-2 border-t border-black/5">
+                  <p className="text-[10px] font-mono text-slate-600 mt-2.5 pt-2 border-t border-black/5">
                     <strong>Solution:</strong> {ans.explanation}
                   </p>
                 )}
@@ -808,19 +1320,40 @@ const AptitudeV2SubmissionCard = ({ item, onDelete }) => {
       )}
 
       {/* Card Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-3 pt-2">
+      <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex-1 py-3 rounded-2xl bg-[#050521]/5 hover:bg-[#c6ff34] text-[#050521] text-[10px] font-black uppercase tracking-widest transition-colors duration-300 border border-[#050521]/10 cursor-pointer"
+          className="flex-1 py-3 rounded-2xl bg-[#050521]/5 hover:bg-[#c6ff34] text-[#050521] text-[10px] font-black uppercase tracking-widest transition-colors duration-300 border border-[#050521]/10 cursor-pointer flex items-center justify-center gap-2"
         >
-          {isExpanded ? "Hide Question Breakdown" : "View Full 40 Questions Breakdown"}
+          <span>{isExpanded ? "▲ Hide 40 Questions Breakdown" : "▼ View Full 40 Questions Breakdown"}</span>
+          <span className="px-2 py-0.5 rounded-full bg-[#050521]/10 text-[9px] font-bold">
+            {displayAnswers.length} Qs
+          </span>
         </button>
+
+        {onUpdate && (
+          <button
+            type="button"
+            onClick={() => setIsEditing(!isEditing)}
+            className={`px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-200 border flex items-center justify-center gap-1.5 cursor-pointer ${
+              isEditing
+                ? "bg-[#050521] text-white border-[#050521]"
+                : "bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 border-blue-200"
+            }`}
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            <span>{isEditing ? "Close Edit" : "Update Result"}</span>
+          </button>
+        )}
+
         {onDelete && (
           <button
             type="button"
-            onClick={() => onDelete(item.id, item.fullName || item.name || "this submission", item._sourceCol)}
-            className="px-5 py-3 rounded-2xl bg-red-50 hover:bg-red-500 hover:text-white text-red-600 text-[10px] font-black uppercase tracking-widest transition-all duration-200 border border-red-200 flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+            onClick={() => onDelete(item.id, item.fullName || item.name || "this submission", item._sourceCol, item._allDocRefs)}
+            className="px-4 py-3 rounded-2xl bg-red-50 hover:bg-red-500 hover:text-white text-red-600 text-[10px] font-black uppercase tracking-widest transition-all duration-200 border border-red-200 flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -2292,6 +2825,7 @@ function AdminDashboard() {
   const [aiBoosterProgramData, setAiBoosterProgramData] = useState([]);
   const [aiPaymentTab, setAiPaymentTab] = useState("all"); // "all" | "paid" | "unpaid"
   const [boosterPaymentTab, setBoosterPaymentTab] = useState("all"); // "all" | "paid" | "unpaid"
+  const [aptitudeV2Filter, setAptitudeV2Filter] = useState("all"); // "all" | "completed" | "in_progress" | "top" | "disqualified"
   const [loadingData, setLoadingData] = useState(true);
   const [activeTab, setActiveTab] = useState("scholarship");
   const [searchQuery, setSearchQuery] = useState("");
@@ -2439,6 +2973,20 @@ function AdminDashboard() {
       );
     } catch (error) {
       console.error("Error updating AI Booster Program registration:", error);
+      throw error;
+    }
+  };
+
+  const handleUpdateAptitudeV2 = async (id, updateData, sourceCol = null, allDocRefs = []) => {
+    try {
+      const res = await updateAptitudeV2Submission(id, updateData, sourceCol, allDocRefs);
+      const updatedFields = res.updatedData || updateData;
+      setAptitudeV2Data((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, ...updatedFields } : item))
+      );
+      return res;
+    } catch (error) {
+      console.error("Error updating Aptitude Test V2 submission:", error);
       throw error;
     }
   };
@@ -2769,8 +3317,18 @@ function AdminDashboard() {
     );
   }
 
-  const handleDeleteRecord = async (id, candidateName = "this record") => {
+  const handleDeleteRecord = async (id, candidateName = "this record", sourceCol = null, allDocRefs = []) => {
     if (!window.confirm(`Are you sure you want to delete the record for "${candidateName}"?`)) {
+      return;
+    }
+
+    if (activeTab === "aptitude_v2") {
+      try {
+        await deleteAptitudeV2Submission(id, sourceCol, allDocRefs);
+      } catch (err) {
+        console.warn("Delete aptitude v2 error:", err);
+      }
+      setAptitudeV2Data((prev) => prev.filter((item) => item.id !== id));
       return;
     }
 
@@ -2836,14 +3394,6 @@ function AdminDashboard() {
       } catch (e) {}
     }
 
-    if (activeTab === "aptitude_v2") {
-      try {
-        await deleteAptitudeV2Submission(id);
-      } catch (err) {
-        console.warn("Delete aptitude v2 error:", err);
-      }
-    }
-
     // Remove from local offline storage if present
     try {
       const localAdm = JSON.parse(localStorage.getItem("offline_student_admissions") || "[]");
@@ -2891,6 +3441,26 @@ function AdminDashboard() {
     setConsultationData((prev) => prev.filter((item) => item.id !== id));
     setAiForEveryoneData((prev) => prev.filter((item) => item.id !== id));
     setAiBoosterProgramData((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const handleClearAllAptitudeV2 = async () => {
+    if (aptitudeV2Data.length === 0) {
+      alert("No Aptitude V2 records to delete.");
+      return;
+    }
+    const confirmClear = window.confirm(
+      `Are you sure you want to permanently delete ALL ${aptitudeV2Data.length} Aptitude Test V2 records? This cannot be undone.`
+    );
+    if (!confirmClear) return;
+
+    try {
+      await deleteAllAptitudeV2Submissions(aptitudeV2Data);
+      setAptitudeV2Data([]);
+      alert("All Aptitude Test V2 records have been permanently deleted.");
+    } catch (err) {
+      console.error("Error clearing all Aptitude V2 data:", err);
+      alert("Error clearing some records. Please refresh and check.");
+    }
   };
 
   const renderCards = (data) => {
@@ -2959,6 +3529,16 @@ function AdminDashboard() {
             <h4 className="text-base font-black uppercase text-[#050521]">No Career Goal Popup Leads Yet</h4>
             <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
               Submissions from the "Got a career goal in mind?" website popup form will appear here in real time.
+            </p>
+          </div>
+        );
+      }
+      if (activeTab === "aptitude_v2") {
+        return (
+          <div className="bg-white border-2 border-dashed border-[#050521]/20 rounded-3xl p-12 text-center my-6">
+            <h4 className="text-base font-black uppercase text-[#050521]">No Aptitude Test V2 Submissions Found</h4>
+            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+              Candidate test submissions and scores will appear here once students register or submit the 40-question Aptitude Test V2.
             </p>
           </div>
         );
@@ -3380,7 +3960,12 @@ function AdminDashboard() {
       return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {data.map((item) => (
-            <AptitudeV2SubmissionCard key={item.id} item={item} onDelete={handleDeleteRecord} />
+            <AptitudeV2SubmissionCard
+              key={item.id}
+              item={item}
+              onDelete={handleDeleteRecord}
+              onUpdate={handleUpdateAptitudeV2}
+            />
           ))}
         </div>
       );
@@ -3416,7 +4001,21 @@ function AdminDashboard() {
     if (activeTab === "master") return masterData;
     if (activeTab === "aptitude") return newAptitudeData;
     if (activeTab === "old_aptitude") return oldAptitudeData;
-    if (activeTab === "aptitude_v2") return aptitudeV2Data;
+    if (activeTab === "aptitude_v2") {
+      if (aptitudeV2Filter === "completed") {
+        return aptitudeV2Data.filter((i) => i.status === "completed" || i.testStatus === "completed" || (i.score !== null && i.score !== undefined && i.score !== "-"));
+      }
+      if (aptitudeV2Filter === "in_progress") {
+        return aptitudeV2Data.filter((i) => i.status !== "completed" && i.testStatus !== "completed" && (i.score === null || i.score === undefined || i.score === "-"));
+      }
+      if (aptitudeV2Filter === "top") {
+        return aptitudeV2Data.filter((i) => Number(i.score) >= 34);
+      }
+      if (aptitudeV2Filter === "disqualified") {
+        return aptitudeV2Data.filter((i) => i.status === "disqualified_security_violation" || i.testStatus === "disqualified" || Boolean(i.disqualificationReason));
+      }
+      return aptitudeV2Data;
+    }
     if (activeTab === "collected") return collectedData;
     if (activeTab === "uploaded") return uploadedData;
     if (activeTab === "webinar") return webinarData;
@@ -3441,6 +4040,21 @@ function AdminDashboard() {
     if (!searchQuery.trim()) return data;
 
     const query = searchQuery.toLowerCase().trim();
+    if (activeTab === "aptitude_v2") {
+      return data.filter((item) => {
+        const idMatch = item.id?.toLowerCase().includes(query);
+        const nameMatch = (item.fullName || item.name || "").toLowerCase().includes(query);
+        const phoneMatch = (item.phone || "").toLowerCase().includes(query);
+        const emailMatch = (item.email || "").toLowerCase().includes(query);
+        const placeMatch = (item.place || item.city || item.location || "").toLowerCase().includes(query);
+        const instMatch = (item.institution || item.college || "").toLowerCase().includes(query);
+        const ratingMatch = (item.performanceRating || "").toLowerCase().includes(query);
+        const statusMatch = (item.status || item.testStatus || "").toLowerCase().includes(query);
+        const scoreMatch = String(item.score ?? "").toLowerCase().includes(query);
+        return idMatch || nameMatch || phoneMatch || emailMatch || placeMatch || instMatch || ratingMatch || statusMatch || scoreMatch;
+      });
+    }
+
     return data.filter(item => {
       return Object.entries(item).some(([key, val]) => {
         if (val === null || val === undefined) return false;
@@ -3749,6 +4363,28 @@ function AdminDashboard() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            {activeTab === "aptitude_v2" && (
+              <>
+                <button
+                  type="button"
+                  onClick={downloadCSV}
+                  className="py-2.5 px-4 bg-[#c6ff34] hover:bg-[#b0f51e] text-[#050521] border border-[#050521]/10 rounded-xl text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>Export CSV</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClearAllAptitudeV2}
+                  disabled={aptitudeV2Data.length === 0}
+                  className="py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  <span>Clear All V2 Records</span>
+                </button>
+              </>
+            )}
             <button
               type="button"
               onClick={fetchData}
@@ -3772,16 +4408,193 @@ function AdminDashboard() {
                 {searchQuery ? `Showing ${getFilteredData().length} of ${getActiveData().length} records` : `${getActiveData().length} records found`}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={fetchData}
-              disabled={loadingData}
-              className="p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black shadow-sm cursor-pointer"
-              title="Refresh data"
-            >
-              <span className={loadingData ? "inline-block animate-spin" : ""}>↻</span>
-            </button>
+            <div className="flex items-center gap-2">
+              {activeTab === "aptitude_v2" && aptitudeV2Data.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClearAllAptitudeV2}
+                  className="px-3 py-2 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm cursor-pointer"
+                  title="Clear All V2 Records"
+                >
+                  Clear All
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={fetchData}
+                disabled={loadingData}
+                className="p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black shadow-sm cursor-pointer"
+                title="Refresh data"
+              >
+                <span className={loadingData ? "inline-block animate-spin" : ""}>↻</span>
+              </button>
+            </div>
           </div>
+
+          {/* Quick Metrics Banner for Aptitude Test V2 */}
+          {activeTab === "aptitude_v2" && !loadingData && (() => {
+            const total = aptitudeV2Data.length;
+            const completedList = aptitudeV2Data.filter(
+              (i) =>
+                i.status === "completed" ||
+                i.testStatus === "completed" ||
+                (i.score !== null && i.score !== undefined && i.score !== "-")
+            );
+            const completedCount = completedList.length;
+            const inProgressCount = total - completedCount;
+            const disqualifiedCount = aptitudeV2Data.filter(
+              (i) =>
+                i.status === "disqualified_security_violation" ||
+                i.testStatus === "disqualified" ||
+                Boolean(i.disqualificationReason)
+            ).length;
+            const topScorers = aptitudeV2Data.filter((i) => Number(i.score) >= 34).length;
+            const totalScoreSum = completedList.reduce((acc, cur) => acc + (Number(cur.score) || 0), 0);
+            const avgScore = completedCount > 0 ? (totalScoreSum / completedCount).toFixed(1) : 0;
+            const avgPct = completedCount > 0 ? ((Number(avgScore) / 40) * 100).toFixed(0) : 0;
+
+            return (
+              <div className="mb-6">
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5 mb-4">
+                  <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">Total Candidates</span>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="text-2xl sm:text-3xl font-black text-[#050521]">{total}</span>
+                      <span className="text-[10px] font-bold text-slate-400">students</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-emerald-50/70 p-4 sm:p-5 rounded-2xl border border-emerald-200/80 shadow-sm flex flex-col justify-between">
+                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-emerald-800">Completed Tests</span>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="text-2xl sm:text-3xl font-black text-emerald-900">{completedCount}</span>
+                      <span className="text-[10px] font-bold text-emerald-700">
+                        {total > 0 ? Math.round((completedCount / total) * 100) : 0}% rate
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-50/70 p-4 sm:p-5 rounded-2xl border border-blue-200/80 shadow-sm flex flex-col justify-between">
+                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-blue-800">Average Score</span>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="text-2xl sm:text-3xl font-black text-blue-900">{avgScore} / 40</span>
+                      <span className="text-[10px] font-bold text-blue-700">({avgPct}%)</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-purple-50/70 p-4 sm:p-5 rounded-2xl border border-purple-200/80 shadow-sm flex flex-col justify-between">
+                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-purple-800">Top Scorers (85%+)</span>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="text-2xl sm:text-3xl font-black text-purple-900">{topScorers}</span>
+                      <span className="text-[10px] font-bold text-purple-700">34+ score</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-rose-50/70 p-4 sm:p-5 rounded-2xl border border-rose-200/80 shadow-sm flex flex-col justify-between">
+                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-rose-800">Disqualified</span>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="text-2xl sm:text-3xl font-black text-rose-900">{disqualifiedCount}</span>
+                      <span className="text-[10px] font-bold text-rose-700">violations</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status Filter Switcher Buttons */}
+                <div className="flex flex-wrap items-center gap-2 p-1.5 bg-white rounded-2xl border border-slate-200 shadow-sm w-fit">
+                  <button
+                    type="button"
+                    onClick={() => setAptitudeV2Filter("all")}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                      aptitudeV2Filter === "all"
+                        ? "bg-[#050521] text-white shadow-sm"
+                        : "text-slate-600 hover:text-[#050521] hover:bg-slate-100"
+                    }`}
+                  >
+                    <span>All Candidates</span>
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                      aptitudeV2Filter === "all" ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
+                    }`}>
+                      {total}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setAptitudeV2Filter("completed")}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                      aptitudeV2Filter === "completed"
+                        ? "bg-emerald-600 text-white shadow-sm"
+                        : "text-emerald-800 hover:text-emerald-900 hover:bg-emerald-50"
+                    }`}
+                  >
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                    <span>Completed</span>
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                      aptitudeV2Filter === "completed" ? "bg-white/25 text-white" : "bg-emerald-100 text-emerald-800"
+                    }`}>
+                      {completedCount}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setAptitudeV2Filter("in_progress")}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                      aptitudeV2Filter === "in_progress"
+                        ? "bg-amber-600 text-white shadow-sm"
+                        : "text-amber-800 hover:text-amber-900 hover:bg-amber-50"
+                    }`}
+                  >
+                    <span className="w-2 h-2 rounded-full bg-amber-400" />
+                    <span>In Progress</span>
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                      aptitudeV2Filter === "in_progress" ? "bg-white/25 text-white" : "bg-amber-100 text-amber-800"
+                    }`}>
+                      {inProgressCount}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setAptitudeV2Filter("top")}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                      aptitudeV2Filter === "top"
+                        ? "bg-purple-600 text-white shadow-sm"
+                        : "text-purple-800 hover:text-purple-900 hover:bg-purple-50"
+                    }`}
+                  >
+                    <span className="w-2 h-2 rounded-full bg-purple-400" />
+                    <span>Top 85%+</span>
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                      aptitudeV2Filter === "top" ? "bg-white/25 text-white" : "bg-purple-100 text-purple-800"
+                    }`}>
+                      {topScorers}
+                    </span>
+                  </button>
+
+                  {disqualifiedCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setAptitudeV2Filter("disqualified")}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                        aptitudeV2Filter === "disqualified"
+                          ? "bg-rose-600 text-white shadow-sm"
+                          : "text-rose-800 hover:text-rose-900 hover:bg-rose-50"
+                      }`}
+                    >
+                      <span className="w-2 h-2 rounded-full bg-rose-400" />
+                      <span>Disqualified</span>
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                        aptitudeV2Filter === "disqualified" ? "bg-white/25 text-white" : "bg-rose-100 text-rose-800"
+                      }`}>
+                        {disqualifiedCount}
+                      </span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Quick Metrics Banner for Popup Leads */}
           {activeTab === "popup_leads" && !loadingData && (

@@ -155,6 +155,15 @@ function Navbar() {
     location.pathname === "/ai-for-everyone" ||
     location.pathname.startsWith("/ai-easy-ayi");
 
+  const isAiBoosterPage =
+    location.pathname === "/ai-booster-program" ||
+    location.pathname === "/aiboosterprogram" ||
+    location.pathname === "/ai-booster" ||
+    location.pathname.startsWith("/ai-booster");
+
+  const isTransparentNav = isAiEasyAyiPage || isAiBoosterPage;
+  const isPinkTheme = isAiEasyAyiPage || isAiBoosterPage;
+
   const navLinks = isHome
     ? [
         { name: "Programs", path: "#programs" },
@@ -205,8 +214,8 @@ function Navbar() {
       <nav
         ref={navContainerRef}
         className={`w-full max-w-7xl flex items-center justify-between px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-full pointer-events-auto transition-all duration-300 relative ${
-          isAiEasyAyiPage
-            ? "bg-gradient-to-b from-white/[0.12] to-white/[0.04] backdrop-blur-2xl backdrop-saturate-150 border border-white/25 shadow-[0_8px_32px_rgba(0,0,0,0.37),inset_0_1px_1px_rgba(255,255,255,0.3)]"
+          isTransparentNav
+            ? "bg-white/[0.08] backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.37),inset_0_1px_1px_rgba(255,255,255,0.25)]"
             : "bg-[#090D11]/85 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
         }`}
       >
@@ -258,7 +267,7 @@ function Navbar() {
                     />
                   </Link>
 
-                  {/* HOVER DROPDOWN MENU FOR 6 BLOG PAGES */}
+                  {/* HOVER DROPDOWN MENU FOR 6 BLOG PAGES (FULL BLACK) */}
                   <AnimatePresence>
                     {isBlogHovered && (
                       <motion.div
@@ -266,7 +275,7 @@ function Navbar() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.96 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="absolute top-full left-1/2 -translate-x-1/2 w-[480px] lg:w-[560px] bg-[#040d1a]/95 backdrop-blur-2xl border border-sky-500/20 rounded-3xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-50 mt-2 text-white"
+                        className="absolute top-full left-1/2 -translate-x-1/2 w-[480px] lg:w-[560px] bg-black backdrop-blur-2xl border border-white/20 rounded-3xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.95)] z-50 mt-2 text-white"
                       >
                         <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
                           <div className="flex items-center gap-2">
@@ -291,7 +300,7 @@ function Navbar() {
                               key={post.id}
                               to={`/blog/${post.slug}`}
                               onClick={() => setIsBlogHovered(false)}
-                              className="group p-3 rounded-2xl bg-white/[0.03] hover:bg-sky-400/10 border border-white/8 hover:border-sky-400/40 transition-all flex flex-col justify-between space-y-1.5"
+                              className="group p-3 rounded-2xl bg-white/[0.04] hover:bg-sky-400/10 border border-white/10 hover:border-sky-400/40 transition-all flex flex-col justify-between space-y-1.5"
                             >
                               <div className="flex items-center justify-between">
                                 <span className="text-[10px] font-mono font-bold text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-500/20">
@@ -360,7 +369,7 @@ function Navbar() {
           <Link
             to="/admission"
             className={`group relative px-4 py-2 rounded-full text-xs font-bold tracking-wide transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-1.5 ${
-              isAiEasyAyiPage
+              isPinkTheme
                 ? "bg-[#fa0058] hover:bg-[#e0004f] text-white shadow-[0_2px_16px_rgba(250,0,88,0.4)]"
                 : "bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-slate-950 shadow-[0_2px_16px_rgba(56,189,248,0.35)]"
             }`}
@@ -379,10 +388,10 @@ function Navbar() {
             onClick={() => setIsOpen(!isOpen)}
             className={`p-2 rounded-full transition-all duration-300 border flex items-center justify-center ${
               isOpen
-                ? isAiEasyAyiPage
+                ? isPinkTheme
                   ? "bg-[#fa0058] text-white border-[#fa0058] shadow-[0_0_15px_rgba(250,0,88,0.4)]"
                   : "bg-sky-400 text-slate-950 border-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.4)]"
-                : isAiEasyAyiPage
+                : isPinkTheme
                 ? "bg-white/[0.08] backdrop-blur-md hover:bg-white/[0.16] text-white border-white/20"
                 : "bg-white/10 hover:bg-white/20 text-white border-white/20"
             }`}
@@ -391,7 +400,7 @@ function Navbar() {
           </button>
         </div>
 
-        {/* MOBILE & TABLET RESPONSIVE DROPDOWN MENU */}
+        {/* MOBILE & TABLET RESPONSIVE DROPDOWN MENU (FULL BLACK) */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -399,7 +408,7 @@ function Navbar() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -16, scale: 0.97 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
-              className="absolute top-[calc(100%+10px)] left-0 w-full rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 lg:hidden z-50 flex flex-col gap-2 shadow-2xl border border-white/15 text-white max-h-[82vh] overflow-y-auto bg-[#07090e] shadow-[0_25px_60px_rgba(0,0,0,0.98)]"
+              className="absolute top-[calc(100%+10px)] left-0 w-full rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 lg:hidden z-50 flex flex-col gap-2 shadow-2xl border border-white/20 text-white max-h-[82vh] overflow-y-auto bg-black shadow-[0_25px_60px_rgba(0,0,0,1)]"
             >
               {/* Menu Header in Tablet/Mobile */}
               <div className="flex items-center justify-between pb-3 px-2 border-b border-white/10">
@@ -419,7 +428,7 @@ function Navbar() {
                         key={link.path}
                         className={`flex flex-col rounded-2xl border transition-all ${
                           active
-                            ? isAiEasyAyiPage
+                            ? isPinkTheme
                               ? "bg-[#fa0058]/15 border-[#fa0058]/40"
                               : "bg-sky-400/10 border-sky-500/30"
                             : "border-transparent hover:border-white/10"
@@ -433,11 +442,13 @@ function Navbar() {
                           >
                             <span className="text-white">{link.name}</span>
                             {active && (
-                              <span className={`w-2 h-2 rounded-full ${
-                                isAiEasyAyiPage
-                                  ? "bg-[#fa0058] shadow-[0_0_8px_rgba(250,0,88,0.6)]"
-                                  : "bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]"
-                              }`} />
+                              <span
+                                className={`w-2 h-2 rounded-full ${
+                                  isPinkTheme
+                                    ? "bg-[#fa0058] shadow-[0_0_8px_rgba(250,0,88,0.6)]"
+                                    : "bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]"
+                                }`}
+                              />
                             )}
                           </Link>
                           <button
@@ -471,7 +482,7 @@ function Navbar() {
                               transition={{ duration: 0.2 }}
                               className="overflow-hidden"
                             >
-                              <div className="p-3 mx-2 mb-2 grid grid-cols-1 sm:grid-cols-2 gap-2 bg-white/[0.02] rounded-xl border border-white/10">
+                              <div className="p-3 mx-2 mb-2 grid grid-cols-1 sm:grid-cols-2 gap-2 bg-[#0a0a0a] rounded-xl border border-white/15">
                                 <div className="sm:col-span-2 flex items-center justify-between pb-1 px-1">
                                   <span className="text-[10px] font-mono font-bold text-white uppercase">
                                     Learning Guides
@@ -489,13 +500,15 @@ function Navbar() {
                                     key={post.id}
                                     to={`/blog/${post.slug}`}
                                     onClick={() => setIsOpen(false)}
-                                    className="text-xs font-mono font-bold text-white hover:text-white p-2.5 rounded-lg bg-white/[0.05] hover:bg-white/15 border border-white/10 hover:border-white/30 flex items-start gap-2 transition-all shadow-sm"
+                                    className="text-xs font-mono font-bold text-white hover:text-white p-2.5 rounded-lg bg-black hover:bg-white/15 border border-white/10 hover:border-white/30 flex items-start gap-2 transition-all shadow-sm"
                                   >
-                                    <span className={`text-[10px] font-black border px-1.5 py-0.5 rounded ${
-                                      isAiEasyAyiPage
-                                        ? "bg-[#fa0058]/20 text-white border-[#fa0058]/40"
-                                        : "bg-sky-950/80 text-white border-sky-500/30"
-                                    }`}>
+                                    <span
+                                      className={`text-[10px] font-black border px-1.5 py-0.5 rounded ${
+                                        isPinkTheme
+                                          ? "bg-[#fa0058]/20 text-white border-[#fa0058]/40"
+                                          : "bg-sky-950/80 text-white border-sky-500/30"
+                                      }`}
+                                    >
                                       0{idx + 1}
                                     </span>
                                     <span className="line-clamp-1 leading-snug text-white">
@@ -518,7 +531,7 @@ function Navbar() {
                       onClick={(e) => handleNavClick(e, link.path)}
                       className={`text-sm sm:text-base font-bold py-2.5 sm:py-3 px-3 sm:px-4 transition-all flex items-center justify-between group rounded-2xl text-white ${
                         active
-                          ? isAiEasyAyiPage
+                          ? isPinkTheme
                             ? "bg-[#fa0058]/20 text-white border border-[#fa0058]/50"
                             : "bg-white/10 text-white border border-white/25"
                           : "text-white hover:bg-white/10 hover:text-white"
@@ -528,7 +541,7 @@ function Navbar() {
                       <span
                         className={`w-2 h-2 rounded-full transition-transform ${
                           active
-                            ? isAiEasyAyiPage
+                            ? isPinkTheme
                               ? "bg-[#fa0058] scale-100 shadow-[0_0_8px_rgba(250,0,88,0.8)]"
                               : "bg-white scale-100 shadow-[0_0_8px_rgba(255,255,255,0.8)]"
                             : "bg-white scale-0 group-hover:scale-100"
@@ -540,7 +553,7 @@ function Navbar() {
               </div>
 
               <div className="h-px w-full my-2 bg-white/10" />
-              
+
               {/* Mobile Direct Action Buttons */}
               <div className="grid grid-cols-2 gap-2.5 pt-1">
                 <Link
@@ -554,7 +567,7 @@ function Navbar() {
                   to="/admission"
                   onClick={() => setIsOpen(false)}
                   className={`py-3 px-3 rounded-xl text-center text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
-                    isAiEasyAyiPage
+                    isPinkTheme
                       ? "bg-[#fa0058] hover:bg-[#e0004f] text-white shadow-[0_2px_12px_rgba(250,0,88,0.4)]"
                       : "bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-white shadow-[0_2px_12px_rgba(56,189,248,0.35)]"
                   }`}
