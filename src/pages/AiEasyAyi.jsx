@@ -1855,7 +1855,7 @@ export default function AiEasyAyi() {
                   >
                     <span className="hidden sm:inline">{t.stickyBtn}</span>
                     <span className="sm:hidden">{t.stickyBtnMobile || (lang === "ml" ? "രജിസ്റ്റർ" : "Register")}</span>
-                  </button>
+                   </button>
                 </div>
 
               </div>

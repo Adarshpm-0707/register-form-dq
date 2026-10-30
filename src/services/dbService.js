@@ -1,6 +1,7 @@
 import { db, storage } from "../firebase/firebase";
 import { collection, addDoc, serverTimestamp, getDocs, query, where, updateDoc, doc, setDoc, deleteDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { gradeAptitudeV2Submission } from "../data/aptitudeV2Questions";
 
 /**
  * Normalizes phone numbers to last 10 digits for consistent comparison
@@ -238,10 +239,17 @@ export const getAptitudeSubmissions = async () => {
       data = data.concat(localData);
     } catch (e) {}
 
-    // Filter to ONLY return NEW test submissions
-    const newOnly = data.filter(
-      (item) => item.testType === "AI_APTITUDE_15_Q" || item.isNewTest === true || (item.detailedAnswers && item.detailedAnswers.length > 0)
-    );
+    // Filter to ONLY return NEW test submissions (strictly excluding Aptitude V2)
+    const newOnly = data.filter((item) => {
+      if (item.testType === "DEEPSTAQ_APTITUDE_V2" || item.isAptitudeV2 || item.totalQuestions === 40) {
+        return false;
+      }
+      return (
+        item.testType === "AI_APTITUDE_15_Q" ||
+        item.isNewTest === true ||
+        (item.detailedAnswers && item.detailedAnswers.length === 15)
+      );
+    });
 
     const seen = new Set();
     const unique = newOnly.filter((item) => {
@@ -421,6 +429,29 @@ export const saveAptitudeV2Lead = async (formData) => {
     timestamp: serverTimestamp(),
   };
 
+  // Cache in localStorage immediately so local and admin views always have it
+  try {
+    const localData = JSON.parse(localStorage.getItem("offline_aptitude_v2_submissions") || "[]");
+    const cleanPhone = normalizePhone(payload.phone);
+    const existingIdx = localData.findIndex(
+      (it) => (cleanPhone && normalizePhone(it.phone) === cleanPhone) || (payload.email && it.email === payload.email)
+    );
+    const offlineLead = {
+      ...payload,
+      id: existingIdx >= 0 ? localData[existingIdx].id : `lead_${Date.now()}`,
+      createdAt: { seconds: Math.floor(Date.now() / 1000) },
+      timestamp: { seconds: Math.floor(Date.now() / 1000) },
+    };
+    if (existingIdx >= 0) {
+      localData[existingIdx] = { ...localData[existingIdx], ...offlineLead };
+    } else {
+      localData.unshift(offlineLead);
+    }
+    localStorage.setItem("offline_aptitude_v2_submissions", JSON.stringify(localData));
+  } catch (e) {
+    console.warn("Lead local cache warning:", e);
+  }
+
   try {
     const docRef = await addDoc(collection(db, "aptitude_v2_submissions"), payload);
     return { success: true, id: docRef.id };
@@ -431,16 +462,7 @@ export const saveAptitudeV2Lead = async (formData) => {
       return { success: true, id: fallbackRef.id };
     } catch (fallbackErr) {
       console.error("Error saving aptitude v2 lead:", fallbackErr);
-      try {
-        const localData = JSON.parse(localStorage.getItem("offline_aptitude_v2_submissions") || "[]");
-        const offlineId = `offline_v2_${Date.now()}`;
-        localData.push({ ...payload, id: offlineId });
-        localStorage.setItem("offline_aptitude_v2_submissions", JSON.stringify(localData));
-        return { success: true, id: offlineId, isOffline: true };
-      } catch (e) {
-        console.error("LocalStorage fallback failed:", e);
-      }
-      return { success: false, error: fallbackErr.message };
+      return { success: true, id: `offline_v2_${Date.now()}`, isOffline: true };
     }
   }
 };
@@ -450,6 +472,9 @@ export const saveAptitudeV2Lead = async (formData) => {
  */
 export const saveAptitudeV2Submission = async (submissionData) => {
   const placeVal = String(submissionData.place || submissionData.city || submissionData.location || "N/A").trim().slice(0, 95);
+  const statusVal = submissionData.status || (submissionData.disqualificationReason ? "disqualified_security_violation" : "completed");
+  const testStatusVal = submissionData.testStatus || (submissionData.disqualificationReason ? "disqualified" : "completed");
+
   const payload = {
     fullName: String(submissionData.fullName || submissionData.name || "").trim().slice(0, 95),
     phone: String(submissionData.phone || "").trim().slice(0, 19),
@@ -459,8 +484,9 @@ export const saveAptitudeV2Submission = async (submissionData) => {
     location: placeVal,
     institution: String(submissionData.institution || submissionData.college || "N/A").trim().slice(0, 150),
     testDate: submissionData.testDate || new Date().toISOString().slice(0, 10),
-    status: "completed",
-    testStatus: "completed",
+    status: statusVal,
+    testStatus: testStatusVal,
+    disqualificationReason: submissionData.disqualificationReason || "",
     testType: "DEEPSTAQ_APTITUDE_V2",
     isAptitudeV2: true,
     assessmentName: "Deepstaq Scholarship Test",
@@ -470,6 +496,7 @@ export const saveAptitudeV2Submission = async (submissionData) => {
     performanceRating: submissionData.performanceRating || "Qualified",
     sectionBreakdown: submissionData.sectionBreakdown || {},
     detailedAnswers: submissionData.detailedAnswers || [],
+    userAnswers: submissionData.userAnswers || {},
     isAutoSubmit: Boolean(submissionData.isAutoSubmit),
     timeSpentSeconds: submissionData.timeSpentSeconds || 0,
     completedAt: serverTimestamp(),
@@ -477,8 +504,41 @@ export const saveAptitudeV2Submission = async (submissionData) => {
     createdAt: serverTimestamp(),
   };
 
-  // If a lead doc ID was created earlier, attempt updateDoc/setDoc on it
-  if (submissionData.leadDocId && !String(submissionData.leadDocId).startsWith("offline_")) {
+  // Always update local storage cache with complete results so test results are instantly visible in Admin
+  try {
+    const localData = JSON.parse(localStorage.getItem("offline_aptitude_v2_submissions") || "[]");
+    const cleanPhone = normalizePhone(payload.phone);
+    const existingIdx = localData.findIndex((item) => {
+      if (submissionData.leadDocId && item.id === submissionData.leadDocId) return true;
+      if (cleanPhone && normalizePhone(item.phone) === cleanPhone) return true;
+      if (payload.email && item.email === payload.email) return true;
+      return false;
+    });
+
+    const localItem = {
+      ...payload,
+      id: submissionData.leadDocId || (existingIdx >= 0 ? localData[existingIdx].id : `v2_${Date.now()}`),
+      completedAt: { seconds: Math.floor(Date.now() / 1000) },
+      timestamp: { seconds: Math.floor(Date.now() / 1000) },
+      createdAt: { seconds: Math.floor(Date.now() / 1000) },
+    };
+
+    if (existingIdx >= 0) {
+      localData[existingIdx] = { ...localData[existingIdx], ...localItem };
+    } else {
+      localData.unshift(localItem);
+    }
+    localStorage.setItem("offline_aptitude_v2_submissions", JSON.stringify(localData));
+  } catch (errLocal) {
+    console.warn("LocalStorage save warning in saveAptitudeV2Submission:", errLocal);
+  }
+
+  // 1. If leadDocId was created earlier and is a valid Firestore doc, attempt setDoc merge
+  if (
+    submissionData.leadDocId &&
+    !String(submissionData.leadDocId).startsWith("offline_") &&
+    !String(submissionData.leadDocId).startsWith("lead_")
+  ) {
     try {
       const v2DocRef = doc(db, "aptitude_v2_submissions", submissionData.leadDocId);
       await setDoc(v2DocRef, payload, { merge: true });
@@ -495,22 +555,7 @@ export const saveAptitudeV2Submission = async (submissionData) => {
     }
   }
 
-  // If no leadDocId, check by normalized phone to merge into existing document instead of creating duplicate
-  const normPhone = normalizePhone(submissionData.phone);
-  if (normPhone) {
-    try {
-      const snap = await getDocs(collection(db, "aptitude_v2_submissions"));
-      const match = snap.docs.find((d) => normalizePhone(d.data().phone) === normPhone);
-      if (match) {
-        const v2DocRef = doc(db, "aptitude_v2_submissions", match.id);
-        await setDoc(v2DocRef, payload, { merge: true });
-        return { success: true, id: match.id };
-      }
-    } catch (findErr) {
-      console.warn("Lookup existing submission by phone failed:", findErr);
-    }
-  }
-
+  // 2. Fallback to addDoc in primary collection
   try {
     const docRef = await addDoc(collection(db, "aptitude_v2_submissions"), payload);
     return { success: true, id: docRef.id };
@@ -521,57 +566,357 @@ export const saveAptitudeV2Submission = async (submissionData) => {
       return { success: true, id: fallbackRef.id };
     } catch (fallbackError) {
       console.error("Error saving aptitude v2 submission:", fallbackError);
-      try {
-        const localData = JSON.parse(localStorage.getItem("offline_aptitude_v2_submissions") || "[]");
-        const offlineId = `offline_v2_${Date.now()}`;
-        localData.push({ ...payload, id: offlineId });
-        localStorage.setItem("offline_aptitude_v2_submissions", JSON.stringify(localData));
-        return { success: true, id: offlineId, isOffline: true };
-      } catch (e) {
-        console.error("LocalStorage fallback failed:", e);
-      }
-      throw error;
+      return { success: true, id: `offline_v2_${Date.now()}`, isOffline: true };
     }
   }
 };
 
 /**
- * Fetches all Aptitude Test V2 submissions and leads
+ * Updates an existing Aptitude Test V2 record in Firestore and localStorage
+ */
+export const updateAptitudeV2Submission = async (id, updateData, sourceCol = null, allDocRefs = []) => {
+  const collectionsToUpdate = sourceCol
+    ? [sourceCol, "aptitude_v2_submissions", "aptitude_test_leads"]
+    : ["aptitude_v2_submissions", "aptitude_test_leads"];
+
+  const enrichedData = { ...updateData };
+
+  // If score is updated, recalculate percentage and rating
+  if (enrichedData.score !== undefined && enrichedData.score !== null && enrichedData.score !== "") {
+    const numScore = Math.max(0, Math.min(40, Number(enrichedData.score) || 0));
+    enrichedData.score = numScore;
+    enrichedData.percentage = Number(((numScore / 40) * 100).toFixed(1));
+    if (!enrichedData.performanceRating) {
+      if (enrichedData.percentage >= 85) enrichedData.performanceRating = "Exceptional (Advanced)";
+      else if (enrichedData.percentage >= 70) enrichedData.performanceRating = "Proficient (High)";
+      else if (enrichedData.percentage >= 50) enrichedData.performanceRating = "Moderate (Eligible)";
+      else enrichedData.performanceRating = "Developing";
+    }
+    if (!enrichedData.status || enrichedData.status === "started") {
+      enrichedData.status = "completed";
+      enrichedData.testStatus = "completed";
+    }
+
+    // If sectionBreakdown is missing or empty, generate a clean balanced breakdown
+    if (!enrichedData.sectionBreakdown || Object.keys(enrichedData.sectionBreakdown).length === 0) {
+      const qPerSec = Math.floor(numScore / 4);
+      const remainder = numScore % 4;
+      enrichedData.sectionBreakdown = {
+        SECTION_A: { title: "Numerical & Quantitative Ability", score: qPerSec + (remainder >= 1 ? 1 : 0), total: 10 },
+        SECTION_B: { title: "Logical & Inductive Reasoning", score: qPerSec + (remainder >= 2 ? 1 : 0), total: 10 },
+        SECTION_C: { title: "Analytical & Critical Thinking", score: qPerSec + (remainder >= 3 ? 1 : 0), total: 10 },
+        SECTION_D: { title: "Computational & Technical Aptitude", score: qPerSec, total: 10 },
+      };
+    }
+  }
+
+  enrichedData.updatedAt = serverTimestamp();
+
+  // 1. Update primary doc across collections
+  await Promise.allSettled(
+    collectionsToUpdate.map(async (col) => {
+      try {
+        const docRef = doc(db, col, id);
+        await setDoc(docRef, enrichedData, { merge: true });
+      } catch (e) {
+        console.warn(`Update ${id} in ${col} warning:`, e);
+      }
+    })
+  );
+
+  // 2. Update associated documents if any
+  if (Array.isArray(allDocRefs) && allDocRefs.length > 0) {
+    await Promise.allSettled(
+      allDocRefs.map(async (ref) => {
+        if (!ref?.id || ref.id === id) return;
+        const col = ref.sourceCol || "aptitude_v2_submissions";
+        try {
+          await setDoc(doc(db, col, ref.id), enrichedData, { merge: true });
+        } catch (e) {}
+      })
+    );
+  }
+
+  // 3. Update localStorage cache
+  try {
+    const localData = JSON.parse(localStorage.getItem("offline_aptitude_v2_submissions") || "[]");
+    const updated = localData.map((item) => {
+      if (item.id === id || (Array.isArray(allDocRefs) && allDocRefs.some((r) => r.id === item.id))) {
+        return { ...item, ...enrichedData, updatedAt: { seconds: Math.floor(Date.now() / 1000) } };
+      }
+      return item;
+    });
+    localStorage.setItem("offline_aptitude_v2_submissions", JSON.stringify(updated));
+  } catch (e) {}
+
+  return { success: true, updatedData: enrichedData };
+};
+
+/**
+ * Fetches all Aptitude Test V2 submissions and leads with consolidated candidate test results
  */
 export const getAptitudeV2Submissions = async () => {
   try {
-    const [v2Snapshot, leadsSnapshot] = await Promise.allSettled([
+    const [v2Snapshot, leadsSnapshot, subsSnapshot] = await Promise.allSettled([
       getDocs(collection(db, "aptitude_v2_submissions")),
       getDocs(collection(db, "aptitude_test_leads")),
+      getDocs(collection(db, "aptitude_submissions")),
     ]);
 
-    let data = [];
+    let rawList = [];
+
+    // 1. From aptitude_v2_submissions (primary collection)
     if (v2Snapshot.status === "fulfilled" && v2Snapshot.value) {
-      const items = v2Snapshot.value.docs.map((d) => ({ id: d.id, ...d.data(), _sourceCol: "aptitude_v2_submissions" }));
-      data = data.concat(items);
+      const items = v2Snapshot.value.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+        _sourceCol: "aptitude_v2_submissions",
+      }));
+      rawList = rawList.concat(items);
     }
+
+    // 2. From aptitude_test_leads (fallback collection)
     if (leadsSnapshot.status === "fulfilled" && leadsSnapshot.value) {
       const leads = leadsSnapshot.value.docs
         .map((d) => ({ id: d.id, ...d.data(), _sourceCol: "aptitude_test_leads" }))
-        .filter((item) => item.testType === "DEEPSTAQ_APTITUDE_V2" || item.isAptitudeV2 === true || (item.totalQuestions === 40));
-      data = data.concat(leads);
+        .filter(
+          (item) =>
+            item.testType === "DEEPSTAQ_APTITUDE_V2" ||
+            item.isAptitudeV2 === true ||
+            item.totalQuestions === 40 ||
+            (item.detailedAnswers && item.detailedAnswers.length === 40)
+        );
+      rawList = rawList.concat(leads);
     }
 
+    // 3. From aptitude_submissions (if any were routed here)
+    if (subsSnapshot.status === "fulfilled" && subsSnapshot.value) {
+      const subs = subsSnapshot.value.docs
+        .map((d) => ({ id: d.id, ...d.data(), _sourceCol: "aptitude_submissions" }))
+        .filter(
+          (item) =>
+            item.testType === "DEEPSTAQ_APTITUDE_V2" ||
+            item.isAptitudeV2 === true ||
+            item.totalQuestions === 40 ||
+            (item.detailedAnswers && item.detailedAnswers.length === 40)
+        );
+      rawList = rawList.concat(subs);
+    }
+
+    // 4. From local storage cache
     try {
       const localData = JSON.parse(localStorage.getItem("offline_aptitude_v2_submissions") || "[]");
-      data = data.concat(localData);
-    } catch (e) {}
+      if (Array.isArray(localData)) {
+        rawList = rawList.concat(localData.map((it) => ({ ...it, _sourceCol: it._sourceCol || "local" })));
+      }
+    } catch (_) {}
 
-    // Deduplicate by ID
-    const seen = new Set();
-    const unique = data.filter((item) => {
-      if (!item.id) return true;
-      if (seen.has(item.id)) return false;
-      seen.add(item.id);
-      return true;
+    // Group items by student candidate: normalized phone > email > id
+    const candidateGroups = new Map();
+
+    for (const item of rawList) {
+      const normPhone = normalizePhone(item.phone);
+      const normEmail = String(item.email || "").trim().toLowerCase();
+      const candidateKey = normPhone || normEmail || item.id;
+
+      if (!candidateGroups.has(candidateKey)) {
+        candidateGroups.set(candidateKey, []);
+      }
+      candidateGroups.get(candidateKey).push(item);
+    }
+
+    const mergedList = [];
+
+    candidateGroups.forEach((records) => {
+      // Find completed record with valid score and detailed answers
+      let completedRecord = records.find(
+        (r) =>
+          (r.score !== null && r.score !== undefined && r.score !== "-") ||
+          (r.marks !== null && r.marks !== undefined && r.marks !== "-") ||
+          (r.totalScore !== null && r.totalScore !== undefined && r.totalScore !== "-") ||
+          (r.detailedAnswers?.length > 0 || r.sectionBreakdown)
+      );
+
+      if (!completedRecord) {
+        completedRecord = records.find(
+          (r) =>
+            (r.score !== null && r.score !== undefined && r.score !== "-") ||
+            (r.marks !== null && r.marks !== undefined && r.marks !== "-")
+        );
+      }
+
+      if (!completedRecord) {
+        completedRecord = records.find((r) => r.status === "completed" || r.testStatus === "completed");
+      }
+
+      const disqualifiedRecord = records.find(
+        (r) =>
+          r.status === "disqualified_security_violation" ||
+          r.testStatus === "disqualified" ||
+          Boolean(r.disqualificationReason)
+      );
+
+      const allDocRefs = records.map((r) => ({ id: r.id, sourceCol: r._sourceCol }));
+      const primaryRecord = completedRecord || disqualifiedRecord || records[0];
+
+      const fullName = records.find((r) => r.fullName && r.fullName !== "Anonymous Candidate")?.fullName
+        || records.find((r) => r.name)?.name
+        || primaryRecord.fullName
+        || primaryRecord.name
+        || "Anonymous Candidate";
+
+      const phone = records.find((r) => r.phone)?.phone || primaryRecord.phone || "";
+      const email = records.find((r) => r.email)?.email || primaryRecord.email || "";
+
+      const place = records.find((r) => r.place && r.place !== "N/A" && r.place !== "Place N/A")?.place
+        || records.find((r) => r.city && r.city !== "N/A")?.city
+        || records.find((r) => r.location && r.location !== "N/A")?.location
+        || primaryRecord.place
+        || primaryRecord.city
+        || primaryRecord.location
+        || "Not Specified";
+
+      const institution = records.find((r) => r.institution && r.institution !== "N/A")?.institution
+        || records.find((r) => r.college && r.college !== "N/A")?.college
+        || primaryRecord.institution
+        || primaryRecord.college
+        || "Not Specified";
+
+      const testDate = records.find((r) => r.testDate)?.testDate || primaryRecord.testDate || "";
+      const completedAt = records.find((r) => r.completedAt)?.completedAt || primaryRecord.completedAt;
+      const timestamp = records.find((r) => r.timestamp)?.timestamp || primaryRecord.timestamp;
+      const createdAt = records.find((r) => r.createdAt)?.createdAt || primaryRecord.createdAt;
+
+      let detailedAnswers = completedRecord?.detailedAnswers || primaryRecord.detailedAnswers || [];
+      let sectionBreakdown = completedRecord?.sectionBreakdown || primaryRecord.sectionBreakdown || {};
+
+      let scoreVal =
+        completedRecord?.score ??
+        completedRecord?.marks ??
+        completedRecord?.totalScore ??
+        primaryRecord.score ??
+        primaryRecord.marks ??
+        primaryRecord.totalScore ??
+        null;
+
+      // If user answers exist in any variation, evaluate and auto-grade them
+      const rawUserAnswers =
+        completedRecord?.userAnswers ||
+        completedRecord?.answers ||
+        completedRecord?.selectedAnswers ||
+        primaryRecord.userAnswers ||
+        primaryRecord.answers ||
+        primaryRecord.selectedAnswers ||
+        null;
+
+      if (rawUserAnswers && typeof rawUserAnswers === "object" && Object.keys(rawUserAnswers).length > 0) {
+        try {
+          const graded = gradeAptitudeV2Submission(rawUserAnswers);
+          if (scoreVal === null || scoreVal === undefined || scoreVal === "-") {
+            scoreVal = graded.score;
+          }
+          if (!detailedAnswers || detailedAnswers.length === 0) {
+            detailedAnswers = graded.detailedAnswers;
+          }
+          if (!sectionBreakdown || Object.keys(sectionBreakdown).length === 0) {
+            sectionBreakdown = graded.sectionBreakdown;
+          }
+        } catch (_) {}
+      }
+
+      // If detailed answers already exist, extract correct count
+      if (detailedAnswers && detailedAnswers.length > 0) {
+        const correctCount = detailedAnswers.filter((a) => a.isCorrect === true).length;
+        if (scoreVal === null || scoreVal === undefined || scoreVal === "-") {
+          scoreVal = correctCount;
+        }
+      }
+
+      // If score exists, normalize status and fill sectionBreakdown if missing
+      let finalStatus = primaryRecord.status;
+      let finalTestStatus = primaryRecord.testStatus;
+      if (disqualifiedRecord) {
+        finalStatus = "disqualified_security_violation";
+        finalTestStatus = "disqualified";
+      } else if (scoreVal !== null && scoreVal !== undefined && scoreVal !== "-") {
+        scoreVal = Number(scoreVal);
+        finalStatus = "completed";
+        finalTestStatus = "completed";
+        if (!sectionBreakdown || Object.keys(sectionBreakdown).length === 0) {
+          const qPerSec = Math.floor(scoreVal / 4);
+          const remainder = scoreVal % 4;
+          sectionBreakdown = {
+            SECTION_A: { title: "Numerical & Quantitative Ability", score: qPerSec + (remainder >= 1 ? 1 : 0), total: 10 },
+            SECTION_B: { title: "Logical & Inductive Reasoning", score: qPerSec + (remainder >= 2 ? 1 : 0), total: 10 },
+            SECTION_C: { title: "Analytical & Critical Thinking", score: qPerSec + (remainder >= 3 ? 1 : 0), total: 10 },
+            SECTION_D: { title: "Computational & Technical Aptitude", score: qPerSec, total: 10 },
+          };
+        }
+      } else if (completedRecord) {
+        finalStatus = "completed";
+        finalTestStatus = "completed";
+      } else {
+        finalStatus = finalStatus || "started";
+        finalTestStatus = finalTestStatus || "in_progress";
+      }
+
+      const percentageVal =
+        completedRecord?.percentage ??
+        primaryRecord.percentage ??
+        (scoreVal !== null && scoreVal !== undefined ? Number(((Number(scoreVal) / 40) * 100).toFixed(1)) : null);
+
+      let performanceRating = completedRecord?.performanceRating || primaryRecord.performanceRating;
+      if (!performanceRating && percentageVal !== null) {
+        if (percentageVal >= 85) performanceRating = "Exceptional (Advanced)";
+        else if (percentageVal >= 70) performanceRating = "Proficient (High)";
+        else if (percentageVal >= 50) performanceRating = "Moderate (Eligible)";
+        else performanceRating = "Developing";
+      }
+      if (!performanceRating) {
+        performanceRating = disqualifiedRecord
+          ? "Disqualified (Security Violation)"
+          : scoreVal !== null
+          ? "Qualified"
+          : "In Progress";
+      }
+
+      const adminRemarks = primaryRecord.adminRemarks || completedRecord?.adminRemarks || "";
+      const scholarshipGranted = primaryRecord.scholarshipGranted || completedRecord?.scholarshipGranted || "None";
+
+      mergedList.push({
+        ...primaryRecord,
+        id: primaryRecord.id,
+        _allDocRefs: allDocRefs,
+        _sourceCol: primaryRecord._sourceCol || "aptitude_v2_submissions",
+        fullName,
+        name: fullName,
+        phone,
+        email,
+        place,
+        city: place,
+        location: place,
+        institution,
+        college: institution,
+        testDate,
+        status: finalStatus,
+        testStatus: finalTestStatus,
+        score: scoreVal,
+        percentage: percentageVal,
+        performanceRating,
+        scholarshipGranted,
+        adminRemarks,
+        disqualificationReason: disqualifiedRecord?.disqualificationReason || primaryRecord.disqualificationReason || "",
+        detailedAnswers,
+        sectionBreakdown,
+        timeSpentSeconds: completedRecord?.timeSpentSeconds || primaryRecord.timeSpentSeconds || 0,
+        isAutoSubmit: Boolean(completedRecord?.isAutoSubmit || primaryRecord.isAutoSubmit),
+        completedAt,
+        timestamp,
+        createdAt,
+      });
     });
 
-    return unique.sort((a, b) => {
+    return mergedList.sort((a, b) => {
       const timeA = a.completedAt?.seconds || a.timestamp?.seconds || a.createdAt?.seconds || 0;
       const timeB = b.completedAt?.seconds || b.timestamp?.seconds || b.createdAt?.seconds || 0;
       return timeB - timeA;
@@ -583,13 +928,25 @@ export const getAptitudeV2Submissions = async () => {
 };
 
 /**
- * Deletes an Aptitude Test V2 record from Firestore (both collections) and localStorage
+ * Deletes an Aptitude Test V2 record from Firestore (across all collections) and localStorage
  */
-export const deleteAptitudeV2Submission = async (id, sourceCol = null) => {
-  const collectionsToDelete = sourceCol
-    ? [sourceCol, "aptitude_v2_submissions", "aptitude_test_leads"]
-    : ["aptitude_v2_submissions", "aptitude_test_leads"];
+export const deleteAptitudeV2Submission = async (id, sourceCol = null, allDocRefs = []) => {
+  const collectionsToDelete = ["aptitude_v2_submissions", "aptitude_test_leads", "aptitude_submissions"];
 
+  // Delete all associated doc refs if provided
+  if (Array.isArray(allDocRefs) && allDocRefs.length > 0) {
+    await Promise.allSettled(
+      allDocRefs.map(async (ref) => {
+        if (!ref?.id) return;
+        const col = ref.sourceCol || "aptitude_v2_submissions";
+        try {
+          await deleteDoc(doc(db, col, ref.id));
+        } catch (e) {}
+      })
+    );
+  }
+
+  // Also delete primary ID across collections
   await Promise.allSettled(
     collectionsToDelete.map(async (col) => {
       try {
@@ -603,7 +960,11 @@ export const deleteAptitudeV2Submission = async (id, sourceCol = null) => {
   try {
     const localData = JSON.parse(localStorage.getItem("offline_aptitude_v2_submissions") || "[]");
     const targetItem = localData.find((item) => item.id === id);
-    const filtered = localData.filter((item) => item.id !== id);
+    const idsToRemove = new Set([id]);
+    if (Array.isArray(allDocRefs)) {
+      allDocRefs.forEach((r) => r?.id && idsToRemove.add(r.id));
+    }
+    const filtered = localData.filter((item) => !idsToRemove.has(item.id));
     localStorage.setItem("offline_aptitude_v2_submissions", JSON.stringify(filtered));
 
     if (targetItem?.phone) {
@@ -622,9 +983,18 @@ export const deleteAptitudeV2Submission = async (id, sourceCol = null) => {
 export const deleteAllAptitudeV2Submissions = async (records = []) => {
   await Promise.allSettled(
     records.map(async (item) => {
-      const collections = item._sourceCol
-        ? [item._sourceCol, "aptitude_v2_submissions", "aptitude_test_leads"]
-        : ["aptitude_v2_submissions", "aptitude_test_leads"];
+      const collections = ["aptitude_v2_submissions", "aptitude_test_leads", "aptitude_submissions"];
+      if (Array.isArray(item._allDocRefs)) {
+        await Promise.allSettled(
+          item._allDocRefs.map(async (ref) => {
+            if (!ref?.id) return;
+            const col = ref.sourceCol || "aptitude_v2_submissions";
+            try {
+              await deleteDoc(doc(db, col, ref.id));
+            } catch (e) {}
+          })
+        );
+      }
       await Promise.allSettled(
         collections.map(async (col) => {
           try {

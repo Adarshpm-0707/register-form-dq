@@ -88,23 +88,6 @@ export default function AptitudeV2() {
     setFormData((prev) => (prev.testDate === todayFormatted ? prev : { ...prev, testDate: todayFormatted }));
   }, []);
 
-  // Ensure Aptitude V2 starts completely fresh by wiping previous local test/block cache
-  useEffect(() => {
-    try {
-      localStorage.removeItem("offline_aptitude_v2_submissions");
-      Object.keys(localStorage).forEach((key) => {
-        if (
-          key.startsWith("deepstaq_blocked_") ||
-          key.startsWith("aptitude_v2_") ||
-          key.includes("aptitude_v2")
-        ) {
-          localStorage.removeItem(key);
-        }
-      });
-      sessionStorage.removeItem("aptitude_v2_blocked");
-    } catch (_) {}
-  }, []);
-
   // Hide Navbar during examination mode (Step 2)
   useEffect(() => {
     if (step === 2) {
@@ -546,6 +529,9 @@ export default function AptitudeV2() {
       performanceRating: gradeResult.performanceRating,
       sectionBreakdown: gradeResult.sectionBreakdown,
       detailedAnswers: gradeResult.detailedAnswers,
+      userAnswers,
+      status: "completed",
+      testStatus: "completed",
       timeSpentSeconds,
       isAutoSubmit,
     };
