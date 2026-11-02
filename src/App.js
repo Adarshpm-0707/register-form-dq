@@ -12,6 +12,8 @@ import "./styles/effects.css";
 // Lazy-loaded pages for instant code-splitting and zero navigation lag
 const Home = lazy(() => import("./pages/Home"));
 const Programs = lazy(() => import("./pages/Programs"));
+const Events = lazy(() => import("./pages/Events"));
+const About = lazy(() => import("./pages/About"));
 
 // 7 Dedicated AI/ML Course & Guide Pages
 const AiCourse = lazy(() => import("./pages/AiCourse"));
@@ -71,6 +73,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/programs" element={<Programs />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/about" element={<About />} />
 
             {/* 7 Separate AI/ML Course & Guide Pages */}
             <Route path="/ai-course" element={<AiCourse />} />

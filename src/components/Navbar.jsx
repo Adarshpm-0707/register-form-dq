@@ -148,7 +148,6 @@ function Navbar() {
     }, 150);
   };
 
-  const isHome = location.pathname === "/";
   const isAiEasyAyiPage =
     location.pathname === "/aieasyayi" ||
     location.pathname === "/ai-easy-ayi" ||
@@ -164,38 +163,20 @@ function Navbar() {
   const isTransparentNav = isAiEasyAyiPage || isAiBoosterPage;
   const isPinkTheme = isAiEasyAyiPage || isAiBoosterPage;
 
-  const navLinks = isHome
-    ? [
-        { name: "Programs", path: "#programs" },
-        { name: "Projects", path: "#projects" },
-        { name: "Events", path: "#events" },
-        { name: "About", path: "#about" },
-        { name: "Contact", path: "#contact" },
-      ]
-    : [
-        { name: "Home", path: "/" },
-        { name: "Programs", path: "/programs" },
-        { name: "Blog", path: "/blog", hasBlogDropdown: true },
-        { name: "Scholarship", path: "/scholarship" },
-        { name: "Admission", path: "/admission" },
-        { name: "Contact", path: "/contact" },
-      ];
-
-  const handleNavClick = (e, targetPath) => {
-    if (targetPath.startsWith("#")) {
-      e.preventDefault();
-      const id = targetPath.replace("#", "");
-      const elem = document.getElementById(id);
-      if (elem) {
-        elem.scrollIntoView({ behavior: "smooth" });
-      }
-      setIsOpen(false);
-    }
-  };
+  // All navigation items are separate dedicated pages
+  const navLinks = [
+    { name: "Home", path: "/" },
+    { name: "Programs", path: "/programs" },
+    { name: "Events", path: "/events" },
+    { name: "About", path: "/about" },
+    { name: "Admission", path: "/admission" },
+    { name: "Scholarship", path: "/scholarship" },
+    { name: "Blog", path: "/blog", hasBlogDropdown: true },
+    { name: "Contact", path: "/contact" },
+  ];
 
   const isActiveRoute = (path) => {
     if (path === "/") return location.pathname === "/";
-    if (path.startsWith("#")) return false;
     return location.pathname.startsWith(path);
   };
 
@@ -339,10 +320,9 @@ function Navbar() {
             }
 
             return (
-              <a
+              <Link
                 key={link.path}
-                href={link.path}
-                onClick={(e) => handleNavClick(e, link.path)}
+                to={link.path}
                 className={`relative text-xs sm:text-sm font-medium tracking-normal transition-all duration-200 group py-1 ${
                   active ? "text-sky-400 font-semibold" : "text-white/80 hover:text-white"
                 }`}
@@ -353,7 +333,7 @@ function Navbar() {
                     active ? "w-full" : "w-0 group-hover:w-full"
                   }`}
                 />
-              </a>
+              </Link>
             );
           })}
         </div>
@@ -525,10 +505,10 @@ function Navbar() {
                   }
 
                   return (
-                    <a
+                    <Link
                       key={link.path}
-                      href={link.path}
-                      onClick={(e) => handleNavClick(e, link.path)}
+                      to={link.path}
+                      onClick={() => setIsOpen(false)}
                       className={`text-sm sm:text-base font-bold py-2.5 sm:py-3 px-3 sm:px-4 transition-all flex items-center justify-between group rounded-2xl text-white ${
                         active
                           ? isPinkTheme
@@ -547,7 +527,7 @@ function Navbar() {
                             : "bg-white scale-0 group-hover:scale-100"
                         }`}
                       />
-                    </a>
+                    </Link>
                   );
                 })}
               </div>

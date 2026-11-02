@@ -16,9 +16,11 @@ export default function Footer() {
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Programs", path: "/programs" },
-    { name: "Blog", path: "/blog" },
-    { name: "Scholarship", path: "/scholarship" },
+    { name: "Events", path: "/events" },
+    { name: "About", path: "/about" },
     { name: "Admission", path: "/admission" },
+    { name: "Scholarship", path: "/scholarship" },
+    { name: "Blog", path: "/blog" },
     { name: "Contact", path: "/contact" },
   ];
 
