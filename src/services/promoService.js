@@ -12,60 +12,32 @@ import {
 const COLLECTION_NAME = "promo_codes";
 const LOCAL_STORAGE_KEY = "deepstaq_promo_codes_cache";
 
-// Initial seed codes if none exist yet
-export const DEFAULT_PROMO_CODES = [
-  {
-    id: "default_easy50",
-    code: "EASY50",
-    discountType: "fixed", // 'fixed' (₹) or 'percentage' (%)
-    discountValue: 50,
-    description: "Flat ₹50 OFF for AI Easy Ayi Live Masterclass",
-    applicableTo: "AI easy Ayi",
-    isActive: true,
-    maxUses: 500,
-    usedCount: 0,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "default_save20",
-    code: "SAVE20",
-    discountType: "fixed",
-    discountValue: 20,
-    description: "Special ₹20 OFF on registration",
-    applicableTo: "AI easy Ayi",
-    isActive: true,
-    maxUses: 1000,
-    usedCount: 0,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "default_ai100",
-    code: "FREE100",
-    discountType: "percentage",
-    discountValue: 100,
-    description: "100% Full Scholarship / Free Entry",
-    applicableTo: "AI easy Ayi",
-    isActive: true,
-    maxUses: 50,
-    usedCount: 0,
-    createdAt: new Date().toISOString(),
-  },
-];
+// No automatic or default codes - ONLY codes added by Admin in the database exist
+export const DEFAULT_PROMO_CODES = [];
 
 /**
- * Get cached local promo codes
+ * Get cached local promo codes (strictly purging any legacy test codes)
  */
 const getLocalPromoCodes = () => {
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) {
+        // Cleanse cache: remove any legacy test sample codes
+        const clean = parsed.filter(
+          (item) =>
+            item &&
+            !String(item.id || "").startsWith("default_") &&
+            !["EASY50", "SAVE20", "FREE100"].includes(item.code)
+        );
+        return clean;
+      }
     }
   } catch (e) {
     console.warn("Failed to load local promo codes:", e);
   }
-  return DEFAULT_PROMO_CODES;
+  return [];
 };
 
 /**
@@ -73,37 +45,68 @@ const getLocalPromoCodes = () => {
  */
 const saveLocalPromoCodes = (codes) => {
   try {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(codes));
+    const clean = Array.isArray(codes)
+      ? codes.filter(
+          (item) =>
+            item &&
+            !String(item.id || "").startsWith("default_") &&
+            !["EASY50", "SAVE20", "FREE100"].includes(item.code)
+        )
+      : [];
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(clean));
   } catch (e) {
     console.warn("Failed to cache promo codes locally:", e);
   }
 };
 
 /**
- * Fetch all promo codes (Firestore with local fallback)
+ * Fetch all promo codes from Firestore database (only admin-added codes)
  */
 export const getPromoCodes = async () => {
-  let list = [];
   try {
     const snap = await getDocs(collection(db, COLLECTION_NAME));
-    if (!snap.empty) {
-      snap.forEach((d) => {
-        list.push({ id: d.id, ...d.data() });
-      });
-      saveLocalPromoCodes(list);
-      return list;
-    }
-  } catch (err) {
-    console.warn("Firestore promo_codes fetch failed, using local cache:", err);
-  }
+    const list = [];
 
-  // If firestore returned empty or failed, use local/default
-  const localList = getLocalPromoCodes();
-  return localList;
+    for (const d of snap.docs) {
+      const data = d.data() || {};
+
+      // Completely purge legacy test/sample codes from Firestore if found
+      if (
+        String(d.id).startsWith("default_") ||
+        ["EASY50", "SAVE20", "FREE100"].includes(data.code)
+      ) {
+        deleteDoc(doc(db, COLLECTION_NAME, d.id)).catch(() => {});
+        continue;
+      }
+
+      let createdAt = data.createdAt;
+      if (createdAt && typeof createdAt.toDate === "function") {
+        createdAt = createdAt.toDate().toISOString();
+      } else if (typeof createdAt !== "string") {
+        createdAt = new Date().toISOString();
+      }
+
+      list.push({
+        id: d.id,
+        ...data,
+        createdAt,
+      });
+    }
+
+    // Sort newest first
+    list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+    // Update local cache with live database records
+    saveLocalPromoCodes(list);
+    return list;
+  } catch (err) {
+    console.warn("Firestore promo_codes fetch failed, falling back to clean local cache:", err);
+    return getLocalPromoCodes();
+  }
 };
 
 /**
- * Add a new promo code
+ * Add a new promo code directly to the Firestore database
  */
 export const createPromoCode = async (promoData) => {
   const cleanCode = String(promoData.code || "")
@@ -128,29 +131,26 @@ export const createPromoCode = async (promoData) => {
     createdAt: serverTimestamp(),
   };
 
-  let createdId = `promo_${Date.now()}`;
-  try {
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), payload);
-    createdId = docRef.id;
-  } catch (err) {
-    console.warn("Failed to save promo code to Firestore, saving to local cache:", err);
-  }
+  // Save to Firestore database
+  const docRef = await addDoc(collection(db, COLLECTION_NAME), payload);
+  const createdId = docRef.id;
 
-  // Update local cache
-  const localList = getLocalPromoCodes();
   const newEntry = {
     id: createdId,
     ...payload,
     createdAt: new Date().toISOString(),
   };
-  const updatedList = [newEntry, ...localList.filter((c) => c.code !== cleanCode)];
+
+  // Update local cache
+  const localList = getLocalPromoCodes();
+  const updatedList = [newEntry, ...localList.filter((c) => c.id !== createdId && c.code !== cleanCode)];
   saveLocalPromoCodes(updatedList);
 
   return { success: true, id: createdId, promo: newEntry };
 };
 
 /**
- * Update an existing promo code
+ * Update an existing promo code in the database
  */
 export const updatePromoCode = async (id, updateData) => {
   const payload = {
@@ -165,12 +165,8 @@ export const updatePromoCode = async (id, updateData) => {
     payload.discountValue = Number(payload.discountValue);
   }
 
-  try {
-    const docRef = doc(db, COLLECTION_NAME, id);
-    await updateDoc(docRef, payload);
-  } catch (err) {
-    console.warn("Firestore updateDoc promo code failed, updating locally:", err);
-  }
+  const docRef = doc(db, COLLECTION_NAME, id);
+  await updateDoc(docRef, payload);
 
   // Update local cache
   const localList = getLocalPromoCodes();
@@ -183,14 +179,11 @@ export const updatePromoCode = async (id, updateData) => {
 };
 
 /**
- * Delete a promo code
+ * Delete a promo code from the database
  */
 export const deletePromoCode = async (id) => {
-  try {
-    await deleteDoc(doc(db, COLLECTION_NAME, id));
-  } catch (err) {
-    console.warn("Firestore deleteDoc promo code failed, deleting locally:", err);
-  }
+  const docRef = doc(db, COLLECTION_NAME, id);
+  await deleteDoc(docRef);
 
   // Update local cache
   const localList = getLocalPromoCodes();
@@ -201,7 +194,7 @@ export const deletePromoCode = async (id) => {
 };
 
 /**
- * Validate and calculate discount for a promo code
+ * Validate and calculate discount for a promo code against active database codes
  * @param {string} inputCode
  * @param {number} originalAmount (e.g. 99)
  * @param {string} program
@@ -220,7 +213,7 @@ export const validatePromoCode = async (inputCode, originalAmount = 99, program 
   }
 
   if (match.isActive === false) {
-    return { valid: false, message: "This promo code is currently inactive or expired." };
+    return { valid: false, message: "This promo code is currently inactive." };
   }
 
   if (match.expiryDate) {

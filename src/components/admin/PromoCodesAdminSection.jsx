@@ -92,10 +92,10 @@ const PromoCodesAdminSection = () => {
       setPromoCodes((prev) =>
         prev.map((item) => (item.id === promo.id ? { ...item, isActive: updatedStatus } : item))
       );
-      showNotification("success", `Promo code ${promo.code} ${updatedStatus ? "activated" : "deactivated"}`);
+      showNotification("success", `Promo code "${promo.code}" ${updatedStatus ? "activated" : "deactivated"} in database`);
     } catch (e) {
       console.error(e);
-      showNotification("error", "Failed to update promo status");
+      showNotification("error", e.message || "Failed to update promo status in database");
     }
   };
 
@@ -106,10 +106,10 @@ const PromoCodesAdminSection = () => {
     try {
       await deletePromoCode(promo.id);
       setPromoCodes((prev) => prev.filter((item) => item.id !== promo.id));
-      showNotification("success", `Promo code ${promo.code} deleted successfully`);
+      showNotification("success", `Promo code "${promo.code}" deleted from database`);
     } catch (e) {
       console.error(e);
-      showNotification("error", "Failed to delete promo code");
+      showNotification("error", e.message || "Failed to delete promo code from database");
     }
   };
 
@@ -133,29 +133,12 @@ const PromoCodesAdminSection = () => {
           expiryDate: formState.expiryDate || null,
           isActive: formState.isActive,
         });
-        setPromoCodes((prev) =>
-          prev.map((item) =>
-            item.id === editingPromo.id
-              ? {
-                  ...item,
-                  code: formState.code.trim().toUpperCase(),
-                  discountType: formState.discountType,
-                  discountValue: Number(formState.discountValue),
-                  applicableTo: formState.applicableTo,
-                  description: formState.description,
-                  maxUses: Number(formState.maxUses),
-                  expiryDate: formState.expiryDate || null,
-                  isActive: formState.isActive,
-                }
-              : item
-          )
-        );
-        showNotification("success", `Promo code ${formState.code} updated successfully!`);
+        showNotification("success", `Promo code "${formState.code}" updated in database!`);
       } else {
-        const res = await createPromoCode(formState);
-        setPromoCodes((prev) => [res.promo, ...prev]);
-        showNotification("success", `Promo code ${formState.code} created successfully!`);
+        await createPromoCode(formState);
+        showNotification("success", `Promo code "${formState.code}" saved to database successfully!`);
       }
+      await fetchPromos();
       handleCloseModal();
     } catch (e) {
       console.error(e);
@@ -216,14 +199,26 @@ const PromoCodesAdminSection = () => {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleOpenCreateModal}
-          className="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-[#050521] hover:bg-[#fa0058] text-white font-black uppercase text-xs tracking-wider transition-all shadow-[4px_4px_0px_0px_#c6ff34] active:scale-95 flex items-center justify-center gap-2 shrink-0 cursor-pointer text-center"
-        >
-          <span className="text-lg leading-none font-bold">+</span>
-          <span>Add New Promo Code</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto shrink-0">
+          <button
+            type="button"
+            onClick={fetchPromos}
+            disabled={loading}
+            title="Reload latest promo codes from database"
+            className="px-4 py-3 sm:py-3.5 rounded-2xl bg-white border-2 border-[#050521] text-[#050521] hover:bg-slate-100 font-bold uppercase text-xs tracking-wider transition-all shadow-[3px_3px_0px_0px_#050521] active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+          >
+            <span>🔄</span>
+            <span className="hidden min-[400px]:inline">Sync DB</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleOpenCreateModal}
+            className="flex-1 sm:flex-initial px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-[#050521] hover:bg-[#fa0058] text-white font-black uppercase text-xs tracking-wider transition-all shadow-[4px_4px_0px_0px_#c6ff34] active:scale-95 flex items-center justify-center gap-2 cursor-pointer text-center"
+          >
+            <span className="text-lg leading-none font-bold">+</span>
+            <span>Add New Promo Code</span>
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -293,9 +288,9 @@ const PromoCodesAdminSection = () => {
       ) : filteredCodes.length === 0 ? (
         <div className="bg-white border-2 border-dashed border-slate-300 rounded-3xl p-8 sm:p-12 text-center">
           <span className="text-3xl block mb-2">🏷️</span>
-          <h4 className="text-base font-black uppercase text-[#050521]">No Promo Codes Found</h4>
-          <p className="text-xs text-slate-500 mt-1">
-            Click "+ Add New Promo Code" above to create your first discount code.
+          <h4 className="text-base font-black uppercase text-[#050521]">No Promo Codes In Database</h4>
+          <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+            Only promo codes created by an admin are saved in the database and shown here. No automatic or test codes exist. Click "+ Add New Promo Code" to add your first code.
           </p>
         </div>
       ) : (
@@ -446,7 +441,7 @@ const PromoCodesAdminSection = () => {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. EASY50, WELCOME20, FREE100"
+                    placeholder="e.g. SPECIAL50, OFFER20, SCHOLAR100"
                     value={formState.code}
                     onChange={(e) =>
                       setFormState({

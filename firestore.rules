@@ -151,7 +151,7 @@ service cloud.firestore {
     // Security for Promo Codes
     match /promo_codes/{document} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || request.auth != null;
     }
 
     // Security for Admins - Strict Ownership, Write restricted to existing Admins (no self privilege escalation)

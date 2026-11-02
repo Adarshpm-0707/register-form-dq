@@ -169,7 +169,7 @@ const TRANSLATIONS = {
 
     // Promo & Discount
     promoLabel: "പ്രൊമോ കോഡ് ഉണ്ടോ?",
-    promoPlaceholder: "കോഡ് നൽകുക (e.g. EASY50)",
+    promoPlaceholder: "കോഡ് നൽകുക",
     promoApplyBtn: "Apply",
     promoApplying: "പരിശോധിക്കുന്നു...",
     promoRemoveBtn: "നീക്കം ചെയ്യുക",
@@ -392,7 +392,7 @@ const TRANSLATIONS = {
 
     // Promo & Discount
     promoLabel: "Have a Promo / Discount Code?",
-    promoPlaceholder: "Enter code (e.g. EASY50)",
+    promoPlaceholder: "Enter promo code",
     promoApplyBtn: "Apply",
     promoApplying: "Checking...",
     promoRemoveBtn: "Remove",

@@ -9,6 +9,9 @@ import event1Img from "../assets/events/event (1).webp";
 import event8Img from "../assets/events/event (8).webp";
 import event10Img from "../assets/events/event (10).webp";
 import event12Img from "../assets/events/event (12).webp";
+import event7Img from "../assets/events/event (7).webp";
+import event9Img from "../assets/events/event (9).webp";
+import event11Img from "../assets/events/event (11).webp";
 
 /* ─────────────────────────────────────────────
    TECH ECOSYSTEM LOGOS & TOOLS
@@ -122,6 +125,33 @@ const eventHighlights = [
     img: event10Img,
     date: "1-Month Track",
     badge: "1-Month Workshop",
+  },
+  {
+    id: 5,
+    title: "Live Mentorship & Project Demo",
+    subtitle: "Architectural Guidance",
+    desc: "One-on-one architectural guidance and technical review for participants building real-world intelligent applications.",
+    img: event7Img,
+    date: "Mentorship",
+    badge: "1:1 Mentorship",
+  },
+  {
+    id: 6,
+    title: "Tech Q&A & Open Discussions",
+    subtitle: "Industry Landscape",
+    desc: "In-depth discussions addressing real-world deployment challenges, LLMOps, and the future landscape of Artificial Intelligence.",
+    img: event9Img,
+    date: "Tech Q&A",
+    badge: "Open Discussions",
+  },
+  {
+    id: 7,
+    title: "Event Concluding Highlights",
+    subtitle: "Certification & Community",
+    desc: "Closing moments celebrating student achievements, certificate distributions, and next steps in the Deepstaq journey.",
+    img: event11Img,
+    date: "Milestone",
+    badge: "Community Celebration",
   },
 ];
 
@@ -403,6 +433,61 @@ export default function Home() {
                 ))}
               </motion.div>
             </div>
+          </div>
+
+        </section>
+
+
+        {/* ══════════════════════════════════════════════════════════
+            PREVIOUS EVENTS / EVENT HIGHLIGHTS (Running Image Marquee)
+           ══════════════════════════════════════════════════════════ */}
+        <section id="events" className="py-12 sm:py-16 px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1440px] mx-auto overflow-hidden">
+          
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 sm:mb-12">
+            <div className="space-y-2">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white">
+                PREVIOUS EVENTS
+              </div>
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+                Event Highlights
+              </h2>
+            </div>
+
+            <div className="flex items-center gap-4 md:max-w-md">
+              <p className="text-sm text-slate-400 font-normal leading-relaxed">
+                Workshops, masterclasses and community sessions to spread AI knowledge and build a stronger learning community in Kannur.
+              </p>
+            </div>
+          </div>
+
+          {/* Running Images Marquee (Left-to-Right Continuous Flow) */}
+          <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)] py-3">
+            <motion.div
+              animate={{ x: ["-50%", "0%"] }}
+              transition={{ duration: 32, repeat: Infinity, ease: "linear" }}
+              className="flex items-center gap-4 sm:gap-6 shrink-0"
+              style={{ width: "max-content" }}
+            >
+              {[...eventHighlights, ...eventHighlights].map((evt, idx) => (
+                <div
+                  key={`${evt.id}-${idx}`}
+                  onClick={() => setActiveEventLightbox(evt)}
+                  className="relative h-48 sm:h-60 md:h-72 aspect-[16/10] rounded-2xl sm:rounded-3xl overflow-hidden border border-white/10 hover:border-sky-400/60 transition-all duration-300 shadow-xl cursor-pointer group shrink-0 bg-slate-900"
+                >
+                  <img
+                    src={evt.img}
+                    alt={evt.title || "Deepstaq Event Highlight"}
+                    className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                    <span className="text-xs font-semibold text-white drop-shadow-md">
+                      {evt.title}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </motion.div>
           </div>
 
         </section>
@@ -807,77 +892,7 @@ export default function Home() {
         </section>
 
 
-        {/* ══════════════════════════════════════════════════════════
-            5. PREVIOUS EVENTS / EVENT HIGHLIGHTS (Matching Screenshot)
-           ══════════════════════════════════════════════════════════ */}
-        <section id="events" className="py-16 sm:py-24 px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1440px] mx-auto">
-          
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
-            <div className="space-y-2">
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white">
-                PREVIOUS EVENTS
-              </div>
-              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
-                Event Highlights
-              </h2>
-            </div>
-
-            <div className="flex items-center gap-4 md:max-w-md">
-              <p className="text-sm text-slate-400 font-normal leading-relaxed">
-                Workshops, masterclasses and community sessions to spread AI knowledge and build a stronger learning community in Kannur.
-              </p>
-            </div>
-          </div>
-
-          {/* 4 Event Cards from Deepstaq Archive */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {eventHighlights.map((evt) => (
-              <div
-                key={evt.id}
-                onClick={() => setActiveEventLightbox(evt)}
-                className="group rounded-3xl overflow-hidden bg-white/[0.03] border border-white/10 hover:border-sky-400/40 transition-all duration-300 flex flex-col justify-between shadow-lg cursor-pointer"
-              >
-                {/* Photo Frame */}
-                <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-900">
-                  <img
-                    src={evt.img}
-                    alt={evt.title}
-                    className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                  />
-                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#090D11]/85 backdrop-blur-md border border-white/15 text-[10px] font-semibold text-white">
-                    {evt.badge}
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-5 flex flex-col justify-between flex-1">
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-1 group-hover:text-white transition-colors">
-                      {evt.title}
-                    </h3>
-                    <div className="text-xs font-medium text-slate-300 mb-2">
-                      {evt.subtitle}
-                    </div>
-                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                      {evt.desc}
-                    </p>
-                  </div>
-
-                  <div className="pt-4 flex items-center justify-between">
-                    <span className="text-[11px] text-slate-500 font-mono">
-                      {evt.date}
-                    </span>
-                    <span className="w-8 h-8 rounded-full bg-white/10 group-hover:bg-sky-400 text-white group-hover:text-slate-950 flex items-center justify-center text-xs font-bold transition-all">
-                      →
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-        </section>
+        
 
 
         {/* ══════════════════════════════════════════════════════════
