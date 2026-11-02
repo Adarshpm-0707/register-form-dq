@@ -32,6 +32,7 @@ import {
   updateAiBoosterProgramRegistration,
   deleteAiBoosterProgramRegistration
 } from "../../services/dbService";
+import PromoCodesAdminSection from "../../components/admin/PromoCodesAdminSection";
 
 const DataCard = ({ item, headers, onDelete }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -2185,12 +2186,17 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
             {isPaid ? (
               <span className="px-3 py-1 bg-emerald-600 text-white rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-[#c6ff34]" />
-                ✓ Paid (₹99)
+                ✓ Paid (₹{item.amountPaid !== undefined ? item.amountPaid : (item.amount || 99)})
               </span>
             ) : (
               <span className="px-3 py-1 bg-amber-500 text-white rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                ⏳ Unpaid (₹99 Pending)
+                ⏳ Unpaid (₹{item.amount || 99} Pending)
+              </span>
+            )}
+            {item.promoCode && (
+              <span className="px-2.5 py-1 bg-[#fa0058]/10 text-[#fa0058] border border-[#fa0058]/30 rounded-full text-[10px] font-mono font-black uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                🏷️ {item.promoCode} (-₹{item.discountAmount || 0})
               </span>
             )}
             {getStatusBadge()}
@@ -2252,11 +2258,18 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
           </span>
           {isPaid ? (
             <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="text-emerald-700 font-black text-xs">✓ Amount Paid: ₹99</span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-emerald-700 font-black text-xs">
+                  ✓ Amount Paid: ₹{item.amountPaid !== undefined ? item.amountPaid : (item.amount || 99)}
+                </span>
+                {item.promoCode && (
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-emerald-200 text-emerald-900 rounded">
+                    Code: {item.promoCode} (-₹{item.discountAmount || 0})
+                  </span>
+                )}
                 <span className="text-slate-400 text-xs">|</span>
                 <span className="text-xs font-mono font-bold text-emerald-900 truncate">
-                  {paymentId ? `Razorpay ID: ${paymentId}` : "Payment Confirmed"}
+                  {paymentId ? `Payment ID: ${paymentId}` : "Payment Confirmed"}
                 </span>
               </div>
               {paymentId && (
@@ -2271,8 +2284,15 @@ const AiForEveryoneCard = ({ item, onDelete, onUpdate }) => {
             </div>
           ) : (
             <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="text-amber-800 font-black text-xs">⏳ ₹99 Payment Incomplete</span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-amber-800 font-black text-xs">
+                  ⏳ Payment Incomplete (₹{item.amount || 99})
+                </span>
+                {item.promoCode && (
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-amber-200 text-amber-900 rounded">
+                    Code: {item.promoCode} (-₹{item.discountAmount || 0})
+                  </span>
+                )}
                 <span className="text-slate-400 text-xs">|</span>
                 <span className="text-[11px] text-amber-700 font-medium">Candidate submitted form but dropped off at gateway</span>
               </div>
@@ -3052,7 +3072,9 @@ function AdminDashboard() {
         "Qualification",
         "Payment Status",
         "Payment ID (Razorpay)",
-        "Amount (INR)",
+        "Amount Paid (INR)",
+        "Promo Code",
+        "Discount Amount (INR)",
         "Address",
         "Lead Status",
         "Admin Notes",
@@ -3077,7 +3099,9 @@ function AdminDashboard() {
           clean(item.qualification || item.education),
           clean(isPaid ? "PAID" : "UNPAID"),
           clean(item.paymentId || ""),
-          clean(isPaid ? (item.amountPaid || 99) : 0),
+          clean(isPaid ? (item.amountPaid !== undefined ? item.amountPaid : (item.amount || 99)) : 0),
+          clean(item.promoCode || ""),
+          clean(item.discountAmount || 0),
           clean(item.address),
           clean(item.status || "New"),
           clean(item.adminNotes || ""),
@@ -3464,6 +3488,9 @@ function AdminDashboard() {
   };
 
   const renderCards = (data) => {
+    if (activeTab === "promo_codes") {
+      return <PromoCodesAdminSection />;
+    }
     if (data.length === 0) {
       if (activeTab === "ai_for_everyone") {
         if (aiPaymentTab === "paid") {
@@ -4031,6 +4058,7 @@ function AdminDashboard() {
       if (boosterPaymentTab === "unpaid") return unpaidBoosterStudents;
       return aiBoosterProgramData;
     }
+    if (activeTab === "promo_codes") return [];
 
     return scholarshipData;
   };
@@ -4098,6 +4126,8 @@ function AdminDashboard() {
         if (boosterPaymentTab === "paid") return "AI Booster Program — Paid Students Section (₹49)";
         if (boosterPaymentTab === "unpaid") return "AI Booster Program — Unpaid / Pending Leads Section";
         return "AI Booster Program — Separate Paid & Unpaid Sections";
+      case "promo_codes":
+        return "Promo & Discount Codes";
       default: return "Dashboard";
     }
   };
@@ -4161,6 +4191,19 @@ function AdminDashboard() {
                )}
                <span className={`px-2.5 py-1 rounded-md text-[9px] ${activeTab === "ai_for_everyone" ? "bg-[#050521]/10 text-[#050521]" : "bg-white/10 text-white"}`}>{aiForEveryoneData.length}</span>
              </div>
+          </button>
+
+          <button 
+             onClick={() => setActiveTab("promo_codes")}
+             className={`flex-shrink-0 md:w-full text-left px-5 py-4 rounded-2xl font-black uppercase tracking-[0.1em] text-[10px] transition-all flex justify-between items-center gap-4 ${activeTab === "promo_codes" ? "bg-[#c6ff34] text-[#050521] shadow-[0_4px_20px_rgba(198,255,52,0.15)]" : "bg-transparent text-white/60 hover:bg-white/10"}`}
+          >
+             <span className="flex items-center gap-2">
+               <span>🏷️</span>
+               <span>Promo & Discounts</span>
+             </span>
+             <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold ${activeTab === "promo_codes" ? "bg-[#050521] text-[#c6ff34]" : "bg-[#fa0058]/20 text-[#fa0058] border border-[#fa0058]/40"}`}>
+               Manage
+             </span>
           </button>
 
           <div className="flex flex-col gap-1">
@@ -4359,7 +4402,11 @@ function AdminDashboard() {
               {getTabTitle()}
             </h2>
             <p className="text-[#050521]/40 font-bold uppercase tracking-widest text-[10px] mt-1">
-              {searchQuery ? `Showing ${getFilteredData().length} of ${getActiveData().length} records` : `Currently viewing ${getActiveData().length} records`}
+              {activeTab === "promo_codes"
+                ? "Manage & Create Discount Coupons for Registrations"
+                : searchQuery
+                ? `Showing ${getFilteredData().length} of ${getActiveData().length} records`
+                : `Currently viewing ${getActiveData().length} records`}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -4385,15 +4432,17 @@ function AdminDashboard() {
                 </button>
               </>
             )}
-            <button
-              type="button"
-              onClick={fetchData}
-              disabled={loadingData}
-              className="py-2.5 px-4 bg-white hover:bg-slate-100 border border-slate-200 text-[#050521] rounded-xl text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
-            >
-              <span className={loadingData ? "animate-spin" : ""}>↻</span>
-              <span>{loadingData ? "Refreshing..." : "Refresh Data"}</span>
-            </button>
+            {activeTab !== "promo_codes" && (
+              <button
+                type="button"
+                onClick={fetchData}
+                disabled={loadingData}
+                className="py-2.5 px-4 bg-white hover:bg-slate-100 border border-slate-200 text-[#050521] rounded-xl text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                <span className={loadingData ? "animate-spin" : ""}>↻</span>
+                <span>{loadingData ? "Refreshing..." : "Refresh Data"}</span>
+              </button>
+            )}
           </div>
         </header>
 
@@ -4405,7 +4454,11 @@ function AdminDashboard() {
             <div>
               <h2 className="text-2xl font-black tracking-tight text-[#050521]">{getTabTitle()}</h2>
               <p className="text-[#050521]/40 font-bold uppercase tracking-widest text-[9px] mt-1">
-                {searchQuery ? `Showing ${getFilteredData().length} of ${getActiveData().length} records` : `${getActiveData().length} records found`}
+                {activeTab === "promo_codes"
+                  ? "Manage Discount Coupons"
+                  : searchQuery
+                  ? `Showing ${getFilteredData().length} of ${getActiveData().length} records`
+                  : `${getActiveData().length} records found`}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -4864,7 +4917,7 @@ function AdminDashboard() {
           )}
 
           {/* Search Input */}
-          {!loadingData && (
+          {!loadingData && activeTab !== "promo_codes" && (
             <div className="mb-6 max-w-md">
               <div className="relative">
                 <input

@@ -2038,6 +2038,8 @@ export const saveAiEasyAyiRegistration = async (formData) => {
     originalPrice: Number(formData.originalPrice || 899),
     amount: Number(formData.amount || 99),
     amountPaid: Number(formData.amountPaid || 0),
+    discountAmount: Number(formData.discountAmount || 0),
+    promoCode: sanitize(formData.promoCode || "", 50),
     paymentStatus: sanitize(formData.paymentStatus || "unpaid", 20),
     paymentId: sanitize(formData.paymentId || "", 100),
     status: sanitize(formData.status || (formData.paymentStatus === "paid" ? "Paid & Confirmed" : "Unpaid Lead"), 50),
@@ -2243,6 +2245,9 @@ export const updateAiEasyAyiRegistration = async (id, updateData) => {
   if (updateData.paymentStatus !== undefined) payload.paymentStatus = sanitize(updateData.paymentStatus, 50);
   if (updateData.paymentId !== undefined) payload.paymentId = sanitize(updateData.paymentId, 100);
   if (updateData.amountPaid !== undefined) payload.amountPaid = Number(updateData.amountPaid);
+  if (updateData.discountAmount !== undefined) payload.discountAmount = Number(updateData.discountAmount);
+  if (updateData.amount !== undefined) payload.amount = Number(updateData.amount);
+  if (updateData.promoCode !== undefined) payload.promoCode = sanitize(updateData.promoCode, 50);
   if (updateData.adminNotes !== undefined) payload.adminNotes = sanitize(updateData.adminNotes, 500);
   if (updateData.qualification !== undefined || updateData.education !== undefined) {
     const qVal = sanitize(updateData.qualification || updateData.education, 100);

@@ -1,10 +1,16 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/Asset 1@4x.png";
 
 export default function Footer() {
+  const location = useLocation();
   const [openFaq, setOpenFaq] = useState(null);
   const currentYear = new Date().getFullYear();
+
+  // Completely remove Footer on all admin routes
+  if (location.pathname.toLowerCase().includes("admin")) {
+    return null;
+  }
 
   // STRICTLY only the items present in the site navbar (no extra links)
   const navLinks = [

@@ -44,7 +44,7 @@ const PageFallback = () => (
 
 const AppLayout = ({ children }) => {
   const location = useLocation();
-  const isAdmin = location.pathname.startsWith("/admin");
+  const isAdmin = location.pathname.toLowerCase().includes("admin");
   const isHome = location.pathname === "/";
 
   return (
