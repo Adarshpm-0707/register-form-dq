@@ -6,6 +6,7 @@ import {
   saveAiEasyAyiRegistration,
   updateAiEasyAyiRegistration,
 } from "../services/dbService";
+import { validatePromoCode } from "../services/promoService";
 import AdVideoSection from "../components/AdVideoSection";
 import LimitedSeatsSection from "../components/LimitedSeatsSection";
 import { useSeatsCountdown } from "../hooks/useSeatsCountdown";
@@ -165,6 +166,17 @@ const TRANSLATIONS = {
     formSaving: "വിവരങ്ങൾ സേവ് ചെയ്യുന്നു...",
     formGateway: "Razorpay തുറക്കുന്നു...",
     formVerifying: "പരിശോധിക്കുന്നു...",
+
+    // Promo & Discount
+    promoLabel: "പ്രൊമോ കോഡ് ഉണ്ടോ?",
+    promoPlaceholder: "കോഡ് നൽകുക (e.g. EASY50)",
+    promoApplyBtn: "Apply",
+    promoApplying: "പരിശോധിക്കുന്നു...",
+    promoRemoveBtn: "നീക്കം ചെയ്യുക",
+    promoFeeLabel: "രജിസ്ട്രേഷൻ ഫീസ്",
+    promoDiscountLabel: "പ്രൊമോ ഓഫർ",
+    promoTotalLabel: "അടയ്ക്കാനുള്ള തുക",
+    promoFreeBtn: "സൗജന്യമായി കൺഫേം ചെയ്യൂ (100% OFF)",
 
     // FAQ
     faqBadge: "സംശയങ്ങൾ",
@@ -378,6 +390,17 @@ const TRANSLATIONS = {
     formGateway: "Opening Razorpay...",
     formVerifying: "Verifying payment...",
 
+    // Promo & Discount
+    promoLabel: "Have a Promo / Discount Code?",
+    promoPlaceholder: "Enter code (e.g. EASY50)",
+    promoApplyBtn: "Apply",
+    promoApplying: "Checking...",
+    promoRemoveBtn: "Remove",
+    promoFeeLabel: "Registration Fee",
+    promoDiscountLabel: "Promo Discount",
+    promoTotalLabel: "Total Payable",
+    promoFreeBtn: "Confirm Free Registration (100% OFF)",
+
     // FAQ
     faqBadge: "FREQUENTLY ASKED",
     faqTitle: "Frequently Asked Questions",
@@ -532,6 +555,62 @@ export default function AiEasyAyi() {
   const [paymentNotice, setPaymentNotice] = useState(null);
   const [pendingRegId, setPendingRegId] = useState(null);
 
+  // Promo Code State
+  const [promoCodeInput, setPromoCodeInput] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState(null);
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoMessage, setPromoMessage] = useState(null);
+
+  const handleApplyPromo = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const clean = promoCodeInput.trim().toUpperCase();
+    if (!clean) {
+      setPromoMessage({
+        type: "error",
+        text: lang === "ml" ? "ദയവായി പ്രൊമോ കോഡ് നൽകുക" : "Please enter a promo code",
+      });
+      return;
+    }
+
+    setPromoLoading(true);
+    setPromoMessage(null);
+    try {
+      const res = await validatePromoCode(clean, 99, "AI easy Ayi");
+      if (res.valid) {
+        setAppliedPromo(res);
+        setPromoMessage({
+          type: "success",
+          text: lang === "ml"
+            ? `✓ ${res.code} അപ്ലൈ ചെയ്തു! ₹${res.discountAmount} ഓഫർ ലഭിച്ചു.`
+            : `✓ ${res.code} applied! Saved ₹${res.discountAmount}.`,
+        });
+      } else {
+        setAppliedPromo(null);
+        setPromoMessage({
+          type: "error",
+          text: res.message || (lang === "ml" ? "അസാധുവായ പ്രൊമോ കോഡ്" : "Invalid promo code"),
+        });
+      }
+    } catch (err) {
+      console.error("Promo validation error:", err);
+      setPromoMessage({
+        type: "error",
+        text: lang === "ml" ? "കോഡ് പരിശോധിക്കാൻ കഴിഞ്ഞില്ല. വീണ്ടും ശ്രമിക്കുക." : "Failed to validate code.",
+      });
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoCodeInput("");
+    setPromoMessage(null);
+  };
+
   const fullSessionDateFormatted = getFullSessionDateFormatted(lang);
 
   const handleExplorePrograms = (path = "/programs") => {
@@ -621,7 +700,20 @@ export default function AiEasyAyi() {
         { label: "Delivery Mode", value: "Online Live via Zoom (Interactive)" },
         { label: "Reference ID", value: submittedData.id || "AYI-REG" },
         { label: "Transaction / Payment ID", value: submittedData.paymentId || "Razorpay Confirmed" },
-        { label: "Total Amount Paid", value: "INR 99.00 (Inclusive of All Taxes)" },
+        {
+          label: "Total Amount Paid",
+          value: submittedData.amountPaid !== undefined
+            ? `INR ${Number(submittedData.amountPaid).toFixed(2)} (Inclusive of All Taxes)`
+            : "INR 99.00 (Inclusive of All Taxes)",
+        },
+        ...(submittedData.promoCode
+          ? [
+              {
+                label: "Promo Code Applied",
+                value: `${submittedData.promoCode} (Saved INR ${Number(submittedData.discountAmount || 0).toFixed(2)})`,
+              },
+            ]
+          : []),
       ];
 
       let fieldY = 81;
@@ -782,6 +874,10 @@ export default function AiEasyAyi() {
 
       const cleanPhone = formData.phone.replace(/\D/g, "").slice(-10);
 
+      const finalAmount = appliedPromo ? appliedPromo.finalAmount : 99;
+      const discountAmount = appliedPromo ? appliedPromo.discountAmount : 0;
+      const appliedCode = appliedPromo ? appliedPromo.code : null;
+
       const payload = {
         fullName: formData.fullName.trim(),
         name: formData.fullName.trim(),
@@ -795,10 +891,13 @@ export default function AiEasyAyi() {
         isAiEasyAyi: true,
         isAiForEveryone: true,
         originalPrice: 899,
-        amount: 99,
+        basePrice: 99,
+        amount: finalAmount,
+        discountAmount: discountAmount,
+        promoCode: appliedCode,
         amountPaid: 0,
-        paymentStatus: "unpaid",
-        status: "Unpaid Lead",
+        paymentStatus: finalAmount === 0 ? "paid" : "unpaid",
+        status: finalAmount === 0 ? "Paid & Confirmed (100% Free)" : "Unpaid Lead",
         languagePreference: lang,
       };
 
@@ -813,9 +912,47 @@ export default function AiEasyAyi() {
       if (typeof window !== "undefined" && typeof window.fbq === "function") {
         window.fbq("track", "Lead", {
           content_name: "AI Easy Ayi Registration",
-          value: 99,
+          value: finalAmount,
           currency: "INR",
         });
+      }
+
+      // 100% FREE PROMO REGISTRATION (No payment gateway needed)
+      if (finalAmount === 0) {
+        const promoPayId = `FREE_${appliedCode || "PROMO"}_${Date.now().toString().slice(-6)}`;
+        try {
+          await updateAiEasyAyiRegistration(regId, {
+            paymentStatus: "paid",
+            status: "Paid & Confirmed (100% Discount)",
+            paymentId: promoPayId,
+            amountPaid: 0,
+            amount: 0,
+            discountAmount: discountAmount,
+            promoCode: appliedCode,
+            qualification: finalQualification,
+            education: finalQualification,
+          });
+        } catch (e) {
+          console.warn("Free registration update note:", e);
+        }
+
+        setSubmittedData({
+          ...payload,
+          id: regId,
+          paymentStatus: "paid",
+          paymentId: promoPayId,
+          amountPaid: 0,
+          originalPrice: 899,
+          registeredAt: new Date().toLocaleDateString(lang === "ml" ? "ml-IN" : "en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }),
+        });
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setLoading(false);
+        return;
       }
 
       setLoadingStep("gateway");
@@ -832,10 +969,12 @@ export default function AiEasyAyi() {
 
       const options = {
         key: process.env.REACT_APP_RAZORPAY_KEY_ID || "rzp_live_RQB88T04c3K3R5",
-        amount: 9900,
+        amount: finalAmount * 100, // <--- Razorpay displays the exact discounted rate!
         currency: "INR",
         name: "DeepStaq Academy",
-        description: "AI easy Ayi - 90 Mins Live Class (5:00 PM - 6:30 PM IST)",
+        description: appliedCode
+          ? `AI easy Ayi - 90 Mins Live Class (${appliedCode}: ₹${discountAmount} OFF)`
+          : "AI easy Ayi - 90 Mins Live Class (5:00 PM - 6:30 PM IST)",
         image: logo,
         prefill: {
           name: formData.fullName.trim(),
@@ -864,7 +1003,10 @@ export default function AiEasyAyi() {
               paymentStatus: "paid",
               status: "Paid & Confirmed",
               paymentId: response.razorpay_payment_id,
-              amountPaid: 99,
+              amountPaid: finalAmount,
+              amount: finalAmount,
+              discountAmount: discountAmount,
+              promoCode: appliedCode,
               qualification: finalQualification,
               education: finalQualification,
             });
@@ -874,7 +1016,9 @@ export default function AiEasyAyi() {
               id: regId,
               paymentStatus: "paid",
               paymentId: response.razorpay_payment_id,
-              amountPaid: 99,
+              amountPaid: finalAmount,
+              discountAmount: discountAmount,
+              promoCode: appliedCode,
               originalPrice: 899,
               registeredAt: new Date().toLocaleDateString(lang === "ml" ? "ml-IN" : "en-IN", {
                 day: "numeric",
@@ -889,7 +1033,7 @@ export default function AiEasyAyi() {
             if (typeof window !== "undefined" && typeof window.fbq === "function") {
               window.fbq("track", "Purchase", {
                 content_name: "AI Easy Ayi Live Workshop",
-                value: 99,
+                value: finalAmount,
                 currency: "INR",
               });
             }
@@ -900,7 +1044,9 @@ export default function AiEasyAyi() {
               id: regId,
               paymentStatus: "paid",
               paymentId: response.razorpay_payment_id,
-              amountPaid: 99,
+              amountPaid: finalAmount,
+              discountAmount: discountAmount,
+              promoCode: appliedCode,
               originalPrice: 899,
               registeredAt: new Date().toLocaleDateString(lang === "ml" ? "ml-IN" : "en-IN", {
                 day: "numeric",
@@ -914,7 +1060,7 @@ export default function AiEasyAyi() {
             if (typeof window !== "undefined" && typeof window.fbq === "function") {
               window.fbq("track", "Purchase", {
                 content_name: "AI Easy Ayi Live Workshop",
-                value: 99,
+                value: finalAmount,
                 currency: "INR",
               });
             }
@@ -962,6 +1108,9 @@ export default function AiEasyAyi() {
     setPaymentNotice(null);
     setPendingRegId(null);
     setSubmittedData(null);
+    setPromoCodeInput("");
+    setAppliedPromo(null);
+    setPromoMessage(null);
     setShowForm(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -1066,6 +1215,17 @@ export default function AiEasyAyi() {
                   <div className="flex flex-col gap-0.5 border-b border-white/5 sm:border-b-0 pb-2 sm:pb-0">
                     <span className="text-[10px] uppercase text-slate-400 font-bold">{t.receiptFormat}</span>
                     <span className="text-sky-300 font-semibold">{t.receiptFormatVal}</span>
+                  </div>
+                  <div className="flex flex-col gap-0.5 border-b border-white/5 sm:border-b-0 pb-2 sm:pb-0">
+                    <span className="text-[10px] uppercase text-slate-400 font-bold">Amount Paid</span>
+                    <span className="text-white font-bold font-mono text-emerald-400">
+                      ₹{submittedData.amountPaid !== undefined ? submittedData.amountPaid : 99}
+                      {submittedData.promoCode && (
+                        <span className="text-[11px] text-[#ff337d] font-normal ml-2">
+                          ({submittedData.promoCode} applied)
+                        </span>
+                      )}
+                    </span>
                   </div>
                   <div className="flex flex-col gap-0.5">
                     <span className="text-[10px] uppercase text-slate-400 font-bold">{t.receiptPaymentId}</span>
@@ -1548,6 +1708,108 @@ export default function AiEasyAyi() {
                         )}
                       </div>
 
+                      {/* Promo Code & Discount Section */}
+                      <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-mono uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                            <span>🏷️</span>
+                            <span>{t.promoLabel || "Have a Promo / Discount Code?"}</span>
+                          </label>
+                          {appliedPromo && (
+                            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold">
+                              {appliedPromo.code} APPLIED
+                            </span>
+                          )}
+                        </div>
+
+                        {!appliedPromo ? (
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={promoCodeInput}
+                              onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  handleApplyPromo(e);
+                                }
+                              }}
+                              placeholder={t.promoPlaceholder || "Enter code (e.g. EASY50)"}
+                              className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-[#0a0f14] text-xs font-mono uppercase text-white placeholder-slate-500 focus:outline-none focus:border-[#f90058] transition-all tracking-wider"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleApplyPromo}
+                              disabled={promoLoading || !promoCodeInput.trim()}
+                              className={`px-5 py-2.5 rounded-xl text-xs font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer ${
+                                promoLoading || !promoCodeInput.trim()
+                                  ? "bg-white/10 text-slate-500 cursor-not-allowed"
+                                  : "bg-[#fa0058] hover:bg-[#e0004f] text-white shadow-[0_2px_12px_rgba(250,0,88,0.3)] hover:scale-[1.02]"
+                              }`}
+                            >
+                              {promoLoading ? (
+                                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                t.promoApplyBtn || "Apply"
+                              )}
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <span className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold shrink-0">
+                                ✓
+                              </span>
+                              <div className="min-w-0">
+                                <p className="text-xs font-bold text-emerald-300 truncate">
+                                  {appliedPromo.code} - {appliedPromo.description}
+                                </p>
+                                <p className="text-[11px] font-mono text-emerald-400/80">
+                                  Discount: -₹{appliedPromo.discountAmount}
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleRemovePromo}
+                              className="px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer shrink-0"
+                            >
+                              {t.promoRemoveBtn || "Remove"}
+                            </button>
+                          </div>
+                        )}
+
+                        {promoMessage && (
+                          <p
+                            className={`text-xs font-mono ${
+                              promoMessage.type === "success" ? "text-emerald-400" : "text-rose-400"
+                            }`}
+                          >
+                            {promoMessage.text}
+                          </p>
+                        )}
+
+                        {/* Price Breakdown */}
+                        <div className="pt-2 border-t border-white/5 space-y-1.5 text-xs font-mono">
+                          <div className="flex justify-between text-slate-400">
+                            <span>{t.promoFeeLabel || "Registration Fee"}:</span>
+                            <span>₹99</span>
+                          </div>
+                          {appliedPromo && (
+                            <div className="flex justify-between text-emerald-400 font-bold">
+                              <span>{t.promoDiscountLabel || "Promo Discount"}:</span>
+                              <span>-₹{appliedPromo.discountAmount}</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between text-white font-black text-sm pt-1 border-t border-white/5">
+                            <span>{t.promoTotalLabel || "Payable Amount"}:</span>
+                            <span className="text-[#c6ff34] text-base font-mono">
+                              ₹{appliedPromo ? appliedPromo.finalAmount : 99}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
                       {/* Submit */}
                       <div className="pt-3 space-y-3">
                         {/* Limited Seats Section in Registration Form */}
@@ -1575,7 +1837,15 @@ export default function AiEasyAyi() {
                             </>
                           ) : (
                             <>
-                              <span>{t.formSubmitBtn}</span>
+                              <span>
+                                {appliedPromo
+                                  ? appliedPromo.finalAmount === 0
+                                    ? (t.promoFreeBtn || "സൗജന്യമായി കൺഫേം ചെയ്യൂ (100% OFF)")
+                                    : (lang === "ml"
+                                        ? `₹${appliedPromo.finalAmount} അടച്ച് കൺഫേം ചെയ്യൂ (₹${appliedPromo.discountAmount} ഓഫർ)`
+                                        : `Pay ₹${appliedPromo.finalAmount} & Confirm (Save ₹${appliedPromo.discountAmount})`)
+                                  : t.formSubmitBtn}
+                              </span>
                               <span className="font-bold">→</span>
                             </>
                           )}
